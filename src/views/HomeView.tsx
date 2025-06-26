@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { Stack } from '@mui/material';
+import { IconButton, Stack } from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 import { DashboardViewState } from '@/types/DashboardViewState';
 import { IWeather } from '@/types/IWeather';
@@ -12,6 +13,7 @@ import { EventList } from '@/widgets/EventList';
 import { EventTimeline } from '@/widgets/EventTimeline';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { Weather } from '@/widgets/Weather';
+import { SettingsDialog } from '@/widgets/Settings';
 
 interface HomeViewProps {
   dashboardViewState: DashboardViewState;
@@ -47,6 +49,7 @@ export function HomeView({
   weatherError,
 }: HomeViewProps) {
   const [now, setNow] = useState(new Date());
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const {
     severity,
     message,
@@ -66,6 +69,14 @@ export function HomeView({
 
   return (
     <Stack p={2} spacing={6}>
+      <IconButton
+        aria-label="settings"
+        onClick={() => setSettingsOpen(true)}
+        sx={{ position: 'fixed', top: 16, right: 16 }}
+      >
+        <SettingsIcon />
+      </IconButton>
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <EventTimeline events={events} currentTime={now} pastWindowHours={3} futureWindowHours={6} />
 
       <Stack direction="row" justifyContent="space-around">
