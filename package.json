@@ -1,0 +1,57 @@
+{
+  "name": "smart-desk",
+  "version": "0.1.0",
+  "homepage": "https://www.martonpaulo.com",
+  "author": {
+    "name": "Marton Paulo",
+    "email": "info@martonpaulo.com",
+    "url": "https://www.martonpaulo.com"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "format": "prettier --check \"**/*.{ts,tsx,json}\"",
+    "format:fix": "prettier --write \"**/*.{ts,tsx,json}\"",
+    "clear": "rm -rf .next node_modules package-lock.json && npm cache clean --force && npm install --verbose && npm run dev"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.1",
+    "@mui/material": "^7.1.1",
+    "@mui/material-nextjs": "^7.1.1",
+    "@tanstack/query-sync-storage-persister": "^5.80.7",
+    "@tanstack/react-query": "^5.80.7",
+    "@tanstack/react-query-persist-client": "^5.80.7",
+    "axios": "^1.10.0",
+    "babel-plugin-react-compiler": "^19.1.0-rc.2",
+    "ical.js": "^2.1.0",
+    "luxon": "^3.6.1",
+    "next": "15.3.3",
+    "next-auth": "^4.24.11",
+    "node-ical": "^0.20.1",
+    "openmeteo": "^1.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-text-to-speech": "^2.1.0",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/luxon": "^3.6.2",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.3",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,94 @@
+import { Box, useTheme } from '@mui/material';
+
+import type { IEvent } from '@/types/IEvent';
+import { filterNonFullDayEvents } from '@/utils/eventUtils';
+import { CurrentIndicator } from '@/widgets/EventTimeline/CurrentIndicator';
+import { EventBar } from '@/widgets/EventTimeline/EventBar';
+import { TimeIndicator } from '@/widgets/EventTimeline/TimeIndicator';
+import {
+  calculateCurrentTimePercentage,
+  formatHourLabel,
+  generateHourlyIndicators,
+  layoutTimelineEvents,
+} from '@/widgets/EventTimeline/timelineUtils';
+
+interface EventTimelineProps {
+  events: IEvent[] | null;
+  currentTime: Date;
+  pastWindowHours: number;
+  futureWindowHours: number;
+}
+
+export function EventTimeline({
+  events,
+  currentTime,
+  pastWindowHours,
+  futureWindowHours,
+}: EventTimelineProps) {
+  const { palette } = useTheme();
+
+  if (!events) return null;
+
+  const now = new Date(currentTime);
+
+  const rowGapRem = 0.25;
+  const rowHeightRem = 0.75;
+  const headerHeightRem = 1.5;
+
+  // filter and level events
+  const filteredEvents = filterNonFullDayEvents(events);
+  const leveledEvents = layoutTimelineEvents(
+    filteredEvents,
+    now,
+    pastWindowHours,
+    futureWindowHours,
+  );
+
+  // compute container height
+  const totalLevels = Math.max(1, ...leveledEvents.map(event => event.level + 1));
+  const containerHeightRem = (rowGapRem + rowHeightRem) * totalLevels + headerHeightRem;
+
+  // time indicators
+  const hourlyMarkers = generateHourlyIndicators(now, pastWindowHours, futureWindowHours);
+  const currentMarkerPos = calculateCurrentTimePercentage(pastWindowHours, futureWindowHours);
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: palette.background.default,
+        border: `1px solid ${palette.divider}`,
+        overflow: 'hidden',
+        borderRadius: 1,
+      }}
+    >
+      <Box
+        sx={{
+          position: 'relative',
+          height: `${containerHeightRem}rem`,
+
+          margin: `${2 * rowGapRem}rem`,
+        }}
+      >
+        {hourlyMarkers.map(marker => (
+          <TimeIndicator
+            key={marker.hourOfDay}
+            position={marker.relativePosition}
+            time={formatHourLabel(marker.hourOfDay)}
+          />
+        ))}
+
+        <CurrentIndicator position={currentMarkerPos} />
+
+        {leveledEvents.map(event => (
+          <EventBar
+            key={event.id}
+            event={event}
+            gapHeight={rowGapRem}
+            eventHeight={rowHeightRem}
+            headerHeight={headerHeightRem}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
+}
