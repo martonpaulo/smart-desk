@@ -33,6 +33,17 @@ interface TodoListProps {
 
 const STORAGE_KEY = 'todo-list';
 const FULL_DAY_MS = 24 * 60 * 60 * 1000;
+const LAST_POPULATE_KEY = 'todo-last-populate';
+
+function getLocalMidnightFromUtc(date: Date): Date {
+  return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+}
+
+function isFullDayEventLocal(event: IEvent): boolean {
+  const startMid = getLocalMidnightFromUtc(new Date(event.start));
+  const endMid = getLocalMidnightFromUtc(new Date(event.end));
+  return endMid.getTime() - startMid.getTime() >= FULL_DAY_MS;
+}
 
 function loadTodos(): TodoItem[] {
   try {
@@ -58,19 +69,20 @@ export function TodoList({ events }: TodoListProps) {
   useEffect(() => {
     const stored = loadTodos();
     let populated = stored;
+    const lastPopulate = getStoredFilters<string>(LAST_POPULATE_KEY);
+    const todayKey = new Date().toISOString().slice(0, 10);
 
-    if (events) {
+    if (events && lastPopulate !== todayKey) {
       const todays = filterTodayEvents(events);
-      const fullDay = todays.filter(ev => {
-        const start = new Date(ev.start).getTime();
-        const end = new Date(ev.end).getTime();
-        return end - start >= FULL_DAY_MS;
-      });
+      const fullDay = todays.filter(isFullDayEventLocal);
+
       fullDay.forEach(ev => {
         if (!populated.some(t => t.id === ev.id)) {
           populated = [...populated, { id: ev.id, text: ev.title, completed: false }];
         }
       });
+
+      setStoredFilters(LAST_POPULATE_KEY, todayKey);
     }
 
     setTodos(populated);
