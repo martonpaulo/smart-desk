@@ -6,7 +6,9 @@ export function useIcsEvents() {
   return useQuery({
     queryKey: ['ics-events'],
     queryFn: fetchIcsEvents,
-    // refresh rate: commonly between 6h and 24h
-    refetchInterval: 1000 * 60 * 5, // 5 minutes
+    // refresh rate:
+    // according to some sources, commonly between 6h and 24h
+    // but in practice, around 1 minute
+    refetchInterval: 1000 * 60 * 1, // 1 minute
   });
 }
