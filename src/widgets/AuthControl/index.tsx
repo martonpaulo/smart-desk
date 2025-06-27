@@ -1,6 +1,6 @@
 import { Alert, AlertColor, Button, CircularProgress, Stack } from '@mui/material';
 
-interface AuthControlProps {
+export interface AuthControlProps {
   severity: AlertColor;
   message: string;
   isLoading: boolean;

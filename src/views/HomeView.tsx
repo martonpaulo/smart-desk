@@ -4,7 +4,6 @@ import { Stack } from '@mui/material';
 
 import { DashboardViewState } from '@/types/DashboardViewState';
 import { IWeather } from '@/types/IWeather';
-import { AuthControl } from '@/widgets/AuthControl';
 import { ChangeSnackbar } from '@/widgets/ChangeSnackbar';
 import { Clock } from '@/widgets/Clock';
 import { EventAlert } from '@/widgets/EventAlert';
@@ -69,7 +68,19 @@ export function HomeView({
   return (
     <Stack p={2} spacing={6}>
       <SettingsButton onClick={() => setSettingsOpen(true)} />
-      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <SettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        auth={{
+          severity,
+          message,
+          isLoading,
+          canSignIn,
+          canSignOut,
+          handleSignIn,
+          handleSignOut,
+        }}
+      />
       <EventTimeline events={events} currentTime={now} pastWindowHours={3} futureWindowHours={6} />
 
       <Stack direction="row" justifyContent="space-around">
@@ -101,16 +112,6 @@ export function HomeView({
               onEventChangesAlertToggle={onEventChangesAlertToggle}
             />
           )}
-
-          <AuthControl
-            severity={severity}
-            message={message}
-            isLoading={isLoading}
-            canSignIn={canSignIn}
-            canSignOut={canSignOut}
-            handleSignIn={handleSignIn}
-            handleSignOut={handleSignOut}
-          />
         </Stack>
       </Stack>
 

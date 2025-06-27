@@ -114,7 +114,7 @@ export function useDashboardViewState(): DashboardViewState {
   if (events.length === 0) {
     return {
       severity: 'info',
-      message: 'No events found. Create one to get started.',
+      message: 'É necessário conectar pelo menos uma agenda (Google ou ICS).',
       isLoading: false,
       canSignIn: false,
       canSignOut: true,
