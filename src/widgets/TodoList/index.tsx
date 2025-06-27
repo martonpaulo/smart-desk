@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 
 import { IEvent } from '@/types/IEvent';
-import { filterTodayEvents } from '@/utils/eventUtils';
+import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 
 interface TodoItem {
@@ -32,79 +32,82 @@ interface TodoListProps {
 }
 
 const STORAGE_KEY = 'todo-list';
-const FULL_DAY_MS = 24 * 60 * 60 * 1000;
 const LAST_POPULATE_KEY = 'todo-last-populate';
-
-function getLocalMidnightFromUtc(date: Date): Date {
-  return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-}
-
-function isFullDayEventLocal(event: IEvent): boolean {
-  const startMid = getLocalMidnightFromUtc(new Date(event.start));
-  const endMid = getLocalMidnightFromUtc(new Date(event.end));
-  return endMid.getTime() - startMid.getTime() >= FULL_DAY_MS;
-}
 
 function loadTodos(): TodoItem[] {
   try {
-    return getStoredFilters<TodoItem[]>(STORAGE_KEY) ?? [];
-  } catch (err) {
-    console.error('Failed to load todos', err);
+    return getStoredFilters<TodoItem[]>(STORAGE_KEY) || [];
+  } catch {
     return [];
   }
 }
 
-function persistTodos(todos: TodoItem[]) {
-  try {
-    setStoredFilters(STORAGE_KEY, todos);
-  } catch (err) {
-    console.error('Failed to save todos', err);
-  }
-}
-
 export function TodoList({ events }: TodoListProps) {
-  const [todos, setTodos] = useState<TodoItem[]>([]);
+  const [todos, setTodos] = useState<TodoItem[]>(() => loadTodos());
   const [newText, setNewText] = useState('');
 
   useEffect(() => {
-    const stored = loadTodos();
-    let populated = stored;
-    const lastPopulate = getStoredFilters<string>(LAST_POPULATE_KEY);
+    // sai se não houver nada carregado ainda
+    if (!events?.length) return;
+
     const todayKey = new Date().toISOString().slice(0, 10);
+    const lastPopulate = getStoredFilters<string>(LAST_POPULATE_KEY);
 
-    if (events && lastPopulate !== todayKey) {
-      const todays = filterTodayEvents(events);
-      const fullDay = todays.filter(isFullDayEventLocal);
+    // sai se já fizemos seed hoje
+    if (lastPopulate === todayKey) return;
 
-      fullDay.forEach(ev => {
-        if (!populated.some(t => t.id === ev.id)) {
-          populated = [...populated, { id: ev.id, text: ev.title, completed: false }];
-        }
-      });
+    const fullDay = filterFullDayEventsForTodayInUTC(events);
 
-      setStoredFilters(LAST_POPULATE_KEY, todayKey);
-    }
+    // sai se não há full-day events novos
+    if (!fullDay.length) return;
 
-    setTodos(populated);
+    setTodos(prev => {
+      const additions = fullDay
+        .filter(ev => !prev.some(t => t.id === ev.id))
+        .map(ev => ({
+          id: ev.id,
+          text: ev.title,
+          completed: false,
+        }));
+
+      if (!additions.length) return prev;
+
+      const updated = [...prev, ...additions];
+      setStoredFilters(STORAGE_KEY, updated);
+      return updated;
+    });
+
+    // só marca como populado depois do seed
+    setStoredFilters(LAST_POPULATE_KEY, todayKey);
   }, [events]);
 
+  // persist on any change
   useEffect(() => {
-    persistTodos(todos);
+    try {
+      setStoredFilters(STORAGE_KEY, todos);
+    } catch {
+      console.error('Could not save todos');
+    }
   }, [todos]);
 
   const handleAdd = () => {
     const text = newText.trim();
     if (!text) return;
-    setTodos(prev => [...prev, { id: `todo-${Date.now()}`, text, completed: false }]);
+    const newTodo = {
+      id: `todo-${Date.now()}`,
+      text,
+      completed: false,
+    };
+    setTodos(prev => [...prev, newTodo]);
     setNewText('');
   };
 
   const handleToggle = (id: string) => {
-    setTodos(prev => {
-      const updated = prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t));
-      updated.sort((a, b) => Number(a.completed) - Number(b.completed));
-      return updated;
-    });
+    setTodos(prev =>
+      prev
+        .map(t => (t.id === id ? { ...t, completed: !t.completed } : t))
+        .sort((a, b) => Number(a.completed) - Number(b.completed)),
+    );
   };
 
   const handleEdit = (id: string) => {
@@ -122,8 +125,9 @@ export function TodoList({ events }: TodoListProps) {
   const handleDelete = (id: string) => {
     const todo = todos.find(t => t.id === id);
     if (!todo) return;
-    if (!window.confirm(`Delete task "${todo.text}"?`)) return;
-    setTodos(prev => prev.filter(t => t.id !== id));
+    if (window.confirm(`Delete task "${todo.text}"?`)) {
+      setTodos(prev => prev.filter(t => t.id !== id));
+    }
   };
 
   const handleInputKey = (e: React.KeyboardEvent<HTMLInputElement>) => {

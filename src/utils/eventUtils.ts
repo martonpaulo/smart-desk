@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 import type { IEvent } from '@/types/IEvent';
 import { IEventStatus } from '@/widgets/EventTimeline/ITimelineEvent';
 
@@ -19,6 +21,32 @@ export function filterNonFullDayEvents(events: IEvent[]): IEvent[] {
     const startMs = new Date(start).getTime();
     const endMs = new Date(end).getTime();
     return endMs - startMs < FULL_DAY_MS;
+  });
+}
+
+export function filterFullDayEventsForTodayInUTC(events: IEvent[], now?: Date): IEvent[] {
+  if (!now) now = new Date();
+
+  const today = DateTime.fromJSDate(now);
+  const todayStart = today.startOf('day').toJSDate().getTime();
+  const todayEnd = today.endOf('day').toJSDate().getTime();
+
+  return events.filter(({ start, end }) => {
+    // Convert event times to UTC for consistent comparison
+    const timezoneOffset = now.getTimezoneOffset() * 60 * 1000; // convert minutes to milliseconds
+    const eventStart = new Date(start).getTime() + timezoneOffset;
+    const eventEnd = new Date(end).getTime() + timezoneOffset;
+
+    // First check if it's a full-day event
+    const isFullDay = eventEnd - eventStart >= FULL_DAY_MS;
+
+    // Then check if it overlaps with today
+    return (
+      isFullDay &&
+      ((eventStart > todayStart && eventStart < todayEnd) ||
+        (eventEnd > todayStart && eventEnd < todayEnd) ||
+        (eventStart < todayStart && eventEnd > todayEnd))
+    );
   });
 }
 

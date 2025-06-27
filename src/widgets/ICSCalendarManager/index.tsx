@@ -25,7 +25,8 @@ const STORAGE_KEY = 'ics-calendars';
 
 function loadCalendars(): IcsCalendarConfig[] {
   try {
-    return getStoredFilters<IcsCalendarConfig[]>(STORAGE_KEY) ?? [];
+    const stored = getStoredFilters<IcsCalendarConfig[]>(STORAGE_KEY) ?? [];
+    return stored;
   } catch (err) {
     console.error('Failed to load calendars', err);
     return [];

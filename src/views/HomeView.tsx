@@ -8,10 +8,10 @@ import { ChangeSnackbar } from '@/widgets/ChangeSnackbar';
 import { Clock } from '@/widgets/Clock';
 import { EventAlert } from '@/widgets/EventAlert';
 import { EventList } from '@/widgets/EventList';
-import { TodoList } from '@/widgets/TodoList';
 import { EventTimeline } from '@/widgets/EventTimeline';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { SoundAlert } from '@/widgets/SoundAlert';
+import { TodoList } from '@/widgets/TodoList';
 import { Weather } from '@/widgets/Weather';
 
 interface HomeViewProps {
