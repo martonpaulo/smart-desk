@@ -1,4 +1,4 @@
-import { Box, useTheme } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 
 import type { IEvent } from '@/types/IEvent';
 import { filterNonFullDayEvents } from '@/utils/eventUtils';
@@ -27,7 +27,22 @@ export function EventTimeline({
 }: EventTimelineProps) {
   const { palette } = useTheme();
 
-  if (!events) return null;
+  if (!events || events.length === 0) {
+    return (
+      <Box
+        sx={theme => ({
+          opacity: 0.5,
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 1,
+          p: 2,
+        })}
+      >
+        <Typography align="center" variant="body2">
+          É necessário conectar pelo menos uma agenda (Google ou ICS).
+        </Typography>
+      </Box>
+    );
+  }
 
   const now = new Date(currentTime);
 

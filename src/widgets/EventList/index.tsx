@@ -1,4 +1,4 @@
-import { List } from '@mui/material';
+import { List, ListItem, ListItemText } from '@mui/material';
 
 import { IEvent } from '@/types/IEvent';
 import {
@@ -14,7 +14,15 @@ interface EventListProps {
 }
 
 export function EventList({ events }: EventListProps) {
-  if (!events) return null;
+  if (!events || events.length === 0) {
+    return (
+      <List dense sx={{ opacity: 0.5 }}>
+        <ListItem>
+          <ListItemText primary="É necessário conectar pelo menos uma agenda (Google ou ICS)." />
+        </ListItem>
+      </List>
+    );
+  }
 
   const sortedByStart = sortEventsByStart(events);
   const withoutFullDay = filterNonFullDayEvents(sortedByStart);

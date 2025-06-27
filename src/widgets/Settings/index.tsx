@@ -13,13 +13,15 @@ import {
 } from '@mui/material';
 
 import ICSCalendarManager from '@/widgets/ICSCalendarManager';
+import { AuthControl, type AuthControlProps } from '@/widgets/AuthControl';
 
 interface SettingsDialogProps {
   open: boolean;
   onClose: () => void;
+  auth: AuthControlProps;
 }
 
-export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
+export function SettingsDialog({ open, onClose, auth }: SettingsDialogProps) {
   const [tab, setTab] = useState(0);
 
   return (
@@ -28,13 +30,13 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
       <DialogContent>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="settings tabs">
           <Tab label="Calendars" />
-          <Tab label="Other" />
+          <Tab label="Account" />
         </Tabs>
         <Box hidden={tab !== 0} pt={2}>
           <ICSCalendarManager />
         </Box>
         <Box hidden={tab !== 1} pt={2}>
-          <Typography variant="body2">More settings coming soon…</Typography>
+          <AuthControl {...auth} />
         </Box>
       </DialogContent>
     </Dialog>

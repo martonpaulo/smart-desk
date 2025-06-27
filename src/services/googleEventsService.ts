@@ -13,7 +13,11 @@ export async function fetchGoogleEvents(date?: string): Promise<IEvent[]> {
   });
 
   if (!response.ok) {
-    // attempt to read error message from JSON
+    // return empty list for unauthenticated users
+    if (response.status === 401) {
+      return [];
+    }
+
     const errorJson = (await response.json().catch(() => null)) as ApiResponse<unknown> | null;
     const message = errorJson?.error ?? 'Failed to fetch Google events';
     throw new Error(message);
