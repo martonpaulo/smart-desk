@@ -16,7 +16,7 @@ export function SettingsDialog({ open, onClose, auth }: SettingsDialogProps) {
   const [tab, setTab] = useState(0);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="mobile" fullWidth>
+    <Dialog open={open} onClose={onClose} fullWidth>
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="settings tabs">
