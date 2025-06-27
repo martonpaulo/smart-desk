@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -18,14 +19,7 @@ import {
 } from '@mui/material';
 
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-
-// Shape of a stored calendar configuration
-export interface IcsCalendarConfig {
-  url: string;
-  id: string;
-  name: string;
-  color: string; // hex code without leading '#'
-}
+import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
 
 const STORAGE_KEY = 'ics-calendars';
 
@@ -56,6 +50,7 @@ interface CalendarFormState {
 
 export function ICSCalendarManager() {
   const [calendars, setCalendars] = useState<IcsCalendarConfig[]>([]);
+  const queryClient = useQueryClient();
   const [form, setForm] = useState<CalendarFormState>({ url: '', id: '', name: '', color: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -127,6 +122,7 @@ export function ICSCalendarManager() {
 
     setCalendars(updated);
     persistCalendars(updated);
+    queryClient.invalidateQueries({ queryKey: ['ics-events'] });
     resetForm();
   }
 
@@ -148,6 +144,7 @@ export function ICSCalendarManager() {
     const updated = calendars.filter((_, i) => i !== index);
     setCalendars(updated);
     persistCalendars(updated);
+    queryClient.invalidateQueries({ queryKey: ['ics-events'] });
     if (editingIndex === index) resetForm();
   }
 

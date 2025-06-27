@@ -2,41 +2,57 @@ import { DateTime } from 'luxon';
 
 import type { ICalendar } from '@/types/ICalendar';
 import type { IEvent } from '@/types/IEvent';
+import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
+import { getStoredFilters } from '@/utils/localStorageUtils';
 
-// Fetch ICS events for yesterday, today, and tomorrow
+const STORAGE_KEY = 'ics-calendars';
+
+// Fetch events from all configured ICS calendars
 export async function fetchIcsEvents(): Promise<IEvent[]> {
-  // determine client timezone, default to UTC
+  const calendars = getStoredFilters<IcsCalendarConfig[]>(STORAGE_KEY) ?? [];
+  if (calendars.length === 0) return [];
+
   const clientZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   const now = DateTime.now().setZone(clientZone);
 
-  // compute window: yesterday 00:00 to tomorrow 23:59
   const startIso = now.minus({ days: 1 }).startOf('day').toISO()!;
   const endIso = now.plus({ days: 1 }).endOf('day').toISO()!;
 
-  const endpoint = new URL('/api/ics-calendar', window.location.origin);
-  endpoint.searchParams.set('timezone', clientZone);
-  endpoint.searchParams.set('startDate', startIso);
-  endpoint.searchParams.set('endDate', endIso);
+  const base = new URL('/api/ics-calendar', window.location.origin);
+  base.searchParams.set('timezone', clientZone);
+  base.searchParams.set('startDate', startIso);
+  base.searchParams.set('endDate', endIso);
 
-  const response = await fetch(endpoint.toString());
+  const fetches = calendars.map(cal => {
+    const url = new URL(base);
+    url.searchParams.set('url', cal.url);
+    url.searchParams.set('id', cal.id);
+    url.searchParams.set('name', cal.name);
+    url.searchParams.set('color', cal.color);
+    return fetch(url.toString())
+      .then(async res => {
+        if (!res.ok) {
+          const errorJson = (await res.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          throw new Error(errorJson?.error ?? 'Failed to fetch ICS events');
+        }
+        const events = (await res.json()) as IEvent[];
+        return events.map(ev => ({
+          id: ev.id,
+          start: new Date(ev.start),
+          end: new Date(ev.end),
+          title: ev.title,
+          attendeeCount: ev.attendeeCount,
+          calendar: ev.calendar as ICalendar,
+        }));
+      })
+      .catch(err => {
+        console.error('ICS fetch failed', err);
+        return [] as IEvent[];
+      });
+  });
 
-  if (!response.ok) {
-    // attempt to read error message from JSON
-    const errorJson = (await response.json().catch(() => null)) as { error?: string } | null;
-    const message = errorJson?.error ?? 'Failed to fetch ICS events';
-    throw new Error(message);
-  }
-
-  // API returns plain array of IEvent
-  const events = (await response.json()) as IEvent[];
-
-  // convert ISO strings to Date objects
-  return events.map(event => ({
-    id: event.id,
-    start: new Date(event.start),
-    end: new Date(event.end),
-    title: event.title,
-    attendeeCount: event.attendeeCount,
-    calendar: event.calendar as ICalendar,
-  }));
+  const results = await Promise.all(fetches);
+  return results.flat();
 }
