@@ -50,7 +50,12 @@ export function SettingsButton({ onClick }: SettingsButtonProps) {
     <IconButton
       aria-label="settings"
       onClick={onClick}
-      sx={{ position: 'fixed', top: 16, right: 16 }}
+      sx={theme => ({
+        position: 'fixed',
+        bottom: 16,
+        right: 16,
+        zIndex: theme.zIndex.modal + 1,
+      })}
     >
       <SettingsIcon />
     </IconButton>

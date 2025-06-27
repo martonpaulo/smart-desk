@@ -107,6 +107,10 @@ export function ICSCalendarManager() {
   function handleSubmit() {
     if (!validate(form)) return;
 
+    if (editingIndex != null) {
+      if (!window.confirm('Update this calendar configuration?')) return;
+    }
+
     const normalized: IcsCalendarConfig = {
       url: form.url.trim(),
       id: form.id.trim(),
@@ -138,6 +142,9 @@ export function ICSCalendarManager() {
   }
 
   function handleDelete(index: number) {
+    const cal = calendars[index];
+    if (!window.confirm(`Delete calendar "${cal.name}"?`)) return;
+
     const updated = calendars.filter((_, i) => i !== index);
     setCalendars(updated);
     persistCalendars(updated);

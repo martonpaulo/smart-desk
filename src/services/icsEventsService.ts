@@ -3,8 +3,8 @@ import { DateTime } from 'luxon';
 import type { ICalendar } from '@/types/ICalendar';
 import type { IEvent } from '@/types/IEvent';
 
-// fetch ICS/Outlook events for yesterday, today, and tomorrow
-export async function fetchOutlookEvents(): Promise<IEvent[]> {
+// Fetch ICS events for yesterday, today, and tomorrow
+export async function fetchIcsEvents(): Promise<IEvent[]> {
   // determine client timezone, default to UTC
   const clientZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   const now = DateTime.now().setZone(clientZone);
@@ -13,7 +13,7 @@ export async function fetchOutlookEvents(): Promise<IEvent[]> {
   const startIso = now.minus({ days: 1 }).startOf('day').toISO()!;
   const endIso = now.plus({ days: 1 }).endOf('day').toISO()!;
 
-  const endpoint = new URL('/api/outlook-calendar', window.location.origin);
+  const endpoint = new URL('/api/ics-calendar', window.location.origin);
   endpoint.searchParams.set('timezone', clientZone);
   endpoint.searchParams.set('startDate', startIso);
   endpoint.searchParams.set('endDate', endIso);
@@ -23,7 +23,7 @@ export async function fetchOutlookEvents(): Promise<IEvent[]> {
   if (!response.ok) {
     // attempt to read error message from JSON
     const errorJson = (await response.json().catch(() => null)) as { error?: string } | null;
-    const message = errorJson?.error ?? 'Failed to fetch Outlook events';
+    const message = errorJson?.error ?? 'Failed to fetch ICS events';
     throw new Error(message);
   }
 

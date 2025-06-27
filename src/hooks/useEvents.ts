@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { useGoogleEvents } from '@/hooks/useGoogleEvents';
-import { useOutlookEvents } from '@/hooks/useOutlookEvents';
+import { useIcsEvents } from '@/hooks/useIcsEvents';
 import { useEventStore } from '@/store/eventStore';
 import { mergeEvents } from '@/utils/eventUtils';
 
@@ -17,16 +17,16 @@ export function useEvents(date?: string) {
   } = useGoogleEvents(date);
 
   const {
-    data: outlookEvents = [],
-    isLoading: loadingOutlook,
-    isError: errorOutlook,
-    error: outlookError,
-    refetch: refetchOutlook,
-  } = useOutlookEvents();
+    data: icsEvents = [],
+    isLoading: loadingIcs,
+    isError: errorIcs,
+    error: icsError,
+    refetch: refetchIcs,
+  } = useIcsEvents();
 
-  const isLoading = loadingGoogle || loadingOutlook;
-  const hasError = errorGoogle || errorOutlook;
-  const error = googleError || outlookError;
+  const isLoading = loadingGoogle || loadingIcs;
+  const hasError = errorGoogle || errorIcs;
+  const error = googleError || icsError;
 
   useEffect(() => {
     if (isLoading || hasError) return;
@@ -34,15 +34,15 @@ export function useEvents(date?: string) {
     // read previous events from the store without subscribing and triggering a re-render
     const prevEvents = useEventStore.getState().events;
 
-    const fetched = [...googleEvents, ...outlookEvents];
+    const fetched = [...googleEvents, ...icsEvents];
     const merged = mergeEvents(prevEvents, fetched);
 
     setEvents(merged);
-  }, [googleEvents, outlookEvents, isLoading, hasError, setEvents]);
+  }, [googleEvents, icsEvents, isLoading, hasError, setEvents]);
 
   function refetchAll() {
     refetchGoogle();
-    refetchOutlook();
+    refetchIcs();
   }
 
   return { isLoading, isError: hasError, error, refetch: refetchAll };
