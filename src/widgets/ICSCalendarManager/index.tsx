@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 
+import { Circle as StatusIcon } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { Circle as StatusIcon } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -17,9 +16,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 
-import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
+import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 
 const STORAGE_KEY = 'ics-calendars';
 

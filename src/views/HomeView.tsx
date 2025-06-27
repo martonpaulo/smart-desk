@@ -9,9 +9,9 @@ import { Clock } from '@/widgets/Clock';
 import { EventAlert } from '@/widgets/EventAlert';
 import { EventList } from '@/widgets/EventList';
 import { EventTimeline } from '@/widgets/EventTimeline';
+import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { Weather } from '@/widgets/Weather';
-import { SettingsDialog, SettingsButton } from '@/widgets/Settings';
 
 interface HomeViewProps {
   dashboardViewState: DashboardViewState;

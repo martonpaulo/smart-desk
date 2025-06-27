@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
 
 import type { ICalendar } from '@/types/ICalendar';
-import type { IEvent } from '@/types/IEvent';
 import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
+import type { IEvent } from '@/types/IEvent';
 import { getStoredFilters } from '@/utils/localStorageUtils';
 
 const STORAGE_KEY = 'ics-calendars';

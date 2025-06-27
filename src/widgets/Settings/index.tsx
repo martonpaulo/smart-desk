@@ -1,19 +1,10 @@
 import { useState } from 'react';
 
 import SettingsIcon from '@mui/icons-material/Settings';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Tab,
-  Tabs,
-  Box,
-  Typography,
-} from '@mui/material';
+import { Box, Dialog, DialogContent, DialogTitle, IconButton, Tab, Tabs } from '@mui/material';
 
-import ICSCalendarManager from '@/widgets/ICSCalendarManager';
 import { AuthControl, type AuthControlProps } from '@/widgets/AuthControl';
+import ICSCalendarManager from '@/widgets/ICSCalendarManager';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -25,7 +16,7 @@ export function SettingsDialog({ open, onClose, auth }: SettingsDialogProps) {
   const [tab, setTab] = useState(0);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="mobile" fullWidth>
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="settings tabs">
