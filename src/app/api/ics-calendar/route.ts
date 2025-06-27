@@ -5,52 +5,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { ICalendar } from '@/types/ICalendar';
 import type { IEvent } from '@/types/IEvent';
 
-const ICS_URL = process.env.ICS_CALENDAR_URL!;
-const CAL_ID = process.env.ICS_CALENDAR_ID!;
-const CAL_NAME = process.env.ICS_CALENDAR_NAME!;
-const CAL_COLOR = process.env.ICS_CALENDAR_COLOR!;
-
-// simple in-memory cache
-let cachedEtag: string | null = null;
-let cachedLastModified: string | null = null;
-let cachedIcalComponent: ICAL.Component | null = null;
-
-// fetch with conditional headers
-async function loadCalendar(): Promise<ICAL.Component> {
-  if (!ICS_URL) throw new Error('ICS_CALENDAR_URL is missing');
-
-  const headers: Record<string, string> = {};
-  if (cachedEtag) headers['If-None-Match'] = cachedEtag;
-  if (cachedLastModified) headers['If-Modified-Since'] = cachedLastModified;
-
-  const res = await fetch(ICS_URL, { headers });
-  if (res.status === 304) {
-    if (!cachedIcalComponent) {
-      throw new Error('Got 304 Not Modified but no cache available');
-    }
-    return cachedIcalComponent;
-  }
-  if (!res.ok) {
-    throw new Error(`fetch ICS failed: ${res.statusText}`);
-  }
-
-  const text = await res.text();
-  // update cache
-  cachedEtag = res.headers.get('etag');
-  cachedLastModified = res.headers.get('last-modified');
-  const jcal = ICAL.parse(text);
-  cachedIcalComponent = new ICAL.Component(jcal);
-  return cachedIcalComponent;
-}
-
-function getCalendarColor(): string {
-  if (!CAL_COLOR) {
-    console.warn('ICS_CALENDAR_COLOR is not set, using default color');
-    return '#0078D4';
-  }
-  return CAL_COLOR.startsWith('#') ? CAL_COLOR : `#${CAL_COLOR}`;
-}
-
 function toDateInZone(time: ICAL.Time | Date, zone: string): Date {
   const d = time instanceof Date ? time : time.toJSDate();
   return DateTime.fromJSDate(d).setZone(zone).toJSDate();
@@ -110,11 +64,19 @@ function extractEvents(
 
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
+  const url = params.get('url');
+  const calId = params.get('id');
+  const calName = params.get('name');
+  const calColorParam = params.get('color') ?? '#0078D4';
   const zone = params.get('timezone') || 'UTC';
   const sIso = params.get('startDate');
   const eIso = params.get('endDate');
-  if (!sIso || !eIso) {
-    return NextResponse.json({ error: 'missing startDate or endDate' }, { status: 400 });
+
+  if (!url || !calId || !calName || !sIso || !eIso) {
+    return NextResponse.json(
+      { error: 'missing url, id, name, startDate or endDate' },
+      { status: 400 },
+    );
   }
 
   const start = DateTime.fromISO(sIso, { zone }).toJSDate();
@@ -123,16 +85,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'invalid date format' }, { status: 400 });
   }
 
-  let root: ICAL.Component;
+  let icalText: string;
   try {
-    root = await loadCalendar();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(res.statusText);
+    icalText = await res.text();
   } catch (err) {
-    console.error(err);
+    console.error('Failed to fetch ICS', err);
     return NextResponse.json({ error: 'could not load ICS' }, { status: 500 });
   }
 
-  const calendarColor = getCalendarColor();
-  const calendarMeta: ICalendar = { id: CAL_ID, name: CAL_NAME, color: calendarColor };
+  const jcal = ICAL.parse(icalText);
+  const root = new ICAL.Component(jcal);
+
+  const calendarColor = calColorParam.startsWith('#') ? calColorParam : `#${calColorParam}`;
+  const calendarMeta: ICalendar = {
+    id: calId,
+    name: calName,
+    color: calendarColor,
+  };
   const events = extractEvents(root, zone, start, end, calendarMeta);
   return NextResponse.json(events);
 }
