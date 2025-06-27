@@ -8,6 +8,7 @@ import { ChangeSnackbar } from '@/widgets/ChangeSnackbar';
 import { Clock } from '@/widgets/Clock';
 import { EventAlert } from '@/widgets/EventAlert';
 import { EventList } from '@/widgets/EventList';
+import { TodoList } from '@/widgets/TodoList';
 import { EventTimeline } from '@/widgets/EventTimeline';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { SoundAlert } from '@/widgets/SoundAlert';
@@ -84,7 +85,10 @@ export function HomeView({
       <EventTimeline events={events} currentTime={now} pastWindowHours={3} futureWindowHours={6} />
 
       <Stack direction="row" justifyContent="space-around">
-        <EventList events={events} />
+        <Stack spacing={2}>
+          <EventList events={events} />
+          <TodoList events={events ?? null} />
+        </Stack>
 
         <Stack spacing={6} alignItems="center">
           <Stack direction="row" spacing={6} alignItems="center">
