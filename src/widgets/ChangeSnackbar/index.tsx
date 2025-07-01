@@ -34,7 +34,8 @@ export function ChangeSnackbar({ events, eventChangesAlertEnabled }: ChangeSnack
 
   useEffect(() => {
     if (!changes.length) return;
-    setMessage(changes.join('<br /><br />'));
+    // join with two newlines to create a blank line between items
+    setMessage(changes.join('\n\n'));
     setOpen(true);
     if (enabledRef.current) playRef.current();
   }, [changes]);
@@ -52,7 +53,8 @@ export function ChangeSnackbar({ events, eventChangesAlertEnabled }: ChangeSnack
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
     >
       <Alert onClose={handleClose} severity="info">
-        <Typography dangerouslySetInnerHTML={{ __html: message }} />
+        {/* preserve line breaks */}
+        <Typography sx={{ whiteSpace: 'pre-line' }}>{message}</Typography>
       </Alert>
     </Snackbar>
   );

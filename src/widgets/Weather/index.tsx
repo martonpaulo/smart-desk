@@ -25,7 +25,7 @@ export function Weather({
 
   const { apparentTemperature, relativeHumidity, time } = weather;
   const lastTime = formattedTime(time);
-  const caption = locationName ? `<b>${locationName}</b> ${lastTime}` : `Updated at ${lastTime}`;
+  const caption = `${locationName ? locationName : 'Updated at'} ${lastTime}`;
 
   return (
     <Stack>
@@ -33,7 +33,7 @@ export function Weather({
         <Typography variant="h4">{apparentTemperature}</Typography>
         <Typography>{relativeHumidity}</Typography>
       </Stack>
-      <Typography variant="caption" dangerouslySetInnerHTML={{ __html: caption }} />
+      <Typography variant="caption">{caption}</Typography>
     </Stack>
   );
 }
