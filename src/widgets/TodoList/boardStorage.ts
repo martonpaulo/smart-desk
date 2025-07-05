@@ -1,5 +1,5 @@
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-import type { BoardState, Column } from './types';
+import { BoardState, Column } from '@/widgets/TodoList/types';
 
 export const STORAGE_KEY = 'todo-board';
 export const LAST_POPULATE_KEY = 'todo-last-populate';

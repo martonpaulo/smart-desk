@@ -5,14 +5,12 @@ import ListIcon from '@mui/icons-material/List';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 
-import type { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-
-import { AddItemForm } from './components/AddItemForm';
-import { TodoColumn } from './components/TodoColumn';
-import { DEFAULT_COLUMNS, LAST_POPULATE_KEY, loadBoard, saveBoard } from './boardStorage';
-import type { BoardState, Column, TodoItem, TodoListProps } from './types';
+import { AddItemForm } from '@/widgets/TodoList/AddItemForm';
+import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
+import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
+import { BoardState, Column, TodoItem, TodoListProps } from '@/widgets/TodoList/types';
 
 export function TodoList({ events }: TodoListProps) {
   const [board, setBoard] = useState<BoardState>(() => loadBoard());
@@ -34,7 +32,13 @@ export function TodoList({ events }: TodoListProps) {
     setBoard(prev => {
       const additions = fullDay
         .filter(ev => !prev.items.some(t => t.id === ev.id))
-        .map(ev => ({ id: ev.id, title: ev.title, description: undefined, tags: [], columnId: 'todo' }));
+        .map(ev => ({
+          id: ev.id,
+          title: ev.title,
+          description: undefined,
+          tags: [],
+          columnId: 'todo',
+        }));
       if (!additions.length) return prev;
       const updated = { ...prev, items: [...prev.items, ...additions] };
       saveBoard(updated);
@@ -74,7 +78,11 @@ export function TodoList({ events }: TodoListProps) {
 
     setBoard(prev => ({
       ...prev,
-      items: prev.items.map(t => (t.id === id ? { ...t, title: title.trim(), description: description.trim() || undefined, tags } : t)),
+      items: prev.items.map(t =>
+        t.id === id
+          ? { ...t, title: title.trim(), description: description.trim() || undefined, tags }
+          : t,
+      ),
     }));
   };
 
@@ -85,9 +93,12 @@ export function TodoList({ events }: TodoListProps) {
   const handleCompleteItem = (id: string) => {
     setBoard(prev => {
       const completedColumn =
-        prev.columns.find(c => c.title.toLowerCase() === 'completed') || prev.columns.find(c => c.id === 'completed');
+        prev.columns.find(c => c.title.toLowerCase() === 'completed') ||
+        prev.columns.find(c => c.id === 'completed');
       const columnId = completedColumn ? completedColumn.id : 'completed';
-      const columns = completedColumn ? prev.columns : [...prev.columns, { id: 'completed', title: 'Completed', color: '#2e7d32' }];
+      const columns = completedColumn
+        ? prev.columns
+        : [...prev.columns, { id: 'completed', title: 'Completed', color: '#2e7d32' }];
       const items = prev.items.map(t => (t.id === id ? { ...t, columnId } : t));
       return { columns, items };
     });
@@ -158,7 +169,9 @@ export function TodoList({ events }: TodoListProps) {
   const filteredItems = board.items.filter(item => {
     if (!search.trim()) return true;
     const term = search.toLowerCase();
-    return item.title.toLowerCase().includes(term) || item.tags.some(t => t.toLowerCase().includes(term));
+    return (
+      item.title.toLowerCase().includes(term) || item.tags.some(t => t.toLowerCase().includes(term))
+    );
   });
 
   const renderColumn = (column: Column) => {
@@ -212,12 +225,22 @@ export function TodoList({ events }: TodoListProps) {
     <Box sx={{ position: 'relative' }}>
       <Stack direction="row" spacing={1} mb={2} alignItems="center">
         <Typography variant="h6">Todo List</Typography>
-        <TextField size="small" placeholder="Search" value={search} onChange={e => setSearch(e.target.value)} />
+        <TextField
+          size="small"
+          placeholder="Search"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
         <Box flexGrow={1} />
         <Button variant="outlined" size="small" onClick={handleClearCompleted}>
           Clear Completed
         </Button>
-        <Button variant="outlined" size="small" startIcon={view === 'board' ? <ListIcon /> : <ViewColumnIcon />} onClick={() => setView(v => (v === 'board' ? 'list' : 'board'))}>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={view === 'board' ? <ListIcon /> : <ViewColumnIcon />}
+          onClick={() => setView(v => (v === 'board' ? 'list' : 'board'))}
+        >
           {view === 'board' ? 'List view' : 'Board view'}
         </Button>
         <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={handleAddColumn}>

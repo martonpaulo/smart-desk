@@ -4,9 +4,18 @@ import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoIcon from '@mui/icons-material/Info';
-import { Box, Chip, Dialog, DialogContent, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Chip,
+  Dialog,
+  DialogContent,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 
-import type { Column, TodoItem } from '../types';
+import { Column, TodoItem } from '@/widgets/TodoList/types';
 
 interface TodoItemCardProps {
   item: TodoItem;
@@ -18,7 +27,15 @@ interface TodoItemCardProps {
   onDragOver: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
 }
 
-export function TodoItemCard({ item, column, onEdit, onDelete, onComplete, onDragStart, onDragOver }: TodoItemCardProps) {
+export function TodoItemCard({
+  item,
+  column,
+  onEdit,
+  onDelete,
+  onComplete,
+  onDragStart,
+  onDragOver,
+}: TodoItemCardProps) {
   const [showDescription, setShowDescription] = useState(false);
 
   return (
@@ -27,7 +44,14 @@ export function TodoItemCard({ item, column, onEdit, onDelete, onComplete, onDra
       draggable
       onDragStart={e => onDragStart(e, item.id)}
       onDragOver={e => onDragOver(e, item.id)}
-      sx={{ p: 1, border: '1px solid', borderColor: column.color, borderRadius: 1, mb: 1, position: 'relative' }}
+      sx={{
+        p: 1,
+        border: '1px solid',
+        borderColor: column.color,
+        borderRadius: 1,
+        mb: 1,
+        position: 'relative',
+      }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Stack direction="row" spacing={1} alignItems="center">

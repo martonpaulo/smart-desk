@@ -1,9 +1,9 @@
-import { alpha, Box, IconButton, Stack, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import { alpha, Box, IconButton, Stack, Typography } from '@mui/material';
 
-import type { Column, TodoItem } from '../types';
-import { TodoItemCard } from './TodoItemCard';
+import { TodoItemCard } from '@/widgets/TodoList/TodoItemCard';
+import { Column, TodoItem } from '@/widgets/TodoList/types';
 
 interface TodoColumnProps {
   column: Column;
