@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import EditIcon from '@mui/icons-material/Edit';
-import { Box, Chip, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { Box, Chip, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha, darken } from '@mui/material/styles';
 
 import { theme } from '@/styles/theme';
@@ -52,7 +52,10 @@ export function TodoItemCard({
   return (
     <Box
       data-todo-id={item.id}
+      role="button"
+      aria-label={`Open task ${item.title}`}
       draggable
+      aria-grabbed={editing ? 'false' : 'true'}
       onDragStart={e => {
         e.stopPropagation();
         onDragStart(e, item.id);
@@ -66,26 +69,21 @@ export function TodoItemCard({
         position: 'relative',
         bgcolor: alpha(darken(column.color, 0.2), 0.15),
         cursor: editing ? 'text' : 'grab',
-        '&:hover .todo-actions': {
-          visibility: 'visible',
-        },
-        '&:active': {
-          cursor: 'grabbing',
-        },
+        '&:hover .todo-actions': { visibility: 'visible' },
+        '&:active': { cursor: 'grabbing' },
         boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Stack direction="row" spacing={0.5} flex={1}>
           {item.description && (
-            <DescriptionOutlinedIcon
-              fontSize="inherit"
-              sx={{
-                color: 'text.secondary',
-                position: 'relative',
-                top: 1,
-              }}
-            />
+            <Tooltip title="Has description" enterTouchDelay={0}>
+              <DescriptionOutlinedIcon
+                aria-hidden="true"
+                fontSize="inherit"
+                sx={{ color: 'text.secondary', position: 'relative', top: 1 }}
+              />
+            </Tooltip>
           )}
 
           {editing ? (
@@ -104,6 +102,7 @@ export function TodoItemCard({
                   finishEditing();
                 }
               }}
+              inputProps={{ 'aria-label': `Edit title for ${item.title}` }}
               slotProps={{
                 input: {
                   sx: theme => ({
@@ -111,23 +110,18 @@ export function TodoItemCard({
                     fontSize: theme.typography.body2.fontSize,
                     lineHeight: theme.typography.body2.lineHeight,
                     fontWeight: theme.typography.body2.fontWeight,
-                    '& textarea': {
-                      wordSpacing: theme.typography.body2.wordSpacing,
-                    },
+                    '& textarea': { wordSpacing: theme.typography.body2.wordSpacing },
                   }),
                 },
               }}
             />
           ) : (
             <Typography
+              role="button"
+              aria-label={`View details of ${item.title}`}
               onClick={() => onOpen(item.id)}
               variant="body2"
-              sx={{
-                maxWidth: '100%',
-                overflowWrap: 'anywhere',
-                wordBreak: 'normal',
-                whiteSpace: 'normal',
-              }}
+              sx={{ maxWidth: '100%', overflowWrap: 'anywhere', whiteSpace: 'normal' }}
             >
               {item.title}
             </Typography>
@@ -145,62 +139,61 @@ export function TodoItemCard({
               zIndex: 2,
               display: 'flex',
               visibility: 'hidden',
-              '& button': {
-                cursor: 'pointer',
-                p: 0.5,
-              },
+              '& button': { cursor: 'pointer', p: 0.5 },
             }}
           >
-            <Box
-              sx={{
-                backgroundColor: theme.palette.grey[100],
-                borderRadius: 1,
-                opacity: 0.9,
-              }}
-            >
-              <IconButton
-                size="small"
-                onClick={e => {
-                  e.stopPropagation();
-                  setTitle(item.title);
-                  setEditing(true);
-                }}
-                sx={{
-                  borderTopLeftRadius: 1,
-                  borderBottomLeftRadius: 1,
-                  borderTopRightRadius: 0,
-                  borderBottomRightRadius: 0,
-                }}
-              >
-                <EditIcon fontSize="inherit" />
-              </IconButton>
-              <IconButton
-                size="small"
-                onClick={e => {
-                  e.stopPropagation();
-                  if (window.confirm('Delete item?')) onDelete(item.id);
-                }}
-                sx={{
-                  borderTopLeftRadius: 0,
-                  borderBottomLeftRadius: 0,
-                  borderTopRightRadius: 1,
-                  borderBottomRightRadius: 1,
-                }}
-              >
-                <DeleteIcon fontSize="inherit" />
-              </IconButton>
+            <Box sx={{ backgroundColor: theme.palette.grey[100], borderRadius: 1, opacity: 0.9 }}>
+              <Tooltip title="Rename task" enterTouchDelay={0}>
+                <IconButton
+                  size="small"
+                  aria-label={`Rename task ${item.title}`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    setTitle(item.title);
+                    setEditing(true);
+                  }}
+                  sx={{
+                    borderTopLeftRadius: 1,
+                    borderBottomLeftRadius: 1,
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
+                  }}
+                >
+                  <EditIcon fontSize="inherit" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Delete task" enterTouchDelay={0}>
+                <IconButton
+                  size="small"
+                  aria-label={`Delete task ${item.title}`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (window.confirm('Delete item?')) onDelete(item.id);
+                  }}
+                  sx={{
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                    borderTopRightRadius: 1,
+                    borderBottomRightRadius: 1,
+                  }}
+                >
+                  <DeleteIcon fontSize="inherit" />
+                </IconButton>
+              </Tooltip>
             </Box>
           </Box>
         )}
       </Stack>
+
       {item.tags.length > 0 && (
         <Stack direction="row" spacing={0.5} pt={1} flexWrap="wrap">
           {item.tags.map(tag => (
             <Chip
-              key={tag}
               label={tag}
+              key={tag}
               size="small"
               disabled
+              aria-label={`Tag ${tag}`}
               sx={{
                 bgcolor: alpha(column.color, 0.65),
                 py: 1.25,
