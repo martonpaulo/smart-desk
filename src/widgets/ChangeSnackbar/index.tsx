@@ -8,6 +8,7 @@ import { useAlertSound } from '@/hooks/useAlertSound';
 import { IAlertType } from '@/types/IAlertType';
 import type { IEvent } from '@/types/IEvent';
 import { filterNonFullDayEvents, filterTodayEvents } from '@/utils/eventUtils';
+import { parseBold } from '@/widgets/ChangeSnackbar/textUtils';
 import { useEventChanges } from '@/widgets/ChangeSnackbar/useEventChanges';
 
 interface ChangeSnackbarProps {
@@ -54,7 +55,7 @@ export function ChangeSnackbar({ events, eventChangesAlertEnabled }: ChangeSnack
     >
       <Alert onClose={handleClose} severity="info">
         {/* preserve line breaks */}
-        <Typography sx={{ whiteSpace: 'pre-line' }}>{message}</Typography>
+        <Typography sx={{ whiteSpace: 'pre-line' }}>{parseBold(message)}</Typography>
       </Alert>
     </Snackbar>
   );
