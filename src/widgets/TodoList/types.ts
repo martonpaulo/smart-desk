@@ -16,7 +16,3 @@ export interface BoardState {
   columns: Column[];
   items: TodoItem[];
 }
-
-export interface TodoListProps {
-  events: import('@/types/IEvent').IEvent[] | null;
-}

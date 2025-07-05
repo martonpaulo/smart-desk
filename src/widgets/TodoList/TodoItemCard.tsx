@@ -4,17 +4,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DescriptionIcon from '@mui/icons-material/Description';
 import EditIcon from '@mui/icons-material/Edit';
-import {
-  Box,
-  Chip,
-  Dialog,
-  DialogContent,
-  IconButton,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Chip, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { alpha, darken } from '@mui/material/styles';
 
 import { Column, TodoItem } from '@/widgets/TodoList/types';
@@ -40,7 +30,6 @@ export function TodoItemCard({
   onDragStart,
   onDragOver,
 }: TodoItemCardProps) {
-  const [showDescription, setShowDescription] = useState(false);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(item.title);
 
@@ -69,17 +58,9 @@ export function TodoItemCard({
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Stack direction="row" alignItems="center">
           {item.description && (
-            <Tooltip title="Show description">
-              <IconButton
-                size="small"
-                onClick={e => {
-                  e.stopPropagation();
-                  setShowDescription(true);
-                }}
-              >
-                <DescriptionIcon fontSize="inherit" />
-              </IconButton>
-            </Tooltip>
+            <IconButton size="small" disabled>
+              <DescriptionIcon fontSize="inherit" />
+            </IconButton>
           )}
 
           {editing ? (
@@ -147,11 +128,6 @@ export function TodoItemCard({
           <Chip key={tag} label={tag} size="small" />
         ))}
       </Stack>
-      <Dialog open={showDescription} onClose={() => setShowDescription(false)}>
-        <DialogContent>
-          <Typography>{item.description}</Typography>
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 }

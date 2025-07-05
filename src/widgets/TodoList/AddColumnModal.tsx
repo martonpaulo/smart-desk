@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import {
   Button,
   Dialog,
@@ -36,7 +37,7 @@ export function AddColumnModal({ open, onAdd, onClose }: AddColumnModalProps) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="tablet" fullWidth>
       <DialogTitle>Add Column</DialogTitle>
       <DialogContent>
         <Stack spacing={2} mt={1}>

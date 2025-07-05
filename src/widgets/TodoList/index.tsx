@@ -4,15 +4,20 @@ import AddIcon from '@mui/icons-material/Add';
 import ListIcon from '@mui/icons-material/List';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
+import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
+import { AddColumnModal } from '@/widgets/TodoList/AddColumnModal';
 import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { EditItemModal } from '@/widgets/TodoList/EditItemModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
-import { AddColumnModal } from '@/widgets/TodoList/AddColumnModal';
-import { useTheme } from '@mui/material/styles';
-import { BoardState, Column, TodoItem, TodoListProps } from '@/widgets/TodoList/types';
+import { BoardState, Column, TodoItem } from '@/widgets/TodoList/types';
+
+interface TodoListProps {
+  events: IEvent[] | null;
+}
 
 export function TodoList({ events }: TodoListProps) {
   const [board, setBoard] = useState<BoardState>(() => loadBoard());
@@ -142,7 +147,10 @@ export function TodoList({ events }: TodoListProps) {
     const options = ['primary', 'secondary', 'success', 'info', 'warning', 'error'];
     const choice = window.prompt(`Color (${options.join(', ')})`, 'primary');
     if (!choice || !options.includes(choice)) return;
-    const color = theme.palette[choice as keyof typeof theme.palette].main;
+
+    const paletteColor =
+      theme.palette[choice as 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error'];
+    const color = 'main' in paletteColor ? paletteColor.main : '';
     setBoard(prev => ({
       ...prev,
       columns: prev.columns.map(c => (c.id === id ? { ...c, color } : c)),
@@ -217,6 +225,7 @@ export function TodoList({ events }: TodoListProps) {
         key={column.id}
         column={column}
         items={items}
+        view={view}
         onRenameColumn={handleRenameColumn}
         onDeleteColumn={handleDeleteColumn}
         onChangeColor={handleChangeColumnColor}

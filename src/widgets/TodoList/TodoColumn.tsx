@@ -10,6 +10,7 @@ import { Column, TodoItem } from '@/widgets/TodoList/types';
 interface TodoColumnProps {
   column: Column;
   items: TodoItem[];
+  view: 'list' | 'board';
   onRenameColumn: (id: string) => void;
   onDeleteColumn: (id: string) => void;
   onChangeColor: (id: string) => void;
@@ -30,6 +31,7 @@ interface TodoColumnProps {
 export function TodoColumn({
   column,
   items,
+  view,
   onRenameColumn,
   onDeleteColumn,
   onChangeColor,
@@ -57,9 +59,8 @@ export function TodoColumn({
       onDragEnd={onColumnDragEnd}
       onDrop={e => onDrop(e, column.id)}
       sx={{
-        minWidth: 250,
-        width: 'fit-content',
-        p: 1,
+        width: view === 'board' ? '250px' : '100%',
+        p: 1.5,
         bgcolor: alpha(column.color, 0.1),
         borderRadius: 1,
       }}
