@@ -7,6 +7,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import ListIcon from '@mui/icons-material/List';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import {
+  alpha,
   Box,
   Button,
   Chip,
@@ -15,8 +16,6 @@ import {
   TextField,
   Tooltip,
   Typography,
-  alpha,
-  useTheme,
 } from '@mui/material';
 
 import type { IEvent } from '@/types/IEvent';
@@ -55,9 +54,7 @@ const DEFAULT_COLUMNS: Column[] = [
 
 function loadBoard(): BoardState {
   try {
-    return (
-      getStoredFilters<BoardState>(STORAGE_KEY) || { columns: DEFAULT_COLUMNS, items: [] }
-    );
+    return getStoredFilters<BoardState>(STORAGE_KEY) || { columns: DEFAULT_COLUMNS, items: [] };
   } catch {
     return { columns: DEFAULT_COLUMNS, items: [] };
   }
@@ -78,10 +75,7 @@ export function TodoList({ events }: TodoListProps) {
   const [newDescription, setNewDescription] = useState('');
   const [newTags, setNewTags] = useState('');
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectRect, setSelectRect] = useState<DOMRect | null>(null);
   const selectionRef = useRef<HTMLDivElement>(null);
-  const { palette } = useTheme();
 
   // Populate with today's all day events only once per day
   useEffect(() => {
@@ -153,7 +147,9 @@ export function TodoList({ events }: TodoListProps) {
     setBoard(prev => ({
       ...prev,
       items: prev.items.map(t =>
-        t.id === id ? { ...t, title: title.trim(), description: description.trim() || undefined, tags } : t,
+        t.id === id
+          ? { ...t, title: title.trim(), description: description.trim() || undefined, tags }
+          : t,
       ),
     }));
   };
@@ -165,7 +161,8 @@ export function TodoList({ events }: TodoListProps) {
   const handleCompleteItem = (id: string) => {
     setBoard(prev => {
       const completedColumn =
-        prev.columns.find(c => c.title.toLowerCase() === 'completed') || prev.columns.find(c => c.id === 'completed');
+        prev.columns.find(c => c.title.toLowerCase() === 'completed') ||
+        prev.columns.find(c => c.id === 'completed');
       const columnId = completedColumn ? completedColumn.id : 'completed';
       const columns = completedColumn
         ? prev.columns
@@ -218,47 +215,9 @@ export function TodoList({ events }: TodoListProps) {
     }));
   };
 
-  const startSelection = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (e.button !== 0) return;
-    const rect = (e.target as HTMLDivElement).getBoundingClientRect();
-    setSelectRect(new DOMRect(e.clientX - rect.left, e.clientY - rect.top, 0, 0));
-  };
-
-  const updateSelection = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (!selectRect) return;
-    const rect = selectionRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const newRect = new DOMRect(
-      Math.min(selectRect.x, x),
-      Math.min(selectRect.y, y),
-      Math.abs(x - selectRect.x),
-      Math.abs(y - selectRect.y),
-    );
-    setSelectRect(newRect);
-
-    const boxes = Array.from(document.querySelectorAll('[data-todo-id]')) as HTMLDivElement[];
-    const newlySelected = boxes
-      .filter(el => {
-        const r = el.getBoundingClientRect();
-        const withinX = r.left < newRect.x + newRect.width + rect.left && r.right > newRect.x + rect.left;
-        const withinY = r.top < newRect.y + newRect.height + rect.top && r.bottom > newRect.y + rect.top;
-        return withinX && withinY;
-      })
-      .map(el => el.dataset.todoId!) as string[];
-    setSelectedIds(newlySelected);
-  };
-
-  const endSelection = () => {
-    setSelectRect(null);
-  };
-
   const renderItem = (item: TodoItem) => {
     const column = board.columns.find(c => c.id === item.columnId);
     if (!column) return null;
-
-    const isSelected = selectedIds.includes(item.id);
 
     return (
       <Box
@@ -268,7 +227,6 @@ export function TodoList({ events }: TodoListProps) {
         onDragStart={e => handleDragStart(e, item.id)}
         sx={{
           p: 1,
-          bgcolor: isSelected ? alpha(column.color, 0.2) : 'background.paper',
           border: '1px solid',
           borderColor: column.color,
           borderRadius: 1,
@@ -369,41 +327,15 @@ export function TodoList({ events }: TodoListProps) {
       </Stack>
 
       {view === 'board' ? (
-        <Stack
-          direction="row"
-          spacing={2}
-          onMouseDown={startSelection}
-          onMouseMove={updateSelection}
-          onMouseUp={endSelection}
-          sx={{ userSelect: 'none' }}
-        >
+        <Stack direction="row" spacing={2} sx={{ userSelect: 'none' }}>
           {board.columns.map(renderColumn)}
         </Stack>
       ) : (
         <Box>{renderList()}</Box>
       )}
 
-      {selectRect && (
-        <Box
-          sx={{
-            position: 'absolute',
-            border: `1px dashed ${palette.primary.main}`,
-            bgcolor: alpha(palette.primary.main, 0.1),
-            left: selectRect.x,
-            top: selectRect.y,
-            width: selectRect.width,
-            height: selectRect.height,
-            pointerEvents: 'none',
-          }}
-        />
-      )}
-
       <Stack mt={2} spacing={1}>
-        <TextField
-          label="Title"
-          value={newTitle}
-          onChange={e => setNewTitle(e.target.value)}
-        />
+        <TextField label="Title" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
         <TextField
           label="Description"
           value={newDescription}
@@ -414,7 +346,9 @@ export function TodoList({ events }: TodoListProps) {
           value={newTags}
           onChange={e => setNewTags(e.target.value)}
         />
-        <Button variant="contained" onClick={handleAddItem} startIcon={<AddIcon />}>Add Item</Button>
+        <Button variant="contained" onClick={handleAddItem} startIcon={<AddIcon />}>
+          Add Item
+        </Button>
       </Stack>
 
       <style jsx>{`
@@ -430,6 +364,3 @@ export function TodoList({ events }: TodoListProps) {
     </Box>
   );
 }
-
-export default TodoList;
-
