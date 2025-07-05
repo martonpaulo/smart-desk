@@ -97,7 +97,6 @@ export function TodoList({ events }: TodoListProps) {
   };
 
   const handleDeleteItem = (id: string) => {
-    if (!window.confirm('Delete this item?')) return;
     setBoard(prev => ({ ...prev, items: prev.items.filter(t => t.id !== id) }));
   };
 

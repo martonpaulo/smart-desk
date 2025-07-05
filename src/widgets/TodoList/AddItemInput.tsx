@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import CheckIcon from '@mui/icons-material/Check';
-import { Box, IconButton, TextField } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { IconButton, InputAdornment, TextField } from '@mui/material';
 
 interface AddItemInputProps {
   columnId: string;
@@ -26,18 +26,27 @@ export function AddItemInput({ columnId, onAdd }: AddItemInputProps) {
   };
 
   return (
-    <Box mt={1} sx={{ display: 'flex', gap: 1 }}>
-      <TextField
-        fullWidth
-        size="small"
-        placeholder="Add new item"
-        value={value}
-        onChange={e => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-      />
-      <IconButton color="primary" onClick={addItem}>
-        <CheckIcon fontSize="small" />
-      </IconButton>
-    </Box>
+    <TextField
+      fullWidth
+      size="small"
+      placeholder="new item"
+      value={value}
+      onChange={e => setValue(e.target.value)}
+      onKeyDown={handleKeyDown}
+      slotProps={{
+        input: {
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={addItem}>
+                <AddIcon fontSize="small" />
+              </IconButton>
+            </InputAdornment>
+          ),
+          sx: {
+            paddingRight: '0px',
+          },
+        },
+      }}
+    />
   );
 }

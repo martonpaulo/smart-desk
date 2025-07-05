@@ -64,7 +64,7 @@ export function HomeView({
   }, []);
 
   return (
-    <Stack p={2}>
+    <Stack p={2} gap={2}>
       <SettingsButton onClick={() => setSettingsOpen(true)} />
       <SettingsDialog
         open={settingsOpen}
@@ -110,9 +110,9 @@ export function HomeView({
         {weather && <Clock currentTime={now} weather={weather} />}
       </Stack>
 
-      <Stack spacing={2}>
-        <EventList events={events} />
+      <Stack spacing={2} direction="row">
         <TodoList events={events ?? null} />
+        <EventList events={events} />
       </Stack>
 
       <EventAlert

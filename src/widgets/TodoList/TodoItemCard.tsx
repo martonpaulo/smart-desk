@@ -49,10 +49,14 @@ export function TodoItemCard({
         mb: 1,
         position: 'relative',
         bgcolor: alpha(darken(column.color, 0.2), 0.15),
-        cursor: 'move',
+        cursor: 'pointer',
         '&:hover .todo-actions': {
           visibility: 'visible',
         },
+        '&:active': {
+          cursor: 'grabbing',
+        },
+        boxShadow: 1,
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -67,6 +71,7 @@ export function TodoItemCard({
             <TextField
               size="small"
               value={title}
+              variant="standard"
               onChange={e => setTitle(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter') {
