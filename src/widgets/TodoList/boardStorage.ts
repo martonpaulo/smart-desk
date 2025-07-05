@@ -6,7 +6,7 @@ export const LAST_POPULATE_KEY = 'todo-last-populate';
 
 export const DEFAULT_COLUMNS: Column[] = [
   { id: 'todo', title: 'Todo', color: '#1976d2' },
-  { id: 'completed', title: 'Completed', color: '#2e7d32' },
+  { id: 'done', title: 'Done', color: '#2e7d32' },
 ];
 
 export function loadBoard(): BoardState {

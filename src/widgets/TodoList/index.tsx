@@ -7,16 +7,18 @@ import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-import { AddItemForm } from '@/widgets/TodoList/AddItemForm';
 import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
+import { EditItemModal } from '@/widgets/TodoList/EditItemModal';
 import { BoardState, Column, TodoItem, TodoListProps } from '@/widgets/TodoList/types';
 
 export function TodoList({ events }: TodoListProps) {
   const [board, setBoard] = useState<BoardState>(() => loadBoard());
   const [view, setView] = useState<'board' | 'list'>('board');
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [editingItem, setEditingItem] = useState<TodoItem | null>(null);
 
   // Populate tasks from today's events once per day
   useEffect(() => {
@@ -53,13 +55,12 @@ export function TodoList({ events }: TodoListProps) {
     saveBoard(board);
   }, [board]);
 
-  const handleAddItem = (title: string, description: string, tags: string[]) => {
+  const handleAddItem = (columnId: string, title: string) => {
     const item: TodoItem = {
       id: `todo-${Date.now()}`,
       title,
-      description: description || undefined,
-      tags,
-      columnId: 'todo',
+      tags: [],
+      columnId,
     };
     setBoard(prev => ({ ...prev, items: [...prev.items, item] }));
   };
@@ -67,23 +68,15 @@ export function TodoList({ events }: TodoListProps) {
   const handleEditItem = (id: string) => {
     const item = board.items.find(t => t.id === id);
     if (!item) return;
-    const title = window.prompt('Edit title', item.title) ?? '';
-    if (!title.trim()) return;
-    const description = window.prompt('Edit description', item.description || '') ?? '';
-    const tagsString = window.prompt('Edit tags comma separated', item.tags.join(', ')) ?? '';
-    const tags = tagsString
-      .split(',')
-      .map(t => t.trim())
-      .filter(Boolean);
+    setEditingItem(item);
+  };
 
+  const handleSaveItem = (updated: TodoItem) => {
     setBoard(prev => ({
       ...prev,
-      items: prev.items.map(t =>
-        t.id === id
-          ? { ...t, title: title.trim(), description: description.trim() || undefined, tags }
-          : t,
-      ),
+      items: prev.items.map(t => (t.id === updated.id ? updated : t)),
     }));
+    setEditingItem(null);
   };
 
   const handleDeleteItem = (id: string) => {
@@ -92,13 +85,13 @@ export function TodoList({ events }: TodoListProps) {
 
   const handleCompleteItem = (id: string) => {
     setBoard(prev => {
-      const completedColumn =
-        prev.columns.find(c => c.title.toLowerCase() === 'completed') ||
-        prev.columns.find(c => c.id === 'completed');
-      const columnId = completedColumn ? completedColumn.id : 'completed';
-      const columns = completedColumn
+      const doneColumn =
+        prev.columns.find(c => c.title.toLowerCase() === 'done') ||
+        prev.columns.find(c => c.id === 'done');
+      const columnId = doneColumn ? doneColumn.id : 'done';
+      const columns = doneColumn
         ? prev.columns
-        : [...prev.columns, { id: 'completed', title: 'Completed', color: '#2e7d32' }];
+        : [...prev.columns, { id: 'done', title: 'Done', color: '#2e7d32' }];
       const items = prev.items.map(t => (t.id === id ? { ...t, columnId } : t));
       return { columns, items };
     });
@@ -131,13 +124,45 @@ export function TodoList({ events }: TodoListProps) {
     }));
   };
 
+  const handleChangeColumnColor = (id: string) => {
+    const column = board.columns.find(c => c.id === id);
+    if (!column) return;
+    const color = window.prompt('Column color', column.color) || column.color;
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns.map(c => (c.id === id ? { ...c, color } : c)),
+    }));
+  };
+
   const handleClearCompleted = () => {
-    setBoard(prev => ({ ...prev, items: prev.items.filter(i => i.columnId !== 'completed') }));
+    setBoard(prev => ({ ...prev, items: prev.items.filter(i => i.columnId !== 'done') }));
   };
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
     event.dataTransfer.effectAllowed = 'move';
     setDraggingId(id);
+  };
+
+  const handleColumnDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
+    event.dataTransfer.effectAllowed = 'move';
+    setDraggingColumnId(id);
+  };
+
+  const handleColumnDragOver = (event: React.DragEvent<HTMLDivElement>, overId: string) => {
+    if (!draggingColumnId || draggingColumnId === overId) return;
+    setBoard(prev => {
+      const columns = [...prev.columns];
+      const from = columns.findIndex(c => c.id === draggingColumnId);
+      const to = columns.findIndex(c => c.id === overId);
+      if (from === -1 || to === -1) return prev;
+      const [moved] = columns.splice(from, 1);
+      columns.splice(to, 0, moved);
+      return { ...prev, columns };
+    });
+  };
+
+  const handleColumnDragEnd = () => {
+    setDraggingColumnId(null);
   };
 
   const handleDragOverItem = (event: React.DragEvent<HTMLDivElement>, overId: string) => {
@@ -183,12 +208,17 @@ export function TodoList({ events }: TodoListProps) {
         items={items}
         onRenameColumn={handleRenameColumn}
         onDeleteColumn={handleDeleteColumn}
+        onChangeColor={handleChangeColumnColor}
         onEditItem={handleEditItem}
         onDeleteItem={handleDeleteItem}
         onCompleteItem={handleCompleteItem}
+        onAddItem={handleAddItem}
         onDragStart={handleDragStart}
         onDragOverItem={handleDragOverItem}
         onDrop={handleDrop}
+        onColumnDragStart={handleColumnDragStart}
+        onColumnDragOver={handleColumnDragOver}
+        onColumnDragEnd={handleColumnDragEnd}
       />
     );
   };
@@ -214,6 +244,9 @@ export function TodoList({ events }: TodoListProps) {
                 onDragStart={handleDragStart}
                 onDragOverItem={handleDragOverItem}
                 onDrop={handleDrop}
+                onAddItem={() => undefined}
+                onChangeColor={() => undefined}
+                hideHeader
               />
             </Box>
           ))}
@@ -255,8 +288,12 @@ export function TodoList({ events }: TodoListProps) {
       ) : (
         <Box>{renderList()}</Box>
       )}
-
-      <AddItemForm onAdd={handleAddItem} />
+      <EditItemModal
+        open={Boolean(editingItem)}
+        item={editingItem}
+        onSave={handleSaveItem}
+        onClose={() => setEditingItem(null)}
+      />
 
       <style jsx>{`
         .todo-actions {
@@ -266,6 +303,9 @@ export function TodoList({ events }: TodoListProps) {
         }
         [data-todo-id]:hover .todo-actions {
           visibility: visible;
+        }
+        .todo-actions button:hover {
+          cursor: pointer;
         }
       `}</style>
     </Box>

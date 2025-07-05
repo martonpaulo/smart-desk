@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { alpha, darken } from '@mui/material/styles';
 
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -51,6 +52,8 @@ export function TodoItemCard({
         borderRadius: 1,
         mb: 1,
         position: 'relative',
+        bgcolor: alpha(darken(column.color, 0.2), 0.15),
+        cursor: 'move',
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -64,7 +67,12 @@ export function TodoItemCard({
             </Tooltip>
           )}
         </Stack>
-        <Stack direction="row" spacing={1} sx={{ visibility: 'hidden' }} className="todo-actions">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ visibility: 'hidden', '& button': { cursor: 'pointer' } }}
+          className="todo-actions"
+        >
           <IconButton size="small" onClick={() => onEdit(item.id)}>
             <EditIcon fontSize="inherit" />
           </IconButton>
