@@ -1,18 +1,15 @@
-import { SyntheticEvent, useState } from 'react';
+import { ReactNode, SyntheticEvent, useState } from 'react';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Box, Dialog, DialogContent, DialogTitle, IconButton, Tab, Tabs } from '@mui/material';
 
-import { AuthControl, type AuthControlProps } from '@/widgets/AuthControl';
-import ICSCalendarManager from '@/widgets/ICSCalendarManager';
-
 interface SettingsDialogProps {
   open: boolean;
   onClose: () => void;
-  auth: AuthControlProps;
+  tabs: Record<string, ReactNode>;
 }
 
-export function SettingsDialog({ open, onClose, auth }: SettingsDialogProps) {
+export function SettingsDialog({ open, onClose, tabs }: SettingsDialogProps) {
   const [tab, setTab] = useState(0);
 
   const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
@@ -24,20 +21,19 @@ export function SettingsDialog({ open, onClose, auth }: SettingsDialogProps) {
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <Tabs value={tab} onChange={handleTabChange} aria-label="settings tabs">
-          <Tab label="Calendars" />
-          <Tab label="Account" />
+          {Object.keys(tabs).map(key => (
+            <Tab key={key} label={key} />
+          ))}
         </Tabs>
-        <Box hidden={tab !== 0} pt={2}>
-          <ICSCalendarManager />
-        </Box>
-        <Box hidden={tab !== 1} pt={2}>
-          <AuthControl {...auth} />
-        </Box>
+        {Object.values(tabs).map((content, index) => (
+          <Box key={index} hidden={tab !== index} pt={2}>
+            {content}
+          </Box>
+        ))}
       </DialogContent>
     </Dialog>
   );
 }
-
 interface SettingsButtonProps {
   onClick: () => void;
 }
@@ -58,5 +54,3 @@ export function SettingsButton({ onClick }: SettingsButtonProps) {
     </IconButton>
   );
 }
-
-export default SettingsDialog;

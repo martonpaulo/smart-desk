@@ -9,6 +9,7 @@ export interface WeatherProps {
   weatherIsLoading: boolean;
   weatherIsError: boolean;
   weatherError: Error | null;
+  showCaption?: boolean;
 }
 
 export function Weather({
@@ -17,6 +18,7 @@ export function Weather({
   weatherIsLoading,
   weatherIsError,
   weatherError,
+  showCaption = true,
 }: WeatherProps) {
   if (weatherIsLoading) return <CircularProgress />;
 
@@ -29,11 +31,11 @@ export function Weather({
 
   return (
     <Stack>
-      <Stack direction="row" spacing={1} alignItems="baseline">
-        <Typography variant="h4">{apparentTemperature}</Typography>
-        <Typography>{relativeHumidity}</Typography>
+      <Stack direction="row" spacing={0.25} alignItems="baseline">
+        <Typography variant="subtitle1">{apparentTemperature}</Typography>
+        <Typography variant="caption">/{relativeHumidity}</Typography>
       </Stack>
-      <Typography variant="caption">{caption}</Typography>
+      {showCaption && <Typography variant="caption">{caption}</Typography>}
     </Stack>
   );
 }

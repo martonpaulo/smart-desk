@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import ListIcon from '@mui/icons-material/List';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
-import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import { IEvent } from '@/types/IEvent';
@@ -24,7 +24,6 @@ export function TodoList({ events }: TodoListProps) {
   const [view, setView] = useState<'board' | 'list'>('board');
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
   const [editingItem, setEditingItem] = useState<TodoItem | null>(null);
   const [addingColumn, setAddingColumn] = useState(false);
   const theme = useTheme();
@@ -210,16 +209,8 @@ export function TodoList({ events }: TodoListProps) {
     }));
   };
 
-  const filteredItems = board.items.filter(item => {
-    if (!search.trim()) return true;
-    const term = search.toLowerCase();
-    return (
-      item.title.toLowerCase().includes(term) || item.tags.some(t => t.toLowerCase().includes(term))
-    );
-  });
-
   const renderColumn = (column: Column) => {
-    const items = filteredItems.filter(i => i.columnId === column.id);
+    const items = board.items.filter(i => i.columnId === column.id);
     return (
       <TodoColumn
         key={column.id}
@@ -247,13 +238,6 @@ export function TodoList({ events }: TodoListProps) {
   return (
     <Box sx={{ position: 'relative' }}>
       <Stack direction="row" spacing={1} mb={2} alignItems="center">
-        <Typography variant="h6">Todo List</Typography>
-        <TextField
-          size="small"
-          placeholder="Search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
         <Box flexGrow={1} />
         <Button
           variant="outlined"

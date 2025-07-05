@@ -4,15 +4,16 @@ import { Stack } from '@mui/material';
 
 import { DashboardViewState } from '@/types/DashboardViewState';
 import { IWeather } from '@/types/IWeather';
+import { AuthControl } from '@/widgets/AuthControl';
 import { ChangeSnackbar } from '@/widgets/ChangeSnackbar';
 import { Clock } from '@/widgets/Clock';
 import { EventAlert } from '@/widgets/EventAlert';
 import { EventList } from '@/widgets/EventList';
 import { EventTimeline } from '@/widgets/EventTimeline';
+import ICSCalendarManager from '@/widgets/ICSCalendarManager';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
-import { Weather } from '@/widgets/Weather';
 
 interface HomeViewProps {
   dashboardViewState: DashboardViewState;
@@ -41,11 +42,7 @@ export function HomeView({
   onMeetingAlertToggle,
   isEventChangesAlertEnabled,
   onEventChangesAlertToggle,
-  locationName,
   weather,
-  weatherIsLoading,
-  weatherIsError,
-  weatherError,
 }: HomeViewProps) {
   const [now, setNow] = useState(new Date());
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -67,43 +64,25 @@ export function HomeView({
   }, []);
 
   return (
-    <Stack p={2} spacing={6}>
+    <Stack p={2}>
       <SettingsButton onClick={() => setSettingsOpen(true)} />
       <SettingsDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        auth={{
-          severity,
-          message,
-          isLoading,
-          canSignIn,
-          canSignOut,
-          handleSignIn,
-          handleSignOut,
-        }}
-      />
-      <EventTimeline events={events} currentTime={now} pastWindowHours={3} futureWindowHours={6} />
-
-      <Stack direction="row" justifyContent="space-around">
-        <Stack spacing={2}>
-          <EventList events={events} />
-          <TodoList events={events ?? null} />
-        </Stack>
-
-        <Stack spacing={6} alignItems="center">
-          <Stack direction="row" spacing={6} alignItems="center">
-            <Clock currentTime={now} />
-
-            <Weather
-              locationName={locationName}
-              weather={weather}
-              weatherIsLoading={weatherIsLoading}
-              weatherIsError={weatherIsError}
-              weatherError={weatherError}
+        tabs={{
+          'ICS Calendar': <ICSCalendarManager />,
+          Auth: (
+            <AuthControl
+              severity={severity}
+              message={message}
+              isLoading={isLoading}
+              canSignIn={canSignIn}
+              canSignOut={canSignOut}
+              handleSignIn={handleSignIn}
+              handleSignOut={handleSignOut}
             />
-          </Stack>
-
-          {events && (
+          ),
+          'Sound Alerts': events && (
             <SoundAlert
               currentTime={now}
               events={events}
@@ -115,8 +94,25 @@ export function HomeView({
               isEventChangesAlertEnabled={isEventChangesAlertEnabled}
               onEventChangesAlertToggle={onEventChangesAlertToggle}
             />
-          )}
+          ),
+        }}
+      />
+      <Stack direction="row" justifyContent="space-between" gap={2} alignItems="center">
+        <Stack flexGrow={1}>
+          <EventTimeline
+            events={events}
+            currentTime={now}
+            pastWindowHours={3}
+            futureWindowHours={6}
+          />
         </Stack>
+
+        {weather && <Clock currentTime={now} weather={weather} />}
+      </Stack>
+
+      <Stack spacing={2}>
+        <EventList events={events} />
+        <TodoList events={events ?? null} />
       </Stack>
 
       <EventAlert

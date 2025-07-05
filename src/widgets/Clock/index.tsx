@@ -1,10 +1,15 @@
-import { Box, Typography } from '@mui/material';
+import ThermostatIcon from '@mui/icons-material/Thermostat';
+import WaterDropOutlinedIcon from '@mui/icons-material/WaterDropOutlined';
+import { Stack, Typography } from '@mui/material';
+
+import { IWeather } from '@/types/IWeather';
 
 interface ClockProps {
   currentTime: Date;
+  weather: IWeather;
 }
 
-export function Clock({ currentTime }: ClockProps) {
+export function Clock({ currentTime, weather }: ClockProps) {
   const formattedTime = currentTime.toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
@@ -17,10 +22,26 @@ export function Clock({ currentTime }: ClockProps) {
     day: 'numeric',
   });
 
+  const { apparentTemperature, relativeHumidity } = weather;
+
   return (
-    <Box sx={{ textAlign: 'center' }}>
+    <Stack>
       <Typography variant="h1">{formattedTime}</Typography>
-      <Typography variant="subtitle1">{formattedDate}</Typography>
-    </Box>
+      <Stack direction="row" justifyContent="space-between">
+        <Typography variant="subtitle1">{formattedDate}</Typography>
+
+        <Stack direction="row" gap={0.75} alignItems="baseline">
+          <Typography variant="subtitle1">
+            <ThermostatIcon fontSize="inherit" />
+            {apparentTemperature}
+          </Typography>
+
+          <Typography variant="caption">
+            <WaterDropOutlinedIcon fontSize="inherit" />
+            {relativeHumidity}
+          </Typography>
+        </Stack>
+      </Stack>
+    </Stack>
   );
 }
