@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 
-import AddIcon from '@mui/icons-material/Add';
 import ListIcon from '@mui/icons-material/List';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import { Box, Button, Stack } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 
 import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-import { AddColumnModal } from '@/widgets/TodoList/AddColumnModal';
+import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
 import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { EditItemModal } from '@/widgets/TodoList/EditItemModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
@@ -25,8 +23,13 @@ export function TodoList({ events }: TodoListProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<TodoItem | null>(null);
-  const [addingColumn, setAddingColumn] = useState(false);
-  const theme = useTheme();
+  const [columnModal, setColumnModal] = useState<{
+    column: Column | null;
+    afterId?: string;
+  } | null>(null);
+  const [hoverItemId, setHoverItemId] = useState<string | null>(null);
+  const [itemDropColumnId, setItemDropColumnId] = useState<string | null>(null);
+  const [hoverColumnId, setHoverColumnId] = useState<string | null>(null);
 
   // Populate tasks from today's events once per day
   useEffect(() => {
@@ -71,6 +74,7 @@ export function TodoList({ events }: TodoListProps) {
       columnId,
     };
     setBoard(prev => ({ ...prev, items: [...prev.items, item] }));
+    return item.id;
   };
 
   const handleEditItem = (id: string) => {
@@ -114,98 +118,105 @@ export function TodoList({ events }: TodoListProps) {
     });
   };
 
-  const handleAddColumn = (title: string, color: string) => {
-    const id = `col-${Date.now()}`;
-    setBoard(prev => ({ ...prev, columns: [...prev.columns, { id, title, color }] }));
+  const handleSaveColumn = (title: string, color: string) => {
+    if (!columnModal) return;
+    if (columnModal.column) {
+      const id = columnModal.column.id;
+      setBoard(prev => ({
+        ...prev,
+        columns: prev.columns.map(c => (c.id === id ? { ...c, title, color } : c)),
+      }));
+    } else {
+      const id = `col-${Date.now()}`;
+      setBoard(prev => {
+        const columns = [...prev.columns];
+        const index = columnModal.afterId
+          ? columns.findIndex(c => c.id === columnModal.afterId) + 1
+          : columns.length;
+        columns.splice(index, 0, { id, title, color });
+        return { ...prev, columns };
+      });
+    }
+    setColumnModal(null);
   };
 
-  const handleRenameColumn = (id: string) => {
-    const column = board.columns.find(c => c.id === id);
-    if (!column) return;
-    const title = window.prompt('Column title', column.title)?.trim();
-    if (!title) return;
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns.map(c => (c.id === id ? { ...c, title } : c)),
-    }));
-  };
-
-  const handleDeleteColumn = (id: string) => {
-    if (id === 'done') return;
-    if (!window.confirm('Delete column and all its items?')) return;
+  const handleDeleteColumn = () => {
+    if (!columnModal?.column || columnModal.column.id === 'done') {
+      setColumnModal(null);
+      return;
+    }
+    if (!window.confirm('Delete column and all its items?')) {
+      setColumnModal(null);
+      return;
+    }
+    const id = columnModal.column.id;
     setBoard(prev => ({
       columns: prev.columns.filter(c => c.id !== id),
       items: prev.items.filter(i => i.columnId !== id),
     }));
-  };
-
-  const handleChangeColumnColor = (id: string) => {
-    const column = board.columns.find(c => c.id === id);
-    if (!column) return;
-    const options = ['primary', 'secondary', 'success', 'info', 'warning', 'error'];
-    const choice = window.prompt(`Color (${options.join(', ')})`, 'primary');
-    if (!choice || !options.includes(choice)) return;
-
-    const paletteColor =
-      theme.palette[choice as 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error'];
-    const color = 'main' in paletteColor ? paletteColor.main : '';
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns.map(c => (c.id === id ? { ...c, color } : c)),
-    }));
+    setColumnModal(null);
   };
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
     event.dataTransfer.effectAllowed = 'move';
     setDraggingId(id);
+    setHoverItemId(null);
+    setItemDropColumnId(null);
   };
 
   const handleColumnDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
     event.dataTransfer.effectAllowed = 'move';
     setDraggingColumnId(id);
+    setHoverColumnId(null);
   };
 
   const handleColumnDragOver = (event: React.DragEvent<HTMLDivElement>, overId: string) => {
     if (!draggingColumnId || draggingColumnId === overId) return;
-    setBoard(prev => {
-      const columns = [...prev.columns];
-      const from = columns.findIndex(c => c.id === draggingColumnId);
-      const to = columns.findIndex(c => c.id === overId);
-      if (from === -1 || to === -1) return prev;
-      const [moved] = columns.splice(from, 1);
-      columns.splice(to, 0, moved);
-      return { ...prev, columns };
-    });
+    setHoverColumnId(overId);
   };
 
   const handleColumnDragEnd = () => {
+    if (draggingColumnId) {
+      setBoard(prev => {
+        const columns = [...prev.columns];
+        const from = columns.findIndex(c => c.id === draggingColumnId);
+        const to = hoverColumnId ? columns.findIndex(c => c.id === hoverColumnId) : from;
+        if (from === -1 || to === -1 || from === to) return prev;
+        const [moved] = columns.splice(from, 1);
+        columns.splice(to, 0, moved);
+        return { ...prev, columns };
+      });
+    }
     setDraggingColumnId(null);
+    setHoverColumnId(null);
   };
 
   const handleDragOverItem = (event: React.DragEvent<HTMLDivElement>, overId: string) => {
     event.preventDefault();
     if (!draggingId || draggingId === overId) return;
-
-    setBoard(prev => {
-      const items = [...prev.items];
-      const from = items.findIndex(i => i.id === draggingId);
-      const to = items.findIndex(i => i.id === overId);
-      if (from === -1 || to === -1) return prev;
-      const [moved] = items.splice(from, 1);
-      items.splice(to, 0, moved);
-      return { ...prev, items };
-    });
+    setHoverItemId(overId);
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>, columnId: string) => {
     event.preventDefault();
     const id = draggingId;
     setDraggingId(null);
+    const overId = hoverItemId;
+    setHoverItemId(null);
+    setItemDropColumnId(null);
     if (!id) return;
-    setBoard(prev => ({
-      ...prev,
-      items: prev.items.map(item => (item.id === id ? { ...item, columnId } : item)),
-    }));
+    setBoard(prev => {
+      const items = [...prev.items];
+      const from = items.findIndex(i => i.id === id);
+      if (from === -1) return prev;
+      const [moved] = items.splice(from, 1);
+      const to = overId
+        ? items.findIndex(i => i.id === overId)
+        : items.reduce((idx, it, i) => (it.columnId === columnId ? i + 1 : idx), 0);
+      const insertIndex = from < to ? to - 1 : to;
+      items.splice(insertIndex, 0, { ...moved, columnId });
+      return { ...prev, items };
+    });
   };
 
   const renderColumn = (column: Column) => {
@@ -216,9 +227,8 @@ export function TodoList({ events }: TodoListProps) {
         column={column}
         items={items}
         view={view}
-        onRenameColumn={handleRenameColumn}
-        onDeleteColumn={handleDeleteColumn}
-        onChangeColor={handleChangeColumnColor}
+        onOpenColumn={col => setColumnModal({ column: col })}
+        onAddColumn={afterId => setColumnModal({ column: null, afterId })}
         onEditItem={handleEditItem}
         onRenameItem={handleRenameItem}
         onDeleteItem={handleDeleteItem}
@@ -226,10 +236,16 @@ export function TodoList({ events }: TodoListProps) {
         onAddItem={handleAddItem}
         onDragStart={handleDragStart}
         onDragOverItem={handleDragOverItem}
+        onItemColumnDragOver={setItemDropColumnId}
         onDrop={handleDrop}
         onColumnDragStart={handleColumnDragStart}
         onColumnDragOver={handleColumnDragOver}
         onColumnDragEnd={handleColumnDragEnd}
+        draggingItemId={draggingId}
+        hoverItemId={hoverItemId}
+        itemDropColumnId={itemDropColumnId}
+        draggingColumnId={draggingColumnId}
+        hoverColumnId={hoverColumnId}
       />
     );
   };
@@ -246,14 +262,6 @@ export function TodoList({ events }: TodoListProps) {
         >
           {view === 'board' ? 'List view' : 'Board view'}
         </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => setAddingColumn(true)}
-        >
-          Add Column
-        </Button>
       </Stack>
 
       <Stack
@@ -269,10 +277,12 @@ export function TodoList({ events }: TodoListProps) {
         onSave={handleSaveItem}
         onClose={() => setEditingItem(null)}
       />
-      <AddColumnModal
-        open={addingColumn}
-        onAdd={handleAddColumn}
-        onClose={() => setAddingColumn(false)}
+      <ColumnModal
+        open={Boolean(columnModal)}
+        column={columnModal?.column || null}
+        onSave={handleSaveColumn}
+        onDelete={handleDeleteColumn}
+        onClose={() => setColumnModal(null)}
       />
 
       <style jsx>{`

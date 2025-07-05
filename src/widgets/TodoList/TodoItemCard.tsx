@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -18,6 +18,8 @@ interface TodoItemCardProps {
   onComplete: (id: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  startEditing?: boolean;
+  onEditingEnd?: () => void;
 }
 
 export function TodoItemCard({
@@ -30,8 +32,22 @@ export function TodoItemCard({
   onDragStart,
   onDragOver,
 }: TodoItemCardProps) {
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(Boolean(startEditing));
   const [title, setTitle] = useState(item.title);
+
+  useEffect(() => {
+    if (startEditing) {
+      setEditing(true);
+      setTitle(item.title);
+    }
+  }, [startEditing, item.title]);
+
+  const finishEditing = () => {
+    const trimmed = title.trim();
+    if (trimmed) onRename(item.id, trimmed);
+    setEditing(false);
+    onEditingEnd?.();
+  };
 
   return (
     <Box
@@ -49,7 +65,7 @@ export function TodoItemCard({
         mb: 1,
         position: 'relative',
         bgcolor: alpha(darken(column.color, 0.2), 0.15),
-        cursor: 'pointer',
+        cursor: editing ? 'text' : 'grab',
         '&:hover .todo-actions': {
           visibility: 'visible',
         },
@@ -71,13 +87,14 @@ export function TodoItemCard({
             <TextField
               size="small"
               value={title}
+              autoFocus
               variant="standard"
+              onBlur={finishEditing}
               onChange={e => setTitle(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter') {
                   e.stopPropagation();
-                  onRename(item.id, title.trim());
-                  setEditing(false);
+                  finishEditing();
                 }
               }}
             />
@@ -90,42 +107,51 @@ export function TodoItemCard({
           sx={{ visibility: 'hidden', '& button': { cursor: 'pointer' } }}
           className="todo-actions"
         >
-          <IconButton
-            size="small"
-            onClick={e => {
-              e.stopPropagation();
-              if (editing) {
-                onRename(item.id, title.trim());
-                setEditing(false);
-              } else {
-                setTitle(item.title);
-                setEditing(true);
-              }
-            }}
-          >
-            <EditIcon fontSize="inherit" />
-          </IconButton>
-          {column.id !== 'done' && (
+          {editing ? (
             <IconButton
               size="small"
               onClick={e => {
                 e.stopPropagation();
-                onComplete(item.id);
+                finishEditing();
               }}
             >
               <CheckIcon fontSize="inherit" />
             </IconButton>
+          ) : (
+            <>
+              <IconButton
+                size="small"
+                onClick={e => {
+                  e.stopPropagation();
+                  setTitle(item.title);
+                  setEditing(true);
+                }}
+              >
+                <EditIcon fontSize="inherit" />
+              </IconButton>
+              {column.id !== 'done' && (
+                <IconButton
+                  size="small"
+                  onClick={e => {
+                    e.stopPropagation();
+                    onComplete(item.id);
+                  }}
+                >
+                  <CheckIcon fontSize="inherit" />
+                </IconButton>
+              )}
+              <IconButton
+                size="small"
+                onClick={e => {
+                  e.stopPropagation();
+                  if (window.confirm('Delete item?')) onDelete(item.id);
+                }}
+                color="error"
+              >
+                <DeleteIcon fontSize="inherit" />
+              </IconButton>
+            </>
           )}
-          <IconButton
-            size="small"
-            onClick={e => {
-              e.stopPropagation();
-              if (window.confirm('Delete item?')) onDelete(item.id);
-            }}
-            color="error"
-          >
-            <DeleteIcon fontSize="inherit" />
-          </IconButton>
         </Stack>
       </Stack>
       <Stack direction="row" spacing={1} mt={0.5} flexWrap="wrap">
