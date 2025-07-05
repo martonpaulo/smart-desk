@@ -1,83 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import ListIcon from '@mui/icons-material/List';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
-import {
-  alpha,
-  Box,
-  Button,
-  Chip,
-  IconButton,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 
-import type { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-
-interface Column {
-  id: string;
-  title: string;
-  color: string;
-}
-
-interface TodoItem {
-  id: string;
-  title: string;
-  description?: string;
-  tags: string[];
-  columnId: string;
-}
-
-interface BoardState {
-  columns: Column[];
-  items: TodoItem[];
-}
-
-interface TodoListProps {
-  events: IEvent[] | null;
-}
-
-const STORAGE_KEY = 'todo-board';
-const LAST_POPULATE_KEY = 'todo-last-populate';
-const DEFAULT_COLUMNS: Column[] = [
-  { id: 'todo', title: 'Todo', color: '#1976d2' },
-  { id: 'completed', title: 'Completed', color: '#2e7d32' },
-];
-
-function loadBoard(): BoardState {
-  try {
-    return getStoredFilters<BoardState>(STORAGE_KEY) || { columns: DEFAULT_COLUMNS, items: [] };
-  } catch {
-    return { columns: DEFAULT_COLUMNS, items: [] };
-  }
-}
-
-function saveBoard(board: BoardState): void {
-  try {
-    setStoredFilters(STORAGE_KEY, board);
-  } catch {
-    console.error('Could not save todo board');
-  }
-}
+import { AddItemForm } from '@/widgets/TodoList/AddItemForm';
+import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
+import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
+import { BoardState, Column, TodoItem, TodoListProps } from '@/widgets/TodoList/types';
 
 export function TodoList({ events }: TodoListProps) {
   const [board, setBoard] = useState<BoardState>(() => loadBoard());
   const [view, setView] = useState<'board' | 'list'>('board');
-  const [newTitle, setNewTitle] = useState('');
-  const [newDescription, setNewDescription] = useState('');
-  const [newTags, setNewTags] = useState('');
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const selectionRef = useRef<HTMLDivElement>(null);
+  const [search, setSearch] = useState('');
 
-  // Populate with today's all day events only once per day
+  // Populate tasks from today's events once per day
   useEffect(() => {
     if (!events?.length) return;
 
@@ -107,28 +48,20 @@ export function TodoList({ events }: TodoListProps) {
     setStoredFilters(LAST_POPULATE_KEY, todayKey);
   }, [events]);
 
-  // Persist board on change
+  // Persist board whenever it changes
   useEffect(() => {
     saveBoard(board);
   }, [board]);
 
-  const handleAddItem = () => {
-    const title = newTitle.trim();
-    if (!title) return;
+  const handleAddItem = (title: string, description: string, tags: string[]) => {
     const item: TodoItem = {
       id: `todo-${Date.now()}`,
       title,
-      description: newDescription.trim() || undefined,
-      tags: newTags
-        .split(',')
-        .map(t => t.trim())
-        .filter(Boolean),
+      description: description || undefined,
+      tags,
       columnId: 'todo',
     };
     setBoard(prev => ({ ...prev, items: [...prev.items, item] }));
-    setNewTitle('');
-    setNewDescription('');
-    setNewTags('');
   };
 
   const handleEditItem = (id: string) => {
@@ -138,7 +71,6 @@ export function TodoList({ events }: TodoListProps) {
     if (!title.trim()) return;
     const description = window.prompt('Edit description', item.description || '') ?? '';
     const tagsString = window.prompt('Edit tags comma separated', item.tags.join(', ')) ?? '';
-
     const tags = tagsString
       .split(',')
       .map(t => t.trim())
@@ -199,9 +131,28 @@ export function TodoList({ events }: TodoListProps) {
     }));
   };
 
+  const handleClearCompleted = () => {
+    setBoard(prev => ({ ...prev, items: prev.items.filter(i => i.columnId !== 'completed') }));
+  };
+
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
     event.dataTransfer.effectAllowed = 'move';
     setDraggingId(id);
+  };
+
+  const handleDragOverItem = (event: React.DragEvent<HTMLDivElement>, overId: string) => {
+    event.preventDefault();
+    if (!draggingId || draggingId === overId) return;
+
+    setBoard(prev => {
+      const items = [...prev.items];
+      const from = items.findIndex(i => i.id === draggingId);
+      const to = items.findIndex(i => i.id === overId);
+      if (from === -1 || to === -1) return prev;
+      const [moved] = items.splice(from, 1);
+      items.splice(to, 0, moved);
+      return { ...prev, items };
+    });
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>, columnId: string) => {
@@ -215,79 +166,30 @@ export function TodoList({ events }: TodoListProps) {
     }));
   };
 
-  const renderItem = (item: TodoItem) => {
-    const column = board.columns.find(c => c.id === item.columnId);
-    if (!column) return null;
-
+  const filteredItems = board.items.filter(item => {
+    if (!search.trim()) return true;
+    const term = search.toLowerCase();
     return (
-      <Box
-        key={item.id}
-        data-todo-id={item.id}
-        draggable
-        onDragStart={e => handleDragStart(e, item.id)}
-        sx={{
-          p: 1,
-          border: '1px solid',
-          borderColor: column.color,
-          borderRadius: 1,
-          mb: 1,
-          position: 'relative',
-        }}
-      >
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="body1">{item.title}</Typography>
-            {item.description && (
-              <Tooltip title="Has description">
-                <AddIcon fontSize="small" />
-              </Tooltip>
-            )}
-          </Stack>
-          <Stack direction="row" spacing={1} sx={{ visibility: 'hidden' }} className="todo-actions">
-            <IconButton size="small" onClick={() => handleEditItem(item.id)}>
-              <EditIcon fontSize="inherit" />
-            </IconButton>
-            <IconButton size="small" onClick={() => handleCompleteItem(item.id)}>
-              <CheckIcon fontSize="inherit" />
-            </IconButton>
-            <IconButton size="small" onClick={() => handleDeleteItem(item.id)}>
-              <DeleteIcon fontSize="inherit" />
-            </IconButton>
-          </Stack>
-        </Stack>
-        <Stack direction="row" spacing={1} mt={0.5} flexWrap="wrap">
-          {item.tags.map(tag => (
-            <Chip key={tag} label={tag} size="small" />
-          ))}
-        </Stack>
-      </Box>
+      item.title.toLowerCase().includes(term) || item.tags.some(t => t.toLowerCase().includes(term))
     );
-  };
+  });
 
   const renderColumn = (column: Column) => {
-    const items = board.items.filter(i => i.columnId === column.id);
+    const items = filteredItems.filter(i => i.columnId === column.id);
     return (
-      <Box
+      <TodoColumn
         key={column.id}
-        onDragOver={e => e.preventDefault()}
-        onDrop={e => handleDrop(e, column.id)}
-        sx={{ width: 250, p: 1, bgcolor: alpha(column.color, 0.1), borderRadius: 1 }}
-      >
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
-          <Typography variant="h6" sx={{ color: column.color }}>
-            {column.title}
-          </Typography>
-          <Stack direction="row" spacing={0}>
-            <IconButton size="small" onClick={() => handleRenameColumn(column.id)}>
-              <EditIcon fontSize="inherit" />
-            </IconButton>
-            <IconButton size="small" onClick={() => handleDeleteColumn(column.id)}>
-              <DeleteIcon fontSize="inherit" />
-            </IconButton>
-          </Stack>
-        </Stack>
-        {items.map(renderItem)}
-      </Box>
+        column={column}
+        items={items}
+        onRenameColumn={handleRenameColumn}
+        onDeleteColumn={handleDeleteColumn}
+        onEditItem={handleEditItem}
+        onDeleteItem={handleDeleteItem}
+        onCompleteItem={handleCompleteItem}
+        onDragStart={handleDragStart}
+        onDragOverItem={handleDragOverItem}
+        onDrop={handleDrop}
+      />
     );
   };
 
@@ -297,11 +199,22 @@ export function TodoList({ events }: TodoListProps) {
         <Typography variant="h6" sx={{ color: col.color }}>
           {col.title}
         </Typography>
-        {board.items
+        {filteredItems
           .filter(i => i.columnId === col.id)
           .map(item => (
             <Box key={item.id} mb={1}>
-              {renderItem(item)}
+              <TodoColumn
+                column={col}
+                items={[item]}
+                onRenameColumn={() => undefined}
+                onDeleteColumn={() => undefined}
+                onEditItem={handleEditItem}
+                onDeleteItem={handleDeleteItem}
+                onCompleteItem={handleCompleteItem}
+                onDragStart={handleDragStart}
+                onDragOverItem={handleDragOverItem}
+                onDrop={handleDrop}
+              />
             </Box>
           ))}
       </Box>
@@ -309,10 +222,19 @@ export function TodoList({ events }: TodoListProps) {
   };
 
   return (
-    <Box ref={selectionRef} sx={{ position: 'relative' }}>
-      <Stack direction="row" spacing={1} mb={2}>
+    <Box sx={{ position: 'relative' }}>
+      <Stack direction="row" spacing={1} mb={2} alignItems="center">
         <Typography variant="h6">Todo List</Typography>
+        <TextField
+          size="small"
+          placeholder="Search"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
         <Box flexGrow={1} />
+        <Button variant="outlined" size="small" onClick={handleClearCompleted}>
+          Clear Completed
+        </Button>
         <Button
           variant="outlined"
           size="small"
@@ -334,22 +256,7 @@ export function TodoList({ events }: TodoListProps) {
         <Box>{renderList()}</Box>
       )}
 
-      <Stack mt={2} spacing={1}>
-        <TextField label="Title" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
-        <TextField
-          label="Description"
-          value={newDescription}
-          onChange={e => setNewDescription(e.target.value)}
-        />
-        <TextField
-          label="Tags (comma separated)"
-          value={newTags}
-          onChange={e => setNewTags(e.target.value)}
-        />
-        <Button variant="contained" onClick={handleAddItem} startIcon={<AddIcon />}>
-          Add Item
-        </Button>
-      </Stack>
+      <AddItemForm onAdd={handleAddItem} />
 
       <style jsx>{`
         .todo-actions {
