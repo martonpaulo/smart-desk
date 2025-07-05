@@ -14,6 +14,7 @@ interface TodoColumnProps {
   onDeleteColumn: (id: string) => void;
   onChangeColor: (id: string) => void;
   onEditItem: (id: string) => void;
+  onRenameItem: (id: string, title: string) => void;
   onDeleteItem: (id: string) => void;
   onCompleteItem: (id: string) => void;
   onAddItem: (columnId: string, title: string) => void;
@@ -33,6 +34,7 @@ export function TodoColumn({
   onDeleteColumn,
   onChangeColor,
   onEditItem,
+  onRenameItem,
   onDeleteItem,
   onCompleteItem,
   onAddItem,
@@ -54,7 +56,13 @@ export function TodoColumn({
       }}
       onDragEnd={onColumnDragEnd}
       onDrop={e => onDrop(e, column.id)}
-      sx={{ width: 250, p: 1, bgcolor: alpha(column.color, 0.1), borderRadius: 1 }}
+      sx={{
+        minWidth: 250,
+        width: 'fit-content',
+        p: 1,
+        bgcolor: alpha(column.color, 0.1),
+        borderRadius: 1,
+      }}
     >
       {!hideHeader && (
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
@@ -68,7 +76,12 @@ export function TodoColumn({
             <IconButton size="small" onClick={() => onChangeColor(column.id)}>
               <PaletteIcon fontSize="inherit" />
             </IconButton>
-            <IconButton size="small" onClick={() => onDeleteColumn(column.id)}>
+            <IconButton
+              size="small"
+              onClick={() => onDeleteColumn(column.id)}
+              disabled={column.id === 'done'}
+              color="error"
+            >
               <DeleteIcon fontSize="inherit" />
             </IconButton>
           </Stack>
@@ -79,7 +92,8 @@ export function TodoColumn({
           key={item.id}
           item={item}
           column={column}
-          onEdit={onEditItem}
+          onOpen={onEditItem}
+          onRename={onRenameItem}
           onDelete={onDeleteItem}
           onComplete={onCompleteItem}
           onDragStart={onDragStart}

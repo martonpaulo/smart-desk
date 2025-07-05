@@ -11,6 +11,7 @@ import {
   DialogContent,
   IconButton,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -21,7 +22,8 @@ import { Column, TodoItem } from '@/widgets/TodoList/types';
 interface TodoItemCardProps {
   item: TodoItem;
   column: Column;
-  onEdit: (id: string) => void;
+  onOpen: (id: string) => void;
+  onRename: (id: string, title: string) => void;
   onDelete: (id: string) => void;
   onComplete: (id: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
@@ -31,20 +33,27 @@ interface TodoItemCardProps {
 export function TodoItemCard({
   item,
   column,
-  onEdit,
+  onOpen,
+  onRename,
   onDelete,
   onComplete,
   onDragStart,
   onDragOver,
 }: TodoItemCardProps) {
   const [showDescription, setShowDescription] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(item.title);
 
   return (
     <Box
       data-todo-id={item.id}
       draggable
-      onDragStart={e => onDragStart(e, item.id)}
+      onDragStart={e => {
+        e.stopPropagation();
+        onDragStart(e, item.id);
+      }}
       onDragOver={e => onDragOver(e, item.id)}
+      onClick={() => !editing && onOpen(item.id)}
       sx={{
         p: 1,
         borderRadius: 1,
@@ -61,26 +70,74 @@ export function TodoItemCard({
         <Stack direction="row" alignItems="center">
           {item.description && (
             <Tooltip title="Show description">
-              <IconButton size="small" onClick={() => setShowDescription(true)}>
+              <IconButton
+                size="small"
+                onClick={e => {
+                  e.stopPropagation();
+                  setShowDescription(true);
+                }}
+              >
                 <DescriptionIcon fontSize="inherit" />
               </IconButton>
             </Tooltip>
           )}
 
-          <Typography>{item.title}</Typography>
+          {editing ? (
+            <TextField
+              size="small"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.stopPropagation();
+                  onRename(item.id, title.trim());
+                  setEditing(false);
+                }
+              }}
+            />
+          ) : (
+            <Typography onClick={() => onOpen(item.id)}>{item.title}</Typography>
+          )}
         </Stack>
         <Stack
           direction="row"
           sx={{ visibility: 'hidden', '& button': { cursor: 'pointer' } }}
           className="todo-actions"
         >
-          <IconButton size="small" onClick={() => onEdit(item.id)}>
+          <IconButton
+            size="small"
+            onClick={e => {
+              e.stopPropagation();
+              if (editing) {
+                onRename(item.id, title.trim());
+                setEditing(false);
+              } else {
+                setTitle(item.title);
+                setEditing(true);
+              }
+            }}
+          >
             <EditIcon fontSize="inherit" />
           </IconButton>
-          <IconButton size="small" onClick={() => onComplete(item.id)}>
-            <CheckIcon fontSize="inherit" />
-          </IconButton>
-          <IconButton size="small" onClick={() => onDelete(item.id)} color="error">
+          {column.id !== 'done' && (
+            <IconButton
+              size="small"
+              onClick={e => {
+                e.stopPropagation();
+                onComplete(item.id);
+              }}
+            >
+              <CheckIcon fontSize="inherit" />
+            </IconButton>
+          )}
+          <IconButton
+            size="small"
+            onClick={e => {
+              e.stopPropagation();
+              if (window.confirm('Delete item?')) onDelete(item.id);
+            }}
+            color="error"
+          >
             <DeleteIcon fontSize="inherit" />
           </IconButton>
         </Stack>

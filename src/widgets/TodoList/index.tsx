@@ -10,6 +10,8 @@ import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { EditItemModal } from '@/widgets/TodoList/EditItemModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
+import { AddColumnModal } from '@/widgets/TodoList/AddColumnModal';
+import { useTheme } from '@mui/material/styles';
 import { BoardState, Column, TodoItem, TodoListProps } from '@/widgets/TodoList/types';
 
 export function TodoList({ events }: TodoListProps) {
@@ -19,6 +21,8 @@ export function TodoList({ events }: TodoListProps) {
   const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [editingItem, setEditingItem] = useState<TodoItem | null>(null);
+  const [addingColumn, setAddingColumn] = useState(false);
+  const theme = useTheme();
 
   // Populate tasks from today's events once per day
   useEffect(() => {
@@ -79,7 +83,17 @@ export function TodoList({ events }: TodoListProps) {
     setEditingItem(null);
   };
 
+  const handleRenameItem = (id: string, title: string) => {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+    setBoard(prev => ({
+      ...prev,
+      items: prev.items.map(t => (t.id === id ? { ...t, title: trimmed } : t)),
+    }));
+  };
+
   const handleDeleteItem = (id: string) => {
+    if (!window.confirm('Delete this item?')) return;
     setBoard(prev => ({ ...prev, items: prev.items.filter(t => t.id !== id) }));
   };
 
@@ -97,10 +111,7 @@ export function TodoList({ events }: TodoListProps) {
     });
   };
 
-  const handleAddColumn = () => {
-    const title = window.prompt('New column title');
-    if (!title) return;
-    const color = window.prompt('Column color (css color value)', '#1976d2') || '#1976d2';
+  const handleAddColumn = (title: string, color: string) => {
     const id = `col-${Date.now()}`;
     setBoard(prev => ({ ...prev, columns: [...prev.columns, { id, title, color }] }));
   };
@@ -108,7 +119,7 @@ export function TodoList({ events }: TodoListProps) {
   const handleRenameColumn = (id: string) => {
     const column = board.columns.find(c => c.id === id);
     if (!column) return;
-    const title = window.prompt('Column title', column.title);
+    const title = window.prompt('Column title', column.title)?.trim();
     if (!title) return;
     setBoard(prev => ({
       ...prev,
@@ -117,6 +128,7 @@ export function TodoList({ events }: TodoListProps) {
   };
 
   const handleDeleteColumn = (id: string) => {
+    if (id === 'done') return;
     if (!window.confirm('Delete column and all its items?')) return;
     setBoard(prev => ({
       columns: prev.columns.filter(c => c.id !== id),
@@ -127,15 +139,14 @@ export function TodoList({ events }: TodoListProps) {
   const handleChangeColumnColor = (id: string) => {
     const column = board.columns.find(c => c.id === id);
     if (!column) return;
-    const color = window.prompt('Column color', column.color) || column.color;
+    const options = ['primary', 'secondary', 'success', 'info', 'warning', 'error'];
+    const choice = window.prompt(`Color (${options.join(', ')})`, 'primary');
+    if (!choice || !options.includes(choice)) return;
+    const color = theme.palette[choice as keyof typeof theme.palette].main;
     setBoard(prev => ({
       ...prev,
       columns: prev.columns.map(c => (c.id === id ? { ...c, color } : c)),
     }));
-  };
-
-  const handleClearCompleted = () => {
-    setBoard(prev => ({ ...prev, items: prev.items.filter(i => i.columnId !== 'done') }));
   };
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
@@ -210,6 +221,7 @@ export function TodoList({ events }: TodoListProps) {
         onDeleteColumn={handleDeleteColumn}
         onChangeColor={handleChangeColumnColor}
         onEditItem={handleEditItem}
+        onRenameItem={handleRenameItem}
         onDeleteItem={handleDeleteItem}
         onCompleteItem={handleCompleteItem}
         onAddItem={handleAddItem}
@@ -223,37 +235,6 @@ export function TodoList({ events }: TodoListProps) {
     );
   };
 
-  const renderList = () => {
-    return board.columns.map(col => (
-      <Box key={col.id} mb={2}>
-        <Typography variant="h6" sx={{ color: col.color }}>
-          {col.title}
-        </Typography>
-        {filteredItems
-          .filter(i => i.columnId === col.id)
-          .map(item => (
-            <Box key={item.id} mb={1}>
-              <TodoColumn
-                column={col}
-                items={[item]}
-                onRenameColumn={() => undefined}
-                onDeleteColumn={() => undefined}
-                onEditItem={handleEditItem}
-                onDeleteItem={handleDeleteItem}
-                onCompleteItem={handleCompleteItem}
-                onDragStart={handleDragStart}
-                onDragOverItem={handleDragOverItem}
-                onDrop={handleDrop}
-                onAddItem={() => undefined}
-                onChangeColor={() => undefined}
-                hideHeader
-              />
-            </Box>
-          ))}
-      </Box>
-    ));
-  };
-
   return (
     <Box sx={{ position: 'relative' }}>
       <Stack direction="row" spacing={1} mb={2} alignItems="center">
@@ -265,9 +246,6 @@ export function TodoList({ events }: TodoListProps) {
           onChange={e => setSearch(e.target.value)}
         />
         <Box flexGrow={1} />
-        <Button variant="outlined" size="small" onClick={handleClearCompleted}>
-          Clear Completed
-        </Button>
         <Button
           variant="outlined"
           size="small"
@@ -276,23 +254,33 @@ export function TodoList({ events }: TodoListProps) {
         >
           {view === 'board' ? 'List view' : 'Board view'}
         </Button>
-        <Button variant="outlined" size="small" startIcon={<AddIcon />} onClick={handleAddColumn}>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={() => setAddingColumn(true)}
+        >
           Add Column
         </Button>
       </Stack>
 
-      {view === 'board' ? (
-        <Stack direction="row" spacing={2} sx={{ userSelect: 'none' }}>
-          {board.columns.map(renderColumn)}
-        </Stack>
-      ) : (
-        <Box>{renderList()}</Box>
-      )}
+      <Stack
+        direction={view === 'board' ? 'row' : 'column'}
+        spacing={2}
+        sx={{ userSelect: 'none' }}
+      >
+        {board.columns.map(renderColumn)}
+      </Stack>
       <EditItemModal
         open={Boolean(editingItem)}
         item={editingItem}
         onSave={handleSaveItem}
         onClose={() => setEditingItem(null)}
+      />
+      <AddColumnModal
+        open={addingColumn}
+        onAdd={handleAddColumn}
+        onClose={() => setAddingColumn(false)}
       />
 
       <style jsx>{`
