@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { SyntheticEvent, useState } from 'react';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Box, Dialog, DialogContent, DialogTitle, IconButton, Tab, Tabs } from '@mui/material';
@@ -15,11 +15,15 @@ interface SettingsDialogProps {
 export function SettingsDialog({ open, onClose, auth }: SettingsDialogProps) {
   const [tab, setTab] = useState(0);
 
+  const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
+    setTab(newValue);
+  };
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth>
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="settings tabs">
+        <Tabs value={tab} onChange={handleTabChange} aria-label="settings tabs">
           <Tab label="Calendars" />
           <Tab label="Account" />
         </Tabs>
