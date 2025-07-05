@@ -8,8 +8,8 @@ import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
-import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import { EditItemModal } from '@/widgets/TodoList/EditItemModal';
+import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import { BoardState, Column, TodoItem, TodoListProps } from '@/widgets/TodoList/types';
 
 export function TodoList({ events }: TodoListProps) {

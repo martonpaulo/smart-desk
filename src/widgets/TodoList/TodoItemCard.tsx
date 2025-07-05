@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { alpha, darken } from '@mui/material/styles';
 
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DescriptionIcon from '@mui/icons-material/Description';
 import EditIcon from '@mui/icons-material/Edit';
-import InfoIcon from '@mui/icons-material/Info';
 import {
   Box,
   Chip,
@@ -15,6 +14,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { alpha, darken } from '@mui/material/styles';
 
 import { Column, TodoItem } from '@/widgets/TodoList/types';
 
@@ -47,29 +47,30 @@ export function TodoItemCard({
       onDragOver={e => onDragOver(e, item.id)}
       sx={{
         p: 1,
-        border: '1px solid',
-        borderColor: column.color,
         borderRadius: 1,
         mb: 1,
         position: 'relative',
         bgcolor: alpha(darken(column.color, 0.2), 0.15),
         cursor: 'move',
+        '&:hover .todo-actions': {
+          visibility: 'visible',
+        },
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Typography variant="body1">{item.title}</Typography>
+        <Stack direction="row" alignItems="center">
           {item.description && (
             <Tooltip title="Show description">
               <IconButton size="small" onClick={() => setShowDescription(true)}>
-                <InfoIcon fontSize="inherit" />
+                <DescriptionIcon fontSize="inherit" />
               </IconButton>
             </Tooltip>
           )}
+
+          <Typography>{item.title}</Typography>
         </Stack>
         <Stack
           direction="row"
-          spacing={1}
           sx={{ visibility: 'hidden', '& button': { cursor: 'pointer' } }}
           className="todo-actions"
         >
@@ -79,7 +80,7 @@ export function TodoItemCard({
           <IconButton size="small" onClick={() => onComplete(item.id)}>
             <CheckIcon fontSize="inherit" />
           </IconButton>
-          <IconButton size="small" onClick={() => onDelete(item.id)}>
+          <IconButton size="small" onClick={() => onDelete(item.id)} color="error">
             <DeleteIcon fontSize="inherit" />
           </IconButton>
         </Stack>

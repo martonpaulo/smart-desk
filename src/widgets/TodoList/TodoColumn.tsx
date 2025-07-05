@@ -2,10 +2,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PaletteIcon from '@mui/icons-material/Palette';
 import { alpha, Box, IconButton, Stack, Typography } from '@mui/material';
-import { useState } from 'react';
 
 import { AddItemInput } from '@/widgets/TodoList/AddItemInput';
-
 import { TodoItemCard } from '@/widgets/TodoList/TodoItemCard';
 import { Column, TodoItem } from '@/widgets/TodoList/types';
 
@@ -52,7 +50,7 @@ export function TodoColumn({
       onDragStart={e => onColumnDragStart && onColumnDragStart(e, column.id)}
       onDragOver={e => {
         e.preventDefault();
-        onColumnDragOver && onColumnDragOver(e, column.id);
+        if (onColumnDragOver) onColumnDragOver(e, column.id);
       }}
       onDragEnd={onColumnDragEnd}
       onDrop={e => onDrop(e, column.id)}

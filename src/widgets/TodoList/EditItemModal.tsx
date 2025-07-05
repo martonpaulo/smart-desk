@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
+
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
+  Button,
   Chip,
   Dialog,
   DialogActions,
@@ -9,9 +12,7 @@ import {
   IconButton,
   Stack,
   TextField,
-  Button,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 
 import { TodoItem } from '@/widgets/TodoList/types';
 
@@ -60,7 +61,7 @@ export function EditItemModal({ item, open, onSave, onClose }: EditItemModalProp
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} maxWidth="tablet" fullWidth>
       <DialogTitle>Edit Item</DialogTitle>
       <IconButton
         aria-label="close"
@@ -71,7 +72,12 @@ export function EditItemModal({ item, open, onSave, onClose }: EditItemModalProp
       </IconButton>
       <DialogContent dividers>
         <Stack spacing={2} mt={1}>
-          <TextField label="Title" value={title} onChange={e => setTitle(e.target.value)} fullWidth />
+          <TextField
+            label="Title"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            fullWidth
+          />
           <TextField
             label="Description"
             multiline
