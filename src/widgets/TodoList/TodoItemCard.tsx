@@ -90,7 +90,7 @@ export function TodoItemCard({
         }}
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Stack direction="row" spacing={0.5} flex={1}>
+          <Stack direction="row" spacing={1} flex={1}>
             {item.description && (
               <Tooltip title="Has description" enterTouchDelay={0}>
                 <DescriptionOutlinedIcon
@@ -201,7 +201,12 @@ export function TodoItemCard({
         </Stack>
 
         {item.tags.length > 0 && (
-          <Stack direction="row" spacing={0.5} pt={1} flexWrap="wrap">
+          <Box
+            display="flex"
+            flexWrap="wrap"
+            gap={0.5} // ou use spacing * 8 se preferir manter escala do theme
+            pt={1}
+          >
             {item.tags.map(tag => (
               <Chip
                 label={tag}
@@ -211,7 +216,6 @@ export function TodoItemCard({
                 aria-label={`Tag ${tag}`}
                 sx={{
                   bgcolor: alpha(column.color, 0.65),
-                  py: 1.25,
                   boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,
                   '&.Mui-disabled': {
                     color: theme => theme.palette.getContrastText(alpha(column.color, 0.65)),
@@ -220,11 +224,21 @@ export function TodoItemCard({
                 }}
               />
             ))}
-          </Stack>
+          </Box>
         )}
       </Box>
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+      <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            onDelete(item.id);
+            setConfirmOpen(false);
+          }
+        }}
+      >
         <DialogTitle>Delete item</DialogTitle>
         <DialogContent>
           Are you sure you want to delete <b>{item.title}</b>?
