@@ -7,8 +7,8 @@ import { Box, Button, Stack } from '@mui/material';
 import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
 import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
+import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
 import { EditItemModal } from '@/widgets/TodoList/EditItemModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import { BoardState, Column, TodoItem } from '@/widgets/TodoList/types';
@@ -102,20 +102,6 @@ export function TodoList({ events }: TodoListProps) {
 
   const handleDeleteItem = (id: string) => {
     setBoard(prev => ({ ...prev, items: prev.items.filter(t => t.id !== id) }));
-  };
-
-  const handleCompleteItem = (id: string) => {
-    setBoard(prev => {
-      const doneColumn =
-        prev.columns.find(c => c.title.toLowerCase() === 'done') ||
-        prev.columns.find(c => c.id === 'done');
-      const columnId = doneColumn ? doneColumn.id : 'done';
-      const columns = doneColumn
-        ? prev.columns
-        : [...prev.columns, { id: 'done', title: 'Done', color: '#2e7d32' }];
-      const items = prev.items.map(t => (t.id === id ? { ...t, columnId } : t));
-      return { columns, items };
-    });
   };
 
   const handleSaveColumn = (title: string, color: string) => {
@@ -232,7 +218,6 @@ export function TodoList({ events }: TodoListProps) {
         onEditItem={handleEditItem}
         onRenameItem={handleRenameItem}
         onDeleteItem={handleDeleteItem}
-        onCompleteItem={handleCompleteItem}
         onAddItem={handleAddItem}
         onDragStart={handleDragStart}
         onDragOverItem={handleDragOverItem}
@@ -245,7 +230,6 @@ export function TodoList({ events }: TodoListProps) {
         hoverItemId={hoverItemId}
         itemDropColumnId={itemDropColumnId}
         draggingColumnId={draggingColumnId}
-        hoverColumnId={hoverColumnId}
       />
     );
   };

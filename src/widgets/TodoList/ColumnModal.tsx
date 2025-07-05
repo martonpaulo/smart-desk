@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
+import { Circle as StatusIcon } from '@mui/icons-material';
 import {
+  alpha,
   Button,
   Dialog,
   DialogActions,
@@ -20,6 +22,15 @@ export const COLUMN_COLORS = [
   { name: 'Orange', value: '#ed6c02' },
   { name: 'Red', value: '#d32f2f' },
   { name: 'Purple', value: '#9c27b0' },
+  { name: 'Gray', value: '#616161' },
+  { name: 'Black', value: '#000000' },
+  { name: 'Pink', value: '#e91e63' },
+  { name: 'Cyan', value: '#00bcd4' },
+  { name: 'Teal', value: '#00796b' },
+  { name: 'Lime', value: '#cddc39' },
+  { name: 'Amber', value: '#ffc107' },
+  { name: 'Brown', value: '#795548' },
+  { name: 'Indigo', value: '#3f51b5' },
 ];
 
 interface ColumnModalProps {
@@ -58,7 +69,8 @@ export function ColumnModal({ open, column, onSave, onDelete, onClose }: ColumnM
           <TextField label="Title" value={title} onChange={e => setTitle(e.target.value)} />
           <TextField select label="Color" value={color} onChange={e => setColor(e.target.value)}>
             {COLUMN_COLORS.map(opt => (
-              <MenuItem key={opt.value} value={opt.value} style={{ color: opt.value }}>
+              <MenuItem key={opt.value} value={opt.value}>
+                <StatusIcon sx={{ color: alpha(opt.value, 0.75) }} />
                 {opt.name}
               </MenuItem>
             ))}

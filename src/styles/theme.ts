@@ -22,6 +22,9 @@ export const theme = createTheme({
       fontSize: '1rem',
       fontWeight: 300,
     },
+    body2: {
+      wordSpacing: '-0.1rem',
+    },
   },
   components: {
     MuiChip: {

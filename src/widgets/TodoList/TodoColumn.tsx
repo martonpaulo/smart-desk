@@ -1,6 +1,7 @@
-import AddIcon from '@mui/icons-material/Add';
-import { alpha, Box, Chip, IconButton, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
+
+import AddIcon from '@mui/icons-material/Add';
+import { alpha, Box, Chip, darken, IconButton, Stack, Typography } from '@mui/material';
 
 import { AddItemInput } from '@/widgets/TodoList/AddItemInput';
 import { TodoItemCard } from '@/widgets/TodoList/TodoItemCard';
@@ -15,7 +16,6 @@ interface TodoColumnProps {
   onEditItem: (id: string) => void;
   onRenameItem: (id: string, title: string) => void;
   onDeleteItem: (id: string) => void;
-  onCompleteItem: (id: string) => void;
   onAddItem: (columnId: string, title: string) => string;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   onDragOverItem: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
@@ -28,7 +28,6 @@ interface TodoColumnProps {
   hoverItemId?: string | null;
   itemDropColumnId?: string | null;
   draggingColumnId?: string | null;
-  hoverColumnId?: string | null;
   hideHeader?: boolean;
 }
 
@@ -41,7 +40,6 @@ export function TodoColumn({
   onEditItem,
   onRenameItem,
   onDeleteItem,
-  onCompleteItem,
   onAddItem,
   onDragStart,
   onDragOverItem,
@@ -54,7 +52,6 @@ export function TodoColumn({
   hoverItemId,
   itemDropColumnId,
   draggingColumnId,
-  hoverColumnId,
   hideHeader,
 }: TodoColumnProps) {
   const [creatingId, setCreatingId] = useState<string | null>(null);
@@ -87,7 +84,11 @@ export function TodoColumn({
         p: 1.5,
         bgcolor: alpha(column.color, 0.1),
         borderRadius: 1,
+        boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,
         position: 'relative',
+        '&:hover .add-column-btn': {
+          visibility: 'visible',
+        },
       }}
     >
       {!hideHeader && (
@@ -112,7 +113,6 @@ export function TodoColumn({
             onOpen={onEditItem}
             onRename={onRenameItem}
             onDelete={onDeleteItem}
-            onComplete={onCompleteItem}
             onDragStart={onDragStart}
             onDragOver={onDragOverItem}
             startEditing={creatingId === item.id}

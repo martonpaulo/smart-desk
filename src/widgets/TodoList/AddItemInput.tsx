@@ -15,5 +15,21 @@ export function AddItemInput({ columnId, onAdd, onStartEdit }: AddItemInputProps
     e.target.value = '';
   };
 
-  return <TextField fullWidth size="small" placeholder="new item" onChange={handleChange} />;
+  return (
+    <TextField
+      fullWidth
+      size="small"
+      placeholder="new item"
+      onChange={handleChange}
+      slotProps={{
+        input: {
+          sx: theme => ({
+            fontSize: theme.typography.body2.fontSize,
+            lineHeight: theme.typography.body2.lineHeight,
+            fontWeight: theme.typography.body2.fontWeight,
+          }),
+        },
+      }}
+    />
+  );
 }
