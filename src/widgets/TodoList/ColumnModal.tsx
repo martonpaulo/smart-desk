@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Circle as StatusIcon } from '@mui/icons-material';
+import { Circle as StatusIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import {
   alpha,
-  Button,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
   MenuItem,
   Stack,
   TextField,
@@ -15,7 +16,6 @@ import {
 
 import { Column } from '@/widgets/TodoList/types';
 
-// Simple color options for users. Add more if needed.
 export const COLUMN_COLORS = [
   { name: 'Blue', value: '#1976d2' },
   { name: 'Green', value: '#2e7d32' },
@@ -44,50 +44,130 @@ interface ColumnModalProps {
 export function ColumnModal({ open, column, onSave, onDelete, onClose }: ColumnModalProps) {
   const [title, setTitle] = useState('');
   const [color, setColor] = useState(COLUMN_COLORS[0].value);
+  const [modalTitle, setModalTitle] = useState('');
+
+  // Ref for title input
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (!open) return;
     if (column) {
       setTitle(column.title);
       setColor(column.color);
+      setModalTitle('Edit Column');
     } else {
       setTitle('');
       setColor(COLUMN_COLORS[0].value);
+      setModalTitle('Add Column');
     }
-  }, [column]);
 
-  const handleConfirm = () => {
-    const trimmed = title.trim();
-    if (!trimmed) return;
-    onSave(trimmed, color);
+    // Delay focus to next tick to ensure element is mounted
+    setTimeout(() => {
+      if (titleInputRef.current) {
+        const input = titleInputRef.current;
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length); // move cursor to end
+      }
+    }, 0);
+  }, [open, column]);
+
+  const hasError = title.length > 16;
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+  };
+
+  const handleCloseOnly = () => {
+    onClose();
+  };
+
+  const handleSaveAndClose = () => {
+    if (title.trim() === '' || hasError) {
+      onClose();
+      return;
+    }
+    onSave(title.trim(), color);
+    onClose();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveAndClose();
+    }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="tablet" fullWidth>
-      <DialogTitle>{column ? 'Edit Column' : 'Add Column'}</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={(_, reason) => {
+        if (reason === 'escapeKeyDown') {
+          handleCloseOnly();
+        } else {
+          handleSaveAndClose();
+        }
+      }}
+      maxWidth="mobileSm"
+      fullWidth
+    >
+      <DialogTitle sx={{ position: 'relative' }}>
+        {modalTitle}
+        {column && onDelete && (
+          <IconButton
+            aria-label="delete column"
+            onClick={onDelete}
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        )}
+      </DialogTitle>
+
       <DialogContent>
-        <Stack spacing={2} mt={1}>
-          <TextField label="Title" value={title} onChange={e => setTitle(e.target.value)} />
-          <TextField select label="Color" value={color} onChange={e => setColor(e.target.value)}>
+        <Stack spacing={2} pt={1}>
+          <TextField
+            inputRef={titleInputRef}
+            label="Title"
+            value={title}
+            onChange={handleTitleChange}
+            onKeyDown={handleKeyDown}
+            error={hasError}
+            helperText={hasError ? 'Max 16 characters' : ''}
+            fullWidth
+          />
+
+          <TextField
+            select
+            label="Color"
+            value={color}
+            onChange={e => setColor(e.target.value)}
+            fullWidth
+            slotProps={{
+              select: {
+                renderValue: (value: unknown) => {
+                  const selected = COLUMN_COLORS.find(c => c.value === value);
+                  if (!selected) return null;
+                  return (
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <StatusIcon sx={{ color: alpha(selected.value, 0.75) }} />
+                      <span>{selected.name}</span>
+                    </Stack>
+                  );
+                },
+              },
+            }}
+          >
             {COLUMN_COLORS.map(opt => (
               <MenuItem key={opt.value} value={opt.value}>
-                <StatusIcon sx={{ color: alpha(opt.value, 0.75) }} />
-                {opt.name}
+                <ListItemIcon>
+                  <StatusIcon sx={{ color: alpha(opt.value, 0.75) }} />
+                </ListItemIcon>
+                <ListItemText primary={opt.name} />
               </MenuItem>
             ))}
           </TextField>
         </Stack>
       </DialogContent>
-      <DialogActions>
-        {column && onDelete && (
-          <Button color="error" onClick={onDelete} disabled={column.id === 'done'}>
-            Delete
-          </Button>
-        )}
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleConfirm}>
-          Confirm
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

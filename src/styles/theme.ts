@@ -3,9 +3,12 @@ import { createTheme } from '@mui/material';
 export const theme = createTheme({
   breakpoints: {
     values: {
-      mobile: 0,
-      tablet: 767,
-      desktop: 1200,
+      mobileSm: 300,
+      mobileLg: 600,
+      tabletSm: 750,
+      tabletLg: 900,
+      laptopSm: 1050,
+      laptopLg: 1200,
     },
   },
   typography: {

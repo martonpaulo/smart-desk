@@ -7,8 +7,11 @@ declare module '@mui/material/styles' {
     md: false;
     lg: false;
     xl: false;
-    mobile: true;
-    tablet: true;
-    desktop: true;
+    mobileSm: true;
+    mobileLg: true;
+    tabletSm: true;
+    tabletLg: true;
+    laptopSm: true;
+    laptopLg: true;
   }
 }

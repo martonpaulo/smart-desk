@@ -1,29 +1,28 @@
 import { useEffect, useState } from 'react';
 
-import CloseIcon from '@mui/icons-material/Close';
 import {
+  alpha,
   Box,
-  Button,
   Chip,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
-  IconButton,
   Stack,
   TextField,
 } from '@mui/material';
 
-import { TodoItem } from '@/widgets/TodoList/types';
+import { theme } from '@/styles/theme';
+import { Column, TodoItem } from '@/widgets/TodoList/types';
 
 interface EditItemModalProps {
   item: TodoItem | null;
   open: boolean;
   onSave: (item: TodoItem) => void;
   onClose: () => void;
+  column: Column | null;
 }
 
-export function EditItemModal({ item, open, onSave, onClose }: EditItemModalProps) {
+export function EditItemModal({ item, open, onSave, onClose, column }: EditItemModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -47,66 +46,111 @@ export function EditItemModal({ item, open, onSave, onClose }: EditItemModalProp
       }
       setTagInput('');
     }
+
+    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+
+    if (e.key === 'Enter' && isCtrlOrCmd) {
+      e.preventDefault();
+      handleSaveAndClose();
+    }
   };
 
   const handleTagDelete = (tag: string) => {
     setTags(prev => prev.filter(t => t !== tag));
   };
 
-  const handleSave = () => {
+  const handleCloseOnly = () => {
+    onClose();
+  };
+
+  const handleSaveAndClose = () => {
     if (!item) return;
     const trimmedTitle = title.trim();
     if (!trimmedTitle) return;
     onSave({ ...item, title: trimmedTitle, description: description.trim() || undefined, tags });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSaveAndClose();
+    }
+  };
+
+  const tagColor = column ? alpha(column.color, 0.65) : undefined;
+  const tagTextColor = tagColor ? theme.palette.getContrastText(tagColor) : undefined;
+
+  const handleKeyDownArea = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+
+    if (e.key === 'Enter' && isCtrlOrCmd) {
+      e.preventDefault();
+      handleSaveAndClose();
+    }
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="tablet" fullWidth>
+    <Dialog
+      open={open}
+      maxWidth="mobileLg"
+      fullWidth
+      onClose={(_, reason) => {
+        if (reason === 'escapeKeyDown') {
+          handleCloseOnly();
+        } else {
+          handleSaveAndClose();
+        }
+      }}
+    >
       <DialogTitle>Edit Item</DialogTitle>
-      <IconButton
-        aria-label="close"
-        onClick={onClose}
-        sx={{ position: 'absolute', right: 8, top: 8 }}
-      >
-        <CloseIcon />
-      </IconButton>
-      <DialogContent dividers>
+      <DialogContent>
         <Stack spacing={2} mt={1}>
           <TextField
             label="Title"
             value={title}
             onChange={e => setTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
             fullWidth
           />
           <TextField
             label="Description"
             multiline
-            minRows={2}
+            minRows={6}
+            onKeyDown={handleKeyDownArea}
             value={description}
             onChange={e => setDescription(e.target.value)}
             fullWidth
           />
-          <Box>
+          <Stack direction="row" spacing={2}>
             <TextField
               label="Add tag"
               value={tagInput}
               onChange={e => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
+              sx={{ minWidth: '200px' }}
             />
-            <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
+            <Box display="flex" flexWrap="wrap" gap={1}>
               {tags.map(tag => (
-                <Chip key={tag} label={tag} onDelete={() => handleTagDelete(tag)} />
+                <Chip
+                  key={tag}
+                  label={tag}
+                  onDelete={() => handleTagDelete(tag)}
+                  sx={{
+                    bgcolor: tagColor ? `${tagColor}` : undefined,
+                    color: tagTextColor,
+                    '& .MuiChip-deleteIcon': {
+                      color: tagTextColor ? `${tagTextColor} !important` : undefined,
+                    },
+                    '&:hover': {
+                      bgcolor: tagColor ? alpha(tagColor, 0.8) : undefined,
+                    },
+                  }}
+                />
               ))}
-            </Stack>
-          </Box>
+            </Box>
+          </Stack>
         </Stack>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSave}>
-          Save
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

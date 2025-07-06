@@ -97,7 +97,16 @@ export function TodoColumn({
             <Typography variant="h6" sx={{ color: column.color }}>
               {column.title}
             </Typography>
-            <Chip label={items.length} size="small" />
+            <Chip
+              label={items.length}
+              size="small"
+              disabled
+              sx={{
+                '&.Mui-disabled': {
+                  opacity: 1,
+                },
+              }}
+            />
           </Stack>
         </Box>
       )}
@@ -131,7 +140,17 @@ export function TodoColumn({
         size="small"
         className="add-column-btn"
         onClick={() => onAddColumn(column.id)}
-        sx={{ position: 'absolute', top: 2, right: 2, visibility: 'hidden' }}
+        sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          transform: 'translate(50%, -50%)',
+          visibility: 'hidden',
+          backgroundColor: theme => alpha(theme.palette.grey[500], 0.15), // neutral gray with opacity
+          '&:hover': {
+            backgroundColor: theme => alpha(theme.palette.grey[500], 0.25),
+          },
+        }}
       >
         <AddIcon fontSize="inherit" />
       </IconButton>

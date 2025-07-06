@@ -6,6 +6,7 @@ export const LAST_POPULATE_KEY = 'todo-last-populate';
 
 export const DEFAULT_COLUMNS: Column[] = [
   { id: 'todo', title: 'Todo', color: '#1976d2' },
+  { id: 'doing', title: 'Doing', color: '#f57c00' },
   { id: 'done', title: 'Done', color: '#2e7d32' },
 ];
 

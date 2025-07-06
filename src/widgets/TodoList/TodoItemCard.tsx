@@ -70,7 +70,6 @@ export function TodoItemCard({
         role="button"
         aria-label={`Open task ${item.title}`}
         draggable
-        aria-grabbed={editing ? 'false' : 'true'}
         onDragStart={e => {
           e.stopPropagation();
           onDragStart(e, item.id);
@@ -83,7 +82,7 @@ export function TodoItemCard({
           mb: 1,
           position: 'relative',
           bgcolor: alpha(darken(column.color, 0.2), 0.15),
-          cursor: editing ? 'text' : 'grab',
+          cursor: editing ? 'text' : 'pointer',
           '&:hover .todo-actions': { visibility: 'visible' },
           '&:active': { cursor: 'grabbing' },
           boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,
@@ -117,7 +116,6 @@ export function TodoItemCard({
                     finishEditing();
                   }
                 }}
-                inputProps={{ 'aria-label': `Edit title for ${item.title}` }}
                 slotProps={{
                   input: {
                     sx: theme => ({
@@ -125,7 +123,6 @@ export function TodoItemCard({
                       fontSize: theme.typography.body2.fontSize,
                       lineHeight: theme.typography.body2.lineHeight,
                       fontWeight: theme.typography.body2.fontWeight,
-                      '& textarea': { wordSpacing: theme.typography.body2.wordSpacing },
                     }),
                   },
                 }}
@@ -201,19 +198,13 @@ export function TodoItemCard({
         </Stack>
 
         {item.tags.length > 0 && (
-          <Box
-            display="flex"
-            flexWrap="wrap"
-            gap={0.5} // ou use spacing * 8 se preferir manter escala do theme
-            pt={1}
-          >
+          <Box display="flex" flexWrap="wrap" gap={0.5} pt={1}>
             {item.tags.map(tag => (
               <Chip
                 label={tag}
                 key={tag}
                 size="small"
                 disabled
-                aria-label={`Tag ${tag}`}
                 sx={{
                   bgcolor: alpha(column.color, 0.65),
                   boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,

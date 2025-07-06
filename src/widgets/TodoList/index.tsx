@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import ListIcon from '@mui/icons-material/List';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
@@ -61,7 +61,90 @@ export function TodoList({ events }: TodoListProps) {
     setStoredFilters(LAST_POPULATE_KEY, todayKey);
   }, [events]);
 
-  // Persist board whenever it changes
+  // history refs
+  const historyRef = useRef<BoardState[]>([board]);
+  const historyIndexRef = useRef(0);
+  const isTimeTravelingRef = useRef(false);
+
+  // push new states into history (skip when undo/redo)
+  useEffect(() => {
+    if (isTimeTravelingRef.current) {
+      isTimeTravelingRef.current = false;
+      return;
+    }
+    const sliced = historyRef.current.slice(0, historyIndexRef.current + 1);
+    sliced.push(board);
+    historyRef.current = sliced;
+    historyIndexRef.current = sliced.length - 1;
+  }, [board]);
+
+  // undo callback
+  const undo = useCallback(() => {
+    if (historyIndexRef.current <= 0) return;
+    historyIndexRef.current--;
+    isTimeTravelingRef.current = true;
+    setBoard(historyRef.current[historyIndexRef.current]);
+  }, []);
+
+  // redo callback
+  const redo = useCallback(() => {
+    if (historyIndexRef.current >= historyRef.current.length - 1) return;
+    historyIndexRef.current++;
+    isTimeTravelingRef.current = true;
+    setBoard(historyRef.current[historyIndexRef.current]);
+  }, []);
+
+  // keyboard listeners for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().includes('MAC');
+      const ctrl = isMac ? e.metaKey : e.ctrlKey;
+      if (!ctrl) return;
+
+      // undo: Ctrl+Z or Cmd+Z
+      if (e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+      // redo: Ctrl+Y or Cmd+Y
+      if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+        e.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo]);
+
+  // populate from full-day events once per day
+  useEffect(() => {
+    if (!events?.length) return;
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const last = getStoredFilters<string>(LAST_POPULATE_KEY);
+    if (last === todayKey) return;
+
+    const fullDay = filterFullDayEventsForTodayInUTC(events);
+    if (!fullDay.length) return;
+
+    setBoard(prev => {
+      const additions = fullDay
+        .filter(ev => !prev.items.some(i => i.id === ev.id))
+        .map(ev => ({
+          id: ev.id,
+          title: ev.title,
+          description: undefined,
+          tags: [],
+          columnId: 'todo',
+        }));
+      if (!additions.length) return prev;
+      const updated = { ...prev, items: [...prev.items, ...additions] };
+      saveBoard(updated);
+      return updated;
+    });
+    setStoredFilters(LAST_POPULATE_KEY, todayKey);
+  }, [events]);
+
+  // persist on every change
   useEffect(() => {
     saveBoard(board);
   }, [board]);
@@ -127,11 +210,7 @@ export function TodoList({ events }: TodoListProps) {
   };
 
   const handleDeleteColumn = () => {
-    if (!columnModal?.column || columnModal.column.id === 'done') {
-      setColumnModal(null);
-      return;
-    }
-    if (!window.confirm('Delete column and all its items?')) {
+    if (!columnModal?.column) {
       setColumnModal(null);
       return;
     }
@@ -256,6 +335,7 @@ export function TodoList({ events }: TodoListProps) {
         {board.columns.map(renderColumn)}
       </Stack>
       <EditItemModal
+        column={board.columns.find(c => c.id === editingItem?.columnId) || null}
         open={Boolean(editingItem)}
         item={editingItem}
         onSave={handleSaveItem}
