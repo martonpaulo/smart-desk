@@ -3,61 +3,61 @@ import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { alpha, Box, Chip, darken, IconButton, Stack, Typography } from '@mui/material';
 
-import { AddItemInput } from '@/widgets/TodoList/AddItemInput';
-import { TodoItemCard } from '@/widgets/TodoList/TodoItemCard';
-import { Column, TodoItem } from '@/widgets/TodoList/types';
+import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
+import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
+import { Column, TodoTask } from '@/widgets/TodoList/types';
 
 interface TodoColumnProps {
   column: Column;
-  items: TodoItem[];
+  tasks: TodoTask[];
   view: 'list' | 'board';
   onOpenColumn: (column: Column) => void;
   onAddColumn: (afterId: string) => void;
-  onEditItem: (id: string) => void;
-  onRenameItem: (id: string, title: string) => void;
-  onDeleteItem: (id: string) => void;
-  onAddItem: (columnId: string, title: string) => string;
+  onEditTask: (id: string) => void;
+  onRenameTask: (id: string, title: string) => void;
+  onDeleteTask: (id: string) => void;
+  onAddTask: (columnId: string, title: string) => string;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
-  onDragOverItem: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
-  onItemColumnDragOver: (columnId: string) => void;
+  onDragOverTask: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  onTaskColumnDragOver: (columnId: string) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, columnId: string) => void;
   onColumnDragStart?: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   onColumnDragOver?: (e: React.DragEvent<HTMLDivElement>, overId: string) => void;
   onColumnDragEnd?: () => void;
-  draggingItemId?: string | null;
-  hoverItemId?: string | null;
-  itemDropColumnId?: string | null;
+  draggingTaskId?: string | null;
+  hoverTaskId?: string | null;
+  taskDropColumnId?: string | null;
   draggingColumnId?: string | null;
   hideHeader?: boolean;
 }
 
 export function TodoColumn({
   column,
-  items,
+  tasks,
   view,
   onOpenColumn,
   onAddColumn,
-  onEditItem,
-  onRenameItem,
-  onDeleteItem,
-  onAddItem,
+  onEditTask,
+  onRenameTask,
+  onDeleteTask,
+  onAddTask,
   onDragStart,
-  onDragOverItem,
-  onItemColumnDragOver,
+  onDragOverTask,
+  onTaskColumnDragOver,
   onDrop,
   onColumnDragStart,
   onColumnDragOver,
   onColumnDragEnd,
-  draggingItemId,
-  hoverItemId,
-  itemDropColumnId,
+  draggingTaskId,
+  hoverTaskId,
+  taskDropColumnId,
   draggingColumnId,
   hideHeader,
 }: TodoColumnProps) {
   const [creatingId, setCreatingId] = useState<string | null>(null);
 
-  const handleAddItem = (colId: string, title: string) => {
-    const id = onAddItem(colId, title);
+  const handleAddTask = (colId: string, title: string) => {
+    const id = onAddTask(colId, title);
     setCreatingId(id);
     return id;
   };
@@ -73,8 +73,8 @@ export function TodoColumn({
         if (draggingColumnId) {
           onColumnDragOver?.(e, column.id);
         }
-        if (draggingItemId) {
-          onItemColumnDragOver(column.id);
+        if (draggingTaskId) {
+          onTaskColumnDragOver(column.id);
         }
       }}
       onDragEnd={onColumnDragEnd}
@@ -97,44 +97,47 @@ export function TodoColumn({
             <Typography variant="h6" sx={{ color: column.color }}>
               {column.title}
             </Typography>
-            <Chip
-              label={items.length}
-              size="small"
-              disabled
-              sx={{
-                '&.Mui-disabled': {
-                  opacity: 1,
-                },
-              }}
-            />
+            {tasks && tasks.length > 0 && (
+              <Chip
+                label={tasks?.length}
+                size="small"
+                disabled
+                sx={{
+                  '&.Mui-disabled': {
+                    opacity: 1,
+                  },
+                }}
+              />
+            )}
           </Stack>
         </Box>
       )}
 
-      {items.map(item => (
-        <div key={item.id}>
-          {draggingItemId && hoverItemId === item.id && (
-            <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
-          )}
-          <TodoItemCard
-            item={item}
-            column={column}
-            onOpen={onEditItem}
-            onRename={onRenameItem}
-            onDelete={onDeleteItem}
-            onDragStart={onDragStart}
-            onDragOver={onDragOverItem}
-            startEditing={creatingId === item.id}
-            onEditingEnd={finishCreate}
-          />
-        </div>
-      ))}
+      {tasks &&
+        tasks.map(task => (
+          <div key={task.id}>
+            {draggingTaskId && hoverTaskId === task.id && (
+              <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
+            )}
+            <TodoTaskCard
+              task={task}
+              column={column}
+              onOpen={onEditTask}
+              onRename={onRenameTask}
+              onDelete={onDeleteTask}
+              onDragStart={onDragStart}
+              onDragOver={onDragOverTask}
+              startEditing={creatingId === task.id}
+              onEditingEnd={finishCreate}
+            />
+          </div>
+        ))}
 
-      {draggingItemId && !hoverItemId && itemDropColumnId === column.id && (
+      {draggingTaskId && !hoverTaskId && taskDropColumnId === column.id && (
         <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
       )}
 
-      {!creatingId && <AddItemInput columnId={column.id} onAdd={handleAddItem} />}
+      {!creatingId && <AddTaskInput columnId={column.id} onAdd={handleAddTask} />}
 
       <IconButton
         size="small"

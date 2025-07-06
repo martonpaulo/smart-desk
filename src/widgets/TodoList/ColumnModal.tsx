@@ -12,6 +12,7 @@ import {
   MenuItem,
   Stack,
   TextField,
+  Tooltip,
 } from '@mui/material';
 
 import { Column } from '@/widgets/TodoList/types';
@@ -113,13 +114,15 @@ export function ColumnModal({ open, column, onSave, onDelete, onClose }: ColumnM
       <DialogTitle sx={{ position: 'relative' }}>
         {modalTitle}
         {column && onDelete && (
-          <IconButton
-            aria-label="delete column"
-            onClick={onDelete}
-            sx={{ position: 'absolute', top: 8, right: 8 }}
-          >
-            <DeleteIcon />
-          </IconButton>
+          <Tooltip title="Delete column" enterTouchDelay={0}>
+            <IconButton
+              aria-label="delete column"
+              onClick={onDelete}
+              sx={{ position: 'absolute', top: 8, right: 8 }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
         )}
       </DialogTitle>
 

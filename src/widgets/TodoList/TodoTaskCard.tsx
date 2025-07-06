@@ -20,10 +20,10 @@ import {
 import { alpha, darken } from '@mui/material/styles';
 
 import { theme } from '@/styles/theme';
-import { Column, TodoItem } from '@/widgets/TodoList/types';
+import { Column, TodoTask } from '@/widgets/TodoList/types';
 
-interface TodoItemCardProps {
-  item: TodoItem;
+interface TodoTaskCardProps {
+  task: TodoTask;
   column: Column;
   onOpen: (id: string) => void;
   onRename: (id: string, title: string) => void;
@@ -34,8 +34,8 @@ interface TodoItemCardProps {
   onEditingEnd?: () => void;
 }
 
-export function TodoItemCard({
-  item,
+export function TodoTaskCard({
+  task,
   column,
   onOpen,
   onRename,
@@ -44,21 +44,21 @@ export function TodoItemCard({
   onDragOver,
   startEditing = false,
   onEditingEnd,
-}: TodoItemCardProps) {
+}: TodoTaskCardProps) {
   const [editing, setEditing] = useState(Boolean(startEditing));
-  const [title, setTitle] = useState(item.title);
+  const [title, setTitle] = useState(task.title);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (startEditing) {
       setEditing(true);
-      setTitle(item.title);
+      setTitle(task.title);
     }
-  }, [startEditing, item.title]);
+  }, [startEditing, task.title]);
 
   const finishEditing = () => {
     const trimmed = title.trim();
-    if (trimmed) onRename(item.id, trimmed);
+    if (trimmed) onRename(task.id, trimmed);
     setEditing(false);
     onEditingEnd?.();
   };
@@ -66,16 +66,16 @@ export function TodoItemCard({
   return (
     <>
       <Box
-        data-todo-id={item.id}
+        data-todo-id={task.id}
         role="button"
-        aria-label={`Open task ${item.title}`}
+        aria-label={`Open task ${task.title}`}
         draggable
         onDragStart={e => {
           e.stopPropagation();
-          onDragStart(e, item.id);
+          onDragStart(e, task.id);
         }}
-        onDragOver={e => onDragOver(e, item.id)}
-        onClick={() => !editing && onOpen(item.id)}
+        onDragOver={e => onDragOver(e, task.id)}
+        onClick={() => !editing && onOpen(task.id)}
         sx={{
           p: 1.5,
           borderRadius: 1,
@@ -90,7 +90,7 @@ export function TodoItemCard({
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Stack direction="row" spacing={1} flex={1}>
-            {item.description && (
+            {task.description && (
               <Tooltip title="Has description" enterTouchDelay={0}>
                 <DescriptionOutlinedIcon
                   aria-hidden="true"
@@ -130,12 +130,12 @@ export function TodoItemCard({
             ) : (
               <Typography
                 role="button"
-                aria-label={`View details of ${item.title}`}
-                onClick={() => onOpen(item.id)}
+                aria-label={`View details of ${task.title}`}
+                onClick={() => onOpen(task.id)}
                 variant="body2"
                 sx={{ maxWidth: '100%', overflowWrap: 'anywhere', whiteSpace: 'normal' }}
               >
-                {item.title}
+                {task.title}
               </Typography>
             )}
           </Stack>
@@ -158,10 +158,10 @@ export function TodoItemCard({
                 <Tooltip title="Rename task" enterTouchDelay={0}>
                   <IconButton
                     size="small"
-                    aria-label={`Rename task ${item.title}`}
+                    aria-label={`Rename task ${task.title}`}
                     onClick={e => {
                       e.stopPropagation();
-                      setTitle(item.title);
+                      setTitle(task.title);
                       setEditing(true);
                     }}
                     sx={{
@@ -177,7 +177,7 @@ export function TodoItemCard({
                 <Tooltip title="Delete task" enterTouchDelay={0}>
                   <IconButton
                     size="small"
-                    aria-label={`Delete task ${item.title}`}
+                    aria-label={`Delete task ${task.title}`}
                     onClick={e => {
                       e.stopPropagation();
                       setConfirmOpen(true);
@@ -197,9 +197,9 @@ export function TodoItemCard({
           )}
         </Stack>
 
-        {item.tags.length > 0 && (
+        {task.tags.length > 0 && (
           <Box display="flex" flexWrap="wrap" gap={0.5} pt={1}>
-            {item.tags.map(tag => (
+            {task.tags.map(tag => (
               <Chip
                 label={tag}
                 key={tag}
@@ -225,21 +225,21 @@ export function TodoItemCard({
         onKeyDown={e => {
           if (e.key === 'Enter') {
             e.preventDefault();
-            onDelete(item.id);
+            onDelete(task.id);
             setConfirmOpen(false);
           }
         }}
       >
-        <DialogTitle>Delete item</DialogTitle>
+        <DialogTitle>Delete task</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <b>{item.title}</b>?
+          Are you sure you want to delete <b>{task.title}</b>?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
           <Button
             color="error"
             onClick={() => {
-              onDelete(item.id);
+              onDelete(task.id);
               setConfirmOpen(false);
             }}
           >

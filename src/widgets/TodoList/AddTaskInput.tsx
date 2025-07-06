@@ -1,12 +1,12 @@
 import TextField from '@mui/material/TextField';
 
-interface AddItemInputProps {
+interface AddTaskInputProps {
   columnId: string;
   onAdd: (columnId: string, title: string) => string;
   onStartEdit?: (id: string) => void;
 }
 
-export function AddItemInput({ columnId, onAdd, onStartEdit }: AddItemInputProps) {
+export function AddTaskInput({ columnId, onAdd, onStartEdit }: AddTaskInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (!value) return;
@@ -19,7 +19,7 @@ export function AddItemInput({ columnId, onAdd, onStartEdit }: AddItemInputProps
     <TextField
       fullWidth
       size="small"
-      placeholder="new item"
+      placeholder="+ new task"
       onChange={handleChange}
       slotProps={{
         input: {

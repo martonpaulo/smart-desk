@@ -4,7 +4,7 @@ export interface Column {
   color: string;
 }
 
-export interface TodoItem {
+export interface TodoTask {
   id: string;
   title: string;
   description?: string;
@@ -14,5 +14,5 @@ export interface TodoItem {
 
 export interface BoardState {
   columns: Column[];
-  items: TodoItem[];
+  tasks: TodoTask[];
 }

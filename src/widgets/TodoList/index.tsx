@@ -9,9 +9,9 @@ import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
-import { EditItemModal } from '@/widgets/TodoList/EditItemModal';
+import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
-import { BoardState, Column, TodoItem } from '@/widgets/TodoList/types';
+import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
 interface TodoListProps {
   events: IEvent[] | null;
@@ -22,13 +22,13 @@ export function TodoList({ events }: TodoListProps) {
   const [view, setView] = useState<'board' | 'list'>('board');
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<TodoItem | null>(null);
+  const [editingTask, setEditingTask] = useState<TodoTask | null>(null);
   const [columnModal, setColumnModal] = useState<{
     column: Column | null;
     afterId?: string;
   } | null>(null);
-  const [hoverItemId, setHoverItemId] = useState<string | null>(null);
-  const [itemDropColumnId, setItemDropColumnId] = useState<string | null>(null);
+  const [hoverTaskId, setHoverTaskId] = useState<string | null>(null);
+  const [taskDropColumnId, setTaskDropColumnId] = useState<string | null>(null);
   const [hoverColumnId, setHoverColumnId] = useState<string | null>(null);
 
   // Populate tasks from today's events once per day
@@ -44,7 +44,7 @@ export function TodoList({ events }: TodoListProps) {
 
     setBoard(prev => {
       const additions = fullDay
-        .filter(ev => !prev.items.some(t => t.id === ev.id))
+        .filter(ev => !prev.tasks.some(t => t.id === ev.id))
         .map(ev => ({
           id: ev.id,
           title: ev.title,
@@ -53,7 +53,7 @@ export function TodoList({ events }: TodoListProps) {
           columnId: 'todo',
         }));
       if (!additions.length) return prev;
-      const updated = { ...prev, items: [...prev.items, ...additions] };
+      const updated = { ...prev, tasks: [...prev.tasks, ...additions] };
       saveBoard(updated);
       return updated;
     });
@@ -128,7 +128,7 @@ export function TodoList({ events }: TodoListProps) {
 
     setBoard(prev => {
       const additions = fullDay
-        .filter(ev => !prev.items.some(i => i.id === ev.id))
+        .filter(ev => !prev.tasks.some(i => i.id === ev.id))
         .map(ev => ({
           id: ev.id,
           title: ev.title,
@@ -137,7 +137,7 @@ export function TodoList({ events }: TodoListProps) {
           columnId: 'todo',
         }));
       if (!additions.length) return prev;
-      const updated = { ...prev, items: [...prev.items, ...additions] };
+      const updated = { ...prev, tasks: [...prev.tasks, ...additions] };
       saveBoard(updated);
       return updated;
     });
@@ -149,42 +149,42 @@ export function TodoList({ events }: TodoListProps) {
     saveBoard(board);
   }, [board]);
 
-  const handleAddItem = (columnId: string, title: string) => {
-    const item: TodoItem = {
+  const handleAddTask = (columnId: string, title: string) => {
+    const task: TodoTask = {
       id: `todo-${Date.now()}`,
       title,
       tags: [],
       columnId,
     };
-    setBoard(prev => ({ ...prev, items: [...prev.items, item] }));
-    return item.id;
+    setBoard(prev => ({ ...prev, tasks: [...prev.tasks, task] }));
+    return task.id;
   };
 
-  const handleEditItem = (id: string) => {
-    const item = board.items.find(t => t.id === id);
-    if (!item) return;
-    setEditingItem(item);
+  const handleEditTask = (id: string) => {
+    const task = board.tasks.find(t => t.id === id);
+    if (!task) return;
+    setEditingTask(task);
   };
 
-  const handleSaveItem = (updated: TodoItem) => {
+  const handleSaveTask = (updated: TodoTask) => {
     setBoard(prev => ({
       ...prev,
-      items: prev.items.map(t => (t.id === updated.id ? updated : t)),
+      tasks: prev.tasks.map(t => (t.id === updated.id ? updated : t)),
     }));
-    setEditingItem(null);
+    setEditingTask(null);
   };
 
-  const handleRenameItem = (id: string, title: string) => {
+  const handleRenameTask = (id: string, title: string) => {
     const trimmed = title.trim();
     if (!trimmed) return;
     setBoard(prev => ({
       ...prev,
-      items: prev.items.map(t => (t.id === id ? { ...t, title: trimmed } : t)),
+      tasks: prev.tasks.map(t => (t.id === id ? { ...t, title: trimmed } : t)),
     }));
   };
 
-  const handleDeleteItem = (id: string) => {
-    setBoard(prev => ({ ...prev, items: prev.items.filter(t => t.id !== id) }));
+  const handleDeleteTask = (id: string) => {
+    setBoard(prev => ({ ...prev, tasks: prev.tasks.filter(t => t.id !== id) }));
   };
 
   const handleSaveColumn = (title: string, color: string) => {
@@ -217,7 +217,7 @@ export function TodoList({ events }: TodoListProps) {
     const id = columnModal.column.id;
     setBoard(prev => ({
       columns: prev.columns.filter(c => c.id !== id),
-      items: prev.items.filter(i => i.columnId !== id),
+      tasks: prev.tasks.filter(i => i.columnId !== id),
     }));
     setColumnModal(null);
   };
@@ -225,8 +225,8 @@ export function TodoList({ events }: TodoListProps) {
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
     event.dataTransfer.effectAllowed = 'move';
     setDraggingId(id);
-    setHoverItemId(null);
-    setItemDropColumnId(null);
+    setHoverTaskId(null);
+    setTaskDropColumnId(null);
   };
 
   const handleColumnDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
@@ -256,58 +256,59 @@ export function TodoList({ events }: TodoListProps) {
     setHoverColumnId(null);
   };
 
-  const handleDragOverItem = (event: React.DragEvent<HTMLDivElement>, overId: string) => {
+  const handleDragOverTask = (event: React.DragEvent<HTMLDivElement>, overId: string) => {
     event.preventDefault();
     if (!draggingId || draggingId === overId) return;
-    setHoverItemId(overId);
+    setHoverTaskId(overId);
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>, columnId: string) => {
     event.preventDefault();
     const id = draggingId;
     setDraggingId(null);
-    const overId = hoverItemId;
-    setHoverItemId(null);
-    setItemDropColumnId(null);
+    const overId = hoverTaskId;
+    setHoverTaskId(null);
+    setTaskDropColumnId(null);
     if (!id) return;
     setBoard(prev => {
-      const items = [...prev.items];
-      const from = items.findIndex(i => i.id === id);
+      const tasks = [...prev.tasks];
+      const from = tasks.findIndex(i => i.id === id);
       if (from === -1) return prev;
-      const [moved] = items.splice(from, 1);
+      const [moved] = tasks.splice(from, 1);
       const to = overId
-        ? items.findIndex(i => i.id === overId)
-        : items.reduce((idx, it, i) => (it.columnId === columnId ? i + 1 : idx), 0);
+        ? tasks.findIndex(i => i.id === overId)
+        : tasks.reduce((idx, it, i) => (it.columnId === columnId ? i + 1 : idx), 0);
       const insertIndex = from < to ? to - 1 : to;
-      items.splice(insertIndex, 0, { ...moved, columnId });
-      return { ...prev, items };
+      tasks.splice(insertIndex, 0, { ...moved, columnId });
+      return { ...prev, tasks };
     });
   };
 
   const renderColumn = (column: Column) => {
-    const items = board.items.filter(i => i.columnId === column.id);
+    const tasks = board.tasks?.filter(i => i.columnId === column.id);
+
     return (
       <TodoColumn
         key={column.id}
         column={column}
-        items={items}
+        tasks={tasks}
         view={view}
         onOpenColumn={col => setColumnModal({ column: col })}
         onAddColumn={afterId => setColumnModal({ column: null, afterId })}
-        onEditItem={handleEditItem}
-        onRenameItem={handleRenameItem}
-        onDeleteItem={handleDeleteItem}
-        onAddItem={handleAddItem}
+        onEditTask={handleEditTask}
+        onRenameTask={handleRenameTask}
+        onDeleteTask={handleDeleteTask}
+        onAddTask={handleAddTask}
         onDragStart={handleDragStart}
-        onDragOverItem={handleDragOverItem}
-        onItemColumnDragOver={setItemDropColumnId}
+        onDragOverTask={handleDragOverTask}
+        onTaskColumnDragOver={setTaskDropColumnId}
         onDrop={handleDrop}
         onColumnDragStart={handleColumnDragStart}
         onColumnDragOver={handleColumnDragOver}
         onColumnDragEnd={handleColumnDragEnd}
-        draggingItemId={draggingId}
-        hoverItemId={hoverItemId}
-        itemDropColumnId={itemDropColumnId}
+        draggingTaskId={draggingId}
+        hoverTaskId={hoverTaskId}
+        taskDropColumnId={taskDropColumnId}
         draggingColumnId={draggingColumnId}
       />
     );
@@ -334,12 +335,13 @@ export function TodoList({ events }: TodoListProps) {
       >
         {board.columns.map(renderColumn)}
       </Stack>
-      <EditItemModal
-        column={board.columns.find(c => c.id === editingItem?.columnId) || null}
-        open={Boolean(editingItem)}
-        item={editingItem}
-        onSave={handleSaveItem}
-        onClose={() => setEditingItem(null)}
+      <EditTaskModal
+        column={board.columns.find(c => c.id === editingTask?.columnId) || null}
+        open={Boolean(editingTask)}
+        task={editingTask}
+        onSave={handleSaveTask}
+        onClose={() => setEditingTask(null)}
+        onDeleteTask={handleDeleteTask}
       />
       <ColumnModal
         open={Boolean(columnModal)}

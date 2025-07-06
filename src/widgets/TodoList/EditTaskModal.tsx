@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import { Delete as DeleteIcon } from '@mui/icons-material';
+import CancelIcon from '@mui/icons-material/Cancel';
 import {
   alpha,
   Box,
@@ -7,35 +9,47 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  IconButton,
   Stack,
   TextField,
+  Tooltip,
 } from '@mui/material';
 
 import { theme } from '@/styles/theme';
-import { Column, TodoItem } from '@/widgets/TodoList/types';
+import { Column, TodoTask } from '@/widgets/TodoList/types';
 
-interface EditItemModalProps {
-  item: TodoItem | null;
+interface EditTaskModalProps {
+  task: TodoTask | null;
   open: boolean;
-  onSave: (item: TodoItem) => void;
+  onSave: (task: TodoTask) => void;
   onClose: () => void;
+  onDeleteTask: (id: string) => void;
   column: Column | null;
 }
 
-export function EditItemModal({ item, open, onSave, onClose, column }: EditItemModalProps) {
+export function EditTaskModal({
+  task,
+  open,
+  onSave,
+  onClose,
+  column,
+  onDeleteTask,
+}: EditTaskModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
 
-  // Update state when item changes
+  // Update state when task changes
   useEffect(() => {
-    if (!item) return;
-    setTitle(item.title);
-    setDescription(item.description || '');
-    setTags(item.tags);
+    if (!task) return;
+    setTitle(task.title);
+    setDescription(task.description || '');
+    setTags(task.tags);
     setTagInput('');
-  }, [item]);
+  }, [task]);
+
+  const [hoveredDeleteTag, setHoveredDeleteTag] = useState<string | null>(null);
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === ' ' || e.key === 'Enter') {
@@ -64,10 +78,10 @@ export function EditItemModal({ item, open, onSave, onClose, column }: EditItemM
   };
 
   const handleSaveAndClose = () => {
-    if (!item) return;
+    if (!task) return;
     const trimmedTitle = title.trim();
     if (!trimmedTitle) return;
-    onSave({ ...item, title: trimmedTitle, description: description.trim() || undefined, tags });
+    onSave({ ...task, title: trimmedTitle, description: description.trim() || undefined, tags });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -102,7 +116,26 @@ export function EditItemModal({ item, open, onSave, onClose, column }: EditItemM
         }
       }}
     >
-      <DialogTitle>Edit Item</DialogTitle>
+      <DialogTitle sx={{ position: 'relative' }}>
+        Edit Task
+        {onDeleteTask && (
+          <Tooltip title="Delete task" enterTouchDelay={0}>
+            <IconButton
+              aria-label="delete task"
+              onClick={() => {
+                if (task) {
+                  onDeleteTask(task.id);
+                }
+                onClose();
+              }}
+              sx={{ position: 'absolute', top: 8, right: 8 }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </DialogTitle>
+
       <DialogContent>
         <Stack spacing={2} mt={1}>
           <TextField
@@ -129,23 +162,40 @@ export function EditItemModal({ item, open, onSave, onClose, column }: EditItemM
               onKeyDown={handleTagKeyDown}
               sx={{ minWidth: '200px' }}
             />
-            <Box display="flex" flexWrap="wrap" gap={1}>
+            <Box display="flex" flexWrap="wrap" gap={1} overflow={'hidden'}>
               {tags.map(tag => (
-                <Chip
+                <Tooltip
                   key={tag}
-                  label={tag}
-                  onDelete={() => handleTagDelete(tag)}
-                  sx={{
-                    bgcolor: tagColor ? `${tagColor}` : undefined,
-                    color: tagTextColor,
-                    '& .MuiChip-deleteIcon': {
-                      color: tagTextColor ? `${tagTextColor} !important` : undefined,
-                    },
-                    '&:hover': {
-                      bgcolor: tagColor ? alpha(tagColor, 0.8) : undefined,
-                    },
-                  }}
-                />
+                  title={hoveredDeleteTag === tag ? 'Delete tag' : 'Edit tag'}
+                  enterTouchDelay={0}
+                >
+                  <Chip
+                    label={tag}
+                    onDelete={() => handleTagDelete(tag)}
+                    onMouseEnter={() => setHoveredDeleteTag(null)} // clear tooltip if not over delete icon
+                    onMouseLeave={() => setHoveredDeleteTag(null)}
+                    deleteIcon={
+                      <CancelIcon
+                        onMouseEnter={e => {
+                          e.stopPropagation();
+                          setHoveredDeleteTag(tag);
+                        }}
+                        onMouseLeave={() => setHoveredDeleteTag(null)}
+                      />
+                    }
+                    sx={{
+                      bgcolor: tagColor ? `${tagColor}` : undefined,
+                      color: tagTextColor,
+                      cursor: 'pointer',
+                      '& .MuiChip-deleteIcon': {
+                        color: tagTextColor ? `${tagTextColor} !important` : undefined,
+                      },
+                      '&:hover': {
+                        bgcolor: tagColor ? alpha(tagColor, 0.8) : undefined,
+                      },
+                    }}
+                  />
+                </Tooltip>
               ))}
             </Box>
           </Stack>
