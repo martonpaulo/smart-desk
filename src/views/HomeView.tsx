@@ -62,9 +62,9 @@ export function HomeView({
     handleSignOut,
   } = dashboardViewState;
 
-  // tick every second (or adjust to 15s/30s if you like)
+  // tick every minute
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
+    const timer = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
 
@@ -126,9 +126,9 @@ export function HomeView({
         </Stack>
       )}
 
-      <Stack spacing={2} direction="row">
+      <Stack spacing={2} direction={isMobile ? 'column' : 'row'} alignItems="stretch">
         <TodoList events={events ?? null} />
-        <EventList events={events} />
+        <EventList events={events} key={`${now.toISOString()}-EventList`} />
       </Stack>
 
       <EventAlert
@@ -136,10 +136,15 @@ export function HomeView({
         onAlertAcknowledge={onAlertAcknowledge}
         alertLeadTimeMinutes={3}
         meetingAlertEnabled={isMeetingAlertEnabled}
+        key={`${now.toISOString()}-EventAlert`}
       />
 
       {events && (
-        <ChangeSnackbar events={events} eventChangesAlertEnabled={isEventChangesAlertEnabled} />
+        <ChangeSnackbar
+          events={events}
+          eventChangesAlertEnabled={isEventChangesAlertEnabled}
+          key={`${now.toISOString()}-ChangeSnackbar`}
+        />
       )}
     </Stack>
   );

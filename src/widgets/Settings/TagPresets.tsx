@@ -1,23 +1,23 @@
 import { useEffect, useState } from 'react';
 
-import DeleteIcon from '@mui/icons-material/Delete';
 import { Circle as StatusIcon } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
-  MenuItem,
   IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
+  MenuItem,
   Stack,
   TextField,
 } from '@mui/material';
 
-import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 import { loadTagPresets, saveTagPresets, TagPreset } from '@/utils/tagPresetsStorage';
+import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 
 export function TagPresets() {
   const [presets, setPresets] = useState<TagPreset[]>([]);
@@ -63,7 +63,7 @@ export function TagPresets() {
 
   return (
     <Box>
-      <Stack direction="row" spacing={2} mb={2}>
+      <Stack direction="row" spacing={2} mb={2} mt={1}>
         <TextField label="Tag" value={name} onChange={e => setName(e.target.value)} />
         <TextField
           select
@@ -99,7 +99,7 @@ export function TagPresets() {
       </Stack>
       <List dense>
         {presets.map((p, idx) => (
-          <ListItem key={idx} sx={{ pl: 0 }} button onClick={() => handleEdit(idx)}>
+          <ListItem key={idx} sx={{ pl: 0 }} component="li" onClick={() => handleEdit(idx)}>
             <ListItemIcon>
               <StatusIcon sx={{ color: p.color }} />
             </ListItemIcon>

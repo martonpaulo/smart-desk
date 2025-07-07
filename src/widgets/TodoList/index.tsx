@@ -204,14 +204,29 @@ export function TodoList({ events }: TodoListProps) {
     setBoard(prev => {
       const task = prev.tasks.find(t => t.id === id);
       if (!task) return prev;
+
       let columns = [...prev.columns];
+      let needsColumnUpdate = false;
+
       const ensureColumn = (cid: string, title: string, color: string) => {
         if (!columns.some(c => c.id === cid)) {
           columns = [...columns, { id: cid, title, color }];
+          needsColumnUpdate = true;
         }
       };
-      ensureColumn('done', 'Done', '#2e7d32');
-      ensureColumn('draft', 'Draft', '#616161');
+
+      // Only ensure 'done' column if moving to it
+      if (task.columnId !== 'done') {
+        ensureColumn('done', 'Done', '#2e7d32');
+      }
+
+      // Only ensure 'draft' column if we need to move back to it
+      if (
+        task.columnId === 'done' &&
+        (!task.prevColumnId || !columns.some(c => c.id === task.prevColumnId))
+      ) {
+        ensureColumn('draft', 'Draft', '#616161');
+      }
 
       const tasks = prev.tasks.map(t => {
         if (t.id !== id) return t;
@@ -228,7 +243,7 @@ export function TodoList({ events }: TodoListProps) {
         return { ...t, prevColumnId: t.columnId, columnId: 'done' };
       });
 
-      return { ...prev, columns, tasks };
+      return needsColumnUpdate ? { ...prev, columns, tasks } : { ...prev, tasks };
     });
   };
 

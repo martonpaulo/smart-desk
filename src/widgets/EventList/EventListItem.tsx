@@ -16,7 +16,6 @@ import {
   calculateMinutesUntilEvent,
   computeEventStatus,
   formatEventTimeRange,
-  getAttendeeCountLabel,
 } from '@/utils/eventUtils';
 
 interface EventListItemProps {
@@ -25,11 +24,10 @@ interface EventListItemProps {
 }
 
 export function EventListItem({ event, onDelete }: EventListItemProps) {
-  const { title, calendar, attendeeCount } = event;
+  const { title, calendar } = event;
   const isCurrent = computeEventStatus(event) === 'current';
 
   const iconColor = calendar?.color || theme.palette.primary.main;
-  const attendeesLabel = getAttendeeCountLabel(event);
   const backgroundColor = isCurrent ? theme.palette.action.selected : 'inherit';
 
   const minutesUntilEvent = calculateMinutesUntilEvent(event);
@@ -37,8 +35,8 @@ export function EventListItem({ event, onDelete }: EventListItemProps) {
   const shouldDisplayChip = isCurrent || (minutesUntilEvent > 0 && minutesUntilEvent < 30);
 
   return (
-    <ListItem sx={{ backgroundColor, borderRadius: 1 }}>
-      <ListItemIcon>
+    <ListItem sx={{ backgroundColor, borderRadius: 1, mb: 0.5 }}>
+      <ListItemIcon sx={{ minWidth: 40 }}>
         <StatusIcon sx={{ color: iconColor }} />
       </ListItemIcon>
 
@@ -50,10 +48,6 @@ export function EventListItem({ event, onDelete }: EventListItemProps) {
         </Stack>
 
         <Typography variant="subtitle1">{title}</Typography>
-
-        {attendeeCount !== undefined && attendeeCount > 0 && (
-          <Typography variant="caption">{attendeesLabel}</Typography>
-        )}
       </ListItemText>
       <ListItemSecondaryAction>
         <IconButton edge="end" aria-label="delete" onClick={() => onDelete(event.id)}>

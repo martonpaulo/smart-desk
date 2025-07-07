@@ -17,19 +17,37 @@ export function SettingsDialog({ open, onClose, tabs }: SettingsDialogProps) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth PaperProps={{ sx: { width: 500 } }}>
+    <Dialog open={open} onClose={onClose} fullWidth>
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
-        <Tabs value={tab} onChange={handleTabChange} aria-label="settings tabs">
-          {Object.keys(tabs).map(key => (
-            <Tab key={key} label={key} />
-          ))}
-        </Tabs>
-        {Object.values(tabs).map((content, index) => (
-          <Box key={index} hidden={tab !== index} pt={2}>
-            {content}
+        <Box sx={{ display: 'flex' }}>
+          <Tabs
+            orientation="vertical"
+            value={tab}
+            onChange={handleTabChange}
+            aria-label="settings tabs"
+            sx={{ borderRight: 1, borderColor: 'divider', minWidth: '120px' }}
+          >
+            {Object.keys(tabs).map(key => (
+              <Tab key={key} label={key} />
+            ))}
+          </Tabs>
+          <Box
+            sx={{
+              flexGrow: 1,
+              ml: 2,
+              maxWidth: 'calc(100% - 144px)',
+              minHeight: '65vh',
+              maxHeight: '65vh',
+            }}
+          >
+            {Object.values(tabs).map((content, index) => (
+              <Box key={index} hidden={tab !== index}>
+                {content}
+              </Box>
+            ))}
           </Box>
-        ))}
+        </Box>
       </DialogContent>
     </Dialog>
   );

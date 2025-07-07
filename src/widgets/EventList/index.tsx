@@ -1,5 +1,6 @@
-import { Button, List, ListItem, ListItemText, Stack, TextField } from '@mui/material';
 import { useState } from 'react';
+
+import { Button, List, ListItem, ListItemText, Stack, TextField } from '@mui/material';
 
 import { useEventStore } from '@/store/eventStore';
 import { IEvent } from '@/types/IEvent';
@@ -23,7 +24,7 @@ export function EventList({ events }: EventListProps) {
     return (
       <List dense sx={{ opacity: 0.5 }}>
         <ListItem>
-          <ListItemText primary="É necessário conectar pelo menos uma agenda (Google ou ICS)." />
+          <ListItemText primary="No upcoming events" />
         </ListItem>
       </List>
     );
@@ -35,13 +36,13 @@ export function EventList({ events }: EventListProps) {
   const upcomingEvents = filterCurrentOrFutureEvents(todaysEvents);
 
   return (
-    <>
-      <List dense>
+    <Stack>
+      <List dense disablePadding>
         {upcomingEvents.map(event => (
           <EventListItem key={event.id} event={event} onDelete={deleteEvent} />
         ))}
       </List>
-      <Stack direction="row" spacing={1} mt={1}>
+      <Stack direction="row" spacing={1} mt={upcomingEvents.length > 0 ? 1 : 0}>
         <TextField
           size="small"
           label="New event"
@@ -63,6 +64,6 @@ export function EventList({ events }: EventListProps) {
           Add
         </Button>
       </Stack>
-    </>
+    </Stack>
   );
 }

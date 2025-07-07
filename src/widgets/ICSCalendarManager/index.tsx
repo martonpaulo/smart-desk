@@ -157,11 +157,23 @@ export function ICSCalendarManager() {
 
       <List dense disablePadding>
         {calendars.map((cal, idx) => (
-          <ListItem key={cal.id} sx={{ pl: 0 }}>
+          <ListItem
+            key={cal.id}
+            sx={{
+              pl: 0,
+            }}
+          >
             <ListItemIcon>
               <StatusIcon sx={{ color: `#${cal.color}` }} />
             </ListItemIcon>
-            <ListItemText primary={cal.name} secondary={cal.url} />
+            <ListItemText
+              primary={cal.name}
+              secondary={cal.url}
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            />
             <ListItemSecondaryAction>
               <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(idx)}>
                 <EditIcon fontSize="small" />

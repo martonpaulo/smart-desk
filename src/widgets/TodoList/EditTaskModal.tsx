@@ -4,7 +4,9 @@ import { Delete as DeleteIcon } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import {
   alpha,
+  Autocomplete,
   Box,
+  Checkbox,
   Chip,
   Dialog,
   DialogContent,
@@ -13,8 +15,6 @@ import {
   Stack,
   TextField,
   Tooltip,
-  Autocomplete,
-  Checkbox,
 } from '@mui/material';
 
 import { theme } from '@/styles/theme';
