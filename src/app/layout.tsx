@@ -7,6 +7,7 @@ import { SessionProvider } from 'next-auth/react';
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
+import { ServiceWorkerProvider } from '@/providers/ServiceWorkerProvider';
 import { poppins } from '@/styles/fonts';
 
 interface RootLayoutProps {
@@ -16,15 +17,24 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <title>Smart Desk</title>
+      <head>
+        <title>Smart Desk</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
+      </head>
 
       <body suppressHydrationWarning className={poppins.variable}>
         <SessionProvider>
-          <LocationProvider>
-            <ReactQueryProvider>
-              <AppThemeProvider>{children}</AppThemeProvider>
-            </ReactQueryProvider>
-          </LocationProvider>
+          <ServiceWorkerProvider>
+            <LocationProvider>
+              <ReactQueryProvider>
+                <AppThemeProvider>{children}</AppThemeProvider>
+              </ReactQueryProvider>
+            </LocationProvider>
+          </ServiceWorkerProvider>
         </SessionProvider>
       </body>
     </html>
