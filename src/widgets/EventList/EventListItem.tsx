@@ -1,5 +1,5 @@
-import { Circle as StatusIcon } from '@mui/icons-material';
-import { ListItem, ListItemIcon, ListItemText, Stack, Typography } from '@mui/material';
+import { Circle as StatusIcon, Delete } from '@mui/icons-material';
+import { IconButton, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Stack, Typography } from '@mui/material';
 
 import { MinutesChip } from '@/components/MinutesChip';
 import { theme } from '@/styles/theme';
@@ -13,9 +13,10 @@ import {
 
 interface EventListItemProps {
   event: IEvent;
+  onDelete: (id: string) => void;
 }
 
-export function EventListItem({ event }: EventListItemProps) {
+export function EventListItem({ event, onDelete }: EventListItemProps) {
   const { title, calendar, attendeeCount } = event;
   const isCurrent = computeEventStatus(event) === 'current';
 
@@ -46,6 +47,11 @@ export function EventListItem({ event }: EventListItemProps) {
           <Typography variant="caption">{attendeesLabel}</Typography>
         )}
       </ListItemText>
+      <ListItemSecondaryAction>
+        <IconButton edge="end" aria-label="delete" onClick={() => onDelete(event.id)}>
+          <Delete fontSize="small" />
+        </IconButton>
+      </ListItemSecondaryAction>
     </ListItem>
   );
 }

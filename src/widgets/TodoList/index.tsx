@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import ListIcon from '@mui/icons-material/List';
-import ViewColumnIcon from '@mui/icons-material/ViewColumn';
-import { Box, Button, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 
 import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
@@ -16,6 +14,7 @@ import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
 // Ensure drag and drop works on Safari PWAs
 import '@/lib/dragDropTouch';
+import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 
 interface TodoListProps {
   events: IEvent[] | null;
@@ -23,7 +22,10 @@ interface TodoListProps {
 
 export function TodoList({ events }: TodoListProps) {
   const [board, setBoard] = useState<BoardState>(() => loadBoard());
-  const [view, setView] = useState<'board' | 'list'>('board');
+  const view = useTodoPrefsStore(state => state.view);
+  const setView = useTodoPrefsStore(state => state.setView);
+  const trashOpen = useTodoPrefsStore(state => state.trashOpen);
+  const setTrashOpen = useTodoPrefsStore(state => state.setTrashOpen);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<TodoTask | null>(null);
@@ -34,7 +36,6 @@ export function TodoList({ events }: TodoListProps) {
   const [hoverTaskId, setHoverTaskId] = useState<string | null>(null);
   const [taskDropColumnId, setTaskDropColumnId] = useState<string | null>(null);
   const [hoverColumnId, setHoverColumnId] = useState<string | null>(null);
-  const [trashOpen, setTrashOpen] = useState(false);
 
   // Populate tasks from today's events once per day
   useEffect(() => {
@@ -200,6 +201,39 @@ export function TodoList({ events }: TodoListProps) {
     });
   };
 
+  const handleToggleDone = (id: string) => {
+    setBoard(prev => {
+      const task = prev.tasks.find(t => t.id === id);
+      if (!task) return prev;
+      let columns = [...prev.columns];
+      const ensureColumn = (cid: string, title: string, color: string) => {
+        if (!columns.some(c => c.id === cid)) {
+          columns = [...columns, { id: cid, title, color }];
+        }
+      };
+      ensureColumn('done', 'Done', '#2e7d32');
+      ensureColumn('draft', 'Draft', '#616161');
+
+      const tasks = prev.tasks.map(t => {
+        if (t.id !== id) return t;
+        if (t.columnId === 'done') {
+          const target = t.prevColumnId && columns.some(c => c.id === t.prevColumnId)
+            ? t.prevColumnId
+            : 'draft';
+          return { ...t, columnId: target, prevColumnId: undefined };
+        }
+
+        if (t.quantity && t.quantity > 1) {
+          return { ...t, quantity: t.quantity - 1 };
+        }
+
+        return { ...t, prevColumnId: t.columnId, columnId: 'done' };
+      });
+
+      return { ...prev, columns, tasks };
+    });
+  };
+
   const handleSaveColumn = (title: string, color: string) => {
     if (!columnModal) return;
     if (columnModal.column) {
@@ -348,6 +382,7 @@ export function TodoList({ events }: TodoListProps) {
         onEditTask={handleEditTask}
         onRenameTask={handleRenameTask}
         onDeleteTask={handleDeleteTask}
+        onToggleDone={handleToggleDone}
         onAddTask={handleAddTask}
         onDragStart={handleDragStart}
         onDragOverTask={handleDragOverTask}
@@ -366,20 +401,6 @@ export function TodoList({ events }: TodoListProps) {
 
   return (
     <Box sx={{ position: 'relative' }}>
-      <Stack direction="row" spacing={1} mb={2} alignItems="center">
-        <Box flexGrow={1} />
-        <Button variant="outlined" size="small" onClick={() => setTrashOpen(true)}>
-          Trash
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={view === 'board' ? <ListIcon /> : <ViewColumnIcon />}
-          onClick={() => setView(v => (v === 'board' ? 'list' : 'board'))}
-        >
-          {view === 'board' ? 'List view' : 'Board view'}
-        </Button>
-      </Stack>
 
       <Stack
         direction={view === 'board' ? 'row' : 'column'}

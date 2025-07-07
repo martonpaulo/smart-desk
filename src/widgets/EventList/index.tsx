@@ -1,4 +1,5 @@
 import { List, ListItem, ListItemText } from '@mui/material';
+import { useEventStore } from '@/store/eventStore';
 
 import { IEvent } from '@/types/IEvent';
 import {
@@ -14,6 +15,7 @@ interface EventListProps {
 }
 
 export function EventList({ events }: EventListProps) {
+  const deleteEvent = useEventStore(state => state.deleteEvent);
   if (!events || events.length === 0) {
     return (
       <List dense sx={{ opacity: 0.5 }}>
@@ -32,7 +34,7 @@ export function EventList({ events }: EventListProps) {
   return (
     <List dense>
       {upcomingEvents.map(event => (
-        <EventListItem key={event.id} event={event} />
+        <EventListItem key={event.id} event={event} onDelete={deleteEvent} />
       ))}
     </List>
   );

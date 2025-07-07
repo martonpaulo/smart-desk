@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Stack } from '@mui/material';
+import { Stack, useMediaQuery } from '@mui/material';
 
 import { DashboardViewState } from '@/types/DashboardViewState';
 import { IWeather } from '@/types/IWeather';
@@ -15,6 +15,10 @@ import { LocalEventsManager } from '@/widgets/LocalEventsManager';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
+import { TodoSettings } from '@/widgets/Settings/TodoSettings';
+import { AppInfo } from '@/widgets/Settings/AppInfo';
+import { TagPresets } from '@/widgets/Settings/TagPresets';
+import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 
 interface HomeViewProps {
   dashboardViewState: DashboardViewState;
@@ -46,6 +50,7 @@ export function HomeView({
 }: HomeViewProps) {
   const [now, setNow] = useState(new Date());
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'));
   const {
     severity,
     message,
@@ -63,6 +68,11 @@ export function HomeView({
     return () => clearInterval(timer);
   }, []);
 
+  const setView = useTodoPrefsStore(state => state.setView);
+  useEffect(() => {
+    if (isMobile) setView('list');
+  }, [isMobile, setView]);
+
   return (
     <Stack p={2} gap={2}>
       <SettingsButton onClick={() => setSettingsOpen(true)} />
@@ -72,6 +82,8 @@ export function HomeView({
         tabs={{
           'ICS Calendar': <ICSCalendarManager />,
           'Local Events': <LocalEventsManager />,
+          Todo: <TodoSettings />,
+          Tags: <TagPresets />,
           Auth: (
             <AuthControl
               severity={severity}
@@ -96,20 +108,23 @@ export function HomeView({
               onEventChangesAlertToggle={onEventChangesAlertToggle}
             />
           ),
+          Info: <AppInfo />,
         }}
       />
-      <Stack direction="row" justifyContent="space-between" gap={2} alignItems="center">
-        <Stack flexGrow={1}>
-          <EventTimeline
-            events={events}
-            currentTime={now}
-            pastWindowHours={3}
-            futureWindowHours={6}
-          />
-        </Stack>
+      {!isMobile && (
+        <Stack direction="row" justifyContent="space-between" gap={2} alignItems="center">
+          <Stack flexGrow={1}>
+            <EventTimeline
+              events={events}
+              currentTime={now}
+              pastWindowHours={3}
+              futureWindowHours={6}
+            />
+          </Stack>
 
-        {weather && <Clock currentTime={now} weather={weather} />}
-      </Stack>
+          {weather && <Clock currentTime={now} weather={weather} />}
+        </Stack>
+      )}
 
       <Stack spacing={2} direction="row">
         <TodoList events={events ?? null} />

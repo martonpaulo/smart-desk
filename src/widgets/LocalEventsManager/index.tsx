@@ -35,11 +35,20 @@ export function LocalEventsManager() {
   const deleteEvent = useEventStore(state => state.deleteEvent);
   const restoreEvent = useEventStore(state => state.restoreEvent);
 
-  const [form, setForm] = useState<FormState>({ title: '', start: '', end: '' });
+  const nowIso = DateTime.now().toISO({ suppressMilliseconds: true });
+  const [form, setForm] = useState<FormState>({
+    title: '',
+    start: nowIso ?? '',
+    end: DateTime.now().plus({ hours: 1 }).toISO({ suppressMilliseconds: true }) ?? '',
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const resetForm = () => {
-    setForm({ title: '', start: '', end: '' });
+    setForm({
+      title: '',
+      start: DateTime.now().toISO({ suppressMilliseconds: true }) ?? '',
+      end: DateTime.now().plus({ hours: 1 }).toISO({ suppressMilliseconds: true }) ?? '',
+    });
     setEditingId(null);
   };
 

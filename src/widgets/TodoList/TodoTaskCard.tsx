@@ -1,26 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
-import DeleteIcon from '@mui/icons-material/Delete';
+import CheckIcon from '@mui/icons-material/Check';
+import UndoIcon from '@mui/icons-material/Undo';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import EditIcon from '@mui/icons-material/Edit';
-import {
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Chip, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha, darken } from '@mui/material/styles';
 
 import { theme } from '@/styles/theme';
 import { Column, TodoTask } from '@/widgets/TodoList/types';
+import { loadTagPresets } from '@/utils/tagPresetsStorage';
 
 interface TodoTaskCardProps {
   task: TodoTask;
@@ -28,6 +17,7 @@ interface TodoTaskCardProps {
   onOpen: (id: string) => void;
   onRename: (id: string, title: string) => void;
   onDelete: (id: string) => void;
+  onToggleDone: (id: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   startEditing?: boolean;
@@ -40,6 +30,7 @@ export function TodoTaskCard({
   onOpen,
   onRename,
   onDelete,
+  onToggleDone,
   onDragStart,
   onDragOver,
   startEditing = false,
@@ -47,7 +38,13 @@ export function TodoTaskCard({
 }: TodoTaskCardProps) {
   const [editing, setEditing] = useState(Boolean(startEditing));
   const [title, setTitle] = useState(task.title);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const tagColors = useMemo(() => {
+    const map: Record<string, string> = {};
+    loadTagPresets().forEach(p => {
+      map[p.name] = p.color;
+    });
+    return map;
+  }, []);
 
   useEffect(() => {
     if (startEditing) {
@@ -58,7 +55,11 @@ export function TodoTaskCard({
 
   const finishEditing = () => {
     const trimmed = title.trim();
-    if (trimmed) onRename(task.id, trimmed);
+    if (trimmed) {
+      onRename(task.id, trimmed);
+    } else if (!task.description && task.tags.length === 0) {
+      onDelete(task.id);
+    }
     setEditing(false);
     onEditingEnd?.();
   };
@@ -134,7 +135,12 @@ export function TodoTaskCard({
                 aria-label={`View details of ${task.title}`}
                 onClick={() => onOpen(task.id)}
                 variant="body2"
-                sx={{ maxWidth: '100%', overflowWrap: 'anywhere', whiteSpace: 'normal' }}
+                sx={{
+                  maxWidth: '100%',
+                  overflowWrap: 'anywhere',
+                  whiteSpace: 'normal',
+                  textDecoration: task.columnId === 'done' ? 'line-through' : 'none',
+                }}
               >
                 {task.title}
               </Typography>
@@ -175,13 +181,16 @@ export function TodoTaskCard({
                     <EditIcon fontSize="inherit" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="Delete task" enterTouchDelay={0}>
+                <Tooltip
+                  title={task.columnId === 'done' ? 'Uncheck task' : 'Check task'}
+                  enterTouchDelay={0}
+                >
                   <IconButton
                     size="small"
-                    aria-label={`Delete task ${task.title}`}
+                    aria-label={`Toggle task ${task.title}`}
                     onClick={e => {
                       e.stopPropagation();
-                      setConfirmOpen(true);
+                      onToggleDone(task.id);
                     }}
                     sx={{
                       borderTopLeftRadius: 0,
@@ -190,7 +199,11 @@ export function TodoTaskCard({
                       borderBottomRightRadius: 1,
                     }}
                   >
-                    <DeleteIcon fontSize="inherit" />
+                    {task.columnId === 'done' ? (
+                      <UndoIcon fontSize="inherit" />
+                    ) : (
+                      <CheckIcon fontSize="inherit" />
+                    )}
                   </IconButton>
                 </Tooltip>
               </Box>
@@ -207,10 +220,11 @@ export function TodoTaskCard({
                 size="small"
                 disabled
                 sx={{
-                  bgcolor: alpha(column.color, 0.65),
+                  bgcolor: tagColors[tag] || alpha(column.color, 0.65),
                   boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,
                   '&.Mui-disabled': {
-                    color: theme => theme.palette.getContrastText(alpha(column.color, 0.65)),
+                    color: theme =>
+                      theme.palette.getContrastText(tagColors[tag] || alpha(column.color, 0.65)),
                     opacity: 1,
                   },
                 }}
@@ -220,34 +234,6 @@ export function TodoTaskCard({
         )}
       </Box>
 
-      <Dialog
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        onKeyDown={e => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            onDelete(task.id);
-            setConfirmOpen(false);
-          }
-        }}
-      >
-        <DialogTitle>Delete task</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete <b>{task.title}</b>?
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
-          <Button
-            color="error"
-            onClick={() => {
-              onDelete(task.id);
-              setConfirmOpen(false);
-            }}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }

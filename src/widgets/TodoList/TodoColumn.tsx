@@ -16,6 +16,7 @@ interface TodoColumnProps {
   onEditTask: (id: string) => void;
   onRenameTask: (id: string, title: string) => void;
   onDeleteTask: (id: string) => void;
+  onToggleDone: (id: string) => void;
   onAddTask: (columnId: string, title: string) => string;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   onDragOverTask: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
@@ -40,6 +41,7 @@ export function TodoColumn({
   onEditTask,
   onRenameTask,
   onDeleteTask,
+  onToggleDone,
   onAddTask,
   onDragStart,
   onDragOverTask,
@@ -126,6 +128,7 @@ export function TodoColumn({
               onOpen={onEditTask}
               onRename={onRenameTask}
               onDelete={onDeleteTask}
+              onToggleDone={onToggleDone}
               onDragStart={onDragStart}
               onDragOver={onDragOverTask}
               startEditing={creatingId === task.id}
@@ -138,7 +141,13 @@ export function TodoColumn({
         <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
       )}
 
-      {!creatingId && <AddTaskInput columnId={column.id} onAdd={handleAddTask} />}
+      {!creatingId && (
+        <AddTaskInput
+          columnId={column.id}
+          columnColor={alpha(darken(column.color, 0.2), 0.15)}
+          onAdd={handleAddTask}
+        />
+      )}
 
       <IconButton
         size="small"

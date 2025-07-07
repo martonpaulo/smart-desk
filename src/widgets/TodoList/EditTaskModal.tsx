@@ -41,6 +41,7 @@ export function EditTaskModal({
   const [tagInput, setTagInput] = useState('');
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [hoveredDeleteTag, setHoveredDeleteTag] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState<number | ''>('');
 
   // ref para o input de tags
   const tagInputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +52,7 @@ export function EditTaskModal({
     setTitle(task.title);
     setDescription(task.description || '');
     setTags(task.tags);
+    setQuantity(task.quantity ?? '');
     setTagInput('');
     setEditingTag(null);
   }, [task]);
@@ -137,6 +139,7 @@ export function EditTaskModal({
       title: trimmedTitle,
       description: description.trim() || undefined,
       tags,
+      quantity: quantity === '' ? undefined : quantity,
     });
   };
 
@@ -202,6 +205,14 @@ export function EditTaskModal({
           />
 
           <TextField
+            label="Quantity"
+            type="number"
+            value={quantity}
+            onChange={e => setQuantity(e.target.value === '' ? '' : Number(e.target.value))}
+            fullWidth
+          />
+
+          <TextField
             label="Description"
             multiline
             minRows={6}
@@ -223,6 +234,14 @@ export function EditTaskModal({
               value={tagInput}
               onChange={e => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
+              onBlur={() => {
+                const value = tagInput.trim();
+                if (value && !tags.includes(value)) {
+                  setTags(prev => [...prev, value]);
+                }
+                setTagInput('');
+                setEditingTag(null);
+              }}
               inputRef={tagInputRef}
               sx={{ minWidth: '200px' }}
             />

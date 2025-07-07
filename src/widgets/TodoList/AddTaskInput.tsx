@@ -4,11 +4,17 @@ import TextField from '@mui/material/TextField';
 
 interface AddTaskInputProps {
   columnId: string;
+  columnColor: string;
   onAdd: (columnId: string, title: string) => string;
   onStartEdit?: (id: string) => void;
 }
 
-export function AddTaskInput({ columnId, onAdd, onStartEdit }: AddTaskInputProps) {
+export function AddTaskInput({
+  columnId,
+  columnColor,
+  onAdd,
+  onStartEdit,
+}: AddTaskInputProps) {
   const handleFocus = () => {
     const id = onAdd(columnId, '');
     onStartEdit?.(id);
@@ -18,9 +24,14 @@ export function AddTaskInput({ columnId, onAdd, onStartEdit }: AddTaskInputProps
     <TextField
       fullWidth
       size="small"
-      placeholder="new tasks"
+      placeholder="New task"
       onFocus={handleFocus}
       inputProps={{ readOnly: true }}
+      sx={{
+        '& .MuiInputBase-root': {
+          '&:hover': { backgroundColor: columnColor },
+        },
+      }}
       slotProps={{
         input: {
           sx: theme => ({
