@@ -12,6 +12,7 @@ import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
+import { TrashDialog } from '@/widgets/TodoList/TrashDialog';
 
 interface TodoListProps {
   events: IEvent[] | null;
@@ -30,6 +31,7 @@ export function TodoList({ events }: TodoListProps) {
   const [hoverTaskId, setHoverTaskId] = useState<string | null>(null);
   const [taskDropColumnId, setTaskDropColumnId] = useState<string | null>(null);
   const [hoverColumnId, setHoverColumnId] = useState<string | null>(null);
+  const [trashOpen, setTrashOpen] = useState(false);
 
   // Populate tasks from today's events once per day
   useEffect(() => {
@@ -184,7 +186,15 @@ export function TodoList({ events }: TodoListProps) {
   };
 
   const handleDeleteTask = (id: string) => {
-    setBoard(prev => ({ ...prev, tasks: prev.tasks.filter(t => t.id !== id) }));
+    setBoard(prev => {
+      const task = prev.tasks.find(t => t.id === id);
+      if (!task) return prev;
+      return {
+        ...prev,
+        tasks: prev.tasks.filter(t => t.id !== id),
+        trash: { ...prev.trash, tasks: [task, ...prev.trash.tasks] },
+      };
+    });
   };
 
   const handleSaveColumn = (title: string, color: string) => {
@@ -215,11 +225,48 @@ export function TodoList({ events }: TodoListProps) {
       return;
     }
     const id = columnModal.column.id;
-    setBoard(prev => ({
-      columns: prev.columns.filter(c => c.id !== id),
-      tasks: prev.tasks.filter(i => i.columnId !== id),
-    }));
+    setBoard(prev => {
+      const column = prev.columns.find(c => c.id === id);
+      const tasks = prev.tasks.filter(i => i.columnId === id);
+      return {
+        columns: prev.columns.filter(c => c.id !== id),
+        tasks: prev.tasks.filter(i => i.columnId !== id),
+        trash: {
+          columns: column ? [column, ...prev.trash.columns] : prev.trash.columns,
+          tasks: [...tasks, ...prev.trash.tasks],
+        },
+      };
+    });
     setColumnModal(null);
+  };
+
+  const handleRestoreTask = (id: string) => {
+    setBoard(prev => {
+      const task = prev.trash.tasks.find(t => t.id === id);
+      if (!task) return prev;
+      return {
+        ...prev,
+        tasks: [...prev.tasks, task],
+        trash: { ...prev.trash, tasks: prev.trash.tasks.filter(t => t.id !== id) },
+      };
+    });
+  };
+
+  const handleRestoreColumn = (id: string) => {
+    setBoard(prev => {
+      const column = prev.trash.columns.find(c => c.id === id);
+      if (!column) return prev;
+      const tasks = prev.trash.tasks.filter(t => t.columnId === id);
+      return {
+        ...prev,
+        columns: [...prev.columns, column],
+        tasks: [...prev.tasks, ...tasks],
+        trash: {
+          columns: prev.trash.columns.filter(c => c.id !== id),
+          tasks: prev.trash.tasks.filter(t => t.columnId !== id),
+        },
+      };
+    });
   };
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
@@ -318,6 +365,9 @@ export function TodoList({ events }: TodoListProps) {
     <Box sx={{ position: 'relative' }}>
       <Stack direction="row" spacing={1} mb={2} alignItems="center">
         <Box flexGrow={1} />
+        <Button variant="outlined" size="small" onClick={() => setTrashOpen(true)}>
+          Trash
+        </Button>
         <Button
           variant="outlined"
           size="small"
@@ -349,6 +399,14 @@ export function TodoList({ events }: TodoListProps) {
         onSave={handleSaveColumn}
         onDelete={handleDeleteColumn}
         onClose={() => setColumnModal(null)}
+      />
+      <TrashDialog
+        open={trashOpen}
+        tasks={board.trash.tasks}
+        columns={board.trash.columns}
+        onRestoreTask={handleRestoreTask}
+        onRestoreColumn={handleRestoreColumn}
+        onClose={() => setTrashOpen(false)}
       />
 
       <style jsx>{`

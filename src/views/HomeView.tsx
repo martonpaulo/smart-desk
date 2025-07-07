@@ -12,6 +12,7 @@ import { EventList } from '@/widgets/EventList';
 import { EventTimeline } from '@/widgets/EventTimeline';
 import ICSCalendarManager from '@/widgets/ICSCalendarManager';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
+import { LocalEventsManager } from '@/widgets/LocalEventsManager';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
 
@@ -70,6 +71,7 @@ export function HomeView({
         onClose={() => setSettingsOpen(false)}
         tabs={{
           'ICS Calendar': <ICSCalendarManager />,
+          'Local Events': <LocalEventsManager />,
           Auth: (
             <AuthControl
               severity={severity}

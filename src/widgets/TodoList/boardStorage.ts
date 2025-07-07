@@ -14,6 +14,7 @@ export const DEFAULT_COLUMNS: Column[] = [
 export const DEFAULT_BOARD: BoardState = {
   columns: DEFAULT_COLUMNS,
   tasks: [],
+  trash: { columns: [], tasks: [] },
 };
 
 export function loadBoard(): BoardState {
@@ -24,7 +25,7 @@ export function loadBoard(): BoardState {
     if (!board || !Array.isArray(board.columns) || !Array.isArray(board.tasks)) {
       return DEFAULT_BOARD;
     }
-
+    if (!board.trash) board.trash = { columns: [], tasks: [] };
     return board;
   } catch {
     return DEFAULT_BOARD;

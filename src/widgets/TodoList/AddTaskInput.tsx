@@ -9,12 +9,9 @@ interface AddTaskInputProps {
 }
 
 export function AddTaskInput({ columnId, onAdd, onStartEdit }: AddTaskInputProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (!value) return;
-    const id = onAdd(columnId, value);
+  const handleFocus = () => {
+    const id = onAdd(columnId, '');
     onStartEdit?.(id);
-    e.target.value = '';
   };
 
   return (
@@ -22,7 +19,8 @@ export function AddTaskInput({ columnId, onAdd, onStartEdit }: AddTaskInputProps
       fullWidth
       size="small"
       placeholder="new task"
-      onChange={handleChange}
+      onFocus={handleFocus}
+      inputProps={{ readOnly: true }}
       slotProps={{
         input: {
           sx: theme => ({

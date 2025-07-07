@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 import { SessionProvider } from 'next-auth/react';
 
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
+import '@/lib/dragDropTouch';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { ServiceWorkerProvider } from '@/providers/ServiceWorkerProvider';

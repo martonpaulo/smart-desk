@@ -15,4 +15,8 @@ export interface TodoTask {
 export interface BoardState {
   columns: Column[];
   tasks: TodoTask[];
+  trash: {
+    columns: Column[];
+    tasks: TodoTask[];
+  };
 }

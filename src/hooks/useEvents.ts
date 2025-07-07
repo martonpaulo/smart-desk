@@ -3,10 +3,9 @@ import { useEffect } from 'react';
 import { useGoogleEvents } from '@/hooks/useGoogleEvents';
 import { useIcsEvents } from '@/hooks/useIcsEvents';
 import { useEventStore } from '@/store/eventStore';
-import { mergeEvents } from '@/utils/eventUtils';
 
 export function useEvents(date?: string) {
-  const setEvents = useEventStore(store => store.setEvents);
+  const setRemoteEvents = useEventStore(store => store.setRemoteEvents);
 
   const {
     data: googleEvents = [],
@@ -31,14 +30,9 @@ export function useEvents(date?: string) {
   useEffect(() => {
     if (isLoading || hasError) return;
 
-    // read previous events from the store without subscribing and triggering a re-render
-    const prevEvents = useEventStore.getState().events;
-
     const fetched = [...googleEvents, ...icsEvents];
-    const merged = mergeEvents(prevEvents, fetched);
-
-    setEvents(merged);
-  }, [googleEvents, icsEvents, isLoading, hasError, setEvents]);
+    setRemoteEvents(fetched);
+  }, [googleEvents, icsEvents, isLoading, hasError, setRemoteEvents]);
 
   function refetchAll() {
     refetchGoogle();

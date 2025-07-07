@@ -1,4 +1,5 @@
 import { IAlertType } from '@/types/IAlertType';
+import { useAudioStore } from '@/store/audioStore';
 
 const alertSoundMap: Record<IAlertType, string> = {
   [IAlertType.UPCOMING]: '/sounds/upcoming.mp3',
@@ -7,9 +8,13 @@ const alertSoundMap: Record<IAlertType, string> = {
 
 export function useAlertSound(alertType: IAlertType) {
   const sound = alertSoundMap[alertType];
+  const audioEnabled = useAudioStore(state => state.audioEnabled);
+  const register = useAudioStore(state => state.registerAudio);
 
   const playAlert = () => {
+    if (!audioEnabled) return;
     const audio = new Audio(sound);
+    register(audio);
     audio.play();
   };
 

@@ -15,12 +15,15 @@ interface EventAlertProps {
   meetingAlertEnabled: boolean;
 }
 
+import { useRef } from 'react';
+
 export function EventAlert({
   events,
   onAlertAcknowledge,
   alertLeadTimeMinutes,
   meetingAlertEnabled,
 }: EventAlertProps) {
+  const shownRef = useRef(new Set<string>());
   if (!events) return null;
 
   const sortedByStart = sortEventsByStart(events);
@@ -34,7 +37,8 @@ export function EventAlert({
       (eventStatus === 'current' ||
         (eventStatus === 'future' &&
           calculateMinutesUntilEvent(event, now) <= alertLeadTimeMinutes)) &&
-      !event.aknowledged
+      !event.aknowledged &&
+      !shownRef.current.has(event.id)
     );
   });
 
@@ -42,12 +46,15 @@ export function EventAlert({
     return null;
   }
 
-  return eventsToShow.map(event => (
-    <EventDialog
-      key={event.id}
-      event={event}
-      onAlertAcknowledge={() => onAlertAcknowledge(event.id)}
-      meetingAlertEnabled={meetingAlertEnabled}
-    />
-  ));
+  return eventsToShow.map(event => {
+    shownRef.current.add(event.id);
+    return (
+      <EventDialog
+        key={event.id}
+        event={event}
+        onAlertAcknowledge={() => onAlertAcknowledge(event.id)}
+        meetingAlertEnabled={meetingAlertEnabled}
+      />
+    );
+  });
 }
