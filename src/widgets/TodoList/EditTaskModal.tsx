@@ -13,9 +13,13 @@ import {
   Stack,
   TextField,
   Tooltip,
+  Autocomplete,
+  Checkbox,
 } from '@mui/material';
 
 import { theme } from '@/styles/theme';
+import { loadTagPresets, saveTagPresets, TagPreset } from '@/utils/tagPresetsStorage';
+import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 import { Column, TodoTask } from '@/widgets/TodoList/types';
 
 interface EditTaskModalProps {
@@ -42,9 +46,15 @@ export function EditTaskModal({
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [hoveredDeleteTag, setHoveredDeleteTag] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number | ''>('');
+  const [useQuantity, setUseQuantity] = useState(false);
+  const [presets, setPresets] = useState<TagPreset[]>([]);
 
   // ref para o input de tags
   const tagInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPresets(loadTagPresets());
+  }, []);
 
   // reset form quando a task mudar
   useEffect(() => {
@@ -53,6 +63,7 @@ export function EditTaskModal({
     setDescription(task.description || '');
     setTags(task.tags);
     setQuantity(task.quantity ?? '');
+    setUseQuantity(task.quantity != null);
     setTagInput('');
     setEditingTag(null);
   }, [task]);
@@ -103,6 +114,11 @@ export function EditTaskModal({
           setTags(prev => [...prev, value]);
         }
       }
+      if (!presets.some(p => p.name === value)) {
+        const next = [...presets, { name: value, color: COLUMN_COLORS[0].value }];
+        setPresets(next);
+        saveTagPresets(next);
+      }
       setTagInput('');
     }
 
@@ -115,6 +131,12 @@ export function EditTaskModal({
         setTags(newTags);
         setTagInput('');
         setEditingTag(null);
+
+        if (!presets.some(p => p.name === value)) {
+          const next = [...presets, { name: value, color: COLUMN_COLORS[0].value }];
+          setPresets(next);
+          saveTagPresets(next);
+        }
 
         // salva fora do setState
         if (task) {
@@ -139,7 +161,7 @@ export function EditTaskModal({
       title: trimmedTitle,
       description: description.trim() || undefined,
       tags,
-      quantity: quantity === '' ? undefined : quantity,
+      quantity: useQuantity && quantity !== '' ? quantity : undefined,
     });
   };
 
@@ -204,13 +226,23 @@ export function EditTaskModal({
             fullWidth
           />
 
-          <TextField
-            label="Quantity"
-            type="number"
-            value={quantity}
-            onChange={e => setQuantity(e.target.value === '' ? '' : Number(e.target.value))}
-            fullWidth
-          />
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Checkbox
+              checked={useQuantity}
+              onChange={(_, checked) => {
+                setUseQuantity(checked);
+                if (!checked) setQuantity('');
+              }}
+            />
+            <TextField
+              label="Quantity"
+              type="number"
+              value={quantity}
+              onChange={e => setQuantity(e.target.value === '' ? '' : Number(e.target.value))}
+              disabled={!useQuantity}
+              fullWidth
+            />
+          </Stack>
 
           <TextField
             label="Description"
@@ -229,21 +261,48 @@ export function EditTaskModal({
           />
 
           <Stack direction="row" spacing={2}>
-            <TextField
-              label={editingTag ? 'Edit tag' : 'Add tag'}
-              value={tagInput}
-              onChange={e => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-              onBlur={() => {
-                const value = tagInput.trim();
-                if (value && !tags.includes(value)) {
-                  setTags(prev => [...prev, value]);
+            <Autocomplete
+              freeSolo
+              options={presets.map(p => p.name)}
+              inputValue={tagInput}
+              onInputChange={(_, value) => setTagInput(value)}
+              onChange={(_, value) => {
+                if (!value) return;
+                const val = String(value).trim();
+                if (!val) return;
+                if (!tags.includes(val)) {
+                  setTags(prev => [...prev, val]);
+                }
+                if (!presets.some(p => p.name === val)) {
+                  const next = [...presets, { name: val, color: COLUMN_COLORS[0].value }];
+                  setPresets(next);
+                  saveTagPresets(next);
                 }
                 setTagInput('');
                 setEditingTag(null);
               }}
-              inputRef={tagInputRef}
-              sx={{ minWidth: '200px' }}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label={editingTag ? 'Edit tag' : 'Add tag'}
+                  onKeyDown={handleTagKeyDown}
+                  onBlur={() => {
+                    const value = tagInput.trim();
+                    if (value && !tags.includes(value)) {
+                      setTags(prev => [...prev, value]);
+                      if (!presets.some(p => p.name === value)) {
+                        const next = [...presets, { name: value, color: COLUMN_COLORS[0].value }];
+                        setPresets(next);
+                        saveTagPresets(next);
+                      }
+                    }
+                    setTagInput('');
+                    setEditingTag(null);
+                  }}
+                  inputRef={tagInputRef}
+                  sx={{ minWidth: '200px' }}
+                />
+              )}
             />
 
             <Box display="flex" flexWrap="wrap" gap={1} overflow="hidden">

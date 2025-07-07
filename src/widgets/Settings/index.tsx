@@ -17,7 +17,7 @@ export function SettingsDialog({ open, onClose, tabs }: SettingsDialogProps) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth>
+    <Dialog open={open} onClose={onClose} fullWidth PaperProps={{ sx: { width: 500 } }}>
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <Tabs value={tab} onChange={handleTabChange} aria-label="settings tabs">

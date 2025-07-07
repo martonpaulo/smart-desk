@@ -81,10 +81,21 @@ export const useEventStore = create<EventState>((set, get) => ({
       const event = state.trash.find(e => e.id === id);
       if (!event) return state;
       const trash = state.trash.filter(e => e.id !== id);
-      const localEvents = [...state.localEvents, event];
-      saveLocalEvents(localEvents);
       const hiddenEvents = state.hiddenEvents.filter(eid => eid !== id);
       saveHiddenEventIds(hiddenEvents);
+
+      if (event.calendar) {
+        const remoteEvents = [...state.remoteEvents, event];
+        return {
+          trash,
+          remoteEvents,
+          hiddenEvents,
+          events: [...remoteEvents, ...state.localEvents],
+        };
+      }
+
+      const localEvents = [...state.localEvents, event];
+      saveLocalEvents(localEvents);
       return {
         trash,
         localEvents,

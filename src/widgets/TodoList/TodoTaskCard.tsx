@@ -38,6 +38,7 @@ export function TodoTaskCard({
 }: TodoTaskCardProps) {
   const [editing, setEditing] = useState(Boolean(startEditing));
   const [title, setTitle] = useState(task.title);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const tagColors = useMemo(() => {
     const map: Record<string, string> = {};
     loadTagPresets().forEach(p => {
@@ -52,6 +53,15 @@ export function TodoTaskCard({
       setTitle(task.title);
     }
   }, [startEditing, task.title]);
+
+  useEffect(() => {
+    if (editing && titleInputRef.current) {
+      const input = titleInputRef.current;
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  }, [editing]);
 
   const finishEditing = () => {
     const trimmed = title.trim();
@@ -109,6 +119,7 @@ export function TodoTaskCard({
                 size="small"
                 value={title}
                 autoFocus
+                inputRef={titleInputRef}
                 variant="standard"
                 onBlur={finishEditing}
                 onChange={e => setTitle(e.target.value)}
