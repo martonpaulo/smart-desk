@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import RestoreIcon from '@mui/icons-material/RestoreFromTrash';
+import { showUndo } from '@/store/undoStore';
 import {
   Box,
   Button,
@@ -29,11 +29,9 @@ interface FormState {
 
 export function LocalEventsManager() {
   const events = useEventStore(state => state.localEvents);
-  const trash = useEventStore(state => state.trash);
   const addEvent = useEventStore(state => state.addLocalEvent);
   const updateEvent = useEventStore(state => state.updateLocalEvent);
   const deleteEvent = useEventStore(state => state.deleteEvent);
-  const restoreEvent = useEventStore(state => state.restoreEvent);
 
   const nowIso = DateTime.now().toISO({ suppressMilliseconds: true });
   const [form, setForm] = useState<FormState>({
@@ -85,7 +83,10 @@ export function LocalEventsManager() {
       </Typography>
       <List dense>
         {events.map(ev => (
-          <ListItem key={ev.id} sx={{ pl: 0 }}>
+          <ListItem
+            key={ev.id}
+            sx={{ pl: 0, position: 'relative', '&:hover .delete-btn': { visibility: 'visible' } }}
+          >
             <ListItemText
               primary={ev.title}
               secondary={`${ev.start.toLocaleString()} – ${ev.end.toLocaleString()}`}
@@ -94,7 +95,16 @@ export function LocalEventsManager() {
               <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(ev)}>
                 <EditIcon fontSize="small" />
               </IconButton>
-              <IconButton edge="end" aria-label="delete" onClick={() => deleteEvent(ev.id)}>
+              <IconButton
+                className="delete-btn"
+                edge="end"
+                aria-label="delete"
+                onClick={() => {
+                  deleteEvent(ev.id);
+                  showUndo('Event deleted', () => useEventStore.getState().restoreEvent(ev.id));
+                }}
+                sx={{ visibility: 'hidden' }}
+              >
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </ListItemSecondaryAction>
@@ -135,25 +145,7 @@ export function LocalEventsManager() {
         </Button>
       </Stack>
 
-      {trash.length > 0 && (
-        <Box mt={4}>
-          <Typography variant="h6" gutterBottom>
-            Trash
-          </Typography>
-          <List dense>
-            {trash.map(ev => (
-              <ListItem key={ev.id} sx={{ pl: 0 }}>
-                <ListItemText primary={ev.title} />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" aria-label="restore" onClick={() => restoreEvent(ev.id)}>
-                    <RestoreIcon fontSize="small" />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      )}
+      {/* Trash moved to settings */}
     </Box>
   );
 }

@@ -16,9 +16,12 @@ import { LocalEventsManager } from '@/widgets/LocalEventsManager';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { AppInfo } from '@/widgets/Settings/AppInfo';
 import { TagPresets } from '@/widgets/Settings/TagPresets';
-import { TodoSettings } from '@/widgets/Settings/TodoSettings';
+import { TodoViewSettings } from '@/widgets/Settings/TodoViewSettings';
+import { EventsTrash } from '@/widgets/Settings/EventsTrash';
+import { TodoTrash } from '@/widgets/TodoList/TodoTrash';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
+import { UndoSnackbar } from '@/components/UndoSnackbar';
 
 interface HomeViewProps {
   dashboardViewState: DashboardViewState;
@@ -82,7 +85,9 @@ export function HomeView({
         tabs={{
           'ICS Calendar': <ICSCalendarManager />,
           'Local Events': <LocalEventsManager />,
-          Todo: <TodoSettings />,
+          'Deleted Events': <EventsTrash />,
+          'Todo View': <TodoViewSettings />,
+          'Todo Trash': <TodoTrash />,
           Tags: <TagPresets />,
           Auth: (
             <AuthControl
@@ -146,6 +151,7 @@ export function HomeView({
           key={`${now.toISOString()}-ChangeSnackbar`}
         />
       )}
+      <UndoSnackbar />
     </Stack>
   );
 }

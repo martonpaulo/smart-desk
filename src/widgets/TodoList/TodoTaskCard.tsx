@@ -243,6 +243,12 @@ export function TodoTaskCard({
             ))}
           </Box>
         )}
+
+        {task.quantity != null && task.quantityTotal != null && (
+          <Typography variant="caption" pt={1} display="block">
+            {`${task.quantityTotal - task.quantity}/${task.quantityTotal}`}
+          </Typography>
+        )}
       </Box>
     </>
   );

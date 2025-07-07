@@ -11,6 +11,7 @@ export interface TodoTask {
   tags: string[];
   columnId: string;
   quantity?: number;
+  quantityTotal?: number;
   prevColumnId?: string;
 }
 

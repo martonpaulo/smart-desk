@@ -62,8 +62,8 @@ export function EditTaskModal({
     setTitle(task.title);
     setDescription(task.description || '');
     setTags(task.tags);
-    setQuantity(task.quantity ?? '');
-    setUseQuantity(task.quantity != null);
+    setQuantity(task.quantityTotal ?? task.quantity ?? '');
+    setUseQuantity(task.quantity != null || task.quantityTotal != null);
     setTagInput('');
     setEditingTag(null);
   }, [task]);
@@ -156,12 +156,14 @@ export function EditTaskModal({
     if (!task) return;
     const trimmedTitle = title.trim();
     if (!trimmedTitle) return;
+    const qty = useQuantity && quantity !== '' ? Number(quantity) : undefined;
     onSave({
       ...task,
       title: trimmedTitle,
       description: description.trim() || undefined,
       tags,
-      quantity: useQuantity && quantity !== '' ? quantity : undefined,
+      quantity: qty != null ? Math.min(task.quantity ?? qty, qty) : undefined,
+      quantityTotal: qty,
     });
   };
 
@@ -235,7 +237,7 @@ export function EditTaskModal({
               }}
             />
             <TextField
-              label="Quantity"
+              label="Max quantity"
               type="number"
               value={quantity}
               onChange={e => setQuantity(e.target.value === '' ? '' : Number(e.target.value))}

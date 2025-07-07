@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Box, Stack } from '@mui/material';
+import { Box, Stack, useMediaQuery } from '@mui/material';
 
 import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
+import { useTodoBoardStore } from '@/store/todoBoardStore';
+import { showUndo } from '@/store/undoStore';
 import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import { TrashDialog } from '@/widgets/TodoList/TrashDialog';
+import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
 import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
 // Ensure drag and drop works on Safari PWAs
@@ -21,7 +24,9 @@ interface TodoListProps {
 }
 
 export function TodoList({ events }: TodoListProps) {
-  const [board, setBoard] = useState<BoardState>(() => loadBoard());
+  const boardStoreBoard = useTodoBoardStore(state => state.board);
+  const setBoardInStore = useTodoBoardStore(state => state.setBoard);
+  const [board, setBoard] = useState<BoardState>(boardStoreBoard);
   const view = useTodoPrefsStore(state => state.view);
   const trashOpen = useTodoPrefsStore(state => state.trashOpen);
   const setTrashOpen = useTodoPrefsStore(state => state.setTrashOpen);
@@ -35,6 +40,12 @@ export function TodoList({ events }: TodoListProps) {
   const [hoverTaskId, setHoverTaskId] = useState<string | null>(null);
   const [taskDropColumnId, setTaskDropColumnId] = useState<string | null>(null);
   const [hoverColumnId, setHoverColumnId] = useState<string | null>(null);
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('mobileLg'));
+
+  // keep global store in sync
+  useEffect(() => {
+    setBoardInStore(board);
+  }, [board, setBoardInStore]);
 
   // Populate tasks from today's events once per day
   useEffect(() => {
@@ -161,7 +172,13 @@ export function TodoList({ events }: TodoListProps) {
       tags: [],
       columnId,
     };
-    setBoard(prev => ({ ...prev, tasks: [...prev.tasks, task] }));
+    setBoard(prev => {
+      let columns = prev.columns;
+      if (!columns.some(c => c.id === columnId)) {
+        columns = [...columns, { id: columnId, title: 'Draft', color: '#616161' }];
+      }
+      return { ...prev, columns, tasks: [...prev.tasks, task] };
+    });
     return task.id;
   };
 
@@ -198,6 +215,7 @@ export function TodoList({ events }: TodoListProps) {
         trash: { ...prev.trash, tasks: [task, ...prev.trash.tasks] },
       };
     });
+    showUndo('Task deleted', undo);
   };
 
   const handleToggleDone = (id: string) => {
@@ -288,6 +306,7 @@ export function TodoList({ events }: TodoListProps) {
       };
     });
     setColumnModal(null);
+    showUndo('Column deleted', undo);
   };
 
   const handleRestoreTask = (id: string) => {
@@ -408,6 +427,7 @@ export function TodoList({ events }: TodoListProps) {
         hoverTaskId={hoverTaskId}
         taskDropColumnId={taskDropColumnId}
         draggingColumnId={draggingColumnId}
+        showAddTaskInput={!isMobile}
       />
     );
   };
@@ -444,6 +464,23 @@ export function TodoList({ events }: TodoListProps) {
         onRestoreColumn={handleRestoreColumn}
         onClose={() => setTrashOpen(false)}
       />
+
+      {isMobile && (
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            left: 16,
+            right: 16,
+          }}
+        >
+          <AddTaskInput
+            columnId="draft"
+            columnColor="#f0f0f0"
+            onAdd={handleAddTask}
+          />
+        </Box>
+      )}
 
       <style jsx>{`
         .todo-actions {

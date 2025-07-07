@@ -1,4 +1,5 @@
 import { Circle as StatusIcon, Delete } from '@mui/icons-material';
+import { showUndo } from '@/store/undoStore';
 import {
   IconButton,
   ListItem,
@@ -12,6 +13,7 @@ import {
 import { MinutesChip } from '@/components/MinutesChip';
 import { theme } from '@/styles/theme';
 import { IEvent } from '@/types/IEvent';
+import { useEventStore } from '@/store/eventStore';
 import {
   calculateMinutesUntilEvent,
   computeEventStatus,
@@ -35,7 +37,15 @@ export function EventListItem({ event, onDelete }: EventListItemProps) {
   const shouldDisplayChip = isCurrent || (minutesUntilEvent > 0 && minutesUntilEvent < 30);
 
   return (
-    <ListItem sx={{ backgroundColor, borderRadius: 1, mb: 0.5 }}>
+    <ListItem
+      sx={{
+        backgroundColor,
+        borderRadius: 1,
+        mb: 0.5,
+        position: 'relative',
+        '&:hover .delete-btn': { visibility: 'visible' },
+      }}
+    >
       <ListItemIcon sx={{ minWidth: 40 }}>
         <StatusIcon sx={{ color: iconColor }} />
       </ListItemIcon>
@@ -50,7 +60,16 @@ export function EventListItem({ event, onDelete }: EventListItemProps) {
         <Typography variant="subtitle1">{title}</Typography>
       </ListItemText>
       <ListItemSecondaryAction>
-        <IconButton edge="end" aria-label="delete" onClick={() => onDelete(event.id)}>
+        <IconButton
+          className="delete-btn"
+          edge="end"
+          aria-label="delete"
+          onClick={() => {
+            onDelete(event.id);
+            showUndo('Event deleted', () => useEventStore.getState().restoreEvent(event.id));
+          }}
+          sx={{ visibility: 'hidden' }}
+        >
           <Delete fontSize="small" />
         </IconButton>
       </ListItemSecondaryAction>

@@ -30,6 +30,7 @@ interface TodoColumnProps {
   taskDropColumnId?: string | null;
   draggingColumnId?: string | null;
   hideHeader?: boolean;
+  showAddTaskInput?: boolean;
 }
 
 export function TodoColumn({
@@ -55,6 +56,7 @@ export function TodoColumn({
   taskDropColumnId,
   draggingColumnId,
   hideHeader,
+  showAddTaskInput = true,
 }: TodoColumnProps) {
   const [creatingId, setCreatingId] = useState<string | null>(null);
 
@@ -141,7 +143,7 @@ export function TodoColumn({
         <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
       )}
 
-      {!creatingId && (
+      {!creatingId && showAddTaskInput && (
         <AddTaskInput
           columnId={column.id}
           columnColor={alpha(darken(column.color, 0.2), 0.15)}
