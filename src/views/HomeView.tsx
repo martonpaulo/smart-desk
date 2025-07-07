@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { Stack, useMediaQuery } from '@mui/material';
 
+import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { DashboardViewState } from '@/types/DashboardViewState';
 import { IWeather } from '@/types/IWeather';
 import { AuthControl } from '@/widgets/AuthControl';
@@ -13,12 +14,11 @@ import { EventTimeline } from '@/widgets/EventTimeline';
 import ICSCalendarManager from '@/widgets/ICSCalendarManager';
 import { LocalEventsManager } from '@/widgets/LocalEventsManager';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
-import { SoundAlert } from '@/widgets/SoundAlert';
-import { TodoList } from '@/widgets/TodoList';
-import { TodoSettings } from '@/widgets/Settings/TodoSettings';
 import { AppInfo } from '@/widgets/Settings/AppInfo';
 import { TagPresets } from '@/widgets/Settings/TagPresets';
-import { useTodoPrefsStore } from '@/store/todoPrefsStore';
+import { TodoSettings } from '@/widgets/Settings/TodoSettings';
+import { SoundAlert } from '@/widgets/SoundAlert';
+import { TodoList } from '@/widgets/TodoList';
 
 interface HomeViewProps {
   dashboardViewState: DashboardViewState;
@@ -50,7 +50,7 @@ export function HomeView({
 }: HomeViewProps) {
   const [now, setNow] = useState(new Date());
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('mobileLg'));
   const {
     severity,
     message,

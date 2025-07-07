@@ -1,15 +1,15 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import CheckIcon from '@mui/icons-material/Check';
-import UndoIcon from '@mui/icons-material/Undo';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import EditIcon from '@mui/icons-material/Edit';
+import UndoIcon from '@mui/icons-material/Undo';
 import { Box, Chip, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha, darken } from '@mui/material/styles';
 
 import { theme } from '@/styles/theme';
-import { Column, TodoTask } from '@/widgets/TodoList/types';
 import { loadTagPresets } from '@/utils/tagPresetsStorage';
+import { Column, TodoTask } from '@/widgets/TodoList/types';
 
 interface TodoTaskCardProps {
   task: TodoTask;
@@ -233,7 +233,6 @@ export function TodoTaskCard({
           </Box>
         )}
       </Box>
-
     </>
   );
 }

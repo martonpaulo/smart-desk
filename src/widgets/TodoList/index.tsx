@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Box, Stack } from '@mui/material';
 
+import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
@@ -14,7 +15,6 @@ import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
 // Ensure drag and drop works on Safari PWAs
 import '@/lib/dragDropTouch';
-import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 
 interface TodoListProps {
   events: IEvent[] | null;
@@ -23,7 +23,6 @@ interface TodoListProps {
 export function TodoList({ events }: TodoListProps) {
   const [board, setBoard] = useState<BoardState>(() => loadBoard());
   const view = useTodoPrefsStore(state => state.view);
-  const setView = useTodoPrefsStore(state => state.setView);
   const trashOpen = useTodoPrefsStore(state => state.trashOpen);
   const setTrashOpen = useTodoPrefsStore(state => state.setTrashOpen);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -217,9 +216,8 @@ export function TodoList({ events }: TodoListProps) {
       const tasks = prev.tasks.map(t => {
         if (t.id !== id) return t;
         if (t.columnId === 'done') {
-          const target = t.prevColumnId && columns.some(c => c.id === t.prevColumnId)
-            ? t.prevColumnId
-            : 'draft';
+          const target =
+            t.prevColumnId && columns.some(c => c.id === t.prevColumnId) ? t.prevColumnId : 'draft';
           return { ...t, columnId: target, prevColumnId: undefined };
         }
 
@@ -401,7 +399,6 @@ export function TodoList({ events }: TodoListProps) {
 
   return (
     <Box sx={{ position: 'relative' }}>
-
       <Stack
         direction={view === 'board' ? 'row' : 'column'}
         spacing={2}

@@ -1,6 +1,9 @@
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 
-export interface TagPreset { name: string; color: string; }
+export interface TagPreset {
+  name: string;
+  color: string;
+}
 
 const KEY = 'tag-presets';
 

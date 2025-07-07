@@ -1,6 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Box, Button, IconButton, List, ListItem, ListItemSecondaryAction, ListItemText, Stack, TextField } from '@mui/material';
+import { useEffect, useState } from 'react';
+
 import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Box,
+  Button,
+  IconButton,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  Stack,
+  TextField,
+} from '@mui/material';
+
 import { loadTagPresets, saveTagPresets, TagPreset } from '@/utils/tagPresetsStorage';
 
 export function TagPresets() {
@@ -31,7 +43,9 @@ export function TagPresets() {
       <Stack direction="row" spacing={2} mb={2}>
         <TextField label="Tag" value={name} onChange={e => setName(e.target.value)} />
         <TextField label="Color" value={color} onChange={e => setColor(e.target.value)} />
-        <Button onClick={handleAdd} variant="contained">Add</Button>
+        <Button onClick={handleAdd} variant="contained">
+          Add
+        </Button>
       </Stack>
       <List dense>
         {presets.map((p, idx) => (

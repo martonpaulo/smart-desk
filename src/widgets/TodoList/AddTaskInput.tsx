@@ -9,12 +9,7 @@ interface AddTaskInputProps {
   onStartEdit?: (id: string) => void;
 }
 
-export function AddTaskInput({
-  columnId,
-  columnColor,
-  onAdd,
-  onStartEdit,
-}: AddTaskInputProps) {
+export function AddTaskInput({ columnId, columnColor, onAdd, onStartEdit }: AddTaskInputProps) {
   const handleFocus = () => {
     const id = onAdd(columnId, '');
     onStartEdit?.(id);

@@ -1,5 +1,13 @@
 import { Circle as StatusIcon, Delete } from '@mui/icons-material';
-import { IconButton, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Stack, Typography } from '@mui/material';
+import {
+  IconButton,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+  Stack,
+  Typography,
+} from '@mui/material';
 
 import { MinutesChip } from '@/components/MinutesChip';
 import { theme } from '@/styles/theme';

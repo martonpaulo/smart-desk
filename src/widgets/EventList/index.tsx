@@ -1,6 +1,6 @@
 import { List, ListItem, ListItemText } from '@mui/material';
-import { useEventStore } from '@/store/eventStore';
 
+import { useEventStore } from '@/store/eventStore';
 import { IEvent } from '@/types/IEvent';
 import {
   filterCurrentOrFutureEvents,

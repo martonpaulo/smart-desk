@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 
 interface TodoPrefsState {
@@ -8,12 +9,14 @@ interface TodoPrefsState {
   setTrashOpen: (open: boolean) => void;
 }
 
+type TodoPrefsData = Pick<TodoPrefsState, 'view' | 'trashOpen'>;
+
 const STORAGE_KEY = 'todo-prefs';
 
-function loadPrefs(): TodoPrefsState {
+function loadPrefs(): TodoPrefsData {
   try {
     return (
-      getStoredFilters<TodoPrefsState>(STORAGE_KEY) ?? {
+      getStoredFilters<TodoPrefsData>(STORAGE_KEY) ?? {
         view: 'board',
         trashOpen: false,
       }
@@ -29,7 +32,11 @@ function loadPrefs(): TodoPrefsState {
 }
 
 function persistPrefs(state: TodoPrefsState) {
-  setStoredFilters(STORAGE_KEY, { view: state.view });
+  const dataToStore: TodoPrefsData = {
+    view: state.view,
+    trashOpen: state.trashOpen,
+  };
+  setStoredFilters(STORAGE_KEY, dataToStore);
 }
 
 export const useTodoPrefsStore = create<TodoPrefsState>(set => ({

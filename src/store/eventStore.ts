@@ -2,8 +2,8 @@ import { create } from 'zustand';
 
 import type { IEvent } from '@/types/IEvent';
 import { mergeEvents } from '@/utils/eventUtils';
-import { loadLocalEvents, saveLocalEvents } from '@/utils/localEventsStorage';
 import { loadHiddenEventIds, saveHiddenEventIds } from '@/utils/hiddenEventsStorage';
+import { loadLocalEvents, saveLocalEvents } from '@/utils/localEventsStorage';
 
 interface EventState {
   events: IEvent[];
@@ -64,7 +64,9 @@ export const useEventStore = create<EventState>((set, get) => ({
       const localEvents = state.localEvents.filter(e => e.id !== id);
       const remoteEvents = state.remoteEvents.filter(e => e.id !== id);
       saveLocalEvents(localEvents);
-      const hidden = state.hiddenEvents.includes(id) ? state.hiddenEvents : [id, ...state.hiddenEvents];
+      const hidden = state.hiddenEvents.includes(id)
+        ? state.hiddenEvents
+        : [id, ...state.hiddenEvents];
       saveHiddenEventIds(hidden);
       return {
         localEvents,
