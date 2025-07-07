@@ -10,7 +10,7 @@ import { HomeView } from '@/views/HomeView';
 export default function Home() {
   const dashboardViewState = useDashboardViewState();
 
-  const { name: locationName, latitude, longitude } = useLocation();
+  const { latitude, longitude } = useLocation();
   const {
     data: weather,
     isLoading: weatherIsLoading,
@@ -40,7 +40,6 @@ export default function Home() {
       onMeetingAlertToggle={toggleMeetingAlertEnabled}
       isEventChangesAlertEnabled={isEventChangesAlertEnabled}
       onEventChangesAlertToggle={toggleEventChangesAlertEnabled}
-      locationName={locationName}
       weather={weather}
       weatherIsLoading={weatherIsLoading}
       weatherIsError={weatherIsError}

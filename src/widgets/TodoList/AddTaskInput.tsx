@@ -1,3 +1,5 @@
+import AddIcon from '@mui/icons-material/Add';
+import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 
 interface AddTaskInputProps {
@@ -19,7 +21,7 @@ export function AddTaskInput({ columnId, onAdd, onStartEdit }: AddTaskInputProps
     <TextField
       fullWidth
       size="small"
-      placeholder="+ new task"
+      placeholder="new task"
       onChange={handleChange}
       slotProps={{
         input: {
@@ -28,6 +30,11 @@ export function AddTaskInput({ columnId, onAdd, onStartEdit }: AddTaskInputProps
             lineHeight: theme.typography.body2.lineHeight,
             fontWeight: theme.typography.body2.fontWeight,
           }),
+          startAdornment: (
+            <InputAdornment position="start">
+              <AddIcon color="action" fontSize="small" />
+            </InputAdornment>
+          ),
         },
       }}
     />

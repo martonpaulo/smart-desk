@@ -25,7 +25,6 @@ interface HomeViewProps {
   onMeetingAlertToggle: () => void;
   isEventChangesAlertEnabled: boolean;
   onEventChangesAlertToggle: () => void;
-  locationName?: string | null;
   weather?: IWeather | null;
   weatherIsLoading: boolean;
   weatherIsError: boolean;
