@@ -8,7 +8,7 @@ interface ServiceWorkerProviderProps {
 
 export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) {
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
+    if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
         .catch(err => console.error('Service Worker registration failed:', err));

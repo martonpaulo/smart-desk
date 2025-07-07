@@ -11,8 +11,8 @@ import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boar
 import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
-import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 import { TrashDialog } from '@/widgets/TodoList/TrashDialog';
+import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
 interface TodoListProps {
   events: IEvent[] | null;

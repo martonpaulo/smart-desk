@@ -18,7 +18,7 @@ export function AddTaskInput({ columnId, onAdd, onStartEdit }: AddTaskInputProps
     <TextField
       fullWidth
       size="small"
-      placeholder="new task"
+      placeholder="new tasks"
       onFocus={handleFocus}
       inputProps={{ readOnly: true }}
       slotProps={{

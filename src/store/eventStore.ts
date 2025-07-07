@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { mergeEvents } from '@/utils/eventUtils';
+
 import type { IEvent } from '@/types/IEvent';
+import { mergeEvents } from '@/utils/eventUtils';
 import { loadLocalEvents, saveLocalEvents } from '@/utils/localEventsStorage';
 
 interface EventState {
@@ -23,9 +24,14 @@ export const useEventStore = create<EventState>((set, get) => ({
   trash: [],
   setRemoteEvents: list => {
     const prev = get().remoteEvents;
-    const merged = mergeEvents(prev, list);
-    const localEvents = get().localEvents;
-    set({ remoteEvents: merged, events: [...merged, ...localEvents] });
+    // Only update if the lists are different
+    if (JSON.stringify(prev) !== JSON.stringify(list)) {
+      const merged = mergeEvents(prev, list);
+      const localEvents = get().localEvents;
+      // Use mergeEvents to combine remote and local events to avoid duplicates
+      const allEvents = mergeEvents(merged, localEvents);
+      set({ remoteEvents: merged, events: allEvents });
+    }
   },
   addLocalEvent: event =>
     set(state => {
@@ -81,6 +87,8 @@ export const useEventStore = create<EventState>((set, get) => ({
       localEvents: state.localEvents.map(event =>
         event.id === id ? { ...event, aknowledged: true } : event,
       ),
-      events: state.events.map(event => (event.id === id ? { ...event, aknowledged: true } : event)),
+      events: state.events.map(event =>
+        event.id === id ? { ...event, aknowledged: true } : event,
+      ),
     })),
 }));
