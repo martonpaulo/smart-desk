@@ -105,9 +105,25 @@ export function EditTaskModal({
     }
 
     if (e.key === 'Enter' && isCtrlOrCmd) {
-      handleSaveAndClose();
       e.preventDefault();
-      handleSaveAndClose();
+
+      const value = tagInput.trim();
+      if (value && !tags.includes(value)) {
+        const newTags = [...tags, value];
+        setTags(newTags);
+        setTagInput('');
+        setEditingTag(null);
+
+        // salva fora do setState
+        if (task) {
+          onSave({
+            ...task,
+            title: title.trim(),
+            description: description.trim() || undefined,
+            tags: newTags,
+          });
+        }
+      }
     }
   };
 
