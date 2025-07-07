@@ -105,6 +105,7 @@ export function EditTaskModal({
     }
 
     if (e.key === 'Enter' && isCtrlOrCmd) {
+      handleSaveAndClose();
       e.preventDefault();
       handleSaveAndClose();
     }
@@ -240,7 +241,7 @@ export function EditTaskModal({
                         color: `${tagTextColor} !important`,
                       },
                       '&:hover': {
-                        bgcolor: alpha(tagColor!, 0.8),
+                        bgcolor: tagColor ? alpha(tagColor, 0.95) : undefined,
                       },
                     }}
                   />

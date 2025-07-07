@@ -19,8 +19,8 @@ import { Column } from '@/widgets/TodoList/types';
 
 export const COLUMN_COLORS = [
   { name: 'Blue', value: '#1976d2' },
-  { name: 'Green', value: '#2e7d32' },
   { name: 'Orange', value: '#ed6c02' },
+  { name: 'Green', value: '#2e7d32' },
   { name: 'Red', value: '#d32f2f' },
   { name: 'Purple', value: '#9c27b0' },
   { name: 'Gray', value: '#616161' },

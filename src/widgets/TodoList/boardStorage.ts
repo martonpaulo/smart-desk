@@ -1,13 +1,14 @@
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
+import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 import { BoardState, Column } from '@/widgets/TodoList/types';
 
 export const STORAGE_KEY = 'todo-board';
 export const LAST_POPULATE_KEY = 'todo-last-populate';
 
 export const DEFAULT_COLUMNS: Column[] = [
-  { id: 'todo', title: 'Todo', color: '#1976d2' },
-  { id: 'doing', title: 'Doing', color: '#f57c00' },
-  { id: 'done', title: 'Done', color: '#2e7d32' },
+  { id: 'todo', title: 'Todo', color: COLUMN_COLORS[0].value },
+  { id: 'doing', title: 'Doing', color: COLUMN_COLORS[1].value },
+  { id: 'done', title: 'Done', color: COLUMN_COLORS[2].value },
 ];
 
 export const DEFAULT_BOARD: BoardState = {
