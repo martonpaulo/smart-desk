@@ -368,6 +368,9 @@ export function TodoList({ events }: TodoListProps) {
     <Box sx={{ position: 'relative' }}>
       <Stack direction="row" spacing={1} mb={2} alignItems="center">
         <Box flexGrow={1} />
+        <Button variant="outlined" size="small" onClick={() => setTrashOpen(true)}>
+          Trash
+        </Button>
         <Button
           variant="outlined"
           size="small"
@@ -377,9 +380,6 @@ export function TodoList({ events }: TodoListProps) {
           {view === 'board' ? 'List view' : 'Board view'}
         </Button>
       </Stack>
-      <Button variant="outlined" size="small" onClick={() => setTrashOpen(true)}>
-        Trash
-      </Button>
 
       <Stack
         direction={view === 'board' ? 'row' : 'column'}
