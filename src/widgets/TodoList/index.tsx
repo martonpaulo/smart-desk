@@ -4,6 +4,9 @@ import ListIcon from '@mui/icons-material/List';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import { Box, Button, Stack } from '@mui/material';
 
+// Ensure drag and drop works on Safari PWAs
+import '@/lib/dragDropTouch';
+
 import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';

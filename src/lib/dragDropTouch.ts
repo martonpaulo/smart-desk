@@ -1,4 +1,4 @@
-// Minimal touch drag-and-drop polyfill for iOS devices.
+// Minimal touch drag-and-drop polyfill for iOS devices and Safari PWAs.
 // Inspired by the drag-drop-touch library (MIT licensed).
 
 interface DragContext {
@@ -82,10 +82,23 @@ function onTouchEnd(e: TouchEvent) {
   ctx.dragging = false;
 }
 
-if (
-  typeof window !== 'undefined' &&
-  'ontouchstart' in window &&
-  !('draggable' in document.createElement('div'))
-) {
+/**
+ * Determine if we need to enable the drag-and-drop polyfill.
+ *
+ * Safari on iOS reports support for draggable elements but fails to fire
+ * drag events when running as a standalone PWA. The check below also
+ * activates the polyfill on older iOS versions that lack native drag-and-drop
+ * support entirely.
+ */
+function shouldEnablePolyfill(): boolean {
+  if (typeof window === 'undefined') return false;
+  if (!('ontouchstart' in window)) return false;
+  const hasNativeDnD = 'draggable' in document.createElement('div');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isPwaSafari = (navigator as any).standalone === true;
+  return !hasNativeDnD || isPwaSafari;
+}
+
+if (shouldEnablePolyfill()) {
   document.addEventListener('touchstart', onTouchStart);
 }

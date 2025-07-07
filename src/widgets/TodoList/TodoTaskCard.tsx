@@ -83,6 +83,7 @@ export function TodoTaskCard({
           position: 'relative',
           bgcolor: alpha(darken(column.color, 0.2), 0.15),
           cursor: editing ? 'text' : 'pointer',
+          touchAction: 'none',
           '&:hover .todo-actions': { visibility: 'visible' },
           '&:active': { cursor: 'grabbing' },
           boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,

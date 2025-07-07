@@ -86,6 +86,7 @@ export function TodoColumn({
         borderRadius: 1,
         boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,
         position: 'relative',
+        touchAction: 'none',
         '&:hover .add-column-btn': {
           visibility: 'visible',
         },
