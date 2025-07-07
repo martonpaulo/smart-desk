@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -39,69 +39,94 @@ export function EditTaskModal({
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [editingTag, setEditingTag] = useState<string | null>(null);
+  const [hoveredDeleteTag, setHoveredDeleteTag] = useState<string | null>(null);
 
-  // Update state when task changes
+  // ref para o input de tags
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
+  // reset form quando a task mudar
   useEffect(() => {
     if (!task) return;
     setTitle(task.title);
     setDescription(task.description || '');
     setTags(task.tags);
     setTagInput('');
+    setEditingTag(null);
   }, [task]);
 
-  const [hoveredDeleteTag, setHoveredDeleteTag] = useState<string | null>(null);
+  // quando entrar em modo de edição de tag, foca e posiciona cursor no fim
+  useEffect(() => {
+    if (editingTag && tagInputRef.current) {
+      tagInputRef.current.focus();
+      const len = tagInputRef.current.value.length;
+      tagInputRef.current.setSelectionRange(len, len);
+    }
+  }, [editingTag]);
 
+  // clicar no chip inicia edição
+  const handleChipClick = (tag: string) => {
+    setEditingTag(tag);
+    setTagInput(tag);
+    setTags(prev => prev.filter(t => t !== tag));
+  };
+
+  // deletar tag
+  const handleTagDelete = (tag: string) => {
+    setTags(prev => prev.filter(t => t !== tag));
+    if (editingTag === tag) {
+      setEditingTag(null);
+      setTagInput('');
+    }
+  };
+
+  // adicionar ou renomear tag
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === ' ' || e.key === 'Enter') {
+    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+
+    if ((e.key === ' ' || e.key === 'Enter') && !isCtrlOrCmd) {
       e.preventDefault();
       const value = tagInput.trim();
-      if (value && !tags.includes(value)) {
-        setTags(prev => [...prev, value]);
+      if (!value) return;
+
+      if (editingTag) {
+        // renomear
+        if (!tags.includes(value)) {
+          setTags(prev => [...prev, value]);
+        }
+        setEditingTag(null);
+      } else {
+        // adicionar nova
+        if (!tags.includes(value)) {
+          setTags(prev => [...prev, value]);
+        }
       }
       setTagInput('');
     }
 
-    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-
     if (e.key === 'Enter' && isCtrlOrCmd) {
       e.preventDefault();
       handleSaveAndClose();
     }
   };
 
-  const handleTagDelete = (tag: string) => {
-    setTags(prev => prev.filter(t => t !== tag));
-  };
-
-  const handleCloseOnly = () => {
-    onClose();
-  };
-
+  // salva e fecha
   const handleSaveAndClose = () => {
     if (!task) return;
     const trimmedTitle = title.trim();
     if (!trimmedTitle) return;
-    onSave({ ...task, title: trimmedTitle, description: description.trim() || undefined, tags });
+    onSave({
+      ...task,
+      title: trimmedTitle,
+      description: description.trim() || undefined,
+      tags,
+    });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSaveAndClose();
-    }
-  };
+  const handleCloseOnly = () => onClose();
 
   const tagColor = column ? alpha(column.color, 0.65) : undefined;
   const tagTextColor = tagColor ? theme.palette.getContrastText(tagColor) : undefined;
-
-  const handleKeyDownArea = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-
-    if (e.key === 'Enter' && isCtrlOrCmd) {
-      e.preventDefault();
-      handleSaveAndClose();
-    }
-  };
 
   return (
     <Dialog
@@ -109,31 +134,24 @@ export function EditTaskModal({
       maxWidth="mobileLg"
       fullWidth
       onClose={(_, reason) => {
-        if (reason === 'escapeKeyDown') {
-          handleCloseOnly();
-        } else {
-          handleSaveAndClose();
-        }
+        if (reason === 'escapeKeyDown') handleCloseOnly();
+        else handleSaveAndClose();
       }}
     >
       <DialogTitle sx={{ position: 'relative' }}>
         Edit Task
-        {onDeleteTask && (
-          <Tooltip title="Delete task" enterTouchDelay={0}>
-            <IconButton
-              aria-label="delete task"
-              onClick={() => {
-                if (task) {
-                  onDeleteTask(task.id);
-                }
-                onClose();
-              }}
-              sx={{ position: 'absolute', top: 8, right: 8 }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        )}
+        <Tooltip title="Delete task" enterTouchDelay={0}>
+          <IconButton
+            aria-label="delete task"
+            onClick={() => {
+              if (task) onDeleteTask(task.id);
+              onClose();
+            }}
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
       </DialogTitle>
 
       <DialogContent>
@@ -142,27 +160,42 @@ export function EditTaskModal({
             label="Title"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSaveAndClose();
+              }
+            }}
             fullWidth
           />
+
           <TextField
             label="Description"
             multiline
             minRows={6}
-            onKeyDown={handleKeyDownArea}
             value={description}
             onChange={e => setDescription(e.target.value)}
+            onKeyDown={e => {
+              const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+              if (e.key === 'Enter' && isCtrlOrCmd) {
+                e.preventDefault();
+                handleSaveAndClose();
+              }
+            }}
             fullWidth
           />
+
           <Stack direction="row" spacing={2}>
             <TextField
-              label="Add tag"
+              label={editingTag ? 'Edit tag' : 'Add tag'}
               value={tagInput}
               onChange={e => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
+              inputRef={tagInputRef}
               sx={{ minWidth: '200px' }}
             />
-            <Box display="flex" flexWrap="wrap" gap={1} overflow={'hidden'}>
+
+            <Box display="flex" flexWrap="wrap" gap={1} overflow="hidden">
               {tags.map(tag => (
                 <Tooltip
                   key={tag}
@@ -171,6 +204,7 @@ export function EditTaskModal({
                 >
                   <Chip
                     label={tag}
+                    onClick={() => handleChipClick(tag)}
                     onDelete={() => handleTagDelete(tag)}
                     onMouseEnter={() => setHoveredDeleteTag(null)} // clear tooltip if not over delete icon
                     onMouseLeave={() => setHoveredDeleteTag(null)}
@@ -184,14 +218,14 @@ export function EditTaskModal({
                       />
                     }
                     sx={{
-                      bgcolor: tagColor ? `${tagColor}` : undefined,
+                      bgcolor: tagColor,
                       color: tagTextColor,
                       cursor: 'pointer',
                       '& .MuiChip-deleteIcon': {
-                        color: tagTextColor ? `${tagTextColor} !important` : undefined,
+                        color: `${tagTextColor} !important`,
                       },
                       '&:hover': {
-                        bgcolor: tagColor ? alpha(tagColor, 0.8) : undefined,
+                        bgcolor: alpha(tagColor!, 0.8),
                       },
                     }}
                   />
