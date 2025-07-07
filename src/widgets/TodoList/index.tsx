@@ -2,18 +2,18 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Box, Stack, useMediaQuery } from '@mui/material';
 
+import { useTodoBoardStore } from '@/store/todoBoardStore';
 import { useTodoPrefsStore } from '@/store/todoPrefsStore';
+import { showUndo } from '@/store/undoStore';
 import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-import { LAST_POPULATE_KEY, loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
-import { useTodoBoardStore } from '@/store/todoBoardStore';
-import { showUndo } from '@/store/undoStore';
+import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
+import { LAST_POPULATE_KEY, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import { TrashDialog } from '@/widgets/TodoList/TrashDialog';
-import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
 import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
 // Ensure drag and drop works on Safari PWAs
@@ -474,11 +474,7 @@ export function TodoList({ events }: TodoListProps) {
             right: 16,
           }}
         >
-          <AddTaskInput
-            columnId="draft"
-            columnColor="#f0f0f0"
-            onAdd={handleAddTask}
-          />
+          <AddTaskInput columnId="draft" columnColor="#f0f0f0" onAdd={handleAddTask} />
         </Box>
       )}
 

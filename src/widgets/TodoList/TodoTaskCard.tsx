@@ -141,20 +141,28 @@ export function TodoTaskCard({
                 }}
               />
             ) : (
-              <Typography
-                role="button"
-                aria-label={`View details of ${task.title}`}
-                onClick={() => onOpen(task.id)}
-                variant="body2"
-                sx={{
-                  maxWidth: '100%',
-                  overflowWrap: 'anywhere',
-                  whiteSpace: 'normal',
-                  textDecoration: task.columnId === 'done' ? 'line-through' : 'none',
-                }}
-              >
-                {task.title}
-              </Typography>
+              <Stack direction="row" alignItems="center" gap={0.5}>
+                <Typography
+                  role="button"
+                  aria-label={`View details of ${task.title}`}
+                  onClick={() => onOpen(task.id)}
+                  variant="body2"
+                  sx={{
+                    maxWidth: '100%',
+                    overflowWrap: 'anywhere',
+                    whiteSpace: 'normal',
+                    textDecoration: task.columnId === 'done' ? 'line-through' : 'none',
+                  }}
+                >
+                  {task.title}
+                </Typography>
+
+                {task.quantity != null && task.quantityTotal != null && (
+                  <Typography variant="caption">
+                    ({`${task.quantityTotal - task.quantity}/${task.quantityTotal}`})
+                  </Typography>
+                )}
+              </Stack>
             )}
           </Stack>
 
@@ -242,12 +250,6 @@ export function TodoTaskCard({
               />
             ))}
           </Box>
-        )}
-
-        {task.quantity != null && task.quantityTotal != null && (
-          <Typography variant="caption" pt={1} display="block">
-            {`${task.quantityTotal - task.quantity}/${task.quantityTotal}`}
-          </Typography>
         )}
       </Box>
     </>

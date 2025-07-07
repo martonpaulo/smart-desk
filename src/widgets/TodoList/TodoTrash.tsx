@@ -1,4 +1,6 @@
-import RestoreIcon from '@mui/icons-material/RestoreFromTrash';
+import { ReactElement } from 'react';
+
+import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 import {
   Box,
   IconButton,
@@ -10,68 +12,130 @@ import {
 } from '@mui/material';
 
 import { useTodoBoardStore } from '@/store/todoBoardStore';
+import type { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
-export function TodoTrash() {
-  const board = useTodoBoardStore(state => state.board);
+/**
+ * Hook encapsulating trash state and restore logic
+ */
+function useTodoTrash() {
+  // board state and setter from our Zustand store
+  const board: BoardState = useTodoBoardStore(state => state.board);
   const setBoard = useTodoBoardStore(state => state.setBoard);
 
-  const handleRestoreTask = (id: string) => {
-    setBoard(prev => {
-      const task = prev.trash.tasks.find(t => t.id === id);
-      if (!task) return prev;
-      return {
-        ...prev,
-        tasks: [...prev.tasks, task],
-        trash: { ...prev.trash, tasks: prev.trash.tasks.filter(t => t.id !== id) },
-      };
-    });
-  };
+  // safely unwrap trash sections or default to empty arrays
+  const trashedColumns: Column[] = board.trash?.columns ?? [];
+  const trashedTasks: TodoTask[] = board.trash?.tasks ?? [];
 
-  const handleRestoreColumn = (id: string) => {
-    setBoard(prev => {
-      const column = prev.trash.columns.find(c => c.id === id);
-      if (!column) return prev;
-      const tasks = prev.trash.tasks.filter(t => t.columnId === id);
+  /**
+   * Restore a single task by id
+   */
+  function restoreTask(taskId: string): void {
+    setBoard((prev: BoardState) => {
+      // find the task in trash
+      const taskToRestore = prev.trash?.tasks.find(t => t.id === taskId);
+      if (!taskToRestore) {
+        // nothing to restore
+        return prev;
+      }
+
+      // remove restored task from trash
+      const updatedTrashTasks = prev.trash!.tasks.filter(t => t.id !== taskId);
+
       return {
         ...prev,
-        columns: [...prev.columns, column],
-        tasks: [...prev.tasks, ...tasks],
+        tasks: [...prev.tasks, taskToRestore],
         trash: {
-          columns: prev.trash.columns.filter(c => c.id !== id),
-          tasks: prev.trash.tasks.filter(t => t.columnId !== id),
+          ...prev.trash!,
+          tasks: updatedTrashTasks,
         },
       };
     });
-  };
+  }
 
-  const { tasks, columns } = board.trash;
+  /**
+   * Restore a column and all its tasks
+   */
+  function restoreColumn(columnId: string): void {
+    setBoard((prev: BoardState) => {
+      // find the column in trash
+      const columnToRestore = prev.trash?.columns.find(c => c.id === columnId);
+      if (!columnToRestore) {
+        return prev;
+      }
+
+      // pick up tasks that belonged to this column
+      const tasksInColumn: TodoTask[] = prev.trash!.tasks.filter(t => t.columnId === columnId);
+      // filter out restored column and its tasks from trash
+      const updatedTrashColumns: Column[] = prev.trash!.columns.filter(c => c.id !== columnId);
+      const updatedTrashTasks: TodoTask[] = prev.trash!.tasks.filter(t => t.columnId !== columnId);
+
+      return {
+        ...prev,
+        columns: [...prev.columns, columnToRestore],
+        tasks: [...prev.tasks, ...tasksInColumn],
+        trash: {
+          columns: updatedTrashColumns,
+          tasks: updatedTrashTasks,
+        },
+      };
+    });
+  }
+
+  const isTrashEmpty: boolean = trashedColumns.length === 0 && trashedTasks.length === 0;
+
+  return {
+    trashedColumns,
+    trashedTasks,
+    isTrashEmpty,
+    restoreTask,
+    restoreColumn,
+  };
+}
+
+/**
+ * UI component to display trashed columns & tasks
+ */
+export function TodoTrash(): ReactElement {
+  const { trashedColumns, trashedTasks, isTrashEmpty, restoreTask, restoreColumn } = useTodoTrash();
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
         Trash
       </Typography>
+
       <List dense>
-        {columns.map(col => (
+        {trashedColumns.map((col: Column) => (
           <ListItem key={col.id} sx={{ pl: 0 }}>
             <ListItemText primary={`Column: ${col.title}`} />
             <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="restore" onClick={() => handleRestoreColumn(col.id)}>
-                <RestoreIcon fontSize="small" />
+              <IconButton
+                edge="end"
+                aria-label={`restore column ${col.title}`}
+                onClick={() => restoreColumn(col.id)}
+              >
+                <RestoreFromTrashIcon fontSize="small" />
               </IconButton>
             </ListItemSecondaryAction>
           </ListItem>
         ))}
-        {tasks.map(task => (
+
+        {trashedTasks.map((task: TodoTask) => (
           <ListItem key={task.id} sx={{ pl: 0 }}>
             <ListItemText primary={`Task: ${task.title}`} />
             <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="restore" onClick={() => handleRestoreTask(task.id)}>
-                <RestoreIcon fontSize="small" />
+              <IconButton
+                edge="end"
+                aria-label={`restore task ${task.title}`}
+                onClick={() => restoreTask(task.id)}
+              >
+                <RestoreFromTrashIcon fontSize="small" />
               </IconButton>
             </ListItemSecondaryAction>
           </ListItem>
         ))}
-        {columns.length === 0 && tasks.length === 0 && (
+
+        {isTrashEmpty && (
           <ListItem sx={{ pl: 0 }}>
             <ListItemText primary="Trash is empty" />
           </ListItem>

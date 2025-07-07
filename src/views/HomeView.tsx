@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { Stack, useMediaQuery } from '@mui/material';
 
+import { UndoSnackbar } from '@/components/UndoSnackbar';
 import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { DashboardViewState } from '@/types/DashboardViewState';
 import { IWeather } from '@/types/IWeather';
@@ -15,13 +16,12 @@ import ICSCalendarManager from '@/widgets/ICSCalendarManager';
 import { LocalEventsManager } from '@/widgets/LocalEventsManager';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { AppInfo } from '@/widgets/Settings/AppInfo';
+import { EventsTrash } from '@/widgets/Settings/EventsTrash';
 import { TagPresets } from '@/widgets/Settings/TagPresets';
 import { TodoViewSettings } from '@/widgets/Settings/TodoViewSettings';
-import { EventsTrash } from '@/widgets/Settings/EventsTrash';
-import { TodoTrash } from '@/widgets/TodoList/TodoTrash';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
-import { UndoSnackbar } from '@/components/UndoSnackbar';
+import { TodoTrash } from '@/widgets/TodoList/TodoTrash';
 
 interface HomeViewProps {
   dashboardViewState: DashboardViewState;

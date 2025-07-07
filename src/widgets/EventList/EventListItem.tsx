@@ -1,5 +1,4 @@
 import { Circle as StatusIcon, Delete } from '@mui/icons-material';
-import { showUndo } from '@/store/undoStore';
 import {
   IconButton,
   ListItem,
@@ -11,9 +10,10 @@ import {
 } from '@mui/material';
 
 import { MinutesChip } from '@/components/MinutesChip';
+import { useEventStore } from '@/store/eventStore';
+import { showUndo } from '@/store/undoStore';
 import { theme } from '@/styles/theme';
 import { IEvent } from '@/types/IEvent';
-import { useEventStore } from '@/store/eventStore';
 import {
   calculateMinutesUntilEvent,
   computeEventStatus,

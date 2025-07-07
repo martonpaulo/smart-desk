@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { showUndo } from '@/store/undoStore';
 import {
   Box,
   Button,
@@ -18,6 +17,7 @@ import {
 import { DateTime } from 'luxon';
 
 import { useEventStore } from '@/store/eventStore';
+import { showUndo } from '@/store/undoStore';
 import type { IEvent } from '@/types/IEvent';
 
 interface FormState {

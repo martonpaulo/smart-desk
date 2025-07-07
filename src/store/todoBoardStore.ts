@@ -3,15 +3,23 @@ import { create } from 'zustand';
 import { loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { BoardState } from '@/widgets/TodoList/types';
 
-interface TodoBoardState {
+export interface TodoBoardState {
   board: BoardState;
-  setBoard: (board: BoardState) => void;
+  setBoard: (boardOrUpdater: BoardState | ((prev: BoardState) => BoardState)) => void;
 }
 
 export const useTodoBoardStore = create<TodoBoardState>(set => ({
   board: loadBoard(),
-  setBoard: board => {
-    saveBoard(board);
-    set({ board });
+  setBoard: boardOrUpdater => {
+    if (typeof boardOrUpdater === 'function') {
+      set(state => {
+        const newBoard = boardOrUpdater(state.board);
+        saveBoard(newBoard);
+        return { board: newBoard };
+      });
+    } else {
+      saveBoard(boardOrUpdater);
+      set({ board: boardOrUpdater });
+    }
   },
 }));
