@@ -4,9 +4,6 @@ import ListIcon from '@mui/icons-material/List';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import { Box, Button, Stack } from '@mui/material';
 
-// Ensure drag and drop works on Safari PWAs
-import '@/lib/dragDropTouch';
-
 import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
@@ -16,6 +13,9 @@ import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import { TrashDialog } from '@/widgets/TodoList/TrashDialog';
 import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
+
+// Ensure drag and drop works on Safari PWAs
+import '@/lib/dragDropTouch';
 
 interface TodoListProps {
   events: IEvent[] | null;
@@ -368,9 +368,6 @@ export function TodoList({ events }: TodoListProps) {
     <Box sx={{ position: 'relative' }}>
       <Stack direction="row" spacing={1} mb={2} alignItems="center">
         <Box flexGrow={1} />
-        <Button variant="outlined" size="small" onClick={() => setTrashOpen(true)}>
-          Trash
-        </Button>
         <Button
           variant="outlined"
           size="small"
@@ -380,6 +377,9 @@ export function TodoList({ events }: TodoListProps) {
           {view === 'board' ? 'List view' : 'Board view'}
         </Button>
       </Stack>
+      <Button variant="outlined" size="small" onClick={() => setTrashOpen(true)}>
+        Trash
+      </Button>
 
       <Stack
         direction={view === 'board' ? 'row' : 'column'}
