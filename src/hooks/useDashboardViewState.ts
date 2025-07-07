@@ -9,6 +9,7 @@ export function useDashboardViewState(): DashboardViewState {
   const { status: authStatus } = useSession();
   const { isLoading: loadingEvents, isError: eventsFailed, error: rawError } = useEvents();
   const events = useEventStore(state => state.events);
+  console.log(events);
 
   const handleSignIn = async () => {
     try {
