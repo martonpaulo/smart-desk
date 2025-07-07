@@ -1,5 +1,5 @@
-import { IAlertType } from '@/types/IAlertType';
 import { useAudioStore } from '@/store/audioStore';
+import { IAlertType } from '@/types/IAlertType';
 
 const alertSoundMap: Record<IAlertType, string> = {
   [IAlertType.UPCOMING]: '/sounds/upcoming.mp3',

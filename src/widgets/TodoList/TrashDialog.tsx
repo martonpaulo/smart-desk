@@ -1,15 +1,16 @@
 import RestoreIcon from '@mui/icons-material/RestoreFromTrash';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
+  DialogTitle,
+  IconButton,
   List,
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
-  IconButton,
 } from '@mui/material';
-import { Column, TodoTask } from './types';
+
+import { Column, TodoTask } from '@/widgets/TodoList/types';
 
 interface TrashDialogProps {
   open: boolean;

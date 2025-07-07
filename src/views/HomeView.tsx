@@ -11,8 +11,8 @@ import { EventAlert } from '@/widgets/EventAlert';
 import { EventList } from '@/widgets/EventList';
 import { EventTimeline } from '@/widgets/EventTimeline';
 import ICSCalendarManager from '@/widgets/ICSCalendarManager';
-import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { LocalEventsManager } from '@/widgets/LocalEventsManager';
+import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
 

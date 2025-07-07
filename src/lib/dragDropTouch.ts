@@ -25,7 +25,9 @@ function dispatch(node: HTMLElement | null, type: string, touch: Touch) {
   Object.defineProperty(evt, 'dataTransfer', {
     value: ctx.dataTransfer,
   });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (evt as any).clientX = touch.clientX;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (evt as any).clientY = touch.clientY;
   node.dispatchEvent(evt);
 }
@@ -80,6 +82,10 @@ function onTouchEnd(e: TouchEvent) {
   ctx.dragging = false;
 }
 
-if (typeof window !== 'undefined' && 'ontouchstart' in window && !('draggable' in document.createElement('div'))) {
+if (
+  typeof window !== 'undefined' &&
+  'ontouchstart' in window &&
+  !('draggable' in document.createElement('div'))
+) {
   document.addEventListener('touchstart', onTouchStart);
 }

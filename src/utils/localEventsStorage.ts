@@ -1,5 +1,5 @@
-import { getStoredFilters, setStoredFilters } from './localStorageUtils';
-import type { IEvent } from '../types/IEvent';
+import { IEvent } from '@/types/IEvent';
+import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 
 const STORAGE_KEY = 'local-events';
 

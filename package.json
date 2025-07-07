@@ -8,7 +8,11 @@
     "url": "https://www.martonpaulo.com"
   },
   "description": "Dashboard for managing events, tasks and smart widgets",
-  "keywords": ["calendar", "tasks", "dashboard"],
+  "keywords": [
+    "calendar",
+    "tasks",
+    "dashboard"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/example/smart-desk.git"
