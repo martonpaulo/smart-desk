@@ -29,8 +29,9 @@ export const useEventStore = create<EventState>((set, get) => ({
     if (JSON.stringify(prev) !== JSON.stringify(list)) {
       const merged = mergeEvents(prev, list);
       const localEvents = get().localEvents;
+      console.log(merged, localEvents);
       // Use mergeEvents to combine remote and local events to avoid duplicates
-      const allEvents = mergeEvents(localEvents, merged);
+      const allEvents = [...merged, ...localEvents];
       console.log('allEvents events:', allEvents);
       set({ remoteEvents: merged, events: allEvents });
     }

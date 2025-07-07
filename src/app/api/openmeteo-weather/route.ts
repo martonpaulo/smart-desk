@@ -16,8 +16,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'invalid latitude or longitude' }, { status: 400 });
   }
 
-  console.log(`Fetching weather for lat: ${latitude}, lon: ${longitude}`);
-
   try {
     const params = {
       latitude,
