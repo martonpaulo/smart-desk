@@ -123,6 +123,8 @@ export function EditTaskModal({
     });
   };
 
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
   const handleCloseOnly = () => onClose();
 
   const tagColor = column ? alpha(column.color, 0.65) : undefined;
@@ -136,6 +138,18 @@ export function EditTaskModal({
       onClose={(_, reason) => {
         if (reason === 'escapeKeyDown') handleCloseOnly();
         else handleSaveAndClose();
+      }}
+      slotProps={{
+        transition: {
+          onEntered: () => {
+            if (titleInputRef.current) {
+              const input = titleInputRef.current;
+              input.focus();
+              const len = input.value.length;
+              input.setSelectionRange(len, len);
+            }
+          },
+        },
       }}
     >
       <DialogTitle sx={{ position: 'relative' }}>
@@ -166,6 +180,7 @@ export function EditTaskModal({
                 handleSaveAndClose();
               }
             }}
+            inputRef={titleInputRef}
             fullWidth
           />
 
