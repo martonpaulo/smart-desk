@@ -38,7 +38,7 @@ export function EventTimeline({
         })}
       >
         <Typography align="center" variant="body2">
-          É necessário conectar pelo menos uma agenda (Google ou ICS).
+          No events to display.
         </Typography>
       </Box>
     );
