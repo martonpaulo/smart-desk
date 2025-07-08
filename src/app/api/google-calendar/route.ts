@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 
-import { authOptions } from '@/lib/auth';
+import { getSessionFromRequest } from '@/lib/auth-helper';
 import type { ApiResponse } from '@/services/api';
 import { mapGoogleEventsToEvents } from '@/services/event-mapper';
 import { GoogleCalendarAPI, GoogleCalendarError } from '@/services/google-api';
@@ -13,15 +12,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const session = await getServerSession(authOptions);
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Session in API route:', {
-        hasSession: !!session,
-        hasAccessToken: !!session?.accessToken,
-        hasError: !!session?.error,
-        error: session?.error,
-      });
-    }
+    const session = await getSessionFromRequest(request);
 
     if (!session) {
       return NextResponse.json<ApiResponse<null>>(
@@ -55,11 +46,7 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const date = searchParams.get('date');
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Date parameter:', date);
-    }
 
-    // If date is provided, use it; otherwise default to today
     let targetDate = new Date();
     if (date) {
       targetDate = new Date(date);
@@ -74,23 +61,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Creating Google Calendar API client...');
-    }
     const api = new GoogleCalendarAPI(session.accessToken);
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Fetching events...');
-    }
     const { events, calendars } = await api.getAllTodaysEvents();
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Fetched events:', events.length, 'calendars:', calendars.length);
-    }
-
     const eventList = mapGoogleEventsToEvents(events, calendars);
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Mapped events:', eventList.length);
-    }
 
     return NextResponse.json<ApiResponse<IEvent[]>>({
       success: true,
@@ -119,7 +92,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Add OPTIONS handler for CORS if needed
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200 });
 }
