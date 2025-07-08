@@ -3,9 +3,31 @@ import type { Account, NextAuthOptions, Session } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import GoogleProvider from 'next-auth/providers/google';
 
+// Required OAuth scopes for Google Calendar access
+const REQUIRED_SCOPES = [
+  'openid',
+  'email',
+  'profile',
+  'https://www.googleapis.com/auth/calendar.readonly',
+];
+
+// Ensure essential environment variables are set at startup
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET } =
+  process.env;
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !NEXTAUTH_SECRET) {
+  throw new Error('Missing Google OAuth environment variables');
+}
+
+function validateScopes(scope?: string) {
+  const granted = scope?.split(' ') || [];
+  return REQUIRED_SCOPES.every(s => granted.includes(s));
+}
+
 async function refreshAccessToken(token: JWT) {
   try {
-    console.log('Refreshing access token...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Refreshing access token...');
+    }
     const url = 'https://oauth2.googleapis.com/token';
     const params = new URLSearchParams({
       client_id: process.env.GOOGLE_CLIENT_ID!,
@@ -18,7 +40,9 @@ async function refreshAccessToken(token: JWT) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
-    console.log('Token refreshed successfully');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Token refreshed successfully');
+    }
     return {
       ...token,
       accessToken: data.access_token,
@@ -48,12 +72,16 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, account }: { token: JWT; account: Account | null }) {
-      console.log('JWT callback - account present:', !!account);
-      console.log('JWT callback - token keys:', Object.keys(token));
+      if (process.env.NODE_ENV === 'development') {
+        console.log('JWT callback - account present:', !!account);
+      }
 
       // Initial sign in
       if (account) {
-        console.log('Initial sign in, storing tokens');
+        if (!validateScopes(account.scope)) {
+          return { ...token, error: 'MissingCalendarScope' };
+        }
+
         return {
           ...token,
           accessToken: account.access_token,
@@ -66,18 +94,13 @@ export const authOptions: NextAuthOptions = {
 
       // Return previous token if the access token has not expired yet
       if (token.accessTokenExpires && Date.now() < (token.accessTokenExpires as number)) {
-        console.log('Access token still valid');
         return token;
       }
 
       // Access token has expired, try to update it
-      console.log('Access token expired, attempting refresh');
       return refreshAccessToken(token);
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      console.log('Session callback - token keys:', Object.keys(token));
-      console.log('Session callback - has accessToken:', !!token.accessToken);
-
       session.accessToken = token.accessToken as string;
       session.error = token.error as string;
 

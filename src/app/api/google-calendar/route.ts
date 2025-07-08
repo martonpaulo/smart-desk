@@ -8,19 +8,22 @@ import { GoogleCalendarAPI, GoogleCalendarError } from '@/services/google-api';
 import type { IEvent } from '@/types/IEvent';
 
 export async function GET(request: NextRequest) {
-  console.log('Calendar API route called:', request.url);
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Calendar API route called:', request.url);
+  }
 
   try {
     const session = await getServerSession(authOptions);
-    console.log('Session in API route:', {
-      hasSession: !!session,
-      hasAccessToken: !!session?.accessToken,
-      hasError: !!session?.error,
-      error: session?.error,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Session in API route:', {
+        hasSession: !!session,
+        hasAccessToken: !!session?.accessToken,
+        hasError: !!session?.error,
+        error: session?.error,
+      });
+    }
 
     if (!session) {
-      console.log('No session found');
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
@@ -31,7 +34,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (session.error === 'RefreshAccessTokenError') {
-      console.log('Token refresh error');
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
@@ -42,7 +44,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (!session.accessToken) {
-      console.log('No access token found in session');
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
@@ -54,7 +55,9 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const date = searchParams.get('date');
-    console.log('Date parameter:', date);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Date parameter:', date);
+    }
 
     // If date is provided, use it; otherwise default to today
     let targetDate = new Date();
@@ -71,15 +74,23 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log('Creating Google Calendar API client...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Creating Google Calendar API client...');
+    }
     const api = new GoogleCalendarAPI(session.accessToken);
 
-    console.log('Fetching events...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Fetching events...');
+    }
     const { events, calendars } = await api.getAllTodaysEvents();
-    console.log('Fetched events:', events.length, 'calendars:', calendars.length);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Fetched events:', events.length, 'calendars:', calendars.length);
+    }
 
     const eventList = mapGoogleEventsToEvents(events, calendars);
-    console.log('Mapped events:', eventList.length);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Mapped events:', eventList.length);
+    }
 
     return NextResponse.json<ApiResponse<IEvent[]>>({
       success: true,
