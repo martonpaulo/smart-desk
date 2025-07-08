@@ -12,8 +12,7 @@ export function useDashboardViewState(): DashboardViewState {
 
   const handleSignIn = async () => {
     try {
-      const res = await signIn('google', { redirect: false });
-      if (res?.url) window.open(res.url, '_blank');
+      await signIn('google', { callbackUrl: '/', redirect: true });
     } catch (err) {
       displayError({ prefix: 'Error during sign in', error: err });
     }

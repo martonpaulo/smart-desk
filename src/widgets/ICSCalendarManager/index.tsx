@@ -18,13 +18,13 @@ import {
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 
-import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
-import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { auth } from '@/services/firebase';
 import {
   saveIcsCalendarsToFirestore,
   subscribeToIcsCalendars,
 } from '@/services/firestore/icsCalendars';
+import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
+import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 
 const STORAGE_KEY = 'ics-calendars';
 

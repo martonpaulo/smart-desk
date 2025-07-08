@@ -1,9 +1,7 @@
+import { auth } from '@/services/firebase';
+import { saveLocalEventsToFirestore } from '@/services/firestore/localEvents';
 import { IEvent } from '@/types/IEvent';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-import { auth } from '@/services/firebase';
-import {
-  saveLocalEventsToFirestore,
-} from '@/services/firestore/localEvents';
 
 const STORAGE_KEY = 'local-events';
 

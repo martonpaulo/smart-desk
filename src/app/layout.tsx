@@ -5,11 +5,11 @@ import { ReactNode } from 'react';
 import { SessionProvider } from 'next-auth/react';
 
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
+import { FirebaseAuthProvider } from '@/providers/FirebaseAuthProvider';
+import { FirestoreSyncProvider } from '@/providers/FirestoreSyncProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { ServiceWorkerProvider } from '@/providers/ServiceWorkerProvider';
-import { FirebaseAuthProvider } from '@/providers/FirebaseAuthProvider';
-import { FirestoreSyncProvider } from '@/providers/FirestoreSyncProvider';
 import { poppins } from '@/styles/fonts';
 
 import '@/lib/dragDropTouch';

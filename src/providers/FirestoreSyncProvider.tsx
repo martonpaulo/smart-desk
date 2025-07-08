@@ -1,17 +1,19 @@
 'use client';
 
 import { ReactNode, useEffect } from 'react';
+
 import { onAuthStateChanged } from 'firebase/auth';
+
 import { auth } from '@/services/firebase';
 import { subscribeToBoard } from '@/services/firestore/board';
-import { subscribeToLocalEvents } from '@/services/firestore/localEvents';
 import { subscribeToIcsCalendars } from '@/services/firestore/icsCalendars';
-import { useTodoBoardStore } from '@/store/todoBoardStore';
-import { DEFAULT_BOARD } from '@/widgets/TodoList/boardStorage';
+import { subscribeToLocalEvents } from '@/services/firestore/localEvents';
 import { useEventStore } from '@/store/eventStore';
-import { loadLocalEvents } from '@/utils/localEventsStorage';
+import { useTodoBoardStore } from '@/store/todoBoardStore';
 import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
+import { loadLocalEvents } from '@/utils/localEventsStorage';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
+import { DEFAULT_BOARD } from '@/widgets/TodoList/boardStorage';
 
 const ICS_STORAGE_KEY = 'ics-calendars';
 

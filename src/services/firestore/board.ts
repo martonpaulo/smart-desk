@@ -1,5 +1,6 @@
 import { doc, getDoc, onSnapshot, setDoc, Unsubscribe } from 'firebase/firestore';
-import { db } from '../firebase';
+
+import { db } from '@/services/firebase';
 import type { BoardState } from '@/widgets/TodoList/types';
 
 const docPath = (uid: string) => doc(db, 'users', uid, 'board', 'state');
@@ -9,10 +10,7 @@ export async function loadBoardFromFirestore(uid: string): Promise<BoardState | 
   return snap.exists() ? (snap.data() as BoardState) : null;
 }
 
-export function subscribeToBoard(
-  uid: string,
-  cb: (board: BoardState | null) => void,
-): Unsubscribe {
+export function subscribeToBoard(uid: string, cb: (board: BoardState | null) => void): Unsubscribe {
   return onSnapshot(docPath(uid), snap => {
     cb(snap.exists() ? (snap.data() as BoardState) : null);
   });

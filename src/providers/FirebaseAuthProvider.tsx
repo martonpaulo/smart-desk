@@ -1,9 +1,11 @@
 'use client';
 
 import { ReactNode, useEffect } from 'react';
+
 import { GoogleAuthProvider, signInWithCredential, signOut } from 'firebase/auth';
-import { auth } from '@/services/firebase';
 import { useSession } from 'next-auth/react';
+
+import { auth } from '@/services/firebase';
 
 interface FirebaseAuthProviderProps {
   children: ReactNode;
