@@ -16,7 +16,12 @@ import {
   TextField,
 } from '@mui/material';
 
-import { loadTagPresets, saveTagPresets, TagPreset } from '@/utils/tagPresetsStorage';
+import {
+  loadTagPresets,
+  saveTagPresets,
+  TagPreset,
+  TAG_PRESETS_KEY,
+} from '@/utils/tagPresetsStorage';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 
 export function TagPresets() {
@@ -27,6 +32,14 @@ export function TagPresets() {
 
   useEffect(() => {
     setPresets(loadTagPresets());
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === TAG_PRESETS_KEY) {
+        setPresets(loadTagPresets());
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const handleAdd = () => {

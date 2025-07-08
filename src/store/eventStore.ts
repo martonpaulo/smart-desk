@@ -4,6 +4,7 @@ import type { IEvent } from '@/types/IEvent';
 import { mergeEvents } from '@/utils/eventUtils';
 import { loadHiddenEventIds, saveHiddenEventIds } from '@/utils/hiddenEventsStorage';
 import { loadLocalEvents, saveLocalEvents } from '@/utils/localEventsStorage';
+import { saveRemoteEvents } from '@/utils/remoteEventsStorage';
 
 interface EventState {
   events: IEvent[];
@@ -18,6 +19,7 @@ interface EventState {
   deleteEvent: (id: string) => void;
   restoreEvent: (id: string) => void;
   setAlertAcknowledged: (id: string) => void;
+  setHiddenEvents: (ids: string[]) => void;
 }
 
 export const useEventStore = create<EventState>((set, get) => ({
@@ -33,6 +35,7 @@ export const useEventStore = create<EventState>((set, get) => ({
     const prev = get().remoteEvents;
     // Only update if the lists are different
     if (JSON.stringify(prev) !== JSON.stringify(list)) {
+      saveRemoteEvents(list);
       const merged = mergeEvents(prev, list);
       const localEvents = get().localEvents;
       const hidden = get().hiddenEvents;
@@ -76,6 +79,7 @@ export const useEventStore = create<EventState>((set, get) => ({
         ? state.hiddenEvents
         : [id, ...state.hiddenEvents];
       saveHiddenEventIds(hidden);
+      saveRemoteEvents(remoteEvents);
       return {
         localEvents,
         remoteEvents,
@@ -94,6 +98,7 @@ export const useEventStore = create<EventState>((set, get) => ({
 
       if (event.calendar) {
         const remoteEvents = [...state.remoteEvents, event];
+        saveRemoteEvents(remoteEvents);
         return {
           trash,
           remoteEvents,
@@ -123,4 +128,14 @@ export const useEventStore = create<EventState>((set, get) => ({
         event.id === id ? { ...event, aknowledged: true } : event,
       ),
     })),
+  setHiddenEvents: ids =>
+    set(state => {
+      saveHiddenEventIds(ids);
+      const remoteEvents = state.remoteEvents.filter(e => !ids.includes(e.id));
+      return {
+        hiddenEvents: ids,
+        remoteEvents,
+        events: [...remoteEvents, ...state.localEvents],
+      };
+    }),
 }));
