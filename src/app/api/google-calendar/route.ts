@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (session.error === 'RefreshAccessTokenError') {
+    if (session.error === 'RefreshAccessTokenError' || session.error === 'MissingRefreshToken') {
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,

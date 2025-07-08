@@ -25,7 +25,8 @@ function validateScopes(scope?: string) {
 async function refreshAccessToken(token: JWT) {
   try {
     if (!token.refreshToken) {
-      throw new Error('Missing refresh token');
+      console.error('Missing refresh token');
+      return { ...token, error: 'MissingRefreshToken' };
     }
     if (process.env.NODE_ENV === 'development') {
       console.log('Refreshing access token...');
