@@ -8,6 +8,8 @@ import { AppThemeProvider } from '@/providers/AppThemeProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { ServiceWorkerProvider } from '@/providers/ServiceWorkerProvider';
+import { FirebaseAuthProvider } from '@/providers/FirebaseAuthProvider';
+import { FirestoreSyncProvider } from '@/providers/FirestoreSyncProvider';
 import { poppins } from '@/styles/fonts';
 
 import '@/lib/dragDropTouch';
@@ -30,13 +32,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
       <body suppressHydrationWarning className={poppins.variable}>
         <SessionProvider>
-          <ServiceWorkerProvider>
-            <LocationProvider>
-              <ReactQueryProvider>
-                <AppThemeProvider>{children}</AppThemeProvider>
-              </ReactQueryProvider>
-            </LocationProvider>
-          </ServiceWorkerProvider>
+          <FirebaseAuthProvider>
+            <FirestoreSyncProvider>
+              <ServiceWorkerProvider>
+                <LocationProvider>
+                  <ReactQueryProvider>
+                    <AppThemeProvider>{children}</AppThemeProvider>
+                  </ReactQueryProvider>
+                </LocationProvider>
+              </ServiceWorkerProvider>
+            </FirestoreSyncProvider>
+          </FirebaseAuthProvider>
         </SessionProvider>
       </body>
     </html>

@@ -20,6 +20,11 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
+import { auth } from '@/services/firebase';
+import {
+  saveIcsCalendarsToFirestore,
+  subscribeToIcsCalendars,
+} from '@/services/firestore/icsCalendars';
 
 const STORAGE_KEY = 'ics-calendars';
 
@@ -34,6 +39,12 @@ function loadCalendars(): IcsCalendarConfig[] {
 }
 
 function persistCalendars(calendars: IcsCalendarConfig[]) {
+  const uid = auth.currentUser?.uid;
+  if (uid) {
+    saveIcsCalendarsToFirestore(uid, calendars).catch(err =>
+      console.error('Failed to save calendars to Firestore', err),
+    );
+  }
   try {
     setStoredFilters(STORAGE_KEY, calendars);
   } catch (err) {
@@ -58,7 +69,16 @@ export function ICSCalendarManager() {
 
   useEffect(() => {
     setCalendars(loadCalendars());
-  }, []);
+
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    const unsub = subscribeToIcsCalendars(uid, list => {
+      setCalendars(list);
+      persistCalendars(list);
+      queryClient.invalidateQueries({ queryKey: ['ics-events'] });
+    });
+    return () => unsub();
+  }, [queryClient]);
 
   const handleChange =
     (field: keyof CalendarFormState) => (event: React.ChangeEvent<HTMLInputElement>) => {

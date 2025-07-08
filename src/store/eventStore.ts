@@ -12,6 +12,7 @@ interface EventState {
   trash: IEvent[];
   hiddenEvents: string[];
   setRemoteEvents: (list: IEvent[]) => void;
+  setLocalEvents: (events: IEvent[]) => void;
   addLocalEvent: (event: IEvent) => void;
   updateLocalEvent: (event: IEvent) => void;
   deleteEvent: (id: string) => void;
@@ -38,6 +39,11 @@ export const useEventStore = create<EventState>((set, get) => ({
       set({ remoteEvents: filtered, events: allEvents });
     }
   },
+  setLocalEvents: events =>
+    set(state => ({
+      localEvents: events,
+      events: [...state.remoteEvents, ...events],
+    })),
   addLocalEvent: event =>
     set(state => {
       const localEvents = [...state.localEvents, event];

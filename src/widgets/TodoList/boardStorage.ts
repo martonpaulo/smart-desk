@@ -1,6 +1,8 @@
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 import { BoardState, Column } from '@/widgets/TodoList/types';
+import { auth } from '@/services/firebase';
+import { saveBoardToFirestore } from '@/services/firestore/board';
 
 export const STORAGE_KEY = 'todo-board';
 export const LAST_POPULATE_KEY = 'todo-last-populate';
@@ -33,6 +35,13 @@ export function loadBoard(): BoardState {
 }
 
 export function saveBoard(board: BoardState): void {
+  const uid = auth.currentUser?.uid;
+  if (uid) {
+    saveBoardToFirestore(uid, board).catch(err =>
+      console.error('Failed to save board to Firestore', err),
+    );
+  }
+
   try {
     setStoredFilters(STORAGE_KEY, board);
   } catch {
