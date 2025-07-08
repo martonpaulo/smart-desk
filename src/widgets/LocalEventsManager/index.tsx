@@ -83,10 +83,7 @@ export function LocalEventsManager() {
       </Typography>
       <List dense>
         {events.map(ev => (
-          <ListItem
-            key={ev.id}
-            sx={{ pl: 0, position: 'relative', '&:hover .delete-btn': { visibility: 'visible' } }}
-          >
+          <ListItem key={ev.id} sx={{ pl: 0, position: 'relative' }}>
             <ListItemText
               primary={ev.title}
               secondary={`${ev.start.toLocaleString()} – ${ev.end.toLocaleString()}`}
@@ -103,7 +100,6 @@ export function LocalEventsManager() {
                   deleteEvent(ev.id);
                   showUndo('Event deleted', () => useEventStore.getState().restoreEvent(ev.id));
                 }}
-                sx={{ visibility: 'hidden' }}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>

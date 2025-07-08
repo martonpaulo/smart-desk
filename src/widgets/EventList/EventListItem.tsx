@@ -43,7 +43,6 @@ export function EventListItem({ event, onDelete }: EventListItemProps) {
         borderRadius: 1,
         mb: 0.5,
         position: 'relative',
-        '&:hover .delete-btn': { visibility: 'visible' },
       }}
     >
       <ListItemIcon sx={{ minWidth: 40 }}>
@@ -68,7 +67,6 @@ export function EventListItem({ event, onDelete }: EventListItemProps) {
             onDelete(event.id);
             showUndo('Event deleted', () => useEventStore.getState().restoreEvent(event.id));
           }}
-          sx={{ visibility: 'hidden' }}
         >
           <Delete fontSize="small" />
         </IconButton>
