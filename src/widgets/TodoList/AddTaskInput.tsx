@@ -19,7 +19,7 @@ export function AddTaskInput({ columnId, columnColor, onAdd, onStartEdit }: AddT
     <TextField
       fullWidth
       size="small"
-      placeholder="New task"
+      placeholder="new task"
       onFocus={handleFocus}
       inputProps={{ readOnly: true }}
       sx={{
