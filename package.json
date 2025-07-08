@@ -40,6 +40,7 @@
     "@tanstack/react-query-persist-client": "^5.80.7",
     "axios": "^1.10.0",
     "babel-plugin-react-compiler": "^19.1.0-rc.2",
+    "firebase": "^11.10.0",
     "ical.js": "^2.1.0",
     "luxon": "^3.6.1",
     "next": "15.3.3",
