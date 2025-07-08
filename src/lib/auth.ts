@@ -12,8 +12,7 @@ const REQUIRED_SCOPES = [
 ];
 
 // Ensure essential environment variables are set at startup
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET } =
-  process.env;
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET } = process.env;
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !NEXTAUTH_SECRET) {
   throw new Error('Missing Google OAuth environment variables');
 }

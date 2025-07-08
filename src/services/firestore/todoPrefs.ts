@@ -7,7 +7,7 @@ const docPath = (uid: string) => doc(db, 'users', uid, 'settings', 'todoPrefs');
 
 export async function loadTodoPrefsFromFirestore(uid: string): Promise<TodoPrefsData | null> {
   const snap = await getDoc(docPath(uid));
-  return snap.exists() ? ((snap.data() as TodoPrefsData) || null) : null;
+  return snap.exists() ? (snap.data() as TodoPrefsData) || null : null;
 }
 
 export function subscribeToTodoPrefs(
@@ -15,7 +15,7 @@ export function subscribeToTodoPrefs(
   cb: (prefs: TodoPrefsData | null) => void,
 ): Unsubscribe {
   return onSnapshot(docPath(uid), snap => {
-    const prefs = snap.exists() ? ((snap.data() as TodoPrefsData) || null) : null;
+    const prefs = snap.exists() ? (snap.data() as TodoPrefsData) || null : null;
     cb(prefs);
   });
 }

@@ -19,8 +19,8 @@ import {
 import {
   loadTagPresets,
   saveTagPresets,
-  TagPreset,
   TAG_PRESETS_KEY,
+  TagPreset,
 } from '@/utils/tagPresetsStorage';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 

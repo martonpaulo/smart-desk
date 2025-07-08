@@ -6,26 +6,19 @@ import { onAuthStateChanged } from 'firebase/auth';
 
 import { auth } from '@/services/firebase';
 import { subscribeToBoard } from '@/services/firestore/board';
+import { subscribeToHiddenEvents } from '@/services/firestore/hiddenEvents';
 import { subscribeToIcsCalendars } from '@/services/firestore/icsCalendars';
 import { subscribeToLocalEvents } from '@/services/firestore/localEvents';
 import { subscribeToRemoteEvents } from '@/services/firestore/remoteEvents';
-import { subscribeToHiddenEvents } from '@/services/firestore/hiddenEvents';
 import { subscribeToTagPresets } from '@/services/firestore/tagPresets';
 import { subscribeToTodoPrefs } from '@/services/firestore/todoPrefs';
 import { useEventStore } from '@/store/eventStore';
 import { useTodoBoardStore } from '@/store/todoBoardStore';
 import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
+import { loadHiddenEventIds, saveHiddenEventIds } from '@/utils/hiddenEventsStorage';
 import { loadLocalEvents } from '@/utils/localEventsStorage';
-import {
-  getStoredFilters,
-  setStoredFilters,
-} from '@/utils/localStorageUtils';
-import {
-  loadHiddenEventIds,
-  saveHiddenEventIds,
-  HIDDEN_EVENTS_KEY,
-} from '@/utils/hiddenEventsStorage';
+import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { saveTagPresets, TAG_PRESETS_KEY } from '@/utils/tagPresetsStorage';
 import { DEFAULT_BOARD } from '@/widgets/TodoList/boardStorage';
 

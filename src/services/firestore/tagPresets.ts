@@ -7,7 +7,7 @@ const docPath = (uid: string) => doc(db, 'users', uid, 'settings', 'tagPresets')
 
 export async function loadTagPresetsFromFirestore(uid: string): Promise<TagPreset[]> {
   const snap = await getDoc(docPath(uid));
-  return snap.exists() ? ((snap.data().presets as TagPreset[]) || []) : [];
+  return snap.exists() ? (snap.data().presets as TagPreset[]) || [] : [];
 }
 
 export function subscribeToTagPresets(
@@ -15,7 +15,7 @@ export function subscribeToTagPresets(
   cb: (presets: TagPreset[]) => void,
 ): Unsubscribe {
   return onSnapshot(docPath(uid), snap => {
-    const presets = snap.exists() ? ((snap.data().presets as TagPreset[]) || []) : [];
+    const presets = snap.exists() ? (snap.data().presets as TagPreset[]) || [] : [];
     cb(presets);
   });
 }

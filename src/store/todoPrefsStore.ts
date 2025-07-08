@@ -12,7 +12,7 @@ interface TodoPrefsState {
   setPrefs: (prefs: TodoPrefsData) => void;
 }
 
-type TodoPrefsData = Pick<TodoPrefsState, 'view' | 'trashOpen'>;
+export type TodoPrefsData = Pick<TodoPrefsState, 'view' | 'trashOpen'>;
 
 const STORAGE_KEY = 'todo-prefs';
 
@@ -27,9 +27,7 @@ function loadPrefs(): TodoPrefsData {
   } catch {
     return {
       view: 'board',
-      setView: () => {},
       trashOpen: false,
-      setTrashOpen: () => {},
     } as TodoPrefsState;
   }
 }
