@@ -114,7 +114,7 @@ export function useDashboardViewState(): DashboardViewState {
   if (events.length === 0) {
     return {
       severity: 'info',
-      message: 'No events found. You can add local events or connect a calendar.',
+      message: 'No events found for today.',
       isLoading: false,
       canSignIn: false,
       canSignOut: true,

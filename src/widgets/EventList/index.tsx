@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Button, List, ListItem, ListItemText, Stack, TextField } from '@mui/material';
+import { Button, List, Stack, TextField } from '@mui/material';
 
 import { useEventStore } from '@/store/eventStore';
 import { IEvent } from '@/types/IEvent';
@@ -20,17 +20,8 @@ export function EventList({ events }: EventListProps) {
   const deleteEvent = useEventStore(state => state.deleteEvent);
   const addLocalEvent = useEventStore(state => state.addLocalEvent);
   const [title, setTitle] = useState('');
-  if (!events || events.length === 0) {
-    return (
-      <List dense sx={{ opacity: 0.5 }}>
-        <ListItem>
-          <ListItemText primary="No upcoming events" />
-        </ListItem>
-      </List>
-    );
-  }
 
-  const sortedByStart = sortEventsByStart(events);
+  const sortedByStart = sortEventsByStart(events || []);
   const withoutFullDay = filterNonFullDayEvents(sortedByStart);
   const todaysEvents = filterTodayEvents(withoutFullDay);
   const upcomingEvents = filterCurrentOrFutureEvents(todaysEvents);
