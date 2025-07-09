@@ -3,16 +3,10 @@
 import { ReactNode, useEffect } from 'react';
 
 import { getSupabaseClient } from '@/lib/supabaseClient';
+import { createEvent, fetchEvents } from '@/services/supabaseEventsService';
+import { createTask, fetchTasks } from '@/services/supabaseTasksService';
 import { loadLocalEvents } from '@/utils/localEventsStorage';
 import { loadBoard } from '@/widgets/TodoList/boardStorage';
-import {
-  createEvent,
-  fetchEvents,
-} from '@/services/supabaseEventsService';
-import {
-  createTask,
-  fetchTasks,
-} from '@/services/supabaseTasksService';
 
 interface Props {
   children: ReactNode;
@@ -34,7 +28,7 @@ export function SupabaseSyncProvider({ children }: Props) {
               end: ev.end,
               title: ev.title,
               attendeeCount: ev.attendeeCount,
-              calendar: ev.calendar,
+              calendar: ev.calendar?.id,
               aknowledged: ev.aknowledged,
             });
           }

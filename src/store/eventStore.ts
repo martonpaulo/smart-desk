@@ -26,7 +26,6 @@ export const useEventStore = create<EventState>((set, get) => ({
   trash: [],
   hiddenEvents: loadHiddenEventIds(),
   setRemoteEvents: list => {
-    console.log('Setting remote events:', list);
     const prev = get().remoteEvents;
     // Only update if the lists are different
     if (JSON.stringify(prev) !== JSON.stringify(list)) {

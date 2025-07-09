@@ -1,7 +1,7 @@
-import { IEvent } from '@/types/IEvent';
-import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import { createEvent, fetchEvents } from '@/services/supabaseEventsService';
+import { IEvent } from '@/types/IEvent';
+import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 
 const STORAGE_KEY = 'local-events';
 
@@ -35,7 +35,7 @@ async function syncWithSupabase(events: IEvent[]): Promise<void> {
           end: ev.end,
           title: ev.title,
           attendeeCount: ev.attendeeCount,
-          calendar: ev.calendar,
+          calendar: ev.calendar?.id,
           aknowledged: ev.aknowledged,
         });
       }
