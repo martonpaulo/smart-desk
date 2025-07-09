@@ -31,6 +31,20 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
+### Google OAuth callback URLs
+
+Add the following authorized redirect URIs in the Google console so both
+NextAuth and Supabase can complete the OAuth flow:
+
+```
+http://localhost:3000/api/auth/callback/google
+http://localhost:3000
+https://your-production-domain/api/auth/callback/google
+https://your-production-domain
+```
+
+Ensure the Supabase project `Site URL` matches the domain you deploy to.
+
 ## Database setup on Supabase
 
 Create `tasks` and `events` tables with row level security enabled and policies based on the `user_id` column. The columns used in the hooks are:

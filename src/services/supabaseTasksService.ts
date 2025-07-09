@@ -27,7 +27,18 @@ export async function fetchTasks(client: SupabaseClient): Promise<TodoTask[]> {
 
 export async function createTask(client: SupabaseClient, payload: NewTask): Promise<TodoTask> {
   console.debug('Supabase: creating task', payload);
-  const { data, error } = await client.from('tasks').insert(payload).select().single();
+  const {
+    data: { user },
+    error: userError,
+  } = await client.auth.getUser();
+  if (userError || !user?.id) {
+    console.error('Supabase: unable to determine user', userError);
+    throw new Error('User not authenticated');
+  }
+
+  const insertPayload = { ...payload, user_id: user.id };
+
+  const { data, error } = await client.from('tasks').insert(insertPayload).select().single();
   if (error) {
     console.error('Supabase: create task failed', error);
     throw new Error(error.message);
