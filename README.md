@@ -59,13 +59,13 @@ Create `tasks`, `columns` and `events` tables with row level security enabled an
 - `title` text
 - `description` text
 - `tags` text[]
-- `columnId` text
+- `columnId` text references `columns(id)`
 - `quantity` integer
 - `quantity_total` integer
 - timestamp columns (`created_at`, `updated_at`)
 ### `columns`
 
-- `id` uuid primary key
+- `id` text primary key
 - `user_id` uuid reference to auth.users
 - `title` text
 - `color` text
@@ -111,12 +111,12 @@ function Dashboard() {
 
   // Example: add a task
   function handleAdd() {
-    createTask.mutate({ title: 'My task', tags: [], columnId: 'todo' });
+    createTask.mutate({ title: 'My task', tags: [], columnSlug: 'todo' });
   }
 
   // Example: mark task done
   function handleDone(id: string) {
-    updateTask.mutate({ id, updates: { columnId: 'done' } });
+    updateTask.mutate({ id, updates: { columnSlug: 'done' } });
   }
 
   // Example: delete a task

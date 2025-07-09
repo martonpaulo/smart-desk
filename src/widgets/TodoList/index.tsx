@@ -93,7 +93,7 @@ export function TodoList({ events }: TodoListProps) {
           title: ev.title,
           description: undefined,
           tags: [],
-          columnId: 'todo',
+          columnSlug: 'todo',
         }));
       if (!additions.length) return prev;
       const updated = { ...prev, tasks: [...prev.tasks, ...additions] };
@@ -177,7 +177,7 @@ export function TodoList({ events }: TodoListProps) {
           title: ev.title,
           description: undefined,
           tags: [],
-          columnId: 'todo',
+          columnSlug: 'todo',
         }));
       if (!additions.length) return prev;
       const updated = { ...prev, tasks: [...prev.tasks, ...additions] };
@@ -192,17 +192,17 @@ export function TodoList({ events }: TodoListProps) {
     saveBoard(board);
   }, [board]);
 
-  const handleAddTask = (columnId: string, title: string) => {
+  const handleAddTask = (columnSlug: string, title: string) => {
     const task: TodoTask = {
       id: generateId(),
       title,
       tags: [],
-      columnId,
+      columnSlug,
     };
     setBoard(prev => {
       let columns = prev.columns;
-      if (!columns.some(c => c.id === columnId)) {
-        columns = [...columns, { id: columnId, title: 'Draft', color: '#616161' }];
+      if (!columns.some(c => c.id === columnSlug)) {
+        columns = [...columns, { id: columnSlug, title: 'Draft', color: '#616161' }];
       }
       return { ...prev, columns, tasks: [...prev.tasks, task] };
     });
@@ -261,31 +261,31 @@ export function TodoList({ events }: TodoListProps) {
       };
 
       // Only ensure 'done' column if moving to it
-      if (task.columnId !== 'done') {
+      if (task.columnSlug !== 'done') {
         ensureColumn('done', 'Done', '#2e7d32');
       }
 
       // Only ensure 'draft' column if we need to move back to it
       if (
-        task.columnId === 'done' &&
-        (!task.prevColumnId || !columns.some(c => c.id === task.prevColumnId))
+        task.columnSlug === 'done' &&
+        (!task.prevColumnSlug || !columns.some(c => c.id === task.prevColumnSlug))
       ) {
         ensureColumn('draft', 'Draft', '#616161');
       }
 
       const tasks = prev.tasks.map(t => {
         if (t.id !== id) return t;
-        if (t.columnId === 'done') {
+        if (t.columnSlug === 'done') {
           const target =
-            t.prevColumnId && columns.some(c => c.id === t.prevColumnId) ? t.prevColumnId : 'draft';
-          return { ...t, columnId: target, prevColumnId: undefined };
+            t.prevColumnSlug && columns.some(c => c.id === t.prevColumnSlug) ? t.prevColumnSlug : 'draft';
+          return { ...t, columnSlug: target, prevColumnSlug: undefined };
         }
 
         if (t.quantity && t.quantity > 1) {
           return { ...t, quantity: t.quantity - 1 };
         }
 
-        return { ...t, prevColumnId: t.columnId, columnId: 'done' };
+        return { ...t, prevColumnSlug: t.columnSlug, columnSlug: 'done' };
       });
 
       return needsColumnUpdate ? { ...prev, columns, tasks } : { ...prev, tasks };
@@ -322,10 +322,10 @@ export function TodoList({ events }: TodoListProps) {
     const id = columnModal.column.id;
     setBoard(prev => {
       const column = prev.columns.find(c => c.id === id);
-      const tasks = prev.tasks.filter(i => i.columnId === id);
+      const tasks = prev.tasks.filter(i => i.columnSlug === id);
       return {
         columns: prev.columns.filter(c => c.id !== id),
-        tasks: prev.tasks.filter(i => i.columnId !== id),
+        tasks: prev.tasks.filter(i => i.columnSlug !== id),
         trash: {
           columns: column ? [column, ...prev.trash.columns] : prev.trash.columns,
           tasks: [...tasks, ...prev.trash.tasks],
@@ -352,14 +352,14 @@ export function TodoList({ events }: TodoListProps) {
     setBoard(prev => {
       const column = prev.trash.columns.find(c => c.id === id);
       if (!column) return prev;
-      const tasks = prev.trash.tasks.filter(t => t.columnId === id);
+      const tasks = prev.trash.tasks.filter(t => t.columnSlug === id);
       return {
         ...prev,
         columns: [...prev.columns, column],
         tasks: [...prev.tasks, ...tasks],
         trash: {
           columns: prev.trash.columns.filter(c => c.id !== id),
-          tasks: prev.trash.tasks.filter(t => t.columnId !== id),
+          tasks: prev.trash.tasks.filter(t => t.columnSlug !== id),
         },
       };
     });
@@ -405,7 +405,7 @@ export function TodoList({ events }: TodoListProps) {
     setHoverTaskId(overId);
   };
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>, columnId: string) => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>, columnSlug: string) => {
     event.preventDefault();
     const id = draggingId;
     setDraggingId(null);
@@ -420,15 +420,15 @@ export function TodoList({ events }: TodoListProps) {
       const [moved] = tasks.splice(from, 1);
       const to = overId
         ? tasks.findIndex(i => i.id === overId)
-        : tasks.reduce((idx, it, i) => (it.columnId === columnId ? i + 1 : idx), 0);
+        : tasks.reduce((idx, it, i) => (it.columnSlug === columnSlug ? i + 1 : idx), 0);
       const insertIndex = from < to ? to - 1 : to;
-      tasks.splice(insertIndex, 0, { ...moved, columnId });
+      tasks.splice(insertIndex, 0, { ...moved, columnSlug });
       return { ...prev, tasks };
     });
   };
 
   const renderColumn = (column: Column) => {
-    const tasks = board.tasks?.filter(i => i.columnId === column.id);
+    const tasks = board.tasks?.filter(i => i.columnSlug === column.id);
 
     return (
       <TodoColumn
@@ -469,7 +469,7 @@ export function TodoList({ events }: TodoListProps) {
         {board.columns.map(renderColumn)}
       </Stack>
       <EditTaskModal
-        column={board.columns.find(c => c.id === editingTask?.columnId) || null}
+        column={board.columns.find(c => c.id === editingTask?.columnSlug) || null}
         open={Boolean(editingTask)}
         task={editingTask}
         onSave={handleSaveTask}
@@ -501,7 +501,7 @@ export function TodoList({ events }: TodoListProps) {
             right: 16,
           }}
         >
-          <AddTaskInput columnId="draft" columnColor="#f0f0f0" onAdd={handleAddTask} />
+          <AddTaskInput columnSlug="draft" columnColor="#f0f0f0" onAdd={handleAddTask} />
         </Box>
       )}
 

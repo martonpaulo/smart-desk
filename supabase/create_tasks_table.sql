@@ -6,7 +6,7 @@ create table if not exists public.tasks (
   title text not null,
   description text,
   tags text[] default '{}',
-  columnId text not null,
+  columnId text references columns(id) not null,
   quantity integer,
   quantityTotal integer,
   created_at timestamptz default now(),
