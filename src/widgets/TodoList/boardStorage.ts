@@ -164,16 +164,20 @@ async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
           color: column.color,
         });
       } else if (existing.title !== column.title || existing.color !== column.color) {
-        await updateColumn(supabase, existing.id, {
-          title: column.title,
-          color: column.color,
-        });
+        if (existing.id) {
+          await updateColumn(supabase, existing.id, {
+            title: column.title,
+            color: column.color,
+          });
+        }
       }
     }
 
     for (const col of remote) {
       if (!board.columns.some(c => c.slug === (col.slug ?? col.id))) {
-        await deleteColumn(supabase, col.id);
+        if (col.id) {
+          await deleteColumn(supabase, col.id);
+        }
       }
     }
   } catch (err) {

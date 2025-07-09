@@ -46,6 +46,8 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
     throw new Error('User not authenticated');
   }
 
+  console.log('payload', payload);
+
   const insertPayload = { ...payload, column_id: payload.columnSlug, user_id: user.id };
 
   const { data, error } = await client

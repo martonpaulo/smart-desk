@@ -71,18 +71,18 @@ export function TodoColumn({
     <Box
       className="todo-column"
       draggable
-      onDragStart={e => onColumnDragStart && onColumnDragStart(e, column.id)}
+      onDragStart={e => onColumnDragStart && column.id && onColumnDragStart(e, column.id)}
       onDragOver={e => {
         e.preventDefault();
-        if (draggingColumnId) {
+        if (draggingColumnId && column.id) {
           onColumnDragOver?.(e, column.id);
         }
-        if (draggingTaskId) {
+        if (draggingTaskId && column.id) {
           onTaskColumnDragOver(column.id);
         }
       }}
       onDragEnd={onColumnDragEnd}
-      onDrop={e => onDrop(e, column.id)}
+      onDrop={e => column.id && onDrop(e, column.id)}
       sx={{
         width: view === 'board' ? '250px' : '100%',
         p: 1.5,
@@ -143,7 +143,7 @@ export function TodoColumn({
         <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
       )}
 
-      {!creatingId && showAddTaskInput && (
+      {!creatingId && showAddTaskInput && column.id && (
         <AddTaskInput
           columnSlug={column.id}
           columnColor={alpha(darken(column.color, 0.2), 0.15)}
@@ -154,7 +154,7 @@ export function TodoColumn({
       <IconButton
         size="small"
         className="add-column-btn"
-        onClick={() => onAddColumn(column.id)}
+        onClick={() => column.id && onAddColumn(column.id)}
         sx={{
           position: 'absolute',
           top: 0,

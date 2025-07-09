@@ -114,7 +114,7 @@ export function TodoTrash(): ReactElement {
               <IconButton
                 edge="end"
                 aria-label={`restore column ${col.title}`}
-                onClick={() => restoreColumn(col.id)}
+                onClick={() => col.id && restoreColumn(col.id)}
               >
                 <RestoreFromTrashIcon fontSize="small" />
               </IconButton>
