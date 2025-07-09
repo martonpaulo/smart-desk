@@ -5,7 +5,6 @@ import { ReactNode } from 'react';
 import { SessionProvider } from 'next-auth/react';
 
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
-import { SupabaseSyncProvider } from '@/providers/SupabaseSyncProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { ServiceWorkerProvider } from '@/providers/ServiceWorkerProvider';
