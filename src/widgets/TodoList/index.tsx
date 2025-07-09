@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Box, Stack, useMediaQuery } from '@mui/material';
+import { Box, Button, Stack, useMediaQuery } from '@mui/material';
 
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import { fetchColumns } from '@/services/supabaseColumnsService';
@@ -470,6 +470,11 @@ export function TodoList({ events }: TodoListProps) {
       >
         {board.columns.map(renderColumn)}
       </Stack>
+      {board.columns.length === 0 && (
+        <Button variant="contained" onClick={() => setColumnModal({ column: null })}>
+          Add First Column
+        </Button>
+      )}
       <EditTaskModal
         column={board.columns.find(c => c.id === editingTask?.columnSlug) || null}
         open={Boolean(editingTask)}
