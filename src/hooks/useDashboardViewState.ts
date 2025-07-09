@@ -1,21 +1,37 @@
+import { useEffect } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 
 import { useEvents } from '@/hooks/useEvents';
-import { signInWithGoogle as supabaseSignIn, signOutSupabase } from '@/hooks/useSupabaseAuth';
+import {
+  isSupabaseLoggedIn,
+  signInWithIdToken as supabaseSignInWithIdToken,
+  signOutSupabase,
+} from '@/hooks/useSupabaseAuth';
 import { useEventStore } from '@/store/eventStore';
 import { DashboardViewState } from '@/types/DashboardViewState';
 import { displayError } from '@/utils/errorUtils';
 
 export function useDashboardViewState(): DashboardViewState {
-  const { status: authStatus } = useSession();
+  const { data: session, status: authStatus } = useSession();
   const { isLoading: loadingEvents, isError: eventsFailed, error: rawError } = useEvents();
   const events = useEventStore(state => state.events);
+
+  useEffect(() => {
+    async function ensureSupabaseSession() {
+      if (authStatus !== 'authenticated' || !session?.idToken) return;
+      const loggedIn = await isSupabaseLoggedIn();
+      if (!loggedIn) {
+        await supabaseSignInWithIdToken(session.idToken);
+      }
+    }
+    void ensureSupabaseSession();
+  }, [authStatus, session]);
 
   const handleSignIn = async () => {
     try {
       const res = await signIn('google', { redirect: false });
       if (res?.url) window.open(res.url, '_blank');
-      await supabaseSignIn();
+      // Supabase sign in will be handled when session becomes available
     } catch (err) {
       displayError({ prefix: 'Error during sign in', error: err });
     }

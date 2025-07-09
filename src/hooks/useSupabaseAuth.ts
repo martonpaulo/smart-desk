@@ -13,6 +13,17 @@ export async function signInWithGoogle(): Promise<void> {
   }
 }
 
+export async function signInWithIdToken(idToken: string): Promise<void> {
+  const supabase = getSupabaseClient();
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: 'google',
+    token: idToken,
+  });
+  if (error) {
+    console.error('Supabase ID token sign in failed', error);
+  }
+}
+
 export async function signOutSupabase(): Promise<void> {
   const supabase = getSupabaseClient();
   const { error } = await supabase.auth.signOut();
