@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Stack, Typography } from '@mui/material';
+
 import CheckIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import HelpIcon from '@mui/icons-material/HelpOutline';
+import { Stack, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
+
 import { getSupabaseClient } from '@/lib/supabaseClient';
 
 function StatusRow({ label, status }: { label: string; status: 'ok' | 'error' | 'pending' }) {
@@ -48,7 +50,9 @@ export function AuthStatus() {
       </Typography>
       <StatusRow
         label="Google Calendar"
-        status={googleStatus === 'authenticated' ? 'ok' : googleStatus === 'loading' ? 'pending' : 'error'}
+        status={
+          googleStatus === 'authenticated' ? 'ok' : googleStatus === 'loading' ? 'pending' : 'error'
+        }
       />
       <StatusRow label="Supabase" status={supabaseStatus} />
     </Stack>

@@ -16,10 +16,10 @@ import ICSCalendarManager from '@/widgets/ICSCalendarManager';
 import { LocalEventsManager } from '@/widgets/LocalEventsManager';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { AppInfo } from '@/widgets/Settings/AppInfo';
+import { AuthStatus } from '@/widgets/Settings/AuthStatus';
 import { EventsTrash } from '@/widgets/Settings/EventsTrash';
 import { TagPresets } from '@/widgets/Settings/TagPresets';
 import { TodoViewSettings } from '@/widgets/Settings/TodoViewSettings';
-import { AuthStatus } from '@/widgets/Settings/AuthStatus';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
 import { TodoTrash } from '@/widgets/TodoList/TodoTrash';
@@ -101,7 +101,7 @@ export function HomeView({
               handleSignOut={handleSignOut}
             />
           ),
-          Status: <AuthStatus />, 
+          Status: <AuthStatus />,
           'Sound Alerts': events && (
             <SoundAlert
               currentTime={now}

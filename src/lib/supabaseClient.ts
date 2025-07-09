@@ -13,6 +13,7 @@ function initClient(): SupabaseClient {
       supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     });
   }
+  console.debug('Supabase client initialized');
   return client;
 }
 

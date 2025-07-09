@@ -31,6 +31,7 @@ async function refreshAccessToken(token: JWT) {
       accessToken: data.access_token,
       accessTokenExpires: Date.now() + data.expires_in * 1000,
       refreshToken: data.refresh_token ?? token.refreshToken,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       idToken: data.id_token ?? (token as any).idToken,
     };
   } catch (error) {
@@ -89,6 +90,7 @@ export const authOptions: NextAuthOptions = {
       console.log('Session callback - has accessToken:', !!token.accessToken);
 
       session.accessToken = token.accessToken as string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       session.idToken = (token as any).idToken as string;
       session.error = token.error as string;
 
