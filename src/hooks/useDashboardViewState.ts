@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+
 import { signIn, signOut, useSession } from 'next-auth/react';
 
 import { useEvents } from '@/hooks/useEvents';
