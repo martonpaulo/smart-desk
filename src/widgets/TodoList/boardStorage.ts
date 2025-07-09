@@ -1,6 +1,8 @@
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 import { BoardState, Column } from '@/widgets/TodoList/types';
+import { getSupabaseClient } from '@/lib/supabaseClient';
+import { createTask, fetchTasks } from '@/services/supabaseTasksService';
 
 export const STORAGE_KEY = 'todo-board';
 export const LAST_POPULATE_KEY = 'todo-last-populate';
@@ -35,7 +37,31 @@ export function loadBoard(): BoardState {
 export function saveBoard(board: BoardState): void {
   try {
     setStoredFilters(STORAGE_KEY, board);
+    void syncTasksWithSupabase(board);
   } catch {
     console.error('Could not save todo board');
+  }
+}
+
+async function syncTasksWithSupabase(board: BoardState): Promise<void> {
+  const supabase = getSupabaseClient();
+  try {
+    const remote = await fetchTasks(supabase);
+    const existing = new Set(remote.map(t => t.id));
+    for (const task of board.tasks) {
+      if (!existing.has(task.id)) {
+        console.debug('Sync local task to Supabase', task);
+        await createTask(supabase, {
+          title: task.title,
+          description: task.description,
+          tags: task.tags,
+          columnId: task.columnId,
+          quantity: task.quantity,
+          quantityTotal: task.quantityTotal,
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Failed syncing tasks to Supabase', err);
   }
 }

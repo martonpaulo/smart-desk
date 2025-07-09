@@ -1,4 +1,8 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
+import {
+  signInWithGoogle as supabaseSignIn,
+  signOutSupabase,
+} from '@/hooks/useSupabaseAuth';
 
 import { useEvents } from '@/hooks/useEvents';
 import { useEventStore } from '@/store/eventStore';
@@ -14,6 +18,7 @@ export function useDashboardViewState(): DashboardViewState {
     try {
       const res = await signIn('google', { redirect: false });
       if (res?.url) window.open(res.url, '_blank');
+      await supabaseSignIn();
     } catch (err) {
       displayError({ prefix: 'Error during sign in', error: err });
     }
@@ -22,6 +27,7 @@ export function useDashboardViewState(): DashboardViewState {
   const handleSignOut = async () => {
     try {
       await signOut();
+      await signOutSupabase();
     } catch (err) {
       displayError({ prefix: 'Error during sign out', error: err });
     }
