@@ -29,7 +29,7 @@ export async function fetchTasks(client: SupabaseClient): Promise<TodoTask[]> {
     description: t.description ?? undefined,
     tags: t.tags ?? [],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    columnSlug: (t as any).columnId,
+    columnSlug: (t as any).column_id,
     quantity: t.quantity ?? undefined,
     quantityTotal: t.quantityTotal ?? undefined,
   }));
@@ -46,7 +46,7 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
     throw new Error('User not authenticated');
   }
 
-  const insertPayload = { ...payload, columnId: payload.columnSlug, user_id: user.id };
+  const insertPayload = { ...payload, column_id: payload.columnSlug, user_id: user.id };
 
   const { data, error } = await client
     .from('tasks')
@@ -63,7 +63,7 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
     title: data.title,
     description: data.description ?? undefined,
     tags: data.tags ?? [],
-    columnSlug: data.columnId,
+    columnSlug: data.column_id,
     quantity: data.quantity ?? undefined,
     quantityTotal: data.quantityTotal ?? undefined,
   } as TodoTask;
@@ -78,7 +78,7 @@ export async function updateTask(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dbUpdates = { ...updates } as any;
   if (updates.columnSlug) {
-    dbUpdates.columnId = updates.columnSlug;
+    dbUpdates.column_id = updates.columnSlug;
     delete dbUpdates.columnSlug;
   }
   const { data, error } = await client
@@ -97,7 +97,7 @@ export async function updateTask(
     title: data.title,
     description: data.description ?? undefined,
     tags: data.tags ?? [],
-    columnSlug: data.columnId,
+    columnSlug: data.column_id,
     quantity: data.quantity ?? undefined,
     quantityTotal: data.quantityTotal ?? undefined,
   } as TodoTask;

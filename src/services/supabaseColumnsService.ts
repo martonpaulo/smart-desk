@@ -4,6 +4,7 @@ import type { Column } from '@/widgets/TodoList/types';
 
 export interface NewColumn {
   id?: string;
+  slug?: string;
   title: string;
   color: string;
   position?: number;
@@ -20,7 +21,13 @@ export async function fetchColumns(client: SupabaseClient): Promise<Column[]> {
     throw new Error(error.message);
   }
   console.debug('Supabase: fetched columns', data);
-  return (data ?? []) as Column[];
+  return (data ?? []).map(c => ({
+    id: c.id,
+    slug: (c as any).slug ?? c.id,
+    title: c.title,
+    color: c.color,
+    position: c.position,
+  })) as Column[];
 }
 
 export async function createColumn(client: SupabaseClient, payload: NewColumn): Promise<Column> {
@@ -34,7 +41,11 @@ export async function createColumn(client: SupabaseClient, payload: NewColumn): 
     throw new Error('User not authenticated');
   }
 
-  const insertPayload = { ...payload, user_id: user.id };
+  const insertPayload = {
+    ...payload,
+    slug: payload.slug ?? payload.id,
+    user_id: user.id,
+  };
 
   const { data, error } = await client
     .from('columns')

@@ -15,9 +15,9 @@ export const STORAGE_KEY = 'todo-board';
 export const LAST_POPULATE_KEY = 'todo-last-populate';
 
 export const DEFAULT_COLUMNS: Column[] = [
-  { id: 'todo', title: 'Todo', color: COLUMN_COLORS[0].value },
-  { id: 'doing', title: 'Doing', color: COLUMN_COLORS[1].value },
-  { id: 'done', title: 'Done', color: COLUMN_COLORS[2].value },
+  { id: 'todo', slug: 'todo', title: 'Todo', color: COLUMN_COLORS[0].value },
+  { id: 'doing', slug: 'doing', title: 'Doing', color: COLUMN_COLORS[1].value },
+  { id: 'done', slug: 'done', title: 'Done', color: COLUMN_COLORS[2].value },
 ];
 
 export const DEFAULT_BOARD: BoardState = {
@@ -38,6 +38,19 @@ export function loadBoard(): BoardState {
       return DEFAULT_BOARD;
     }
     if (!board.trash) board.trash = { columns: [], tasks: [] };
+    // Migrate column slug property if missing
+    board.columns = board.columns.map(c => {
+      if (!(c as any).slug) {
+        (c as any).slug = c.id;
+      }
+      return c;
+    });
+    board.trash.columns = board.trash.columns.map(c => {
+      if (!(c as any).slug) {
+        (c as any).slug = c.id;
+      }
+      return c;
+    });
     // Migrate old columnId property if present
     board.tasks = board.tasks.map(t => {
       if ((t as any).columnId && !(t as any).columnSlug) {
@@ -59,8 +72,10 @@ export function loadBoard(): BoardState {
 export function saveBoard(board: BoardState): void {
   try {
     setStoredFilters(STORAGE_KEY, board);
-    void syncTasksWithSupabase(board);
-    void syncColumnsWithSupabase(board);
+    void (async () => {
+      await syncColumnsWithSupabase(board);
+      await syncTasksWithSupabase(board);
+    })();
   } catch {
     console.error('Could not save todo board');
   }
@@ -137,18 +152,19 @@ async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
   const supabase = getSupabaseClient();
   try {
     const remote = await fetchColumns(supabase);
-    const remoteMap = new Map(remote.map(c => [c.id, c]));
+    const remoteMap = new Map(remote.map(c => [c.slug ?? c.id, c]));
 
     for (const column of board.columns) {
-      const existing = remoteMap.get(column.id);
+      const existing = remoteMap.get(column.slug);
       if (!existing) {
         await createColumn(supabase, {
           id: column.id,
+          slug: column.slug,
           title: column.title,
           color: column.color,
         });
       } else if (existing.title !== column.title || existing.color !== column.color) {
-        await updateColumn(supabase, column.id, {
+        await updateColumn(supabase, existing.id, {
           title: column.title,
           color: column.color,
         });
@@ -156,7 +172,7 @@ async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
     }
 
     for (const col of remote) {
-      if (!board.columns.some(c => c.id === col.id)) {
+      if (!board.columns.some(c => c.slug === (col.slug ?? col.id))) {
         await deleteColumn(supabase, col.id);
       }
     }
