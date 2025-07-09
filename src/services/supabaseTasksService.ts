@@ -7,7 +7,7 @@ export interface NewTask {
   title: string;
   description?: string;
   tags: string[];
-  columnId: string;
+  columnSlug: string;
   quantity?: number;
   quantityTotal?: number;
 }
@@ -23,7 +23,15 @@ export async function fetchTasks(client: SupabaseClient): Promise<TodoTask[]> {
     throw new Error(error.message);
   }
   console.debug('Supabase: fetched tasks', data);
-  return (data ?? []) as TodoTask[];
+  return (data ?? []).map(t => ({
+    id: t.id,
+    title: t.title,
+    description: t.description ?? undefined,
+    tags: t.tags ?? [],
+    columnSlug: (t as any).columnId,
+    quantity: t.quantity ?? undefined,
+    quantityTotal: t.quantityTotal ?? undefined,
+  }));
 }
 
 export async function createTask(client: SupabaseClient, payload: NewTask): Promise<TodoTask> {
@@ -37,7 +45,7 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
     throw new Error('User not authenticated');
   }
 
-  const insertPayload = { ...payload, user_id: user.id };
+  const insertPayload = { ...payload, columnId: payload.columnSlug, user_id: user.id };
 
   const { data, error } = await client
     .from('tasks')
@@ -49,7 +57,15 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
     throw new Error(error.message);
   }
   console.debug('Supabase: created task', data);
-  return data as TodoTask;
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description ?? undefined,
+    tags: data.tags ?? [],
+    columnSlug: data.columnId,
+    quantity: data.quantity ?? undefined,
+    quantityTotal: data.quantityTotal ?? undefined,
+  } as TodoTask;
 }
 
 export async function updateTask(
@@ -58,13 +74,26 @@ export async function updateTask(
   updates: Partial<NewTask>,
 ): Promise<TodoTask> {
   console.debug('Supabase: updating task', id, updates);
-  const { data, error } = await client.from('tasks').update(updates).eq('id', id).select().single();
+  const dbUpdates = { ...updates } as any;
+  if (updates.columnSlug) {
+    dbUpdates.columnId = updates.columnSlug;
+    delete dbUpdates.columnSlug;
+  }
+  const { data, error } = await client.from('tasks').update(dbUpdates).eq('id', id).select().single();
   if (error) {
     console.error('Supabase: update task failed', error);
     throw new Error(error.message);
   }
   console.debug('Supabase: updated task', data);
-  return data as TodoTask;
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description ?? undefined,
+    tags: data.tags ?? [],
+    columnSlug: data.columnId,
+    quantity: data.quantity ?? undefined,
+    quantityTotal: data.quantityTotal ?? undefined,
+  } as TodoTask;
 }
 
 export async function deleteTask(client: SupabaseClient, id: string): Promise<void> {

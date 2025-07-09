@@ -151,7 +151,7 @@ export function TodoTaskCard({
                     maxWidth: '100%',
                     overflowWrap: 'anywhere',
                     whiteSpace: 'normal',
-                    textDecoration: task.columnId === 'done' ? 'line-through' : 'none',
+                  textDecoration: task.columnSlug === 'done' ? 'line-through' : 'none',
                   }}
                 >
                   {task.title}
@@ -201,7 +201,7 @@ export function TodoTaskCard({
                   </IconButton>
                 </Tooltip>
                 <Tooltip
-                  title={task.columnId === 'done' ? 'Uncheck task' : 'Check task'}
+                  title={task.columnSlug === 'done' ? 'Uncheck task' : 'Check task'}
                   enterTouchDelay={0}
                 >
                   <IconButton
@@ -218,7 +218,7 @@ export function TodoTaskCard({
                       borderBottomRightRadius: 1,
                     }}
                   >
-                    {task.columnId === 'done' ? (
+                    {task.columnSlug === 'done' ? (
                       <UndoIcon fontSize="inherit" />
                     ) : (
                       <CheckIcon fontSize="inherit" />

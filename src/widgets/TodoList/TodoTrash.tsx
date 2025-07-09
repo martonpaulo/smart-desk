@@ -55,19 +55,19 @@ function useTodoTrash() {
   /**
    * Restore a column and all its tasks
    */
-  function restoreColumn(columnId: string): void {
+  function restoreColumn(columnSlug: string): void {
     setBoard((prev: BoardState) => {
       // find the column in trash
-      const columnToRestore = prev.trash?.columns.find(c => c.id === columnId);
+      const columnToRestore = prev.trash?.columns.find(c => c.id === columnSlug);
       if (!columnToRestore) {
         return prev;
       }
 
       // pick up tasks that belonged to this column
-      const tasksInColumn: TodoTask[] = prev.trash!.tasks.filter(t => t.columnId === columnId);
+      const tasksInColumn: TodoTask[] = prev.trash!.tasks.filter(t => t.columnSlug === columnSlug);
       // filter out restored column and its tasks from trash
-      const updatedTrashColumns: Column[] = prev.trash!.columns.filter(c => c.id !== columnId);
-      const updatedTrashTasks: TodoTask[] = prev.trash!.tasks.filter(t => t.columnId !== columnId);
+      const updatedTrashColumns: Column[] = prev.trash!.columns.filter(c => c.id !== columnSlug);
+      const updatedTrashTasks: TodoTask[] = prev.trash!.tasks.filter(t => t.columnSlug !== columnSlug);
 
       return {
         ...prev,

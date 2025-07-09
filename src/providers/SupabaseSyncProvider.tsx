@@ -76,7 +76,7 @@ export function SupabaseSyncProvider({ children }: Props) {
               title: task.title,
               description: task.description,
               tags: task.tags,
-              columnId: task.columnId,
+              columnSlug: task.columnSlug,
               quantity: task.quantity,
               quantityTotal: task.quantityTotal,
             });

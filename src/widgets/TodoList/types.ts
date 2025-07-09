@@ -9,10 +9,10 @@ export interface TodoTask {
   title: string;
   description?: string;
   tags: string[];
-  columnId: string;
+  columnSlug: string;
   quantity?: number;
   quantityTotal?: number;
-  prevColumnId?: string;
+  prevColumnSlug?: string;
 }
 
 export interface BoardState {
