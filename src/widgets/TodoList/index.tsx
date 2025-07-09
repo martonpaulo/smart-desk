@@ -6,6 +6,7 @@ import { useTodoBoardStore } from '@/store/todoBoardStore';
 import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { showUndo } from '@/store/undoStore';
 import { IEvent } from '@/types/IEvent';
+import { getSupabaseClient } from '@/lib/supabaseClient';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { generateId } from '@/utils/idUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
@@ -16,6 +17,8 @@ import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import { TrashDialog } from '@/widgets/TodoList/TrashDialog';
 import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
+import { fetchColumns } from '@/services/supabaseColumnsService';
+import { fetchTasks } from '@/services/supabaseTasksService';
 
 // Ensure drag and drop works on Safari PWAs
 import '@/lib/dragDropTouch';
@@ -42,6 +45,32 @@ export function TodoList({ events }: TodoListProps) {
   const [taskDropColumnId, setTaskDropColumnId] = useState<string | null>(null);
   const [hoverColumnId, setHoverColumnId] = useState<string | null>(null);
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('mobileLg'));
+
+  // Periodically sync board with Supabase every minute
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    let cancelled = false;
+
+    async function refresh() {
+      try {
+        const [columns, tasks] = await Promise.all([
+          fetchColumns(supabase),
+          fetchTasks(supabase),
+        ]);
+        if (cancelled) return;
+        setBoard(prev => ({ ...prev, columns: columns.length ? columns : prev.columns, tasks }));
+      } catch (err) {
+        console.error('Failed to refresh board from Supabase', err);
+      }
+    }
+
+    void refresh();
+    const id = setInterval(refresh, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   // keep global store in sync
   useEffect(() => {

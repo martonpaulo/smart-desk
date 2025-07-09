@@ -1,5 +1,16 @@
 import { getSupabaseClient } from '@/lib/supabaseClient';
-import { createTask, fetchTasks, updateTask } from '@/services/supabaseTasksService';
+import {
+  createTask,
+  deleteTask,
+  fetchTasks,
+  updateTask,
+} from '@/services/supabaseTasksService';
+import {
+  createColumn,
+  deleteColumn,
+  fetchColumns,
+  updateColumn,
+} from '@/services/supabaseColumnsService';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
@@ -19,7 +30,8 @@ export const DEFAULT_BOARD: BoardState = {
   trash: { columns: [], tasks: [] },
 };
 
-let isSyncing = false;
+let isSyncingTasks = false;
+let isSyncingColumns = false;
 
 export function loadBoard(): BoardState {
   try {
@@ -40,14 +52,15 @@ export function saveBoard(board: BoardState): void {
   try {
     setStoredFilters(STORAGE_KEY, board);
     void syncTasksWithSupabase(board);
+    void syncColumnsWithSupabase(board);
   } catch {
     console.error('Could not save todo board');
   }
 }
 
 async function syncTasksWithSupabase(board: BoardState): Promise<void> {
-  if (isSyncing) return;
-  isSyncing = true;
+  if (isSyncingTasks) return;
+  isSyncingTasks = true;
   const supabase = getSupabaseClient();
   try {
     const remote = await fetchTasks(supabase);
@@ -83,13 +96,19 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
         });
       }
     }
+
+    for (const task of remote) {
+      if (!board.tasks.some(t => t.id === task.id)) {
+        await deleteTask(supabase, task.id);
+      }
+    }
     if (updated) {
       setStoredFilters(STORAGE_KEY, board);
     }
   } catch (err) {
     console.error('Failed syncing tasks to Supabase', err);
   } finally {
-    isSyncing = false;
+    isSyncingTasks = false;
   }
 }
 
@@ -102,4 +121,43 @@ function areTasksEqual(a: TodoTask, b: TodoTask): boolean {
     a.quantity === b.quantity &&
     a.quantityTotal === b.quantityTotal
   );
+}
+
+async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
+  if (isSyncingColumns) return;
+  isSyncingColumns = true;
+  const supabase = getSupabaseClient();
+  try {
+    const remote = await fetchColumns(supabase);
+    const remoteMap = new Map(remote.map(c => [c.id, c]));
+
+    for (const column of board.columns) {
+      const existing = remoteMap.get(column.id);
+      if (!existing) {
+        await createColumn(supabase, {
+          id: column.id,
+          title: column.title,
+          color: column.color,
+        });
+      } else if (
+        existing.title !== column.title ||
+        existing.color !== column.color
+      ) {
+        await updateColumn(supabase, column.id, {
+          title: column.title,
+          color: column.color,
+        });
+      }
+    }
+
+    for (const col of remote) {
+      if (!board.columns.some(c => c.id === col.id)) {
+        await deleteColumn(supabase, col.id);
+      }
+    }
+  } catch (err) {
+    console.error('Failed syncing columns to Supabase', err);
+  } finally {
+    isSyncingColumns = false;
+  }
 }
