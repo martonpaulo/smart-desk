@@ -6,13 +6,10 @@ import { isSupabaseLoggedIn } from '@/hooks/useSupabaseAuth';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import { createEvent, fetchEvents } from '@/services/supabaseEventsService';
 import { createTask, fetchTasks } from '@/services/supabaseTasksService';
-import {
-  loadLocalEvents,
-  saveLocalEvents,
-} from '@/utils/localEventsStorage';
-import { loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { useEventStore } from '@/store/eventStore';
 import { useTodoBoardStore } from '@/store/todoBoardStore';
+import { loadLocalEvents, saveLocalEvents } from '@/utils/localEventsStorage';
+import { loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
 
 interface Props {
   children: ReactNode;

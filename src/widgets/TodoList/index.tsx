@@ -7,6 +7,7 @@ import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { showUndo } from '@/store/undoStore';
 import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
+import { generateId } from '@/utils/idUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
 import { LAST_POPULATE_KEY, saveBoard } from '@/widgets/TodoList/boardStorage';
@@ -15,7 +16,6 @@ import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import { TrashDialog } from '@/widgets/TodoList/TrashDialog';
 import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
-import { generateId } from '@/utils/idUtils';
 
 // Ensure drag and drop works on Safari PWAs
 import '@/lib/dragDropTouch';

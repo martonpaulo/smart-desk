@@ -10,8 +10,8 @@ import {
   filterTodayEvents,
   sortEventsByStart,
 } from '@/utils/eventUtils';
-import { EventListItem } from '@/widgets/EventList/EventListItem';
 import { generateId } from '@/utils/idUtils';
+import { EventListItem } from '@/widgets/EventList/EventListItem';
 
 interface EventListProps {
   events: IEvent[] | null;
