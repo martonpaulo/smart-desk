@@ -8,6 +8,7 @@ export interface NewTask {
   description?: string;
   tags: string[];
   columnSlug: string;
+  position?: number;
   quantity?: number;
   quantityTotal?: number;
 }
@@ -17,7 +18,7 @@ export async function fetchTasks(client: SupabaseClient): Promise<TodoTask[]> {
   const { data, error } = await client
     .from('tasks')
     .select('*')
-    .order('created_at', { ascending: true });
+    .order('position', { ascending: true });
   if (error) {
     console.error('Supabase: fetch tasks failed', error);
     throw new Error(error.message);
@@ -30,6 +31,7 @@ export async function fetchTasks(client: SupabaseClient): Promise<TodoTask[]> {
     tags: t.tags ?? [],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     columnSlug: (t as any).column_id,
+    position: t.position ?? undefined,
     quantity: t.quantity ?? undefined,
     quantityTotal: t.quantityTotal ?? undefined,
   }));
@@ -48,7 +50,11 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
 
   console.log('payload', payload);
 
-  const insertPayload = { ...payload, column_id: payload.columnSlug, user_id: user.id };
+  const insertPayload = {
+    ...payload,
+    column_id: payload.columnSlug,
+    user_id: user.id,
+  };
 
   const { data, error } = await client
     .from('tasks')
@@ -66,6 +72,7 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
     description: data.description ?? undefined,
     tags: data.tags ?? [],
     columnSlug: data.column_id,
+    position: data.position ?? undefined,
     quantity: data.quantity ?? undefined,
     quantityTotal: data.quantityTotal ?? undefined,
   } as TodoTask;
@@ -100,6 +107,7 @@ export async function updateTask(
     description: data.description ?? undefined,
     tags: data.tags ?? [],
     columnSlug: data.column_id,
+    position: data.position ?? undefined,
     quantity: data.quantity ?? undefined,
     quantityTotal: data.quantityTotal ?? undefined,
   } as TodoTask;

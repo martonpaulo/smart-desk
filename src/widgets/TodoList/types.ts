@@ -3,6 +3,7 @@ export interface Column {
   slug: string;
   title: string;
   color: string;
+  position?: number;
 }
 
 export interface TodoTask {
@@ -14,6 +15,7 @@ export interface TodoTask {
   quantity?: number;
   quantityTotal?: number;
   prevColumnSlug?: string;
+  position?: number;
 }
 
 export interface BoardState {

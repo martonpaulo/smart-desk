@@ -8,6 +8,7 @@ create table if not exists public.tasks (
   tags text[] default '{}',
   columnSlug text not null,
   column_id text references columns(id) not null,
+  position integer,
   quantity integer,
   quantityTotal integer,
   created_at timestamptz default now(),

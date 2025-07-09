@@ -15,9 +15,9 @@ export const STORAGE_KEY = 'todo-board';
 export const LAST_POPULATE_KEY = 'todo-last-populate';
 
 export const DEFAULT_COLUMNS: Column[] = [
-  { id: 'todo', slug: 'todo', title: 'Todo', color: COLUMN_COLORS[0].value },
-  { id: 'doing', slug: 'doing', title: 'Doing', color: COLUMN_COLORS[1].value },
-  { id: 'done', slug: 'done', title: 'Done', color: COLUMN_COLORS[2].value },
+  { id: 'todo', slug: 'todo', title: 'Todo', color: COLUMN_COLORS[0].value, position: 0 },
+  { id: 'doing', slug: 'doing', title: 'Doing', color: COLUMN_COLORS[1].value, position: 1 },
+  { id: 'done', slug: 'done', title: 'Done', color: COLUMN_COLORS[2].value, position: 2 },
 ];
 
 export const DEFAULT_BOARD: BoardState = {
@@ -28,6 +28,17 @@ export const DEFAULT_BOARD: BoardState = {
 
 let isSyncingTasks = false;
 let isSyncingColumns = false;
+
+function applyPositions(board: BoardState): BoardState {
+  const columns = board.columns.map((c, index) => ({ ...c, position: index }));
+  const counter: Record<string, number> = {};
+  const tasks = board.tasks.map(t => {
+    const idx = counter[t.columnSlug] ?? 0;
+    counter[t.columnSlug] = idx + 1;
+    return { ...t, position: idx };
+  });
+  return { ...board, columns, tasks };
+}
 
 export function loadBoard(): BoardState {
   try {
@@ -63,7 +74,7 @@ export function loadBoard(): BoardState {
       }
       return t;
     });
-    return board;
+    return applyPositions(board);
   } catch {
     return DEFAULT_BOARD;
   }
@@ -71,10 +82,11 @@ export function loadBoard(): BoardState {
 
 export function saveBoard(board: BoardState): void {
   try {
-    setStoredFilters(STORAGE_KEY, board);
+    const withPos = applyPositions(board);
+    setStoredFilters(STORAGE_KEY, withPos);
     void (async () => {
-      await syncColumnsWithSupabase(board);
-      await syncTasksWithSupabase(board);
+      await syncColumnsWithSupabase(withPos);
+      await syncTasksWithSupabase(withPos);
     })();
   } catch {
     console.error('Could not save todo board');
@@ -100,6 +112,7 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
           description: task.description,
           tags: task.tags,
           columnSlug: task.columnSlug,
+          position: task.position,
           quantity: task.quantity,
           quantityTotal: task.quantityTotal,
         });
@@ -114,6 +127,7 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
           description: task.description,
           tags: task.tags,
           columnSlug: task.columnSlug,
+          position: task.position,
           quantity: task.quantity,
           quantityTotal: task.quantityTotal,
         });
@@ -140,6 +154,7 @@ function areTasksEqual(a: TodoTask, b: TodoTask): boolean {
     a.title === b.title &&
     a.description === b.description &&
     a.columnSlug === b.columnSlug &&
+    a.position === b.position &&
     JSON.stringify(a.tags) === JSON.stringify(b.tags) &&
     a.quantity === b.quantity &&
     a.quantityTotal === b.quantityTotal
@@ -154,7 +169,7 @@ async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
     const remote = await fetchColumns(supabase);
     const remoteMap = new Map(remote.map(c => [c.slug ?? c.id, c]));
 
-    for (const column of board.columns) {
+    for (const [index, column] of board.columns.entries()) {
       const existing = remoteMap.get(column.slug);
       if (!existing) {
         await createColumn(supabase, {
@@ -162,12 +177,18 @@ async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
           slug: column.slug,
           title: column.title,
           color: column.color,
+          position: index,
         });
-      } else if (existing.title !== column.title || existing.color !== column.color) {
+      } else if (
+        existing.title !== column.title ||
+        existing.color !== column.color ||
+        existing.position !== index
+      ) {
         if (existing.id) {
           await updateColumn(supabase, existing.id, {
             title: column.title,
             color: column.color,
+            position: index,
           });
         }
       }
