@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect } from 'react';
 
+import { isSupabaseLoggedIn } from '@/hooks/useSupabaseAuth';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import { createEvent, fetchEvents } from '@/services/supabaseEventsService';
 import { createTask, fetchTasks } from '@/services/supabaseTasksService';
@@ -16,6 +17,11 @@ export function SupabaseSyncProvider({ children }: Props) {
   useEffect(() => {
     async function sync() {
       const supabase = getSupabaseClient();
+      const loggedIn = await isSupabaseLoggedIn();
+      if (!loggedIn) {
+        console.warn('Supabase sync skipped: no session');
+        return;
+      }
       try {
         const remoteEvents = await fetchEvents(supabase);
         const eventIds = new Set(remoteEvents.map(e => e.id));
