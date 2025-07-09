@@ -38,7 +38,11 @@ export function TrashDialog({
             <ListItem key={col.id} sx={{ pl: 0 }}>
               <ListItemText primary={`Column: ${col.title}`} />
               <ListItemSecondaryAction>
-                <IconButton edge="end" aria-label="restore" onClick={() => onRestoreColumn(col.id)}>
+                <IconButton
+                  edge="end"
+                  aria-label="restore"
+                  onClick={() => col.id && onRestoreColumn(col.id)}
+                >
                   <RestoreIcon fontSize="small" />
                 </IconButton>
               </ListItemSecondaryAction>
