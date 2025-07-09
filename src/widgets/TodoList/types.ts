@@ -1,5 +1,6 @@
 export interface Column {
-  id: string;
+  id?: string;
+  slug: string;
   title: string;
   color: string;
 }
