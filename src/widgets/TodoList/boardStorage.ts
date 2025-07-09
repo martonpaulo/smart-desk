@@ -1,16 +1,11 @@
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import {
-  createTask,
-  deleteTask,
-  fetchTasks,
-  updateTask,
-} from '@/services/supabaseTasksService';
-import {
   createColumn,
   deleteColumn,
   fetchColumns,
   updateColumn,
 } from '@/services/supabaseColumnsService';
+import { createTask, deleteTask, fetchTasks, updateTask } from '@/services/supabaseTasksService';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
@@ -139,10 +134,7 @@ async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
           title: column.title,
           color: column.color,
         });
-      } else if (
-        existing.title !== column.title ||
-        existing.color !== column.color
-      ) {
+      } else if (existing.title !== column.title || existing.color !== column.color) {
         await updateColumn(supabase, column.id, {
           title: column.title,
           color: column.color,

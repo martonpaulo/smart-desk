@@ -23,10 +23,7 @@ export async function fetchColumns(client: SupabaseClient): Promise<Column[]> {
   return (data ?? []) as Column[];
 }
 
-export async function createColumn(
-  client: SupabaseClient,
-  payload: NewColumn,
-): Promise<Column> {
+export async function createColumn(client: SupabaseClient, payload: NewColumn): Promise<Column> {
   console.debug('Supabase: creating column', payload);
   const {
     data: { user },
@@ -72,10 +69,7 @@ export async function updateColumn(
   return data as Column;
 }
 
-export async function deleteColumn(
-  client: SupabaseClient,
-  id: string,
-): Promise<void> {
+export async function deleteColumn(client: SupabaseClient, id: string): Promise<void> {
   console.debug('Supabase: deleting column', id);
   const { error } = await client.from('columns').delete().eq('id', id);
   if (error) {
