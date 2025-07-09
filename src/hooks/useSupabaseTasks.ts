@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { useSupabaseClient } from '@/lib/supabaseClient';
 import {
   createTask,
   deleteTask,
   fetchTasks,
-  updateTask,
   type NewTask,
+  updateTask,
 } from '@/services/supabaseTasksService';
 import type { TodoTask } from '@/widgets/TodoList/types';
 
@@ -32,8 +33,7 @@ export function useUpdateTask() {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<NewTask> }) =>
       updateTask(supabase, id, updates),
-    onSuccess: (_res: TodoTask) =>
-      queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+    onSuccess: (_res: TodoTask) => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
   });
 }
 

@@ -3,6 +3,13 @@ import type { Account, NextAuthOptions, Session } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import GoogleProvider from 'next-auth/providers/google';
 
+const REQUIRED_SCOPES = [
+  'openid',
+  'email',
+  'profile',
+  'https://www.googleapis.com/auth/calendar.readonly',
+];
+
 async function refreshAccessToken(token: JWT) {
   try {
     console.log('Refreshing access token...');
@@ -38,9 +45,10 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
-          scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly',
-          access_type: 'offline',
           prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+          scope: REQUIRED_SCOPES.join(' '),
         },
       },
     }),

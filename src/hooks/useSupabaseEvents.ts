@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { useSupabaseClient } from '@/lib/supabaseClient';
 import {
   createEvent,
   deleteEvent,
   fetchEvents,
-  updateEvent,
   type NewEvent,
+  updateEvent,
 } from '@/services/supabaseEventsService';
 import type { IEvent } from '@/types/IEvent';
 
@@ -32,8 +33,7 @@ export function useUpdateEvent() {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<NewEvent> }) =>
       updateEvent(supabase, id, updates),
-    onSuccess: (_res: IEvent) =>
-      queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onSuccess: (_res: IEvent) => queryClient.invalidateQueries({ queryKey: ['events'] }),
   });
 }
 
