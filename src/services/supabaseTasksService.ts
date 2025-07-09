@@ -39,7 +39,11 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
 
   const insertPayload = { ...payload, user_id: user.id };
 
-  const { data, error } = await client.from('tasks').insert(insertPayload).select().single();
+  const { data, error } = await client
+    .from('tasks')
+    .upsert(insertPayload, { onConflict: 'id' })
+    .select()
+    .single();
   if (error) {
     console.error('Supabase: create task failed', error);
     throw new Error(error.message);

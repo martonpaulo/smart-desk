@@ -1,8 +1,12 @@
 import { getSupabaseClient } from '@/lib/supabaseClient';
-import { createTask, fetchTasks } from '@/services/supabaseTasksService';
+import {
+  createTask,
+  fetchTasks,
+  updateTask,
+} from '@/services/supabaseTasksService';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
-import { BoardState, Column } from '@/widgets/TodoList/types';
+import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
 export const STORAGE_KEY = 'todo-board';
 export const LAST_POPULATE_KEY = 'todo-last-populate';
@@ -18,6 +22,8 @@ export const DEFAULT_BOARD: BoardState = {
   tasks: [],
   trash: { columns: [], tasks: [] },
 };
+
+let isSyncing = false;
 
 export function loadBoard(): BoardState {
   try {
@@ -44,13 +50,17 @@ export function saveBoard(board: BoardState): void {
 }
 
 async function syncTasksWithSupabase(board: BoardState): Promise<void> {
+  if (isSyncing) return;
+  isSyncing = true;
   const supabase = getSupabaseClient();
   try {
     const remote = await fetchTasks(supabase);
-    const existing = new Set(remote.map(t => t.id));
+    const remoteMap = new Map(remote.map(t => [t.id, t]));
     let updated = false;
+
     for (const task of board.tasks) {
-      if (!existing.has(task.id)) {
+      const existing = remoteMap.get(task.id);
+      if (!existing) {
         console.debug('Sync local task to Supabase', task);
         const created = await createTask(supabase, {
           id: task.id,
@@ -65,6 +75,16 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
           task.id = created.id;
           updated = true;
         }
+        remoteMap.set(task.id, created);
+      } else if (!areTasksEqual(existing, task)) {
+        await updateTask(supabase, task.id, {
+          title: task.title,
+          description: task.description,
+          tags: task.tags,
+          columnId: task.columnId,
+          quantity: task.quantity,
+          quantityTotal: task.quantityTotal,
+        });
       }
     }
     if (updated) {
@@ -72,5 +92,18 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
     }
   } catch (err) {
     console.error('Failed syncing tasks to Supabase', err);
+  } finally {
+    isSyncing = false;
   }
+}
+
+function areTasksEqual(a: TodoTask, b: TodoTask): boolean {
+  return (
+    a.title === b.title &&
+    a.description === b.description &&
+    a.columnId === b.columnId &&
+    JSON.stringify(a.tags) === JSON.stringify(b.tags) &&
+    a.quantity === b.quantity &&
+    a.quantityTotal === b.quantityTotal
+  );
 }
