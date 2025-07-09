@@ -28,6 +28,7 @@ export async function fetchTasks(client: SupabaseClient): Promise<TodoTask[]> {
     title: t.title,
     description: t.description ?? undefined,
     tags: t.tags ?? [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     columnSlug: (t as any).columnId,
     quantity: t.quantity ?? undefined,
     quantityTotal: t.quantityTotal ?? undefined,
@@ -74,12 +75,18 @@ export async function updateTask(
   updates: Partial<NewTask>,
 ): Promise<TodoTask> {
   console.debug('Supabase: updating task', id, updates);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dbUpdates = { ...updates } as any;
   if (updates.columnSlug) {
     dbUpdates.columnId = updates.columnSlug;
     delete dbUpdates.columnSlug;
   }
-  const { data, error } = await client.from('tasks').update(dbUpdates).eq('id', id).select().single();
+  const { data, error } = await client
+    .from('tasks')
+    .update(dbUpdates)
+    .eq('id', id)
+    .select()
+    .single();
   if (error) {
     console.error('Supabase: update task failed', error);
     throw new Error(error.message);

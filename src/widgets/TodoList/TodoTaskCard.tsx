@@ -151,7 +151,7 @@ export function TodoTaskCard({
                     maxWidth: '100%',
                     overflowWrap: 'anywhere',
                     whiteSpace: 'normal',
-                  textDecoration: task.columnSlug === 'done' ? 'line-through' : 'none',
+                    textDecoration: task.columnSlug === 'done' ? 'line-through' : 'none',
                   }}
                 >
                   {task.title}

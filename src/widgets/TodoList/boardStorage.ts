@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import {
   createColumn,

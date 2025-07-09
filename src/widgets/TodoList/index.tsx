@@ -277,7 +277,9 @@ export function TodoList({ events }: TodoListProps) {
         if (t.id !== id) return t;
         if (t.columnSlug === 'done') {
           const target =
-            t.prevColumnSlug && columns.some(c => c.id === t.prevColumnSlug) ? t.prevColumnSlug : 'draft';
+            t.prevColumnSlug && columns.some(c => c.id === t.prevColumnSlug)
+              ? t.prevColumnSlug
+              : 'draft';
           return { ...t, columnSlug: target, prevColumnSlug: undefined };
         }
 

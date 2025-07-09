@@ -67,7 +67,9 @@ function useTodoTrash() {
       const tasksInColumn: TodoTask[] = prev.trash!.tasks.filter(t => t.columnSlug === columnSlug);
       // filter out restored column and its tasks from trash
       const updatedTrashColumns: Column[] = prev.trash!.columns.filter(c => c.id !== columnSlug);
-      const updatedTrashTasks: TodoTask[] = prev.trash!.tasks.filter(t => t.columnSlug !== columnSlug);
+      const updatedTrashTasks: TodoTask[] = prev.trash!.tasks.filter(
+        t => t.columnSlug !== columnSlug,
+      );
 
       return {
         ...prev,
