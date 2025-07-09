@@ -1,10 +1,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
-import {
-  signInWithGoogle as supabaseSignIn,
-  signOutSupabase,
-} from '@/hooks/useSupabaseAuth';
 
 import { useEvents } from '@/hooks/useEvents';
+import { signInWithGoogle as supabaseSignIn, signOutSupabase } from '@/hooks/useSupabaseAuth';
 import { useEventStore } from '@/store/eventStore';
 import { DashboardViewState } from '@/types/DashboardViewState';
 import { displayError } from '@/utils/errorUtils';
