@@ -16,6 +16,11 @@ function initClient(): SupabaseClient {
   return client;
 }
 
+// Non-hook version for utilities outside React components
+export function getSupabaseClient(): SupabaseClient {
+  return initClient();
+}
+
 export function useSupabaseClient(): SupabaseClient {
   const { data: session } = useSession();
 
