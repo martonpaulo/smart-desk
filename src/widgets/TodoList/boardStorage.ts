@@ -1,9 +1,5 @@
 import { getSupabaseClient } from '@/lib/supabaseClient';
-import {
-  createTask,
-  fetchTasks,
-  updateTask,
-} from '@/services/supabaseTasksService';
+import { createTask, fetchTasks, updateTask } from '@/services/supabaseTasksService';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';

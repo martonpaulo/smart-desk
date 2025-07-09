@@ -2,6 +2,10 @@
 
 Smart Desk is a small dashboard built with Next.js and Material UI. It aggregates events from Google Calendar and custom ICS feeds and also lets you manage personal tasks and reminders.
 
+this projects uses Google Cloud Console, Supabase, GitHub and Vercel
+
+Google Sign In method to sync calendar events and Supabase session
+
 ## Features
 
 - Google authentication in a dedicated tab
@@ -50,6 +54,7 @@ Ensure the Supabase project `Site URL` matches the domain you deploy to.
 Create `tasks` and `events` tables with row level security enabled and policies based on the `user_id` column. The columns used in the hooks are:
 
 ### `tasks`
+
 - `id` uuid primary key
 - `user_id` uuid reference to auth.users
 - `title` text
@@ -61,6 +66,7 @@ Create `tasks` and `events` tables with row level security enabled and policies 
 - timestamp columns (`created_at`, `updated_at`)
 
 ### `events`
+
 - `id` uuid primary key
 - `user_id` uuid reference to auth.users
 - `start` timestamptz
