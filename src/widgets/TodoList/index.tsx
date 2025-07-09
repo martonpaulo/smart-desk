@@ -258,10 +258,7 @@ export function TodoList({ events }: TodoListProps) {
 
       const ensureColumn = (cid: string, title: string, color: string) => {
         if (!columns.some(c => c.id === cid)) {
-          columns = [
-            ...columns,
-            { id: cid, slug: cid, title, color },
-          ];
+          columns = [...columns, { id: cid, slug: cid, title, color }];
           needsColumnUpdate = true;
         }
       };

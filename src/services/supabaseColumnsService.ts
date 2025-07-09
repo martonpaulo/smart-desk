@@ -23,6 +23,7 @@ export async function fetchColumns(client: SupabaseClient): Promise<Column[]> {
   console.debug('Supabase: fetched columns', data);
   return (data ?? []).map(c => ({
     id: c.id,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     slug: (c as any).slug ?? c.id,
     title: c.title,
     color: c.color,
