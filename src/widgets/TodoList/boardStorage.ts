@@ -1,8 +1,8 @@
+import { getSupabaseClient } from '@/lib/supabaseClient';
+import { createTask, fetchTasks } from '@/services/supabaseTasksService';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 import { BoardState, Column } from '@/widgets/TodoList/types';
-import { getSupabaseClient } from '@/lib/supabaseClient';
-import { createTask, fetchTasks } from '@/services/supabaseTasksService';
 
 export const STORAGE_KEY = 'todo-board';
 export const LAST_POPULATE_KEY = 'todo-last-populate';
