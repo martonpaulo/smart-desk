@@ -31,6 +31,7 @@ async function refreshAccessToken(token: JWT) {
       accessToken: data.access_token,
       accessTokenExpires: Date.now() + data.expires_in * 1000,
       refreshToken: data.refresh_token ?? token.refreshToken,
+      idToken: data.id_token ?? (token as any).idToken,
     };
   } catch (error) {
     console.error('Error refreshing access token:', error);
@@ -65,6 +66,7 @@ export const authOptions: NextAuthOptions = {
         return {
           ...token,
           accessToken: account.access_token,
+          idToken: account.id_token,
           accessTokenExpires: account.expires_at
             ? account.expires_at * 1000
             : Date.now() + 3600 * 1000,
@@ -87,6 +89,7 @@ export const authOptions: NextAuthOptions = {
       console.log('Session callback - has accessToken:', !!token.accessToken);
 
       session.accessToken = token.accessToken as string;
+      session.idToken = (token as any).idToken as string;
       session.error = token.error as string;
 
       return session;

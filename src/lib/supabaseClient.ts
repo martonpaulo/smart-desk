@@ -27,17 +27,25 @@ export function useSupabaseClient(): SupabaseClient {
   const supabase = useMemo(() => initClient(), []);
 
   useEffect(() => {
-    // Attach NextAuth access token so RLS policies can identify the user
-    if (session?.accessToken) {
-      // Use the global.auth.setSession method instead of deprecated setAuth
-      supabase.auth.setSession({
-        access_token: session.accessToken as string,
-        refresh_token: '',
-      });
-    } else {
-      supabase.auth.signOut();
+    async function syncAuth() {
+      if (session?.idToken) {
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) {
+          const { error } = await supabase.auth.signInWithIdToken({
+            provider: 'google',
+            token: session.idToken as string,
+          });
+          if (error) {
+            console.error('Supabase sign-in failed', error);
+          }
+        }
+      } else {
+        await supabase.auth.signOut();
+      }
     }
-  }, [session?.accessToken, supabase]);
+
+    void syncAuth();
+  }, [session?.idToken, supabase]);
 
   return supabase;
 }

@@ -27,7 +27,14 @@ export async function fetchEvents(client: SupabaseClient): Promise<IEvent[]> {
 
 export async function createEvent(client: SupabaseClient, payload: NewEvent): Promise<IEvent> {
   console.debug('Supabase: creating event', payload);
-  const { data, error } = await client.from('events').insert(payload).select().single();
+  const { data: userData, error: userError } = await client.auth.getUser();
+  if (userError) {
+    console.error('Supabase: get user failed', userError);
+    throw new Error(userError.message);
+  }
+
+  const eventWithUserId = { ...payload, user_id: userData.user.id };
+  const { data, error } = await client.from('events').insert(eventWithUserId).select().single();
   if (error) {
     console.error('Supabase: create event failed', error);
     throw new Error(error.message);
