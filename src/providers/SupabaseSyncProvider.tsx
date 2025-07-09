@@ -6,8 +6,13 @@ import { isSupabaseLoggedIn } from '@/hooks/useSupabaseAuth';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import { createEvent, fetchEvents } from '@/services/supabaseEventsService';
 import { createTask, fetchTasks } from '@/services/supabaseTasksService';
-import { loadLocalEvents } from '@/utils/localEventsStorage';
-import { loadBoard } from '@/widgets/TodoList/boardStorage';
+import {
+  loadLocalEvents,
+  saveLocalEvents,
+} from '@/utils/localEventsStorage';
+import { loadBoard, saveBoard } from '@/widgets/TodoList/boardStorage';
+import { useEventStore } from '@/store/eventStore';
+import { useTodoBoardStore } from '@/store/todoBoardStore';
 
 interface Props {
   children: ReactNode;
@@ -23,13 +28,28 @@ export function SupabaseSyncProvider({ children }: Props) {
         return;
       }
       try {
+        const eventStore = useEventStore.getState();
+        const boardStore = useTodoBoardStore.getState();
+
         const remoteEvents = await fetchEvents(supabase);
-        const eventIds = new Set(remoteEvents.map(e => e.id));
         const localEvents = loadLocalEvents();
+        const localEventIds = new Set(localEvents.map(e => e.id));
+
+        for (const re of remoteEvents) {
+          if (!localEventIds.has(re.id)) {
+            localEvents.push(re);
+            eventStore.addLocalEvent(re);
+          }
+        }
+
+        saveLocalEvents(localEvents);
+
+        const eventIds = new Set(remoteEvents.map(e => e.id));
         for (const ev of localEvents) {
           if (!eventIds.has(ev.id)) {
             console.debug('Sync: pushing local event', ev);
             await createEvent(supabase, {
+              id: ev.id,
               start: ev.start,
               end: ev.end,
               title: ev.title,
@@ -41,12 +61,21 @@ export function SupabaseSyncProvider({ children }: Props) {
         }
 
         const remoteTasks = await fetchTasks(supabase);
-        const taskIds = new Set(remoteTasks.map(t => t.id));
         const board = loadBoard();
+        const localTaskIds = new Set(board.tasks.map(t => t.id));
+
+        for (const rt of remoteTasks) {
+          if (!localTaskIds.has(rt.id)) {
+            board.tasks.push(rt);
+          }
+        }
+
+        const taskIds = new Set(remoteTasks.map(t => t.id));
         for (const task of board.tasks) {
           if (!taskIds.has(task.id)) {
             console.debug('Sync: pushing local task', task);
             await createTask(supabase, {
+              id: task.id,
               title: task.title,
               description: task.description,
               tags: task.tags,
@@ -56,6 +85,12 @@ export function SupabaseSyncProvider({ children }: Props) {
             });
           }
         }
+
+        if (remoteTasks.length !== board.tasks.length) {
+          boardStore.setBoard(board);
+        }
+
+        saveBoard(board);
       } catch (err) {
         console.error('Supabase sync failed', err);
       }

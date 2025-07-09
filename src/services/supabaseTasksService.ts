@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { TodoTask } from '@/widgets/TodoList/types';
 
 export interface NewTask {
+  id?: string;
   title: string;
   description?: string;
   tags: string[];

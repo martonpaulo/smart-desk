@@ -48,10 +48,12 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
   try {
     const remote = await fetchTasks(supabase);
     const existing = new Set(remote.map(t => t.id));
+    let updated = false;
     for (const task of board.tasks) {
       if (!existing.has(task.id)) {
         console.debug('Sync local task to Supabase', task);
-        await createTask(supabase, {
+        const created = await createTask(supabase, {
+          id: task.id,
           title: task.title,
           description: task.description,
           tags: task.tags,
@@ -59,7 +61,14 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
           quantity: task.quantity,
           quantityTotal: task.quantityTotal,
         });
+        if (created.id !== task.id) {
+          task.id = created.id;
+          updated = true;
+        }
       }
+    }
+    if (updated) {
+      setStoredFilters(STORAGE_KEY, board);
     }
   } catch (err) {
     console.error('Failed syncing tasks to Supabase', err);

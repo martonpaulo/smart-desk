@@ -19,6 +19,7 @@ import { DateTime } from 'luxon';
 import { useEventStore } from '@/store/eventStore';
 import { showUndo } from '@/store/undoStore';
 import type { IEvent } from '@/types/IEvent';
+import { generateId } from '@/utils/idUtils';
 
 interface FormState {
   id?: string;
@@ -53,7 +54,7 @@ export function LocalEventsManager() {
   const handleSubmit = () => {
     if (!form.title.trim() || !form.start || !form.end) return;
     const event: IEvent = {
-      id: editingId ?? `local-${Date.now()}`,
+      id: editingId ?? generateId(),
       title: form.title.trim(),
       start: new Date(form.start),
       end: new Date(form.end),

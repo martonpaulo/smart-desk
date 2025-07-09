@@ -11,6 +11,7 @@ import {
   sortEventsByStart,
 } from '@/utils/eventUtils';
 import { EventListItem } from '@/widgets/EventList/EventListItem';
+import { generateId } from '@/utils/idUtils';
 
 interface EventListProps {
   events: IEvent[] | null;
@@ -48,7 +49,7 @@ export function EventList({ events }: EventListProps) {
             if (!text) return;
             const start = new Date();
             const end = new Date(start.getTime() + 60 * 60 * 1000);
-            addLocalEvent({ id: `local-${Date.now()}`, title: text, start, end });
+            addLocalEvent({ id: generateId(), title: text, start, end });
             setTitle('');
           }}
         >

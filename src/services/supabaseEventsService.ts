@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { IEvent } from '@/types/IEvent';
 
 export interface NewEvent {
+  id?: string;
   start: Date;
   end: Date;
   title: string;
