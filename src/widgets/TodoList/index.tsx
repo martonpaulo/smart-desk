@@ -202,7 +202,10 @@ export function TodoList({ events }: TodoListProps) {
     setBoard(prev => {
       let columns = prev.columns;
       if (!columns.some(c => c.id === columnSlug)) {
-        columns = [...columns, { id: columnSlug, title: 'Draft', color: '#616161' }];
+        columns = [
+          ...columns,
+          { id: columnSlug, slug: columnSlug, title: 'Draft', color: '#616161' },
+        ];
       }
       return { ...prev, columns, tasks: [...prev.tasks, task] };
     });
@@ -255,7 +258,10 @@ export function TodoList({ events }: TodoListProps) {
 
       const ensureColumn = (cid: string, title: string, color: string) => {
         if (!columns.some(c => c.id === cid)) {
-          columns = [...columns, { id: cid, title, color }];
+          columns = [
+            ...columns,
+            { id: cid, slug: cid, title, color },
+          ];
           needsColumnUpdate = true;
         }
       };
@@ -303,13 +309,13 @@ export function TodoList({ events }: TodoListProps) {
         columns: prev.columns.map(c => (c.id === id ? { ...c, title, color } : c)),
       }));
     } else {
-      const id = `col-${Date.now()}`;
+      const id = generateId();
       setBoard(prev => {
         const columns = [...prev.columns];
         const index = columnModal.afterId
           ? columns.findIndex(c => c.id === columnModal.afterId) + 1
           : columns.length;
-        columns.splice(index, 0, { id, title, color });
+        columns.splice(index, 0, { id, slug: id, title, color });
         return { ...prev, columns };
       });
     }
