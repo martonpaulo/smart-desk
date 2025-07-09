@@ -162,7 +162,7 @@ export function EditTaskModal({
       title: trimmedTitle,
       description: description.trim() || undefined,
       tags,
-      quantity: qty != null ? Math.min(task.quantity ?? qty, qty) : undefined,
+      quantity: 0,
       quantityTotal: qty,
     });
   };

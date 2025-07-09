@@ -283,11 +283,25 @@ export function TodoList({ events }: TodoListProps) {
             t.prevColumnSlug && columns.some(c => c.id === t.prevColumnSlug)
               ? t.prevColumnSlug
               : 'draft';
-          return { ...t, columnSlug: target, prevColumnSlug: undefined };
+          return {
+            ...t,
+            columnSlug: target,
+            prevColumnSlug: undefined,
+            quantity: 0,
+            quantityTotal: t.quantityTotal,
+          };
         }
 
-        if (t.quantity && t.quantity > 1) {
-          return { ...t, quantity: t.quantity - 1 };
+        if (t.quantity !== undefined && t.quantityTotal && t.quantity < t.quantityTotal) {
+          if (t.quantity === t.quantityTotal - 1) {
+            return {
+              ...t,
+              columnSlug: 'done',
+              prevColumnSlug: t.columnSlug,
+              quantity: t.quantity + 1,
+            };
+          }
+          return { ...t, quantity: t.quantity + 1 };
         }
 
         return { ...t, prevColumnSlug: t.columnSlug, columnSlug: 'done' };

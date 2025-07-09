@@ -23,8 +23,25 @@ export function AddTaskInput({ columnSlug, columnColor, onAdd, onStartEdit }: Ad
       onFocus={handleFocus}
       inputProps={{ readOnly: true }}
       sx={{
+        borderColor: columnColor,
+        '& input': {
+          cursor: 'pointer', // ⬅️ isso aqui força no input real
+        },
         '& .MuiInputBase-root': {
+          cursor: 'pointer',
+          transition: 'background-color 0.15s',
           '&:hover': { backgroundColor: columnColor },
+        },
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: columnColor,
+          },
+          '&:hover fieldset': {
+            borderColor: columnColor,
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: columnColor,
+          },
         },
       }}
       slotProps={{

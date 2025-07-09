@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckIcon from '@mui/icons-material/Check';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import EditIcon from '@mui/icons-material/Edit';
@@ -73,6 +74,20 @@ export function TodoTaskCard({
     setEditing(false);
     onEditingEnd?.();
   };
+
+  let secondaryAction: ReactNode = null;
+  let secondaryActionLabel: string = '';
+
+  if (task.columnSlug === 'done') {
+    secondaryAction = <UndoIcon fontSize="inherit" />;
+    secondaryActionLabel = 'Uncheck task';
+  } else if (task.quantity != null && task.quantityTotal != null) {
+    secondaryAction = <AddCircleOutlineIcon fontSize="inherit" />;
+    secondaryActionLabel = 'Increment task';
+  } else {
+    secondaryAction = <CheckIcon fontSize="inherit" />;
+    secondaryActionLabel = 'Check task';
+  }
 
   return (
     <>
@@ -159,7 +174,7 @@ export function TodoTaskCard({
 
                 {task.quantity != null && task.quantityTotal != null && (
                   <Typography variant="caption">
-                    ({`${task.quantityTotal - task.quantity}/${task.quantityTotal}`})
+                    ({`${task.quantity}/${task.quantityTotal}`})
                   </Typography>
                 )}
               </Stack>
@@ -200,10 +215,7 @@ export function TodoTaskCard({
                     <EditIcon fontSize="inherit" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip
-                  title={task.columnSlug === 'done' ? 'Uncheck task' : 'Check task'}
-                  enterTouchDelay={0}
-                >
+                <Tooltip title={secondaryActionLabel} enterTouchDelay={0}>
                   <IconButton
                     size="small"
                     aria-label={`Toggle task ${task.title}`}
@@ -218,11 +230,7 @@ export function TodoTaskCard({
                       borderBottomRightRadius: 1,
                     }}
                   >
-                    {task.columnSlug === 'done' ? (
-                      <UndoIcon fontSize="inherit" />
-                    ) : (
-                      <CheckIcon fontSize="inherit" />
-                    )}
+                    {secondaryAction}
                   </IconButton>
                 </Tooltip>
               </Box>

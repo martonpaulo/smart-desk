@@ -84,7 +84,7 @@ export function TodoColumn({
       onDragEnd={onColumnDragEnd}
       onDrop={e => column.id && onDrop(e, column.id)}
       sx={{
-        width: view === 'board' ? '250px' : '100%',
+        width: view === 'board' ? '220px' : '100%',
         p: 1.5,
         bgcolor: alpha(column.color, 0.1),
         borderRadius: 1,
