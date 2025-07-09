@@ -37,6 +37,18 @@ export function loadBoard(): BoardState {
       return DEFAULT_BOARD;
     }
     if (!board.trash) board.trash = { columns: [], tasks: [] };
+    // Migrate old columnId property if present
+    board.tasks = board.tasks.map(t => {
+      if ((t as any).columnId && !(t as any).columnSlug) {
+        (t as any).columnSlug = (t as any).columnId;
+        delete (t as any).columnId;
+      }
+      if ((t as any).prevColumnId && !(t as any).prevColumnSlug) {
+        (t as any).prevColumnSlug = (t as any).prevColumnId;
+        delete (t as any).prevColumnId;
+      }
+      return t;
+    });
     return board;
   } catch {
     return DEFAULT_BOARD;
@@ -71,7 +83,7 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
           title: task.title,
           description: task.description,
           tags: task.tags,
-          columnId: task.columnId,
+          columnSlug: task.columnSlug,
           quantity: task.quantity,
           quantityTotal: task.quantityTotal,
         });
@@ -85,7 +97,7 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
           title: task.title,
           description: task.description,
           tags: task.tags,
-          columnId: task.columnId,
+          columnSlug: task.columnSlug,
           quantity: task.quantity,
           quantityTotal: task.quantityTotal,
         });
@@ -111,7 +123,7 @@ function areTasksEqual(a: TodoTask, b: TodoTask): boolean {
   return (
     a.title === b.title &&
     a.description === b.description &&
-    a.columnId === b.columnId &&
+    a.columnSlug === b.columnSlug &&
     JSON.stringify(a.tags) === JSON.stringify(b.tags) &&
     a.quantity === b.quantity &&
     a.quantityTotal === b.quantityTotal
