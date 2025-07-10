@@ -19,6 +19,7 @@ import { AppInfo } from '@/widgets/Settings/AppInfo';
 import { AuthStatus } from '@/widgets/Settings/AuthStatus';
 import { EventsTrash } from '@/widgets/Settings/EventsTrash';
 import { TagPresets } from '@/widgets/Settings/TagPresets';
+import { ZoomSetting } from '@/widgets/Settings/ZoomSetting';
 import { TodoViewSettings } from '@/widgets/Settings/TodoViewSettings';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
@@ -90,6 +91,7 @@ export function HomeView({
           'Todo View': <TodoViewSettings />,
           'Todo Trash': <TodoTrash />,
           Tags: <TagPresets />,
+          'UI Zoom': <ZoomSetting />,
           Auth: (
             <AuthControl
               severity={severity}

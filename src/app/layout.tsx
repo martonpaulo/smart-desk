@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 import { SessionProvider } from 'next-auth/react';
 
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
+import { ZoomProvider } from '@/providers/ZoomProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { ServiceWorkerProvider } from '@/providers/ServiceWorkerProvider';
@@ -35,7 +36,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <LocationProvider>
               <ReactQueryProvider>
                 <SupabaseSyncProvider>
-                  <AppThemeProvider>{children}</AppThemeProvider>
+                  <ZoomProvider>
+                    <AppThemeProvider>{children}</AppThemeProvider>
+                  </ZoomProvider>
                 </SupabaseSyncProvider>
               </ReactQueryProvider>
             </LocationProvider>
