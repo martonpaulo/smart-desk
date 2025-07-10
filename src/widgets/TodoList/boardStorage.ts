@@ -105,11 +105,8 @@ export function saveBoard(board: BoardState): void {
   }
 }
 
-async function syncTasksWithSupabase(
-  board: BoardState,
-  lastSync: string,
-): Promise<BoardState> {
-  if (isSyncingTasks) return;
+async function syncTasksWithSupabase(board: BoardState, lastSync: string): Promise<BoardState> {
+  if (isSyncingTasks) return board;
   isSyncingTasks = true;
   const supabase = getSupabaseClient();
   try {
@@ -188,11 +185,8 @@ function areTasksEqual(a: TodoTask, b: TodoTask): boolean {
   );
 }
 
-async function syncColumnsWithSupabase(
-  board: BoardState,
-  lastSync: string,
-): Promise<BoardState> {
-  if (isSyncingColumns) return;
+async function syncColumnsWithSupabase(board: BoardState, lastSync: string): Promise<BoardState> {
+  if (isSyncingColumns) return board;
   isSyncingColumns = true;
   const supabase = getSupabaseClient();
   try {

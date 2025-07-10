@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { Column } from '@/widgets/TodoList/types';
@@ -16,10 +17,7 @@ export async function fetchColumns(
   opts: { includeTrashed?: boolean } = {},
 ): Promise<Column[]> {
   console.debug('Supabase: fetching columns');
-  const query = client
-    .from('columns')
-    .select('*')
-    .order('position', { ascending: true });
+  const query = client.from('columns').select('*').order('position', { ascending: true });
   if (!opts.includeTrashed) {
     query.eq('trashed', false);
   }
@@ -31,7 +29,7 @@ export async function fetchColumns(
   console.debug('Supabase: fetched columns', data);
   return (data ?? []).map(c => ({
     id: c.id,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     slug: (c as any).slug ?? c.id,
     title: c.title,
     color: c.color,
@@ -102,10 +100,7 @@ export async function updateColumn(
 
 export async function deleteColumn(client: SupabaseClient, id: string): Promise<void> {
   console.debug('Supabase: trashing column', id);
-  const { error } = await client
-    .from('columns')
-    .update({ trashed: true })
-    .eq('id', id);
+  const { error } = await client.from('columns').update({ trashed: true }).eq('id', id);
   if (error) {
     console.error('Supabase: delete column failed', error);
     throw new Error(error.message);

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { TodoTask } from '@/widgets/TodoList/types';
@@ -19,10 +21,7 @@ export async function fetchTasks(
   opts: { includeTrashed?: boolean } = {},
 ): Promise<TodoTask[]> {
   console.debug('Supabase: fetching tasks');
-  const query = client
-    .from('tasks')
-    .select('*')
-    .order('position', { ascending: true });
+  const query = client.from('tasks').select('*').order('position', { ascending: true });
   if (!opts.includeTrashed) {
     query.eq('trashed', false);
   }
@@ -37,7 +36,7 @@ export async function fetchTasks(
     title: t.title,
     description: t.description ?? undefined,
     tags: t.tags ?? [],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     columnSlug: (t as any).column_id,
     position: t.position ?? undefined,
     quantity: t.quantity ?? undefined,
@@ -97,7 +96,7 @@ export async function updateTask(
   updates: Partial<NewTask>,
 ): Promise<TodoTask> {
   console.debug('Supabase: updating task', id, updates);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const dbUpdates = { ...updates } as any;
   if (updates.columnSlug) {
     dbUpdates.column_id = updates.columnSlug;
@@ -130,10 +129,7 @@ export async function updateTask(
 
 export async function deleteTask(client: SupabaseClient, id: string): Promise<void> {
   console.debug('Supabase: trashing task', id);
-  const { error } = await client
-    .from('tasks')
-    .update({ trashed: true })
-    .eq('id', id);
+  const { error } = await client.from('tasks').update({ trashed: true }).eq('id', id);
   if (error) {
     console.error('Supabase: delete task failed', error);
     throw new Error(error.message);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { IEvent } from '@/types/IEvent';
@@ -18,10 +19,7 @@ export async function fetchEvents(
   opts: { includeTrashed?: boolean } = {},
 ): Promise<IEvent[]> {
   console.debug('Supabase: fetching events');
-  const query = client
-    .from('events')
-    .select('*')
-    .order('start', { ascending: true });
+  const query = client.from('events').select('*').order('start', { ascending: true });
   if (!opts.includeTrashed) {
     query.eq('trashed', false);
   }
@@ -90,10 +88,7 @@ export async function updateEvent(
 
 export async function deleteEvent(client: SupabaseClient, id: string): Promise<void> {
   console.debug('Supabase: trashing event', id);
-  const { error } = await client
-    .from('events')
-    .update({ trashed: true })
-    .eq('id', id);
+  const { error } = await client.from('events').update({ trashed: true }).eq('id', id);
   if (error) {
     console.error('Supabase: delete event failed', error);
     throw new Error(error.message);
