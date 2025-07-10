@@ -12,8 +12,8 @@ import {
   sortEventsByStart,
 } from '@/utils/eventUtils';
 import { generateId } from '@/utils/idUtils';
-import { EventListItem } from '@/widgets/EventList/EventListItem';
 import { EditEventModal } from '@/widgets/EventList/EditEventModal';
+import { EventListItem } from '@/widgets/EventList/EventListItem';
 
 interface EventListProps {
   events: IEvent[] | null;
@@ -35,11 +35,7 @@ export function EventList({ events }: EventListProps) {
     <Stack>
       <List dense disablePadding>
         {upcomingEvents.map(event => (
-          <EventListItem
-            key={event.id}
-            event={event}
-            onClick={() => setSelectedEvent(event)}
-          />
+          <EventListItem key={event.id} event={event} onClick={() => setSelectedEvent(event)} />
         ))}
       </List>
       <Stack direction="row" spacing={1} mt={upcomingEvents.length > 0 ? 1 : 0}>

@@ -24,13 +24,7 @@ interface EditEventModalProps {
   onClose: () => void;
 }
 
-export function EditEventModal({
-  open,
-  event,
-  onSave,
-  onDelete,
-  onClose,
-}: EditEventModalProps) {
+export function EditEventModal({ open, event, onSave, onDelete, onClose }: EditEventModalProps) {
   const [title, setTitle] = useState('');
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
@@ -39,7 +33,9 @@ export function EditEventModal({
   useEffect(() => {
     if (!event) return;
     setTitle(event.title);
-    setStart(DateTime.fromJSDate(new Date(event.start)).toISO({ suppressMilliseconds: true }) || '');
+    setStart(
+      DateTime.fromJSDate(new Date(event.start)).toISO({ suppressMilliseconds: true }) || '',
+    );
     setEnd(DateTime.fromJSDate(new Date(event.end)).toISO({ suppressMilliseconds: true }) || '');
   }, [event]);
 
