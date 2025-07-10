@@ -13,13 +13,7 @@ export function ZoomSetting() {
   return (
     <Stack spacing={2} sx={{ p: 1 }}>
       <Typography>Zoom: {Math.round(zoom * 100)}%</Typography>
-      <Slider
-        value={zoom}
-        min={0.5}
-        max={2}
-        step={0.1}
-        onChange={handleChange}
-      />
+      <Slider value={zoom} min={0.5} max={2} step={0.1} onChange={handleChange} />
     </Stack>
   );
 }

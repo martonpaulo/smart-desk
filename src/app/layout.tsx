@@ -5,11 +5,11 @@ import { ReactNode } from 'react';
 import { SessionProvider } from 'next-auth/react';
 
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
-import { ZoomProvider } from '@/providers/ZoomProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { ServiceWorkerProvider } from '@/providers/ServiceWorkerProvider';
 import { SupabaseSyncProvider } from '@/providers/SupabaseSyncProvider';
+import { ZoomProvider } from '@/providers/ZoomProvider';
 import { poppins } from '@/styles/fonts';
 
 import '@/lib/dragDropTouch';
