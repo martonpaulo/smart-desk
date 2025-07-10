@@ -1,9 +1,11 @@
 import { useState } from 'react';
 
-import { Button, List, Stack, TextField } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
+import { InputAdornment, List, Stack, TextField } from '@mui/material';
 
 import { useEventStore } from '@/store/eventStore';
 import { showUndo } from '@/store/undoStore';
+import { theme } from '@/styles/theme';
 import { IEvent } from '@/types/IEvent';
 import {
   filterCurrentOrFutureEvents,
@@ -15,60 +17,96 @@ import { generateId } from '@/utils/idUtils';
 import { EditEventModal } from '@/widgets/EventList/EditEventModal';
 import { EventListItem } from '@/widgets/EventList/EventListItem';
 
-interface EventListProps {
-  events: IEvent[] | null;
-}
+export function EventList({ events }: { events: IEvent[] | null }) {
+  const deleteEvent = useEventStore(s => s.deleteEvent);
+  const addLocalEvent = useEventStore(s => s.addLocalEvent);
+  const updateLocalEvent = useEventStore(s => s.updateLocalEvent);
 
-export function EventList({ events }: EventListProps) {
-  const deleteEvent = useEventStore(state => state.deleteEvent);
-  const addLocalEvent = useEventStore(state => state.addLocalEvent);
-  const updateLocalEvent = useEventStore(state => state.updateLocalEvent);
   const [selectedEvent, setSelectedEvent] = useState<IEvent | null>(null);
   const [title, setTitle] = useState('');
 
-  const sortedByStart = sortEventsByStart(events || []);
-  const withoutFullDay = filterNonFullDayEvents(sortedByStart);
-  const todaysEvents = filterTodayEvents(withoutFullDay);
-  const upcomingEvents = filterCurrentOrFutureEvents(todaysEvents);
+  const upcomingEvents = filterCurrentOrFutureEvents(
+    filterTodayEvents(filterNonFullDayEvents(sortEventsByStart(events || []))),
+  );
+
+  const handleAdd = () => {
+    const text = title.trim();
+    if (!text) return;
+    const start = new Date();
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    addLocalEvent({ id: generateId(), title: text, start, end });
+    setTitle('');
+  };
+
+  const columnColor = theme.palette.grey[200];
+  const lightenColor = theme.palette.grey[300];
 
   return (
     <Stack>
       <List dense disablePadding>
-        {upcomingEvents.map(event => (
-          <EventListItem key={event.id} event={event} onClick={() => setSelectedEvent(event)} />
+        {upcomingEvents.map(ev => (
+          <EventListItem key={ev.id} event={ev} onClick={() => setSelectedEvent(ev)} />
         ))}
       </List>
-      <Stack direction="row" spacing={1} mt={upcomingEvents.length > 0 ? 1 : 0}>
+
+      <Stack direction="row" alignItems="center" mt={upcomingEvents.length > 0 ? 1 : 0} spacing={0}>
         <TextField
+          fullWidth
           size="small"
-          label="New event"
+          placeholder="New event"
           value={title}
           onChange={e => setTitle(e.target.value)}
-          fullWidth
-        />
-        <Button
-          variant="contained"
-          onClick={() => {
-            const text = title.trim();
-            if (!text) return;
-            const start = new Date();
-            const end = new Date(start.getTime() + 60 * 60 * 1000);
-            addLocalEvent({ id: generateId(), title: text, start, end });
-            setTitle('');
+          onKeyDown={e => {
+            if (e.key === 'Enter') handleAdd();
           }}
-        >
-          Add
-        </Button>
+          sx={{
+            borderColor: columnColor,
+            '& input': {
+              cursor: 'pointer',
+            },
+            '& .MuiInputBase-root': {
+              cursor: 'pointer',
+              transition: 'background-color 0.15s',
+              '&:hover': { backgroundColor: columnColor },
+            },
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: lightenColor,
+              },
+              '&:hover fieldset': {
+                borderColor: lightenColor,
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: lightenColor,
+              },
+            },
+          }}
+          slotProps={{
+            input: {
+              sx: theme => ({
+                fontSize: theme.typography.body2.fontSize,
+                lineHeight: theme.typography.body2.lineHeight,
+                fontWeight: theme.typography.body2.fontWeight,
+              }),
+              startAdornment: (
+                <InputAdornment position="start">
+                  <AddIcon color="action" fontSize="small" />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
       </Stack>
+
       <EditEventModal
-        open={selectedEvent !== null}
+        open={!!selectedEvent}
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
         onDelete={id => {
           deleteEvent(id);
           showUndo('Event deleted', () => useEventStore.getState().restoreEvent(id));
         }}
-        onSave={ev => updateLocalEvent(ev)}
+        onSave={updateLocalEvent}
       />
     </Stack>
   );

@@ -14,16 +14,24 @@ export const theme = createTheme({
   typography: {
     fontFamily: 'var(--font-poppins)',
     h1: {
-      fontSize: '4rem',
+      fontSize: '3.5rem',
       fontWeight: 400,
     },
     h2: {
-      fontSize: '2rem',
-      fontWeight: 300,
+      fontSize: '2.5rem',
+      fontWeight: 400,
+    },
+    h6: {
+      fontSize: '1.125rem',
+      fontWeight: 500,
     },
     body1: {
       fontSize: '1rem',
       fontWeight: 300,
+    },
+    subtitle1: {
+      fontSize: '0.875rem',
+      fontWeight: 400,
     },
   },
   components: {

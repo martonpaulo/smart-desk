@@ -25,7 +25,7 @@ export function AddTaskInput({ columnSlug, columnColor, onAdd, onStartEdit }: Ad
       sx={{
         borderColor: columnColor,
         '& input': {
-          cursor: 'pointer', // ⬅️ isso aqui força no input real
+          cursor: 'pointer',
         },
         '& .MuiInputBase-root': {
           cursor: 'pointer',

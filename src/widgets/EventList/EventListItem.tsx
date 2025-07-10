@@ -32,22 +32,24 @@ export function EventListItem({ event, onClick }: EventListItemProps) {
       sx={{
         backgroundColor,
         borderRadius: 1,
+        px: 1.5,
+        py: shouldDisplayChip ? 1 : 0.5,
         mb: 0.5,
         position: 'relative',
       }}
     >
-      <ListItemIcon sx={{ minWidth: 40 }}>
-        <StatusIcon sx={{ color: iconColor }} />
+      <ListItemIcon sx={{ minWidth: 0, mr: 1.5 }}>
+        <StatusIcon sx={{ color: iconColor, fontSize: '1.25rem' }} />
       </ListItemIcon>
 
       <ListItemText>
         <Stack direction="row" alignItems="center" gap={1}>
-          <Typography variant="body2">{formatEventTimeRange(event)}</Typography>
+          <Typography variant="caption">{formatEventTimeRange(event)}</Typography>
 
           {shouldDisplayChip && <MinutesChip event={event} size="small" />}
         </Stack>
 
-        <Typography variant="subtitle1">{title}</Typography>
+        <Typography variant="body2">{title}</Typography>
       </ListItemText>
     </ListItemButton>
   );

@@ -1,4 +1,4 @@
-import { Slider, Stack, Typography } from '@mui/material';
+import { Box, Button, Input, Stack, Typography } from '@mui/material';
 
 import { useUiPrefsStore } from '@/store/uiPrefsStore';
 
@@ -6,14 +6,23 @@ export function ZoomSetting() {
   const zoom = useUiPrefsStore(state => state.zoom);
   const setZoom = useUiPrefsStore(state => state.setZoom);
 
-  const handleChange = (_event: Event, value: number | number[]) => {
-    if (typeof value === 'number') setZoom(value);
+  const resetZoom = () => {
+    setZoom(1);
   };
 
   return (
-    <Stack spacing={2} sx={{ p: 1 }}>
-      <Typography>Zoom: {Math.round(zoom * 100)}%</Typography>
-      <Slider value={zoom} min={0.5} max={2} step={0.1} onChange={handleChange} />
-    </Stack>
+    <Box>
+      <Stack direction="row" spacing={2} alignItems="center" sx={{ my: 1 }}>
+        <Input
+          type="number"
+          value={Math.round(zoom * 100)}
+          onChange={e => setZoom(Number(e.target.value) / 100)}
+        />
+        <Typography variant="body2">%</Typography>
+      </Stack>
+      <Button variant="outlined" size="small" onClick={resetZoom}>
+        Reset Zoom
+      </Button>
+    </Box>
   );
 }
