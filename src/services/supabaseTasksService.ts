@@ -11,14 +11,22 @@ export interface NewTask {
   position?: number;
   quantity?: number;
   quantityTotal?: number;
+  trashed?: boolean;
 }
 
-export async function fetchTasks(client: SupabaseClient): Promise<TodoTask[]> {
+export async function fetchTasks(
+  client: SupabaseClient,
+  opts: { includeTrashed?: boolean } = {},
+): Promise<TodoTask[]> {
   console.debug('Supabase: fetching tasks');
-  const { data, error } = await client
+  const query = client
     .from('tasks')
     .select('*')
     .order('position', { ascending: true });
+  if (!opts.includeTrashed) {
+    query.eq('trashed', false);
+  }
+  const { data, error } = await query;
   if (error) {
     console.error('Supabase: fetch tasks failed', error);
     throw new Error(error.message);
@@ -34,6 +42,8 @@ export async function fetchTasks(client: SupabaseClient): Promise<TodoTask[]> {
     position: t.position ?? undefined,
     quantity: t.quantity ?? undefined,
     quantityTotal: t.quantityTotal ?? undefined,
+    trashed: (t as any).trashed ?? false,
+    updatedAt: (t as any).updated_at,
   }));
 }
 
@@ -54,6 +64,7 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
     ...payload,
     column_id: payload.columnSlug,
     user_id: user.id,
+    trashed: false,
   };
 
   const { data, error } = await client
@@ -75,6 +86,8 @@ export async function createTask(client: SupabaseClient, payload: NewTask): Prom
     position: data.position ?? undefined,
     quantity: data.quantity ?? undefined,
     quantityTotal: data.quantityTotal ?? undefined,
+    trashed: data.trashed ?? false,
+    updatedAt: data.updated_at,
   } as TodoTask;
 }
 
@@ -110,12 +123,17 @@ export async function updateTask(
     position: data.position ?? undefined,
     quantity: data.quantity ?? undefined,
     quantityTotal: data.quantityTotal ?? undefined,
+    trashed: data.trashed ?? false,
+    updatedAt: data.updated_at,
   } as TodoTask;
 }
 
 export async function deleteTask(client: SupabaseClient, id: string): Promise<void> {
-  console.debug('Supabase: deleting task', id);
-  const { error } = await client.from('tasks').delete().eq('id', id);
+  console.debug('Supabase: trashing task', id);
+  const { error } = await client
+    .from('tasks')
+    .update({ trashed: true })
+    .eq('id', id);
   if (error) {
     console.error('Supabase: delete task failed', error);
     throw new Error(error.message);

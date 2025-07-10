@@ -9,6 +9,7 @@ create table if not exists public.events (
   attendee_count integer,
   calendar text,
   aknowledged boolean default false,
+  trashed boolean default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

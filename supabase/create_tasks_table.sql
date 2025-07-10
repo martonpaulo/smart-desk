@@ -11,6 +11,7 @@ create table if not exists public.tasks (
   position integer,
   quantity integer,
   quantityTotal integer,
+  trashed boolean default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

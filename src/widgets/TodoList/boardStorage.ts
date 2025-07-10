@@ -13,6 +13,7 @@ import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
 export const STORAGE_KEY = 'todo-board';
 export const LAST_POPULATE_KEY = 'todo-last-populate';
+export const LAST_SYNC_KEY = 'todo-last-sync';
 
 export const DEFAULT_COLUMNS: Column[] = [
   { id: 'todo', slug: 'todo', title: 'Todo', color: COLUMN_COLORS[0].value, position: 0 },
@@ -25,6 +26,14 @@ export const DEFAULT_BOARD: BoardState = {
   tasks: [],
   trash: { columns: [], tasks: [] },
 };
+
+export function getLastSync(): string {
+  return getStoredFilters<string>(LAST_SYNC_KEY) ?? new Date(0).toISOString();
+}
+
+function setLastSync(date: string): void {
+  setStoredFilters(LAST_SYNC_KEY, date);
+}
 
 let isSyncingTasks = false;
 let isSyncingColumns = false;
@@ -85,21 +94,37 @@ export function saveBoard(board: BoardState): void {
     const withPos = applyPositions(board);
     setStoredFilters(STORAGE_KEY, withPos);
     void (async () => {
-      await syncColumnsWithSupabase(withPos);
-      await syncTasksWithSupabase(withPos);
+      const lastSync = getLastSync();
+      const afterColumns = await syncColumnsWithSupabase(withPos, lastSync);
+      const finalBoard = await syncTasksWithSupabase(afterColumns, lastSync);
+      setStoredFilters(STORAGE_KEY, finalBoard);
+      setLastSync(new Date().toISOString());
     })();
   } catch {
     console.error('Could not save todo board');
   }
 }
 
-async function syncTasksWithSupabase(board: BoardState): Promise<void> {
+async function syncTasksWithSupabase(
+  board: BoardState,
+  lastSync: string,
+): Promise<BoardState> {
   if (isSyncingTasks) return;
   isSyncingTasks = true;
   const supabase = getSupabaseClient();
   try {
-    const remote = await fetchTasks(supabase);
+    const remote = await fetchTasks(supabase, { includeTrashed: true });
     const remoteMap = new Map(remote.map(t => [t.id, t]));
+    const remoteNewer = remote.some(r => new Date(r.updatedAt ?? 0) > new Date(lastSync));
+
+    if (remoteNewer) {
+      return {
+        ...board,
+        tasks: remote.filter(t => !t.trashed),
+        trash: { ...board.trash, tasks: remote.filter(t => t.trashed) },
+      };
+    }
+
     let updated = false;
 
     for (const task of board.tasks) {
@@ -130,12 +155,13 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
           position: task.position,
           quantity: task.quantity,
           quantityTotal: task.quantityTotal,
+          trashed: false,
         });
       }
     }
 
     for (const task of remote) {
-      if (!board.tasks.some(t => t.id === task.id)) {
+      if (!board.tasks.some(t => t.id === task.id) && !task.trashed) {
         await deleteTask(supabase, task.id);
       }
     }
@@ -147,6 +173,7 @@ async function syncTasksWithSupabase(board: BoardState): Promise<void> {
   } finally {
     isSyncingTasks = false;
   }
+  return board;
 }
 
 function areTasksEqual(a: TodoTask, b: TodoTask): boolean {
@@ -161,13 +188,25 @@ function areTasksEqual(a: TodoTask, b: TodoTask): boolean {
   );
 }
 
-async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
+async function syncColumnsWithSupabase(
+  board: BoardState,
+  lastSync: string,
+): Promise<BoardState> {
   if (isSyncingColumns) return;
   isSyncingColumns = true;
   const supabase = getSupabaseClient();
   try {
-    const remote = await fetchColumns(supabase);
+    const remote = await fetchColumns(supabase, { includeTrashed: true });
     const remoteMap = new Map(remote.map(c => [c.slug ?? c.id, c]));
+    const remoteNewer = remote.some(r => new Date(r.updatedAt ?? 0) > new Date(lastSync));
+
+    if (remoteNewer) {
+      return {
+        ...board,
+        columns: remote.filter(c => !c.trashed),
+        trash: { ...board.trash, columns: remote.filter(c => c.trashed) },
+      };
+    }
 
     for (const [index, column] of board.columns.entries()) {
       const existing = remoteMap.get(column.slug);
@@ -189,13 +228,14 @@ async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
             title: column.title,
             color: column.color,
             position: index,
+            trashed: false,
           });
         }
       }
     }
 
     for (const col of remote) {
-      if (!board.columns.some(c => c.slug === (col.slug ?? col.id))) {
+      if (!board.columns.some(c => c.slug === (col.slug ?? col.id)) && !col.trashed) {
         if (col.id) {
           await deleteColumn(supabase, col.id);
         }
@@ -206,4 +246,5 @@ async function syncColumnsWithSupabase(board: BoardState): Promise<void> {
   } finally {
     isSyncingColumns = false;
   }
+  return board;
 }

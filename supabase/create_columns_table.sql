@@ -7,6 +7,7 @@ create table if not exists public.columns (
   title text not null,
   color text not null,
   position integer,
+  trashed boolean default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

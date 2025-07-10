@@ -8,14 +8,22 @@ export interface NewColumn {
   title: string;
   color: string;
   position?: number;
+  trashed?: boolean;
 }
 
-export async function fetchColumns(client: SupabaseClient): Promise<Column[]> {
+export async function fetchColumns(
+  client: SupabaseClient,
+  opts: { includeTrashed?: boolean } = {},
+): Promise<Column[]> {
   console.debug('Supabase: fetching columns');
-  const { data, error } = await client
+  const query = client
     .from('columns')
     .select('*')
     .order('position', { ascending: true });
+  if (!opts.includeTrashed) {
+    query.eq('trashed', false);
+  }
+  const { data, error } = await query;
   if (error) {
     console.error('Supabase: fetch columns failed', error);
     throw new Error(error.message);
@@ -28,6 +36,8 @@ export async function fetchColumns(client: SupabaseClient): Promise<Column[]> {
     title: c.title,
     color: c.color,
     position: c.position,
+    trashed: (c as any).trashed ?? false,
+    updatedAt: (c as any).updated_at,
   })) as Column[];
 }
 
@@ -46,6 +56,7 @@ export async function createColumn(client: SupabaseClient, payload: NewColumn): 
     ...payload,
     slug: payload.slug ?? payload.id,
     user_id: user.id,
+    trashed: false,
   };
 
   const { data, error } = await client
@@ -58,7 +69,11 @@ export async function createColumn(client: SupabaseClient, payload: NewColumn): 
     throw new Error(error.message);
   }
   console.debug('Supabase: created column', data);
-  return data as Column;
+  return {
+    ...(data as Column),
+    trashed: (data as any).trashed ?? false,
+    updatedAt: (data as any).updated_at,
+  };
 }
 
 export async function updateColumn(
@@ -78,12 +93,19 @@ export async function updateColumn(
     throw new Error(error.message);
   }
   console.debug('Supabase: updated column', data);
-  return data as Column;
+  return {
+    ...(data as Column),
+    trashed: (data as any).trashed ?? false,
+    updatedAt: (data as any).updated_at,
+  };
 }
 
 export async function deleteColumn(client: SupabaseClient, id: string): Promise<void> {
-  console.debug('Supabase: deleting column', id);
-  const { error } = await client.from('columns').delete().eq('id', id);
+  console.debug('Supabase: trashing column', id);
+  const { error } = await client
+    .from('columns')
+    .update({ trashed: true })
+    .eq('id', id);
   if (error) {
     console.error('Supabase: delete column failed', error);
     throw new Error(error.message);

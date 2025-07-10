@@ -8,4 +8,6 @@ export interface IEvent {
   attendeeCount?: number;
   calendar?: ICalendar;
   aknowledged?: boolean;
+  trashed?: boolean;
+  updatedAt?: string;
 }

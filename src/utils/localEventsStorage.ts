@@ -25,7 +25,7 @@ export function saveLocalEvents(events: IEvent[]): void {
 async function syncWithSupabase(events: IEvent[]): Promise<void> {
   const supabase = getSupabaseClient();
   try {
-    const remote = await fetchEvents(supabase);
+    const remote = await fetchEvents(supabase, { includeTrashed: true });
     const existing = new Set(remote.map(e => e.id));
     let updated = false;
     for (const ev of events) {

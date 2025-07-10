@@ -4,6 +4,8 @@ export interface Column {
   title: string;
   color: string;
   position?: number;
+  trashed?: boolean;
+  updatedAt?: string;
 }
 
 export interface TodoTask {
@@ -16,6 +18,8 @@ export interface TodoTask {
   quantityTotal?: number;
   prevColumnSlug?: string;
   position?: number;
+  trashed?: boolean;
+  updatedAt?: string;
 }
 
 export interface BoardState {
