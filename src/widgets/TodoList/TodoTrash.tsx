@@ -102,7 +102,7 @@ export function TodoTrash(): ReactElement {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h3" gutterBottom>
         Trash
       </Typography>
 

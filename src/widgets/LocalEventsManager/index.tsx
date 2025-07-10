@@ -79,7 +79,7 @@ export function LocalEventsManager() {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h3" gutterBottom>
         Local Events
       </Typography>
       <List dense>

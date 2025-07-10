@@ -67,6 +67,7 @@ export function TodoColumn({
   };
 
   const finishCreate = () => setCreatingId(null);
+
   return (
     <Box
       className="todo-column"
@@ -99,7 +100,7 @@ export function TodoColumn({
       {!hideHeader && (
         <Box onClick={() => onOpenColumn(column)} sx={{ cursor: 'pointer', mb: 1 }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="h6" sx={{ color: column.color }}>
+            <Typography variant="h3" sx={{ color: column.color }}>
               {column.title}
             </Typography>
             {tasks && tasks.length > 0 && (

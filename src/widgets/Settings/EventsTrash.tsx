@@ -17,7 +17,7 @@ export function EventsTrash() {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h3" gutterBottom>
         Deleted Events
       </Typography>
       <List dense>

@@ -1,7 +1,16 @@
 import { useState } from 'react';
 
 import { Add as AddIcon } from '@mui/icons-material';
-import { InputAdornment, List, Stack, TextField } from '@mui/material';
+import {
+  alpha,
+  Chip,
+  darken,
+  InputAdornment,
+  List,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 import { useEventStore } from '@/store/eventStore';
 import { showUndo } from '@/store/undoStore';
@@ -38,18 +47,48 @@ export function EventList({ events }: { events: IEvent[] | null }) {
     setTitle('');
   };
 
-  const columnColor = theme.palette.grey[200];
-  const lightenColor = theme.palette.grey[300];
+  const columnColor = alpha(theme.palette.primary.light, 0.2);
+  const darkenColor = alpha(theme.palette.primary.light, 0.2);
+  const lightenColor = alpha('#1976d2', 0.1);
 
   return (
-    <Stack>
+    <Stack
+      bgcolor={lightenColor}
+      borderRadius={1}
+      p={1.5}
+      sx={{ boxShadow: `0 1px 3px ${alpha(darken(columnColor, 0.1), 0.1)}` }}
+    >
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
+        <Typography variant="h3" color="primary">
+          Event List
+        </Typography>
+
+        {upcomingEvents && upcomingEvents.length > 0 && (
+          <Chip
+            label={upcomingEvents?.length}
+            size="small"
+            disabled
+            sx={{
+              '&.Mui-disabled': {
+                opacity: 1,
+              },
+            }}
+          />
+        )}
+      </Stack>
+
       <List dense disablePadding>
         {upcomingEvents.map(ev => (
-          <EventListItem key={ev.id} event={ev} onClick={() => setSelectedEvent(ev)} />
+          <EventListItem
+            key={ev.id}
+            event={ev}
+            onClick={() => setSelectedEvent(ev)}
+            color={columnColor}
+          />
         ))}
       </List>
 
-      <Stack direction="row" alignItems="center" mt={upcomingEvents.length > 0 ? 1 : 0} spacing={0}>
+      <Stack direction="row" alignItems="center" spacing={0}>
         <TextField
           fullWidth
           size="small"
@@ -71,13 +110,13 @@ export function EventList({ events }: { events: IEvent[] | null }) {
             },
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                borderColor: lightenColor,
+                borderColor: darkenColor,
               },
               '&:hover fieldset': {
-                borderColor: lightenColor,
+                borderColor: darkenColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: lightenColor,
+                borderColor: darkenColor,
               },
             },
           }}

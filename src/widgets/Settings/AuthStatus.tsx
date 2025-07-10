@@ -45,7 +45,7 @@ export function AuthStatus() {
 
   return (
     <Stack spacing={2}>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h3" gutterBottom>
         Connection Status
       </Typography>
       <StatusRow

@@ -102,7 +102,7 @@ export function SoundAlert({
   return (
     <Stack>
       <Box display="flex" alignItems="center" gap={0.5}>
-        <Typography variant="h6">Sound alerts</Typography>
+        <Typography variant="h3">Sound alerts</Typography>
         <IconButton onClick={handleEnableAudio}>
           {isAudioOn ? <VolumeUpIcon /> : <VolumeOffIcon />}
         </IconButton>

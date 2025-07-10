@@ -151,7 +151,7 @@ export function ICSCalendarManager() {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h3" gutterBottom>
         ICS Calendars
       </Typography>
 

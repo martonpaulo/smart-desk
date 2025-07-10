@@ -1,5 +1,13 @@
 import { Circle as StatusIcon } from '@mui/icons-material';
-import { ListItemButton, ListItemIcon, ListItemText, Stack, Typography } from '@mui/material';
+import {
+  alpha,
+  darken,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Stack,
+  Typography,
+} from '@mui/material';
 
 import { MinutesChip } from '@/components/MinutesChip';
 import { theme } from '@/styles/theme';
@@ -13,18 +21,33 @@ import {
 interface EventListItemProps {
   event: IEvent;
   onClick: () => void;
+  color?: string;
 }
 
-export function EventListItem({ event, onClick }: EventListItemProps) {
+export function EventListItem({
+  event,
+  onClick,
+  color = theme.palette.primary.light,
+}: EventListItemProps) {
   const { title, calendar } = event;
   const isCurrent = computeEventStatus(event) === 'current';
 
   const iconColor = calendar?.color || theme.palette.primary.main;
-  const backgroundColor = isCurrent ? theme.palette.action.selected : 'inherit';
 
   const minutesUntilEvent = calculateMinutesUntilEvent(event);
+  const shouldDisplayChip = isCurrent || (minutesUntilEvent > 0 && minutesUntilEvent < 60);
 
-  const shouldDisplayChip = isCurrent || (minutesUntilEvent > 0 && minutesUntilEvent < 30);
+  let backgroundColor: string;
+
+  if (isCurrent) {
+    backgroundColor = alpha(darken(color, 0.2), 0.55);
+  } else if (minutesUntilEvent > 0 && minutesUntilEvent < 60) {
+    backgroundColor = alpha(darken(color, 0.2), 0.125);
+  } else {
+    backgroundColor = alpha(darken(color, 0.2), 0);
+  }
+
+  const fontColor = theme.palette.text.primary;
 
   return (
     <ListItemButton
@@ -33,23 +56,33 @@ export function EventListItem({ event, onClick }: EventListItemProps) {
         backgroundColor,
         borderRadius: 1,
         px: 1.5,
-        py: shouldDisplayChip ? 1 : 0.5,
-        mb: 0.5,
+        py: 1,
+        mb: 0.75,
         position: 'relative',
+        boxShadow: shouldDisplayChip ? `0 1px 3px ${alpha(darken(color, 0.1), 0.1)}` : 'none',
       }}
     >
       <ListItemIcon sx={{ minWidth: 0, mr: 1.5 }}>
-        <StatusIcon sx={{ color: iconColor, fontSize: '1.25rem' }} />
+        <StatusIcon
+          sx={{
+            color: iconColor,
+            fontSize: '1.25rem',
+          }}
+        />
       </ListItemIcon>
 
       <ListItemText>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography variant="caption">{formatEventTimeRange(event)}</Typography>
+        <Stack direction="row" alignItems="center" gap={1} mb={0.25}>
+          <Typography variant="caption" color={fontColor}>
+            {formatEventTimeRange(event)}
+          </Typography>
 
           {shouldDisplayChip && <MinutesChip event={event} size="small" />}
         </Stack>
 
-        <Typography variant="body2">{title}</Typography>
+        <Typography variant="h4" color={fontColor}>
+          {title}
+        </Typography>
       </ListItemText>
     </ListItemButton>
   );
