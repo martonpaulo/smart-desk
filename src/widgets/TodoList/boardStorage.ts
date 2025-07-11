@@ -112,17 +112,36 @@ async function syncTasksWithSupabase(board: BoardState, lastSync: string): Promi
   try {
     const remote = await fetchTasks(supabase, { includeTrashed: true });
     const remoteMap = new Map(remote.map(t => [t.id, t]));
-    const remoteNewer = remote.some(r => new Date(r.updatedAt ?? 0) > new Date(lastSync));
-
-    if (remoteNewer) {
-      return {
-        ...board,
-        tasks: remote.filter(t => !t.trashed),
-        trash: { ...board.trash, tasks: remote.filter(t => t.trashed) },
-      };
-    }
 
     let updated = false;
+
+    // merge remote tasks into local board first to avoid losing local updates
+    for (const rTask of remote) {
+      const localIndex = board.tasks.findIndex(t => t.id === rTask.id);
+      const remoteIsNewer = new Date(rTask.updatedAt ?? 0) > new Date(lastSync);
+
+      if (rTask.trashed) {
+        if (localIndex !== -1) {
+          const [removed] = board.tasks.splice(localIndex, 1);
+          board.trash.tasks.push({ ...removed, ...rTask });
+          updated = true;
+        } else if (!board.trash.tasks.some(t => t.id === rTask.id)) {
+          board.trash.tasks.push(rTask);
+          updated = true;
+        }
+        continue;
+      }
+
+      if (localIndex === -1) {
+        if (!board.trash.tasks.some(t => t.id === rTask.id)) {
+          board.tasks.push(rTask);
+          updated = true;
+        }
+      } else if (remoteIsNewer && !areTasksEqual(rTask, board.tasks[localIndex])) {
+        board.tasks[localIndex] = { ...board.tasks[localIndex], ...rTask };
+        updated = true;
+      }
+    }
 
     for (const task of board.tasks) {
       const existing = remoteMap.get(task.id);
@@ -158,7 +177,10 @@ async function syncTasksWithSupabase(board: BoardState, lastSync: string): Promi
     }
 
     for (const task of remote) {
-      if (!board.tasks.some(t => t.id === task.id) && !task.trashed) {
+      const existsInBoard =
+        board.tasks.some(t => t.id === task.id) ||
+        board.trash.tasks.some(t => t.id === task.id);
+      if (!existsInBoard && !task.trashed) {
         await deleteTask(supabase, task.id);
       }
     }
