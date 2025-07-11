@@ -48,15 +48,18 @@ export function EventList({ events }: { events: IEvent[] | null }) {
   };
 
   const columnColor = alpha(theme.palette.primary.light, 0.2);
-  const darkenColor = alpha(theme.palette.primary.light, 0.2);
-  const lightenColor = alpha('#1976d2', 0.1);
+  const darkenColor = alpha(theme.palette.primary.light, 0.4);
 
   return (
     <Stack
-      bgcolor={lightenColor}
       borderRadius={1}
       p={1.5}
-      sx={{ boxShadow: `0 1px 3px ${alpha(darken(columnColor, 0.1), 0.1)}` }}
+      sx={{
+        boxShadow: `0 1px 3px ${alpha(darken(columnColor, 0.5), 0.1)}`,
+        borderWidth: 1,
+        borderStyle: 'solid',
+        borderColor: darkenColor,
+      }}
     >
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
         <Typography variant="h3" color="primary">
@@ -110,13 +113,13 @@ export function EventList({ events }: { events: IEvent[] | null }) {
             },
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                borderColor: darkenColor,
+                borderColor: columnColor,
               },
               '&:hover fieldset': {
-                borderColor: darkenColor,
+                borderColor: columnColor,
               },
               '&.Mui-focused fieldset': {
-                borderColor: darkenColor,
+                borderColor: columnColor,
               },
             },
           }}
