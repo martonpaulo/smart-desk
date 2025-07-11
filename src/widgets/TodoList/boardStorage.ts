@@ -178,8 +178,7 @@ async function syncTasksWithSupabase(board: BoardState, lastSync: string): Promi
 
     for (const task of remote) {
       const existsInBoard =
-        board.tasks.some(t => t.id === task.id) ||
-        board.trash.tasks.some(t => t.id === task.id);
+        board.tasks.some(t => t.id === task.id) || board.trash.tasks.some(t => t.id === task.id);
       if (!existsInBoard && !task.trashed) {
         await deleteTask(supabase, task.id);
       }
