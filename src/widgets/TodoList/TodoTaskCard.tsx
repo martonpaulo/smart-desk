@@ -172,7 +172,7 @@ export function TodoTaskCard({
                   {task.title}
                 </Typography>
 
-                {task.quantity != null && task.quantityTotal != null && (
+                {task.quantity != null && task.quantityTotal != null && task.quantityTotal > 0 && (
                   <Typography variant="caption">
                     ({`${task.quantity}/${task.quantityTotal}`})
                   </Typography>
