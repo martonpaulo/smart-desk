@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -15,6 +15,7 @@ import {
   Stack,
   TextField,
   Tooltip,
+  Typography,
 } from '@mui/material';
 
 import { theme } from '@/styles/theme';
@@ -156,14 +157,17 @@ export function EditTaskModal({
     if (!task) return;
     const trimmedTitle = title.trim();
     if (!trimmedTitle) return;
-    const qty = useQuantity && quantity !== '' ? Number(quantity) : undefined;
+
+    const qty = useQuantity && quantity !== '' ? 0 : undefined;
+    const qtyTotal = useQuantity && quantity !== '' ? Number(quantity) : undefined;
+
     onSave({
       ...task,
       title: trimmedTitle,
       description: description.trim() || undefined,
       tags,
-      quantity: 0,
-      quantityTotal: qty,
+      quantity: qty,
+      quantityTotal: qtyTotal,
     });
   };
 
@@ -173,6 +177,15 @@ export function EditTaskModal({
 
   const tagColor = column ? alpha(column.color, 0.65) : undefined;
   const tagTextColor = tagColor ? theme.palette.getContrastText(tagColor) : undefined;
+
+  const handleQuantityChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const num = Number(value);
+
+    if (!isNaN(num) && num > 0) {
+      setQuantity(num);
+    }
+  };
 
   return (
     <Dialog
@@ -229,6 +242,10 @@ export function EditTaskModal({
           />
 
           <Stack direction="row" spacing={2} alignItems="center">
+            <Typography variant="body2" sx={{ flexShrink: 0 }}>
+              Use quantity?
+            </Typography>
+
             <Checkbox
               checked={useQuantity}
               onChange={(_, checked) => {
@@ -240,7 +257,7 @@ export function EditTaskModal({
               label="Max quantity"
               type="number"
               value={quantity}
-              onChange={e => setQuantity(e.target.value === '' ? '' : Number(e.target.value))}
+              onChange={handleQuantityChange}
               disabled={!useQuantity}
               fullWidth
             />

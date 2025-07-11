@@ -75,13 +75,17 @@ export function TodoTaskCard({
     onEditingEnd?.();
   };
 
+  const isQuantityTask =
+    task.quantity != null && task.quantityTotal != null && task.quantityTotal > 0;
+  const isTaskDone = task.columnSlug === 'done';
+
   let secondaryAction: ReactNode = null;
   let secondaryActionLabel: string = '';
 
-  if (task.columnSlug === 'done') {
+  if (isTaskDone) {
     secondaryAction = <UndoIcon fontSize="inherit" />;
     secondaryActionLabel = 'Uncheck task';
-  } else if (task.quantity != null && task.quantityTotal != null) {
+  } else if (isQuantityTask) {
     secondaryAction = <AddCircleOutlineIcon fontSize="inherit" />;
     secondaryActionLabel = 'Increment task';
   } else {
@@ -172,7 +176,7 @@ export function TodoTaskCard({
                   {task.title}
                 </Typography>
 
-                {task.quantity != null && task.quantityTotal != null && task.quantityTotal > 0 && (
+                {isQuantityTask && (
                   <Typography variant="caption">
                     ({`${task.quantity}/${task.quantityTotal}`})
                   </Typography>
