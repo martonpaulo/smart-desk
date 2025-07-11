@@ -114,7 +114,9 @@ async function syncTasksWithSupabase(board: BoardState, lastSync: string): Promi
     const remoteMap = new Map(remote.map(t => [t.id, t]));
     const remoteNewer = remote.some(r => new Date(r.updatedAt ?? 0) > new Date(lastSync));
 
-    if (remoteNewer) {
+    // Only override local tasks with remote data when there are no local tasks
+    // This prevents freshly created tasks from being discarded on first sync
+    if (remoteNewer && board.tasks.length === 0) {
       return {
         ...board,
         tasks: remote.filter(t => !t.trashed),
