@@ -114,7 +114,7 @@ export function ColumnModal({ open, column, onSave, onDelete, onClose }: ColumnM
       <DialogTitle sx={{ position: 'relative' }}>
         {modalTitle}
         {column && onDelete && (
-          <Tooltip title="Delete column" enterTouchDelay={0}>
+          <Tooltip title="Delete column">
             <IconButton
               aria-label="delete column"
               onClick={onDelete}

@@ -1,6 +1,17 @@
 import { createTheme } from '@mui/material';
 
 export const theme = createTheme({
+  transitions: {
+    duration: {
+      shortest: 75,
+      shorter: 100,
+      short: 125,
+      standard: 150,
+      complex: 187,
+      enteringScreen: 112,
+      leavingScreen: 97,
+    },
+  },
   breakpoints: {
     values: {
       mobileSm: 300,

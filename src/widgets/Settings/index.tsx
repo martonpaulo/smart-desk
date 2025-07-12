@@ -64,7 +64,7 @@ export function SettingsButton({ onClick }: SettingsButtonProps) {
       sx={theme => ({
         position: 'fixed',
         bottom: 16,
-        right: 16,
+        left: 16,
         zIndex: theme.zIndex.modal + 1,
       })}
     >

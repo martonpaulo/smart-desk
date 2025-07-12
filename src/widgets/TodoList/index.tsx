@@ -12,7 +12,7 @@ import { IEvent } from '@/types/IEvent';
 import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
 import { generateId } from '@/utils/idUtils';
 import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
-import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
+import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
 import { LAST_POPULATE_KEY, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
@@ -516,18 +516,7 @@ export function TodoList({ events }: TodoListProps) {
         onClose={() => setTrashOpen(false)}
       />
 
-      {isMobile && (
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 16,
-            left: 16,
-            right: 16,
-          }}
-        >
-          <AddTaskInput columnSlug="draft" columnColor="#f0f0f0" onAdd={handleAddTask} />
-        </Box>
-      )}
+      {isMobile && <AddTaskFloatButton onAdd={handleAddTask} />}
 
       <style jsx>{`
         .todo-actions {

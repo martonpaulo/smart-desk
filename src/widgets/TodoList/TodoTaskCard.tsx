@@ -122,7 +122,7 @@ export function TodoTaskCard({
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Stack direction="row" spacing={1} flex={1}>
             {task.description && (
-              <Tooltip title="Has description" enterTouchDelay={0}>
+              <Tooltip title="Has description">
                 <DescriptionOutlinedIcon
                   aria-hidden="true"
                   fontSize="inherit"
@@ -200,7 +200,7 @@ export function TodoTaskCard({
               }}
             >
               <Box sx={{ backgroundColor: theme.palette.grey[100], borderRadius: 1, opacity: 0.9 }}>
-                <Tooltip title="Rename task" enterTouchDelay={0}>
+                <Tooltip title="Rename task">
                   <IconButton
                     size="small"
                     aria-label={`Rename task ${task.title}`}
@@ -219,7 +219,7 @@ export function TodoTaskCard({
                     <EditIcon fontSize="inherit" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title={secondaryActionLabel} enterTouchDelay={0}>
+                <Tooltip title={secondaryActionLabel}>
                   <IconButton
                     size="small"
                     aria-label={`Toggle task ${task.title}`}

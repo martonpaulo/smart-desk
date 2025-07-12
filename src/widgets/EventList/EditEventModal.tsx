@@ -83,7 +83,7 @@ export function EditEventModal({ open, event, onSave, onDelete, onClose }: EditE
       <DialogTitle sx={{ position: 'relative' }}>
         Edit Event
         {event && (
-          <Tooltip title="Delete event" enterTouchDelay={0}>
+          <Tooltip title="Delete event">
             <IconButton
               aria-label="delete event"
               onClick={handleDelete}

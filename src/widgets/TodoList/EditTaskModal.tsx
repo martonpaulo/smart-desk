@@ -211,7 +211,7 @@ export function EditTaskModal({
     >
       <DialogTitle sx={{ position: 'relative' }}>
         Edit Task
-        <Tooltip title="Delete task" enterTouchDelay={0}>
+        <Tooltip title="Delete task">
           <IconButton
             aria-label="delete task"
             onClick={() => {
@@ -326,11 +326,7 @@ export function EditTaskModal({
 
             <Box display="flex" flexWrap="wrap" gap={1} overflow="hidden">
               {tags.map(tag => (
-                <Tooltip
-                  key={tag}
-                  title={hoveredDeleteTag === tag ? 'Delete tag' : 'Edit tag'}
-                  enterTouchDelay={0}
-                >
+                <Tooltip key={tag} title={hoveredDeleteTag === tag ? 'Delete tag' : 'Edit tag'}>
                   <Chip
                     label={tag}
                     onClick={() => handleChipClick(tag)}
