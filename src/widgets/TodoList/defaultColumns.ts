@@ -1,4 +1,5 @@
-import { colorMap, ColorOption } from '@/styles/colors';
+import { colorMap } from '@/styles/colors';
+import { ColorOption } from '@/types/color';
 
 export enum DefaultColumn {
   DRAFT = 'draft',
