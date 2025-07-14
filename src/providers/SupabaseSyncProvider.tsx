@@ -28,10 +28,15 @@ export function SupabaseSyncProvider({ children }: SupabaseSyncProviderProps) {
       }
 
       try {
-        await boardStore.syncFromServer();
-        await boardStore.syncPending();
-        await settingsStore.syncFromServer();
-        await settingsStore.syncPending();
+        await Promise.all([
+          boardStore.syncFromServer(),
+          settingsStore.syncFromServer(),
+        ]);
+
+        await Promise.all([
+          boardStore.syncPending(),
+          settingsStore.syncPending(),
+        ]);
         setStatus('connected');
       } catch (err) {
         console.error('fullSync error', err);
@@ -48,8 +53,10 @@ export function SupabaseSyncProvider({ children }: SupabaseSyncProviderProps) {
       }
 
       try {
-        await boardStore.syncPending();
-        await settingsStore.syncPending();
+        await Promise.all([
+          boardStore.syncPending(),
+          settingsStore.syncPending(),
+        ]);
         setStatus('connected');
       } catch (err) {
         console.error('periodicSync error', err);
