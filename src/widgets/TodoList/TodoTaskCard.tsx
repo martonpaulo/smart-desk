@@ -1,26 +1,25 @@
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { DragEvent, ReactNode, useEffect, useRef, useState } from 'react';
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckIcon from '@mui/icons-material/Check';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import UndoIcon from '@mui/icons-material/Undo';
-import { Box, Chip, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha, darken } from '@mui/material/styles';
 
 import { theme } from '@/styles/theme';
-import { loadTagPresets } from '@/utils/tagPresetsStorage';
-import { Column, TodoTask } from '@/widgets/TodoList/types';
+import { Column } from '@/types/column';
+import { Task } from '@/types/task';
 
 interface TodoTaskCardProps {
-  task: TodoTask;
+  task: Task;
   column: Column;
   onOpen: (id: string) => void;
   onRename: (id: string, title: string) => void;
-  onDelete: (id: string) => void;
   onToggleDone: (id: string) => void;
-  onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
-  onDragOver: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  onDragStart: (e: DragEvent<HTMLDivElement>, id: string) => void;
+  onDragOver: (e: DragEvent<HTMLDivElement>, id: string) => void;
   startEditing?: boolean;
   onEditingEnd?: () => void;
 }
@@ -30,7 +29,6 @@ export function TodoTaskCard({
   column,
   onOpen,
   onRename,
-  onDelete,
   onToggleDone,
   onDragStart,
   onDragOver,
@@ -40,13 +38,13 @@ export function TodoTaskCard({
   const [editing, setEditing] = useState(Boolean(startEditing));
   const [title, setTitle] = useState(task.title);
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const tagColors = useMemo(() => {
-    const map: Record<string, string> = {};
-    loadTagPresets().forEach(p => {
-      map[p.name] = p.color;
-    });
-    return map;
-  }, []);
+  // const tagColors = useMemo(() => {
+  //   const map: Record<string, string> = {};
+  //   loadTagPresets().forEach(p => {
+  //     map[p.name] = p.color;
+  //   });
+  //   return map;
+  // }, []);
 
   useEffect(() => {
     if (startEditing) {
@@ -68,16 +66,13 @@ export function TodoTaskCard({
     const trimmed = title.trim();
     if (trimmed) {
       onRename(task.id, trimmed);
-    } else if (!task.description && task.tags.length === 0) {
-      onDelete(task.id);
     }
     setEditing(false);
     onEditingEnd?.();
   };
 
-  const isQuantityTask =
-    task.quantity != null && task.quantityTotal != null && task.quantityTotal > 0;
-  const isTaskDone = task.columnSlug === 'done';
+  const isQuantityTask = task.quantityTarget > 1;
+  const isTaskDone = task.quantityDone >= task.quantityTarget;
 
   let secondaryAction: ReactNode = null;
   let secondaryActionLabel: string = '';
@@ -121,7 +116,7 @@ export function TodoTaskCard({
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Stack direction="row" spacing={1} flex={1}>
-            {task.description && (
+            {task.notes && (
               <Tooltip title="Has description">
                 <DescriptionOutlinedIcon
                   aria-hidden="true"
@@ -170,7 +165,7 @@ export function TodoTaskCard({
                     maxWidth: '100%',
                     overflowWrap: 'anywhere',
                     whiteSpace: 'normal',
-                    textDecoration: task.columnSlug === 'done' ? 'line-through' : 'none',
+                    textDecoration: isTaskDone ? 'line-through' : 'none',
                   }}
                 >
                   {task.title}
@@ -178,7 +173,7 @@ export function TodoTaskCard({
 
                 {isQuantityTask && (
                   <Typography variant="caption">
-                    ({`${task.quantity}/${task.quantityTotal}`})
+                    ({`${task.quantityDone}/${task.quantityTarget}`})
                   </Typography>
                 )}
               </Stack>
@@ -242,7 +237,7 @@ export function TodoTaskCard({
           )}
         </Stack>
 
-        {task.tags.length > 0 && (
+        {/* {task.tags.length > 0 && (
           <Box display="flex" flexWrap="wrap" gap={0.5} pt={1}>
             {task.tags.map(tag => (
               <Chip
@@ -261,8 +256,7 @@ export function TodoTaskCard({
                 }}
               />
             ))}
-          </Box>
-        )}
+          </Box> */}
       </Box>
     </>
   );

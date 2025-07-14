@@ -9,5 +9,6 @@ export interface IEvent {
   calendar?: ICalendar;
   aknowledged?: boolean;
   trashed?: boolean;
-  updatedAt?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

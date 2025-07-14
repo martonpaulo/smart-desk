@@ -21,18 +21,17 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { QuantitySelector } from '@/components/QuantitySelector';
-import { TaskContext } from '@/types/task';
 import { formatDuration, parseDuration } from '@/utils/timeUtils';
-import { DefaultColumn } from '@/widgets/TodoList/defaultColumns';
+
+type TaskContext = 'online' | 'out' | 'afk' | 'talk';
 
 interface AddTaskFloatButtonProps {
-  onAdd: (columnSlug: string, title: string) => string;
+  onAdd: (title: string) => Promise<string>;
 }
 
 export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
   const theme = useTheme();
   const zIndex = theme.zIndex.modal;
-  const columnSlug = DefaultColumn.DRAFT;
 
   // form open state
   const [open, setOpen] = useState(false);
@@ -77,9 +76,9 @@ export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
   // handle click or Enter on title field
   const submitTask = useCallback(() => {
     if (!title.trim()) return;
-    onAdd(columnSlug, title.trim());
+    onAdd(title);
     closeForm();
-  }, [title, onAdd, columnSlug, closeForm]);
+  }, [title, onAdd, closeForm]);
 
   // Ctrl/Cmd + Enter anywhere in open form triggers submit
   useEffect(() => {

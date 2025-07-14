@@ -3,25 +3,25 @@ import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { alpha, Box, Chip, darken, IconButton, Stack, Typography } from '@mui/material';
 
+import { Column } from '@/types/column';
+import { Task } from '@/types/task';
 import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
 import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
-import { Column, TodoTask } from '@/widgets/TodoList/types';
 
 interface TodoColumnProps {
   column: Column;
-  tasks: TodoTask[];
-  view: 'list' | 'board';
-  onOpenColumn: (column: Column) => void;
-  onAddColumn: (afterId: string) => void;
+  tasks: Task[];
+  isMobile?: boolean;
+  onEditColumn: (column: Column) => void;
+  onAddColumnAfter: (prevPos: number) => void;
+  onAddTask: (title: string, columnId: string) => Promise<string>;
   onEditTask: (id: string) => void;
   onRenameTask: (id: string, title: string) => void;
-  onDeleteTask: (id: string) => void;
   onToggleDone: (id: string) => void;
-  onAddTask: (columnSlug: string, title: string) => string;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   onDragOverTask: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
-  onTaskColumnDragOver: (columnSlug: string) => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>, columnSlug: string) => void;
+  onTaskColumnDragOver: (columnId: string) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>, columnId: string) => void;
   onColumnDragStart?: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   onColumnDragOver?: (e: React.DragEvent<HTMLDivElement>, overId: string) => void;
   onColumnDragEnd?: () => void;
@@ -36,14 +36,13 @@ interface TodoColumnProps {
 export function TodoColumn({
   column,
   tasks,
-  view,
-  onOpenColumn,
-  onAddColumn,
+  isMobile = false,
+  onEditColumn,
+  onAddColumnAfter,
+  onAddTask,
   onEditTask,
   onRenameTask,
-  onDeleteTask,
   onToggleDone,
-  onAddTask,
   onDragStart,
   onDragOverTask,
   onTaskColumnDragOver,
@@ -60,8 +59,8 @@ export function TodoColumn({
 }: TodoColumnProps) {
   const [creatingId, setCreatingId] = useState<string | null>(null);
 
-  const handleAddTask = (colId: string, title: string) => {
-    const id = onAddTask(colId, title);
+  const handleAddTask = async (colId: string, title: string) => {
+    const id = await onAddTask(title, colId);
     setCreatingId(id);
     return id;
   };
@@ -85,7 +84,7 @@ export function TodoColumn({
       onDragEnd={onColumnDragEnd}
       onDrop={e => column.id && onDrop(e, column.id)}
       sx={{
-        width: view === 'board' ? '220px' : '100%',
+        width: isMobile ? '100%' : '220px',
         p: 1.5,
         bgcolor: alpha(column.color, 0.1),
         borderRadius: 1,
@@ -98,7 +97,7 @@ export function TodoColumn({
       }}
     >
       {!hideHeader && (
-        <Box onClick={() => onOpenColumn(column)} sx={{ cursor: 'pointer', mb: 1 }}>
+        <Box onClick={() => onEditColumn(column)} sx={{ cursor: 'pointer', mb: 1 }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Typography variant="h3" sx={{ color: column.color }}>
               {column.title}
@@ -130,7 +129,6 @@ export function TodoColumn({
               column={column}
               onOpen={onEditTask}
               onRename={onRenameTask}
-              onDelete={onDeleteTask}
               onToggleDone={onToggleDone}
               onDragStart={onDragStart}
               onDragOver={onDragOverTask}
@@ -146,7 +144,7 @@ export function TodoColumn({
 
       {!creatingId && showAddTaskInput && column.id && (
         <AddTaskInput
-          columnSlug={column.id}
+          columnId={column.id}
           columnColor={alpha(darken(column.color, 0.2), 0.15)}
           onAdd={handleAddTask}
         />
@@ -155,7 +153,7 @@ export function TodoColumn({
       <IconButton
         size="small"
         className="add-column-btn"
-        onClick={() => column.id && onAddColumn(column.id)}
+        onClick={() => onAddColumnAfter(column.position)}
         sx={{
           position: 'absolute',
           top: 0,

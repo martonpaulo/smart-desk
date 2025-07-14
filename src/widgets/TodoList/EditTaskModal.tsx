@@ -19,14 +19,15 @@ import {
 } from '@mui/material';
 
 import { theme } from '@/styles/theme';
+import { Column } from '@/types/column';
+import { Task } from '@/types/task';
 import { loadTagPresets, saveTagPresets, TagPreset } from '@/utils/tagPresetsStorage';
 import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
-import { Column, TodoTask } from '@/widgets/TodoList/types';
 
 interface EditTaskModalProps {
-  task: TodoTask | null;
+  task: Task | null;
   open: boolean;
-  onSave: (task: TodoTask) => void;
+  onSave: (task: Task) => void;
   onClose: () => void;
   onDeleteTask: (id: string) => void;
   column: Column | null;
@@ -41,7 +42,7 @@ export function EditTaskModal({
   onDeleteTask,
 }: EditTaskModalProps) {
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [notes, setNotes] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [editingTag, setEditingTag] = useState<string | null>(null);
@@ -61,10 +62,10 @@ export function EditTaskModal({
   useEffect(() => {
     if (!task) return;
     setTitle(task.title);
-    setDescription(task.description || '');
-    setTags(task.tags);
-    setQuantity(task.quantityTotal ?? task.quantity ?? '');
-    setUseQuantity(task.quantity != null || task.quantityTotal != null);
+    setNotes(task.notes || '');
+    // setTags(task.tags);
+    setQuantity(task.quantityTarget ?? task.quantityDone ?? '');
+    setUseQuantity(task.quantityDone != null || task.quantityTarget != null);
     setTagInput('');
     setEditingTag(null);
   }, [task]);
@@ -144,8 +145,8 @@ export function EditTaskModal({
           onSave({
             ...task,
             title: title.trim(),
-            description: description.trim() || undefined,
-            tags: newTags,
+            notes: notes.trim() || undefined,
+            // tags: newTags,
           });
         }
       }
@@ -164,10 +165,9 @@ export function EditTaskModal({
     onSave({
       ...task,
       title: trimmedTitle,
-      description: description.trim() || undefined,
-      tags,
-      quantity: qty,
-      quantityTotal: qtyTotal,
+      notes: notes.trim(),
+      quantityDone: qty ?? task.quantityDone,
+      quantityTarget: qtyTotal ?? task.quantityTarget,
     });
   };
 
@@ -267,8 +267,8 @@ export function EditTaskModal({
             label="Description"
             multiline
             minRows={6}
-            value={description}
-            onChange={e => setDescription(e.target.value)}
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
             onKeyDown={e => {
               const isCtrlOrCmd = e.ctrlKey || e.metaKey;
               if (e.key === 'Enter' && isCtrlOrCmd) {

@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 
-import { Column } from '@/widgets/TodoList/types';
+import { Column } from '@/types/column';
 
 export const COLUMN_COLORS = [
   { name: 'Blue', value: '#1976d2' },
@@ -37,12 +37,20 @@ export const COLUMN_COLORS = [
 interface ColumnModalProps {
   open: boolean;
   column: Column | null;
-  onSave: (title: string, color: string) => void;
-  onDelete?: () => void;
+  prevPosition?: number;
+  onSave: (title: string, color: string, prevPosition?: number) => void;
+  onDelete?: (id: string) => void;
   onClose: () => void;
 }
 
-export function ColumnModal({ open, column, onSave, onDelete, onClose }: ColumnModalProps) {
+export function ColumnModal({
+  open,
+  column,
+  prevPosition,
+  onSave,
+  onDelete,
+  onClose,
+}: ColumnModalProps) {
   const [title, setTitle] = useState('');
   const [color, setColor] = useState(COLUMN_COLORS[0].value);
   const [modalTitle, setModalTitle] = useState('');
@@ -87,7 +95,8 @@ export function ColumnModal({ open, column, onSave, onDelete, onClose }: ColumnM
       onClose();
       return;
     }
-    onSave(title.trim(), color);
+    const posToUse = prevPosition ?? column?.position;
+    onSave(title.trim(), color, posToUse);
     onClose();
   };
 
@@ -96,6 +105,13 @@ export function ColumnModal({ open, column, onSave, onDelete, onClose }: ColumnM
       e.preventDefault();
       handleSaveAndClose();
     }
+  };
+
+  const handleDelete = () => {
+    if (column && onDelete) {
+      onDelete(column.id);
+    }
+    onClose();
   };
 
   return (
@@ -117,7 +133,7 @@ export function ColumnModal({ open, column, onSave, onDelete, onClose }: ColumnM
           <Tooltip title="Delete column">
             <IconButton
               aria-label="delete column"
-              onClick={onDelete}
+              onClick={handleDelete}
               sx={{ position: 'absolute', top: 8, right: 8 }}
             >
               <DeleteIcon />

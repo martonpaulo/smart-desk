@@ -10,11 +10,12 @@ import {
   ListItemText,
 } from '@mui/material';
 
-import { Column, TodoTask } from '@/widgets/TodoList/types';
+import { Column } from '@/types/column';
+import { Task } from '@/types/task';
 
 interface TrashDialogProps {
   open: boolean;
-  tasks: TodoTask[];
+  tasks: Task[];
   columns: Column[];
   onRestoreTask: (id: string) => void;
   onRestoreColumn: (id: string) => void;

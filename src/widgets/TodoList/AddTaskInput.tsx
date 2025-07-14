@@ -3,15 +3,15 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 
 interface AddTaskInputProps {
-  columnSlug: string;
+  columnId: string;
   columnColor: string;
-  onAdd: (columnSlug: string, title: string) => string;
+  onAdd: (columnId: string, title: string) => Promise<string>;
   onStartEdit?: (id: string) => void;
 }
 
-export function AddTaskInput({ columnSlug, columnColor, onAdd, onStartEdit }: AddTaskInputProps) {
-  const handleFocus = () => {
-    const id = onAdd(columnSlug, '');
+export function AddTaskInput({ columnId, columnColor, onAdd, onStartEdit }: AddTaskInputProps) {
+  const handleFocus = async () => {
+    const id = await onAdd(columnId, '');
     onStartEdit?.(id);
   };
 

@@ -1,477 +1,248 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
-import { Box, Button, Stack, useMediaQuery } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 
-import { getSupabaseClient } from '@/lib/supabaseClient';
-import { fetchColumns } from '@/services/supabaseColumnsService';
-import { fetchTasks } from '@/services/supabaseTasksService';
-import { useTodoBoardStore } from '@/store/todoBoardStore';
-import { useTodoPrefsStore } from '@/store/todoPrefsStore';
-import { showUndo } from '@/store/undoStore';
-import { IEvent } from '@/types/IEvent';
-import { filterFullDayEventsForTodayInUTC } from '@/utils/eventUtils';
-import { generateId } from '@/utils/idUtils';
-import { getStoredFilters, setStoredFilters } from '@/utils/localStorageUtils';
+import { useResponsiveness } from '@/hooks/useResponsiveness';
+import { useBoardStore } from '@/store/board/store';
+import { Column } from '@/types/column';
+import { Task } from '@/types/task';
+import { getNewColumnPosition, isTaskEmpty } from '@/utils/boardHelpers';
 import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
-import { LAST_POPULATE_KEY, saveBoard } from '@/widgets/TodoList/boardStorage';
 import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
-import { TrashDialog } from '@/widgets/TodoList/TrashDialog';
-import { BoardState, Column, TodoTask } from '@/widgets/TodoList/types';
 
-// Ensure drag and drop works on Safari PWAs
+// Safari PWA drag-drop fix
 import '@/lib/dragDropTouch';
 
-interface TodoListProps {
-  events: IEvent[] | null;
-}
+export function TodoList() {
+  // store selectors
+  const columns = useBoardStore(s => s.columns);
+  const tasks = useBoardStore(s => s.tasks);
+  const addColumn = useBoardStore(s => s.addColumn);
+  const addTask = useBoardStore(s => s.addTask);
+  const updateColumn = useBoardStore(s => s.updateColumn);
+  const updateTask = useBoardStore(s => s.updateTask);
 
-export function TodoList({ events }: TodoListProps) {
-  const boardStoreBoard = useTodoBoardStore(state => state.board);
-  const setBoardInStore = useTodoBoardStore(state => state.setBoard);
-  const [board, setBoard] = useState<BoardState>(boardStoreBoard);
-  const view = useTodoPrefsStore(state => state.view);
-  const trashOpen = useTodoPrefsStore(state => state.trashOpen);
-  const setTrashOpen = useTodoPrefsStore(state => state.setTrashOpen);
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
-  const [editingTask, setEditingTask] = useState<TodoTask | null>(null);
-  const [columnModal, setColumnModal] = useState<{
-    column: Column | null;
-    afterId?: string;
-  } | null>(null);
+  const { isMobile } = useResponsiveness();
+
+  // column modal state
+  const [isColumnModalOpen, setColumnModalOpen] = useState(false);
+  const [activeColumn, setActiveColumn] = useState<Column | null>(null);
+  const [insertionPosition, setInsertionPosition] = useState<number>();
+  // task drag state
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [hoverTaskId, setHoverTaskId] = useState<string | null>(null);
   const [taskDropColumnId, setTaskDropColumnId] = useState<string | null>(null);
+  // **new** column drag state
+  const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
   const [hoverColumnId, setHoverColumnId] = useState<string | null>(null);
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('mobileLg'));
 
-  // Periodically sync board with Supabase every minute
-  useEffect(() => {
-    const supabase = getSupabaseClient();
-    let cancelled = false;
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-    async function refresh() {
-      try {
-        const [columns, tasks] = await Promise.all([fetchColumns(supabase), fetchTasks(supabase)]);
-        if (cancelled) return;
-        setBoard(prev => ({ ...prev, columns: columns.length ? columns : prev.columns, tasks }));
-      } catch (err) {
-        console.error('Failed to refresh board from Supabase', err);
+  const columnsToRender = columns.filter(c => !c.trashed);
+  const boardIsEmpty = columnsToRender.length === 0;
+
+  // ── Column modal open/close ─────────────────────────────────────────────
+  const openNewColumnModal = () => {
+    setActiveColumn(null);
+    setInsertionPosition(undefined);
+    setColumnModalOpen(true);
+  };
+  const openEditColumnModal = (col: Column) => {
+    setActiveColumn(col);
+    setInsertionPosition(undefined);
+    setColumnModalOpen(true);
+  };
+  const openInsertColumnModal = (prevPos: number) => {
+    setActiveColumn(null);
+    setInsertionPosition(getNewColumnPosition(columns, prevPos));
+    setColumnModalOpen(true);
+  };
+  const closeColumnModal = () => {
+    setActiveColumn(null);
+    setInsertionPosition(undefined);
+    setColumnModalOpen(false);
+  };
+
+  // ── Column save/delete ─────────────────────────────────────────────────
+  const handleSaveColumn = async (title: string, color: string) => {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+
+    try {
+      if (activeColumn) {
+        await updateColumn({ id: activeColumn.id, title: trimmed, color });
+      } else {
+        const pos =
+          insertionPosition !== undefined ? insertionPosition : getNewColumnPosition(columns);
+        await addColumn({ title: trimmed, color, position: pos });
       }
+    } catch (err) {
+      console.error('Column save failed', err);
+    } finally {
+      closeColumnModal();
     }
+  };
 
-    void refresh();
-    const id = setInterval(refresh, 60_000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
-
-  // keep global store in sync
-  useEffect(() => {
-    setBoardInStore(board);
-  }, [board, setBoardInStore]);
-
-  // Populate tasks from today's events once per day
-  useEffect(() => {
-    if (!events?.length) return;
-
-    const todayKey = new Date().toISOString().slice(0, 10);
-    const lastPopulate = getStoredFilters<string>(LAST_POPULATE_KEY);
-    if (lastPopulate === todayKey) return;
-
-    const fullDay = filterFullDayEventsForTodayInUTC(events);
-    if (!fullDay.length) return;
-
-    setBoard(prev => {
-      const additions = fullDay
-        .filter(ev => !prev.tasks.some(t => t.id === ev.id))
-        .map(ev => ({
-          id: ev.id,
-          title: ev.title,
-          description: undefined,
-          tags: [],
-          columnSlug: 'todo',
-        }));
-      if (!additions.length) return prev;
-      const updated = { ...prev, tasks: [...prev.tasks, ...additions] };
-      saveBoard(updated);
-      return updated;
-    });
-
-    setStoredFilters(LAST_POPULATE_KEY, todayKey);
-  }, [events]);
-
-  // history refs
-  const historyRef = useRef<BoardState[]>([board]);
-  const historyIndexRef = useRef(0);
-  const isTimeTravelingRef = useRef(false);
-
-  // push new states into history (skip when undo/redo)
-  useEffect(() => {
-    if (isTimeTravelingRef.current) {
-      isTimeTravelingRef.current = false;
-      return;
+  const handleDeleteColumn = async (id: string) => {
+    try {
+      await updateColumn({ id, trashed: true });
+    } catch (err) {
+      console.error('Column delete failed', err);
     }
-    const sliced = historyRef.current.slice(0, historyIndexRef.current + 1);
-    sliced.push(board);
-    historyRef.current = sliced;
-    historyIndexRef.current = sliced.length - 1;
-  }, [board]);
+  };
 
-  // undo callback
-  const undo = useCallback(() => {
-    if (historyIndexRef.current <= 0) return;
-    historyIndexRef.current--;
-    isTimeTravelingRef.current = true;
-    setBoard(historyRef.current[historyIndexRef.current]);
-  }, []);
-
-  // redo callback
-  const redo = useCallback(() => {
-    if (historyIndexRef.current >= historyRef.current.length - 1) return;
-    historyIndexRef.current++;
-    isTimeTravelingRef.current = true;
-    setBoard(historyRef.current[historyIndexRef.current]);
-  }, []);
-
-  // keyboard listeners for undo/redo
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const isMac = navigator.platform.toUpperCase().includes('MAC');
-      const ctrl = isMac ? e.metaKey : e.ctrlKey;
-      if (!ctrl) return;
-
-      // undo: Ctrl+Z or Cmd+Z
-      if (e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        undo();
-      }
-      // redo: Ctrl+Y or Cmd+Y
-      if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
-        e.preventDefault();
-        redo();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo]);
-
-  // populate from full-day events once per day
-  useEffect(() => {
-    if (!events?.length) return;
-    const todayKey = new Date().toISOString().slice(0, 10);
-    const last = getStoredFilters<string>(LAST_POPULATE_KEY);
-    if (last === todayKey) return;
-
-    const fullDay = filterFullDayEventsForTodayInUTC(events);
-    if (!fullDay.length) return;
-
-    setBoard(prev => {
-      const additions = fullDay
-        .filter(ev => !prev.tasks.some(i => i.id === ev.id))
-        .map(ev => ({
-          id: ev.id,
-          title: ev.title,
-          description: undefined,
-          tags: [],
-          columnSlug: 'todo',
-        }));
-      if (!additions.length) return prev;
-      const updated = { ...prev, tasks: [...prev.tasks, ...additions] };
-      saveBoard(updated);
-      return updated;
-    });
-    setStoredFilters(LAST_POPULATE_KEY, todayKey);
-  }, [events]);
-
-  // persist on every change
-  useEffect(() => {
-    saveBoard(board);
-  }, [board]);
-
-  const handleAddTask = (columnSlug: string, title: string) => {
-    const task: TodoTask = {
-      id: generateId(),
-      title,
-      tags: [],
-      columnSlug,
-    };
-    setBoard(prev => {
-      let columns = prev.columns;
-      if (!columns.some(c => c.id === columnSlug)) {
-        columns = [
-          ...columns,
-          { id: columnSlug, slug: columnSlug, title: 'Draft', color: '#616161' },
-        ];
-      }
-      return { ...prev, columns, tasks: [...prev.tasks, task] };
-    });
-    return task.id;
+  // ── Task handlers (unchanged) ───────────────────────────────────────────
+  const handleAddTask = async (title: string, columnId?: string): Promise<string> => {
+    const trimmed = title.trim();
+    if (!trimmed) return '';
+    try {
+      return await addTask({ title: trimmed, columnId });
+    } catch (err) {
+      console.error('Task add failed', err);
+      return '';
+    }
   };
 
   const handleEditTask = (id: string) => {
-    const task = board.tasks.find(t => t.id === id);
+    const task = tasks.find(t => t.id === id);
     if (!task) return;
     setEditingTask(task);
   };
 
-  const handleSaveTask = (updated: TodoTask) => {
-    setBoard(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t => (t.id === updated.id ? updated : t)),
-    }));
-    setEditingTask(null);
+  const handleSaveTask = (updated: Task) => {
+    if (isTaskEmpty(updated)) return;
+    try {
+      updateTask({ ...updated });
+    } catch (err) {
+      console.error('Task save failed', err);
+    } finally {
+      setEditingTask(null);
+    }
   };
 
-  const handleRenameTask = (id: string, title: string) => {
+  const handleRenameTask = async (id: string, title: string) => {
     const trimmed = title.trim();
     if (!trimmed) return;
-    setBoard(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t => (t.id === id ? { ...t, title: trimmed } : t)),
-    }));
-  };
-
-  const handleDeleteTask = (id: string) => {
-    setBoard(prev => {
-      const task = prev.tasks.find(t => t.id === id);
-      if (!task) return prev;
-      return {
-        ...prev,
-        tasks: prev.tasks.filter(t => t.id !== id),
-        trash: { ...prev.trash, tasks: [task, ...prev.trash.tasks] },
-      };
-    });
-    showUndo('Task deleted', undo);
-  };
-
-  const handleToggleDone = (id: string) => {
-    setBoard(prev => {
-      const task = prev.tasks.find(t => t.id === id);
-      if (!task) return prev;
-
-      let columns = [...prev.columns];
-      let needsColumnUpdate = false;
-
-      const ensureColumn = (cid: string, title: string, color: string) => {
-        if (!columns.some(c => c.id === cid)) {
-          columns = [...columns, { id: cid, slug: cid, title, color }];
-          needsColumnUpdate = true;
-        }
-      };
-
-      // Only ensure 'done' column if moving to it
-      if (task.columnSlug !== 'done') {
-        ensureColumn('done', 'Done', '#2e7d32');
-      }
-
-      // Only ensure 'draft' column if we need to move back to it
-      if (
-        task.columnSlug === 'done' &&
-        (!task.prevColumnSlug || !columns.some(c => c.id === task.prevColumnSlug))
-      ) {
-        ensureColumn('draft', 'Draft', '#616161');
-      }
-
-      const tasks = prev.tasks.map(t => {
-        if (t.id !== id) return t;
-        if (t.columnSlug === 'done') {
-          const target =
-            t.prevColumnSlug && columns.some(c => c.id === t.prevColumnSlug)
-              ? t.prevColumnSlug
-              : 'draft';
-          return {
-            ...t,
-            columnSlug: target,
-            prevColumnSlug: undefined,
-            quantity: 0,
-            quantityTotal: t.quantityTotal,
-          };
-        }
-
-        if (t.quantity !== undefined && t.quantityTotal && t.quantity < t.quantityTotal) {
-          if (t.quantity === t.quantityTotal - 1) {
-            return {
-              ...t,
-              columnSlug: 'done',
-              prevColumnSlug: t.columnSlug,
-              quantity: t.quantity + 1,
-            };
-          }
-          return { ...t, quantity: t.quantity + 1 };
-        }
-
-        return { ...t, prevColumnSlug: t.columnSlug, columnSlug: 'done' };
-      });
-
-      return needsColumnUpdate ? { ...prev, columns, tasks } : { ...prev, tasks };
-    });
-  };
-
-  const handleSaveColumn = (title: string, color: string) => {
-    if (!columnModal) return;
-    if (columnModal.column) {
-      const id = columnModal.column.id;
-      setBoard(prev => ({
-        ...prev,
-        columns: prev.columns.map(c => (c.id === id ? { ...c, title, color } : c)),
-      }));
-    } else {
-      const id = generateId();
-      setBoard(prev => {
-        const columns = [...prev.columns];
-        const index = columnModal.afterId
-          ? columns.findIndex(c => c.id === columnModal.afterId) + 1
-          : columns.length;
-        columns.splice(index, 0, { id, slug: id, title, color });
-        return { ...prev, columns };
-      });
+    try {
+      await updateTask({ id, title: trimmed });
+    } catch (err) {
+      console.error('Task rename failed', err);
     }
-    setColumnModal(null);
   };
 
-  const handleDeleteColumn = () => {
-    if (!columnModal?.column) {
-      setColumnModal(null);
-      return;
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await updateTask({ id, trashed: true });
+    } catch (err) {
+      console.error('Task delete failed', err);
     }
-    const id = columnModal.column.id;
-    setBoard(prev => {
-      const column = prev.columns.find(c => c.id === id);
-      const tasks = prev.tasks.filter(i => i.columnSlug === id);
-      return {
-        columns: prev.columns.filter(c => c.id !== id),
-        tasks: prev.tasks.filter(i => i.columnSlug !== id),
-        trash: {
-          columns: column ? [column, ...prev.trash.columns] : prev.trash.columns,
-          tasks: [...tasks, ...prev.trash.tasks],
-        },
-      };
-    });
-    setColumnModal(null);
-    showUndo('Column deleted', undo);
   };
 
-  const handleRestoreTask = (id: string) => {
-    setBoard(prev => {
-      const task = prev.trash.tasks.find(t => t.id === id);
-      if (!task) return prev;
-      return {
-        ...prev,
-        tasks: [...prev.tasks, task],
-        trash: { ...prev.trash, tasks: prev.trash.tasks.filter(t => t.id !== id) },
-      };
-    });
+  const handleToggleDone = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task || task.quantityTarget == null) return;
+    const next = (task.quantityDone ?? 0) + 1;
+    const value = next > task.quantityTarget ? 0 : next;
+    try {
+      await updateTask({ id, quantityDone: value });
+    } catch (err) {
+      console.error('Toggle done failed', err);
+    }
   };
 
-  const handleRestoreColumn = (id: string) => {
-    setBoard(prev => {
-      const column = prev.trash.columns.find(c => c.id === id);
-      if (!column) return prev;
-      const tasks = prev.trash.tasks.filter(t => t.columnSlug === id);
-      return {
-        ...prev,
-        columns: [...prev.columns, column],
-        tasks: [...prev.tasks, ...tasks],
-        trash: {
-          columns: prev.trash.columns.filter(c => c.id !== id),
-          tasks: prev.trash.tasks.filter(t => t.columnSlug !== id),
-        },
-      };
-    });
-  };
-
-  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
-    event.dataTransfer.effectAllowed = 'move';
-    setDraggingId(id);
+  // ── Task drag & drop ────────────────────────────────────────────────────
+  const handleTaskDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
+    e.dataTransfer.effectAllowed = 'move';
+    setDraggingTaskId(id);
     setHoverTaskId(null);
     setTaskDropColumnId(null);
   };
+  const handleTaskDragOver = (e: React.DragEvent<HTMLDivElement>, overId: string) => {
+    e.preventDefault();
+    if (draggingTaskId && draggingTaskId !== overId) {
+      setHoverTaskId(overId);
+    }
+  };
+  const handleTaskColumnDragOver = (columnId: string) => {
+    if (draggingTaskId) setTaskDropColumnId(columnId);
+  };
+  const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, columnId: string) => {
+    e.preventDefault();
+    if (!draggingTaskId) return;
+    try {
+      await updateTask({ id: draggingTaskId, columnId });
+    } catch (err) {
+      console.error('Task move failed', err);
+    } finally {
+      setDraggingTaskId(null);
+      setHoverTaskId(null);
+      setTaskDropColumnId(null);
+    }
+  };
 
-  const handleColumnDragStart = (event: React.DragEvent<HTMLDivElement>, id: string) => {
-    event.dataTransfer.effectAllowed = 'move';
+  // ── Column drag & drop ──────────────────────────────────────────────────
+  const handleColumnDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
+    e.dataTransfer.effectAllowed = 'move';
     setDraggingColumnId(id);
     setHoverColumnId(null);
   };
 
-  const handleColumnDragOver = (event: React.DragEvent<HTMLDivElement>, overId: string) => {
+  const handleColumnDragOver = (e: React.DragEvent<HTMLDivElement>, overId: string) => {
+    e.preventDefault();
     if (!draggingColumnId || draggingColumnId === overId) return;
     setHoverColumnId(overId);
   };
 
   const handleColumnDragEnd = () => {
     if (draggingColumnId) {
-      setBoard(prev => {
-        const columns = [...prev.columns];
-        const from = columns.findIndex(c => c.id === draggingColumnId);
-        const to = hoverColumnId ? columns.findIndex(c => c.id === hoverColumnId) : from;
-        if (from === -1 || to === -1 || from === to) return prev;
-        const [moved] = columns.splice(from, 1);
-        columns.splice(to, 0, moved);
-        return { ...prev, columns };
-      });
+      // sort visible columns by position
+      const sorted = columnsToRender.slice().sort((a, b) => a.position - b.position);
+
+      const fromIdx = sorted.findIndex(c => c.id === draggingColumnId);
+      const toIdx = hoverColumnId ? sorted.findIndex(c => c.id === hoverColumnId) : fromIdx;
+
+      if (fromIdx >= 0 && toIdx >= 0 && fromIdx !== toIdx) {
+        // reorder array
+        const moved = sorted.splice(fromIdx, 1)[0];
+        sorted.splice(toIdx, 0, moved);
+        // batch update new positions
+        sorted.forEach((col, i) => {
+          updateColumn({ id: col.id, position: i + 1 });
+        });
+      }
     }
+
     setDraggingColumnId(null);
     setHoverColumnId(null);
   };
 
-  const handleDragOverTask = (event: React.DragEvent<HTMLDivElement>, overId: string) => {
-    event.preventDefault();
-    if (!draggingId || draggingId === overId) return;
-    setHoverTaskId(overId);
-  };
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>, columnSlug: string) => {
-    event.preventDefault();
-    const id = draggingId;
-    setDraggingId(null);
-    const overId = hoverTaskId;
-    setHoverTaskId(null);
-    setTaskDropColumnId(null);
-    if (!id) return;
-    setBoard(prev => {
-      const tasks = [...prev.tasks];
-      const from = tasks.findIndex(i => i.id === id);
-      if (from === -1) return prev;
-      const [moved] = tasks.splice(from, 1);
-      const to = overId
-        ? tasks.findIndex(i => i.id === overId)
-        : tasks.reduce((idx, it, i) => (it.columnSlug === columnSlug ? i + 1 : idx), 0);
-      const insertIndex = from < to ? to - 1 : to;
-      tasks.splice(insertIndex, 0, { ...moved, columnSlug });
-      return { ...prev, tasks };
-    });
-  };
-
   const renderColumn = (column: Column) => {
-    const tasks = board.tasks?.filter(i => i.columnSlug === column.id);
-
+    const colTasks = tasks.filter(t => t.columnId === column.id && !t.trashed);
     return (
       <TodoColumn
         key={column.id}
         column={column}
-        tasks={tasks}
-        view={view}
-        onOpenColumn={col => setColumnModal({ column: col })}
-        onAddColumn={afterId => setColumnModal({ column: null, afterId })}
+        tasks={colTasks}
+        isMobile={isMobile}
+        onEditColumn={openEditColumnModal}
+        onAddColumnAfter={openInsertColumnModal}
+        onAddTask={handleAddTask}
         onEditTask={handleEditTask}
         onRenameTask={handleRenameTask}
-        onDeleteTask={handleDeleteTask}
         onToggleDone={handleToggleDone}
-        onAddTask={handleAddTask}
-        onDragStart={handleDragStart}
-        onDragOverTask={handleDragOverTask}
-        onTaskColumnDragOver={setTaskDropColumnId}
-        onDrop={handleDrop}
+        onDragStart={handleTaskDragStart}
+        onDragOverTask={handleTaskDragOver}
+        onTaskColumnDragOver={handleTaskColumnDragOver}
+        onDrop={handleTaskDrop}
+        draggingTaskId={draggingTaskId}
+        hoverTaskId={hoverTaskId}
+        taskDropColumnId={taskDropColumnId}
+        // ── new column DnD props ───────────────────────────────────────
         onColumnDragStart={handleColumnDragStart}
         onColumnDragOver={handleColumnDragOver}
         onColumnDragEnd={handleColumnDragEnd}
-        draggingTaskId={draggingId}
-        hoverTaskId={hoverTaskId}
-        taskDropColumnId={taskDropColumnId}
         draggingColumnId={draggingColumnId}
         showAddTaskInput={!isMobile}
       />
@@ -479,58 +250,38 @@ export function TodoList({ events }: TodoListProps) {
   };
 
   return (
-    <Box sx={{ position: 'relative' }}>
-      <Stack
-        direction={view === 'board' ? 'row' : 'column'}
-        spacing={2}
-        sx={{ userSelect: 'none' }}
-      >
-        {board.columns.map(renderColumn)}
+    <Stack spacing={2}>
+      <Stack direction={isMobile ? 'column' : 'row'} spacing={2} sx={{ userSelect: 'none' }}>
+        {columnsToRender
+          .slice()
+          .sort((a, b) => a.position - b.position)
+          .map(renderColumn)}
       </Stack>
-      {board.columns.length === 0 && (
-        <Button variant="contained" onClick={() => setColumnModal({ column: null })}>
+
+      {boardIsEmpty && (
+        <Button variant="contained" onClick={openNewColumnModal}>
           Add First Column
         </Button>
       )}
+
+      <ColumnModal
+        open={isColumnModalOpen}
+        column={activeColumn}
+        onSave={handleSaveColumn}
+        onDelete={id => id && handleDeleteColumn(id)}
+        onClose={closeColumnModal}
+      />
+
+      {isMobile && <AddTaskFloatButton onAdd={handleAddTask} />}
+
       <EditTaskModal
-        column={board.columns.find(c => c.id === editingTask?.columnSlug) || null}
+        column={editingTask ? columns.find(c => c.id === editingTask.columnId) || null : null}
         open={Boolean(editingTask)}
         task={editingTask}
         onSave={handleSaveTask}
         onClose={() => setEditingTask(null)}
         onDeleteTask={handleDeleteTask}
       />
-      <ColumnModal
-        open={Boolean(columnModal)}
-        column={columnModal?.column || null}
-        onSave={handleSaveColumn}
-        onDelete={handleDeleteColumn}
-        onClose={() => setColumnModal(null)}
-      />
-      <TrashDialog
-        open={trashOpen}
-        tasks={board.trash.tasks}
-        columns={board.trash.columns}
-        onRestoreTask={handleRestoreTask}
-        onRestoreColumn={handleRestoreColumn}
-        onClose={() => setTrashOpen(false)}
-      />
-
-      {isMobile && <AddTaskFloatButton onAdd={handleAddTask} />}
-
-      <style jsx>{`
-        .todo-actions {
-          position: absolute;
-          right: 0.25rem;
-          top: 0.25rem;
-        }
-        [data-todo-id]:hover .todo-actions {
-          visibility: visible;
-        }
-        .todo-actions button:hover {
-          cursor: pointer;
-        }
-      `}</style>
-    </Box>
+    </Stack>
   );
 }

@@ -3,7 +3,6 @@ import { create } from 'zustand';
 import type { IEvent } from '@/types/IEvent';
 import { mergeEvents } from '@/utils/eventUtils';
 import { loadHiddenEventIds, saveHiddenEventIds } from '@/utils/hiddenEventsStorage';
-import { loadLocalEvents, saveLocalEvents } from '@/utils/localEventsStorage';
 
 interface EventState {
   events: IEvent[];
@@ -11,6 +10,7 @@ interface EventState {
   localEvents: IEvent[];
   trash: IEvent[];
   hiddenEvents: string[];
+  setLocalEvents: (events: IEvent[]) => void;
   setRemoteEvents: (list: IEvent[]) => void;
   addLocalEvent: (event: IEvent) => void;
   updateLocalEvent: (event: IEvent) => void;
@@ -22,96 +22,81 @@ interface EventState {
 export const useEventStore = create<EventState>((set, get) => ({
   events: [],
   remoteEvents: [],
-  localEvents: loadLocalEvents(),
+  localEvents: [],
   trash: [],
-  hiddenEvents: loadHiddenEventIds(),
+  hiddenEvents: [],
+  setLocalEvents: events => set({ localEvents: events }),
   setRemoteEvents: list => {
-    const prev = get().remoteEvents;
-    // Only update if the lists are different
-    if (JSON.stringify(prev) !== JSON.stringify(list)) {
-      const merged = mergeEvents(prev, list);
-      const localEvents = get().localEvents;
-      const hidden = get().hiddenEvents;
-      const filtered = merged.filter(e => !hidden.includes(e.id));
-      const allEvents = [...filtered, ...localEvents];
-      set({ remoteEvents: filtered, events: allEvents });
-    }
+    const mergedEvents = mergeEvents(get().localEvents, list);
+    set({ remoteEvents: list, events: mergedEvents });
   },
-  addLocalEvent: event =>
+  addLocalEvent: event => {
     set(state => {
-      const localEvents = [...state.localEvents, event];
-      saveLocalEvents(localEvents);
+      const newEvents = [...state.localEvents, event];
+      const mergedEvents = mergeEvents(newEvents, state.remoteEvents);
+      return { localEvents: newEvents, events: mergedEvents };
+    });
+  },
+  updateLocalEvent: event => {
+    set(state => {
+      const updatedEvents = state.localEvents.map(e => (e.id === event.id ? event : e));
+      const mergedEvents = mergeEvents(updatedEvents, state.remoteEvents);
+      return { localEvents: updatedEvents, events: mergedEvents };
+    });
+  },
+  deleteEvent: id => {
+    set(state => {
+      const updatedLocalEvents = state.localEvents.filter(e => e.id !== id);
+      const updatedRemoteEvents = state.remoteEvents.filter(e => e.id !== id);
+      const mergedEvents = mergeEvents(updatedLocalEvents, updatedRemoteEvents);
       return {
-        localEvents,
-        events: [...state.remoteEvents, ...localEvents],
+        localEvents: updatedLocalEvents,
+        remoteEvents: updatedRemoteEvents,
+        events: mergedEvents,
+        trash: [...state.trash, ...state.events.filter(e => e.id === id)],
       };
-    }),
-  updateLocalEvent: event =>
+    });
+  },
+  restoreEvent: id => {
     set(state => {
-      const localEvents = state.localEvents.map(e => (e.id === event.id ? event : e));
-      saveLocalEvents(localEvents);
-      return {
-        localEvents,
-        events: [...state.remoteEvents, ...localEvents],
-      };
-    }),
-  deleteEvent: id =>
-    set(state => {
-      const event =
-        state.localEvents.find(e => e.id === id) || state.remoteEvents.find(e => e.id === id);
-      if (!event) return state;
-      const localEvents = state.localEvents.filter(e => e.id !== id);
-      const remoteEvents = state.remoteEvents.filter(e => e.id !== id);
-      saveLocalEvents(localEvents);
-      const hidden = state.hiddenEvents.includes(id)
-        ? state.hiddenEvents
-        : [id, ...state.hiddenEvents];
-      saveHiddenEventIds(hidden);
-      return {
-        localEvents,
-        remoteEvents,
-        hiddenEvents: hidden,
-        events: [...remoteEvents, ...localEvents],
-        trash: [event, ...state.trash],
-      };
-    }),
-  restoreEvent: id =>
-    set(state => {
-      const event = state.trash.find(e => e.id === id);
-      if (!event) return state;
-      const trash = state.trash.filter(e => e.id !== id);
-      const hiddenEvents = state.hiddenEvents.filter(eid => eid !== id);
-      saveHiddenEventIds(hiddenEvents);
+      const restoredEvent = state.trash.find(e => e.id === id);
+      if (!restoredEvent) return state;
 
-      if (event.calendar) {
-        const remoteEvents = [...state.remoteEvents, event];
-        return {
-          trash,
-          remoteEvents,
-          hiddenEvents,
-          events: [...remoteEvents, ...state.localEvents],
-        };
-      }
+      const updatedTrash = state.trash.filter(e => e.id !== id);
+      const updatedLocalEvents = [...state.localEvents, restoredEvent];
+      const mergedEvents = mergeEvents(updatedLocalEvents, state.remoteEvents);
 
-      const localEvents = [...state.localEvents, event];
-      saveLocalEvents(localEvents);
       return {
-        trash,
-        localEvents,
-        hiddenEvents,
-        events: [...state.remoteEvents, ...localEvents],
+        localEvents: updatedLocalEvents,
+        events: mergedEvents,
+        trash: updatedTrash,
       };
-    }),
-  setAlertAcknowledged: id =>
-    set(state => ({
-      remoteEvents: state.remoteEvents.map(event =>
-        event.id === id ? { ...event, aknowledged: true } : event,
-      ),
-      localEvents: state.localEvents.map(event =>
-        event.id === id ? { ...event, aknowledged: true } : event,
-      ),
-      events: state.events.map(event =>
-        event.id === id ? { ...event, aknowledged: true } : event,
-      ),
-    })),
+    });
+  },
+  setAlertAcknowledged: id => {
+    set(state => {
+      const updatedEvents = state.events.map(e => (e.id === id ? { ...e, aknowledged: true } : e));
+      return { events: updatedEvents };
+    });
+  },
+  loadHiddenEvents: () => {
+    const hiddenIds = loadHiddenEventIds();
+    set({ hiddenEvents: hiddenIds });
+  },
+  saveHiddenEvents: () => {
+    const hiddenIds = get().hiddenEvents;
+    saveHiddenEventIds(hiddenIds);
+  },
+  toggleHiddenEvent: (id: string) => {
+    set(state => {
+      const hiddenEvents = state.hiddenEvents.includes(id)
+        ? state.hiddenEvents.filter(hid => hid !== id)
+        : [...state.hiddenEvents, id];
+      return { hiddenEvents };
+    });
+  },
+  clearHiddenEvents: () => {
+    set({ hiddenEvents: [] });
+    saveHiddenEventIds([]);
+  },
 }));

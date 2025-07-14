@@ -1,138 +1,58 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import type { TodoTask } from '@/widgets/TodoList/types';
+import { Task } from '@/types/task';
+import { mapDBToTask, mapTaskToDB } from '@/utils/databaseUtils';
 
-export interface NewTask {
-  id?: string;
-  title: string;
-  description?: string;
-  tags: string[];
-  columnSlug: string;
-  position?: number;
-  quantity?: number;
-  quantityTotal?: number;
-  trashed?: boolean;
-}
-
-export async function fetchTasks(
-  client: SupabaseClient,
-  opts: { includeTrashed?: boolean } = {},
-): Promise<TodoTask[]> {
-  console.debug('Supabase: fetching tasks');
+export async function fetchTasks(client: SupabaseClient): Promise<Task[]> {
   const query = client.from('tasks').select('*').order('position', { ascending: true });
-  if (!opts.includeTrashed) {
-    query.eq('trashed', false);
-  }
+
   const { data, error } = await query;
   if (error) {
-    console.error('Supabase: fetch tasks failed', error);
-    throw new Error(error.message);
+    console.error('fetchTasks failed', error);
+    throw new Error('Could not load tasks');
   }
-  console.debug('Supabase: fetched tasks', data);
-  return (data ?? []).map(t => ({
-    id: t.id,
-    title: t.title,
-    description: t.description ?? undefined,
-    tags: t.tags ?? [],
 
-    columnSlug: (t as any).column_id,
-    position: t.position ?? undefined,
-    quantity: t.quantity ?? undefined,
-    quantityTotal: t.quantityTotal ?? undefined,
-    trashed: (t as any).trashed ?? false,
-    updatedAt: (t as any).updated_at,
-  }));
+  const tasks = data ?? [];
+  const mappedTasks = tasks.map(mapDBToTask);
+  return mappedTasks;
 }
 
-export async function createTask(client: SupabaseClient, payload: NewTask): Promise<TodoTask> {
-  console.debug('Supabase: creating task', payload);
+export async function upsertTask(client: SupabaseClient, payload: Task): Promise<Task> {
   const {
     data: { user },
-    error: userError,
+    error: authError,
   } = await client.auth.getUser();
-  if (userError || !user?.id) {
-    console.error('Supabase: unable to determine user', userError);
+
+  if (authError || !user?.id) {
+    console.error('upsertTask auth failed', authError);
     throw new Error('User not authenticated');
   }
 
-  console.log('payload', payload);
-
-  const insertPayload = {
-    ...payload,
-    column_id: payload.columnSlug,
-    user_id: user.id,
-    trashed: false,
-  };
+  const row = mapTaskToDB({
+    task: payload,
+    userId: user.id,
+  });
 
   const { data, error } = await client
     .from('tasks')
-    .upsert(insertPayload, { onConflict: 'id' })
+    .upsert(row, { onConflict: 'id' })
     .select()
     .single();
+
   if (error) {
-    console.error('Supabase: create task failed', error);
-    throw new Error(error.message);
+    console.error('upsertTask failed', error);
+    throw new Error('Could not save task');
   }
-  console.debug('Supabase: created task', data);
-  return {
-    id: data.id,
-    title: data.title,
-    description: data.description ?? undefined,
-    tags: data.tags ?? [],
-    columnSlug: data.column_id,
-    position: data.position ?? undefined,
-    quantity: data.quantity ?? undefined,
-    quantityTotal: data.quantityTotal ?? undefined,
-    trashed: data.trashed ?? false,
-    updatedAt: data.updated_at,
-  } as TodoTask;
+
+  const mappedRow = mapDBToTask(data);
+  return mappedRow;
 }
 
-export async function updateTask(
-  client: SupabaseClient,
-  id: string,
-  updates: Partial<NewTask>,
-): Promise<TodoTask> {
-  console.debug('Supabase: updating task', id, updates);
-
-  const dbUpdates = { ...updates } as any;
-  if (updates.columnSlug) {
-    dbUpdates.column_id = updates.columnSlug;
-    delete dbUpdates.columnSlug;
-  }
-  const { data, error } = await client
-    .from('tasks')
-    .update(dbUpdates)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) {
-    console.error('Supabase: update task failed', error);
-    throw new Error(error.message);
-  }
-  console.debug('Supabase: updated task', data);
-  return {
-    id: data.id,
-    title: data.title,
-    description: data.description ?? undefined,
-    tags: data.tags ?? [],
-    columnSlug: data.column_id,
-    position: data.position ?? undefined,
-    quantity: data.quantity ?? undefined,
-    quantityTotal: data.quantityTotal ?? undefined,
-    trashed: data.trashed ?? false,
-    updatedAt: data.updated_at,
-  } as TodoTask;
-}
-
-export async function deleteTask(client: SupabaseClient, id: string): Promise<void> {
-  console.debug('Supabase: trashing task', id);
+export async function trashTask(client: SupabaseClient, id: string): Promise<void> {
   const { error } = await client.from('tasks').update({ trashed: true }).eq('id', id);
+
   if (error) {
-    console.error('Supabase: delete task failed', error);
-    throw new Error(error.message);
+    console.error('trashTask failed', error);
+    throw new Error('Could not delete task');
   }
-  console.debug('Supabase: deleted task');
 }

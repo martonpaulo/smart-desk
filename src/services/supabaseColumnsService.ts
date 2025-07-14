@@ -1,109 +1,58 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import type { Column } from '@/widgets/TodoList/types';
+import { Column } from '@/types/column';
+import { mapColumnToDB, mapDBToColumn } from '@/utils/databaseUtils';
 
-export interface NewColumn {
-  id?: string;
-  slug?: string;
-  title: string;
-  color: string;
-  position?: number;
-  trashed?: boolean;
-}
-
-export async function fetchColumns(
-  client: SupabaseClient,
-  opts: { includeTrashed?: boolean } = {},
-): Promise<Column[]> {
-  console.debug('Supabase: fetching columns');
+export async function fetchColumns(client: SupabaseClient): Promise<Column[]> {
   const query = client.from('columns').select('*').order('position', { ascending: true });
-  if (!opts.includeTrashed) {
-    query.eq('trashed', false);
-  }
+
   const { data, error } = await query;
   if (error) {
-    console.error('Supabase: fetch columns failed', error);
-    throw new Error(error.message);
+    console.error('fetchColumns failed', error);
+    throw new Error('Could not load columns');
   }
-  console.debug('Supabase: fetched columns', data);
-  return (data ?? []).map(c => ({
-    id: c.id,
 
-    slug: (c as any).slug ?? c.id,
-    title: c.title,
-    color: c.color,
-    position: c.position,
-    trashed: (c as any).trashed ?? false,
-    updatedAt: (c as any).updated_at,
-  })) as Column[];
+  const rows = data ?? [];
+  const mappedRows = rows.map(mapDBToColumn);
+  return mappedRows;
 }
 
-export async function createColumn(client: SupabaseClient, payload: NewColumn): Promise<Column> {
-  console.debug('Supabase: creating column', payload);
+export async function upsertColumn(client: SupabaseClient, payload: Column): Promise<Column> {
   const {
     data: { user },
-    error: userError,
+    error: authError,
   } = await client.auth.getUser();
-  if (userError || !user?.id) {
-    console.error('Supabase: unable to determine user', userError);
+
+  if (authError || !user?.id) {
+    console.error('upsertColumn auth failed', authError);
     throw new Error('User not authenticated');
   }
 
-  const insertPayload = {
-    ...payload,
-    slug: payload.slug ?? payload.id,
-    user_id: user.id,
-    trashed: false,
-  };
+  const row = mapColumnToDB({
+    column: payload,
+    userId: user.id,
+  });
 
   const { data, error } = await client
     .from('columns')
-    .upsert(insertPayload, { onConflict: 'id' })
+    .upsert(row, { onConflict: 'id' })
     .select()
     .single();
+
   if (error) {
-    console.error('Supabase: create column failed', error);
-    throw new Error(error.message);
+    console.error('upsertColumn failed', error);
+    throw new Error('Could not save column');
   }
-  console.debug('Supabase: created column', data);
-  return {
-    ...(data as Column),
-    trashed: (data as any).trashed ?? false,
-    updatedAt: (data as any).updated_at,
-  };
+
+  const mappedRow = mapDBToColumn(data);
+  return mappedRow;
 }
 
-export async function updateColumn(
-  client: SupabaseClient,
-  id: string,
-  updates: Partial<NewColumn>,
-): Promise<Column> {
-  console.debug('Supabase: updating column', id, updates);
-  const { data, error } = await client
-    .from('columns')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) {
-    console.error('Supabase: update column failed', error);
-    throw new Error(error.message);
-  }
-  console.debug('Supabase: updated column', data);
-  return {
-    ...(data as Column),
-    trashed: (data as any).trashed ?? false,
-    updatedAt: (data as any).updated_at,
-  };
-}
-
-export async function deleteColumn(client: SupabaseClient, id: string): Promise<void> {
-  console.debug('Supabase: trashing column', id);
+export async function trashColumn(client: SupabaseClient, id: string): Promise<void> {
   const { error } = await client.from('columns').update({ trashed: true }).eq('id', id);
+
   if (error) {
-    console.error('Supabase: delete column failed', error);
-    throw new Error(error.message);
+    console.error('trashColumn failed', error);
+    throw new Error('Could not delete column');
   }
-  console.debug('Supabase: deleted column');
 }

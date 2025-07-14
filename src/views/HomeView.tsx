@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 
-import { Stack, useMediaQuery } from '@mui/material';
+import { Stack } from '@mui/material';
 
 import { UndoSnackbar } from '@/components/UndoSnackbar';
+import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { DashboardViewState } from '@/types/DashboardViewState';
 import { IWeather } from '@/types/IWeather';
@@ -23,7 +24,6 @@ import { TodoViewSettings } from '@/widgets/Settings/TodoViewSettings';
 import { ZoomSetting } from '@/widgets/Settings/ZoomSetting';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
-import { TodoTrash } from '@/widgets/TodoList/TodoTrash';
 
 interface HomeViewProps {
   dashboardViewState: DashboardViewState;
@@ -55,7 +55,7 @@ export function HomeView({
 }: HomeViewProps) {
   const [now, setNow] = useState(new Date());
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('mobileLg'));
+  const { isMobile } = useResponsiveness();
   const {
     severity,
     message,
@@ -89,7 +89,6 @@ export function HomeView({
           'Local Events': <LocalEventsManager />,
           'Deleted Events': <EventsTrash />,
           'Todo View': <TodoViewSettings />,
-          'Todo Trash': <TodoTrash />,
           Tags: <TagPresets />,
           'UI Zoom': <ZoomSetting />,
           Auth: (
@@ -136,7 +135,7 @@ export function HomeView({
       )}
 
       <Stack spacing={2} direction={isMobile ? 'column' : 'row'} alignItems="stretch">
-        <TodoList events={events ?? null} />
+        <TodoList />
         <EventList events={events} key={`${now.toISOString()}-EventList`} />
       </Stack>
 
