@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useDashboardViewState } from '@/hooks/useDashboardViewState';
 import { useLocation } from '@/hooks/useLocation';
 import { useWeather } from '@/hooks/useWeather';
@@ -30,20 +31,22 @@ export default function Home() {
   );
 
   return (
-    <HomeView
-      dashboardViewState={dashboardViewState}
-      onAlertAcknowledge={setAlertAcknowledged}
-      audioEnabled={audioEnabled}
-      toggleAudioEnabled={toggleAudioEnabled}
-      isFirstRender={isFirstRender}
-      isMeetingAlertEnabled={isMeetingAlertEnabled}
-      onMeetingAlertToggle={toggleMeetingAlertEnabled}
-      isEventChangesAlertEnabled={isEventChangesAlertEnabled}
-      onEventChangesAlertToggle={toggleEventChangesAlertEnabled}
-      weather={weather}
-      weatherIsLoading={weatherIsLoading}
-      weatherIsError={weatherIsError}
-      weatherError={weatherError}
-    />
+    <ErrorBoundary>
+      <HomeView
+        dashboardViewState={dashboardViewState}
+        onAlertAcknowledge={setAlertAcknowledged}
+        audioEnabled={audioEnabled}
+        toggleAudioEnabled={toggleAudioEnabled}
+        isFirstRender={isFirstRender}
+        isMeetingAlertEnabled={isMeetingAlertEnabled}
+        onMeetingAlertToggle={toggleMeetingAlertEnabled}
+        isEventChangesAlertEnabled={isEventChangesAlertEnabled}
+        onEventChangesAlertToggle={toggleEventChangesAlertEnabled}
+        weather={weather}
+        weatherIsLoading={weatherIsLoading}
+        weatherIsError={weatherIsError}
+        weatherError={weatherError}
+      />
+    </ErrorBoundary>
   );
 }
