@@ -140,9 +140,9 @@ export function HomeView({
       </Stack>
 
       <EventAlert
-        events={events}
+        events={null}
         onAlertAcknowledge={onAlertAcknowledge}
-        alertLeadTimeMinutes={3}
+        alertLeadTimeMinutes={2}
         meetingAlertEnabled={isMeetingAlertEnabled}
         key={`${now.toISOString()}-EventAlert`}
       />
