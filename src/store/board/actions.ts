@@ -7,12 +7,12 @@ import {
   AddColumnData,
   AddTaskData,
   BoardState,
-  SyncColumn,
-  SyncTask,
   UpdateColumnData,
   UpdateTaskData,
 } from '@/store/board/types';
 import { theme } from '@/styles/theme';
+import { Column } from '@/types/column';
+import { Task } from '@/types/task';
 import { getLastTaskPositionInColumn, getNewColumnPosition, mergeById } from '@/utils/boardHelpers';
 
 type Set = StoreApi<BoardState>['setState'];
@@ -27,7 +27,7 @@ export async function addColumnAction(set: Set, get: Get, data: AddColumnData): 
       ? data.position
       : getNewColumnPosition(columns);
 
-  const newCol: SyncColumn = {
+  const newCol: Column = {
     id,
     title: data.title.trim(),
     color: data.color,
@@ -50,7 +50,7 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
   let columns = get().columns;
 
   if (columns.length === 0) {
-    const draft: SyncColumn = {
+    const draft: Column = {
       id: crypto.randomUUID(),
       title: 'Draft',
       color: theme.palette.primary.main,
@@ -71,7 +71,7 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
   const targetId = data.columnId ?? sorted[0].id;
   const nextPos = getLastTaskPositionInColumn(tasks, targetId) + 1;
 
-  const newTask: SyncTask = {
+  const newTask: Task = {
     id: crypto.randomUUID(),
     title: data.title.trim(),
     notes: (data.notes ?? '').trim(),
@@ -98,7 +98,7 @@ export async function syncPendingAction(set: Set, get: Get) {
   const client = getSupabaseClient();
   const { pendingColumns, pendingTasks } = get();
 
-  const stillColumns: SyncColumn[] = [];
+  const stillColumns: Column[] = [];
   for (const col of pendingColumns) {
     try {
       const saved = await upsertColumn(client, col);
@@ -110,7 +110,7 @@ export async function syncPendingAction(set: Set, get: Get) {
     }
   }
 
-  const stillTasks: SyncTask[] = [];
+  const stillTasks: Task[] = [];
   for (const task of pendingTasks) {
     try {
       const saved = await upsertTask(client, task);
@@ -142,12 +142,12 @@ export async function syncFromServerAction(set: Set, get: Get) {
       remoteTasks,
     );
 
-    const mergedCols: SyncColumn[] = mergedColsBase.map(c => {
+    const mergedCols: Column[] = mergedColsBase.map(c => {
       const local = localCols.find(l => l.id === c.id);
       return { ...c, isSynced: !local || c.updatedAt >= local.updatedAt };
     });
 
-    const mergedTasks: SyncTask[] = mergedTasksBase.map(t => {
+    const mergedTasks: Task[] = mergedTasksBase.map(t => {
       const local = localTasks.find(l => l.id === t.id);
       return { ...t, isSynced: !local || t.updatedAt >= local.updatedAt };
     });
@@ -171,7 +171,7 @@ export async function updateColumnAction(set: Set, get: Get, data: UpdateColumnD
 
   set(state => {
     const now = new Date();
-    let updated: SyncColumn | undefined;
+    let updated: Column | undefined;
 
     const columns = state.columns.map(c => {
       if (c.id !== data.id) return c;
@@ -205,7 +205,7 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
 
   set(state => {
     const now = new Date();
-    let updated: SyncTask | undefined;
+    let updated: Task | undefined;
 
     const tasks = state.tasks.map(t => {
       if (t.id !== data.id) return t;

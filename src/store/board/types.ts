@@ -1,11 +1,11 @@
-import type { Column as BaseColumn } from '@/types/column';
-import type { Task as BaseTask } from '@/types/task';
+import type { Column } from '@/types/column';
+import type { Task } from '@/types/task';
 
 export interface BoardState {
-  columns: SyncColumn[];
-  tasks: SyncTask[];
-  pendingColumns: SyncColumn[];
-  pendingTasks: SyncTask[];
+  columns: Column[];
+  tasks: Task[];
+  pendingColumns: Column[];
+  pendingTasks: Task[];
 
   addColumn(data: AddColumnData): Promise<string>;
   addTask(data: AddTaskData): Promise<string>;
@@ -15,15 +15,6 @@ export interface BoardState {
 
   syncPending(): Promise<void>;
   syncFromServer(): Promise<void>;
-}
-
-// Extend base types with a sync flag
-export interface SyncColumn extends BaseColumn {
-  isSynced: boolean;
-}
-
-export interface SyncTask extends BaseTask {
-  isSynced: boolean;
 }
 
 export interface AddColumnData {

@@ -3,6 +3,8 @@ import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { alpha, Box, Chip, darken, IconButton, Stack, Typography } from '@mui/material';
 
+import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
+import { SyncStatus } from '@/store/syncStatus';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
 import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
@@ -29,8 +31,8 @@ interface TodoColumnProps {
   hoverTaskId?: string | null;
   taskDropColumnId?: string | null;
   draggingColumnId?: string | null;
-  hideHeader?: boolean;
   showAddTaskInput?: boolean;
+  syncStatus: SyncStatus;
 }
 
 export function TodoColumn({
@@ -54,8 +56,8 @@ export function TodoColumn({
   hoverTaskId,
   taskDropColumnId,
   draggingColumnId,
-  hideHeader,
   showAddTaskInput = true,
+  syncStatus,
 }: TodoColumnProps) {
   const [creatingId, setCreatingId] = useState<string | null>(null);
 
@@ -96,27 +98,30 @@ export function TodoColumn({
         },
       }}
     >
-      {!hideHeader && (
-        <Box onClick={() => onEditColumn(column)} sx={{ cursor: 'pointer', mb: 1 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
+      <Box onClick={() => onEditColumn(column)} sx={{ cursor: 'pointer', mb: 1 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack direction="row" gap={0.5}>
+            {!column.isSynced && <SyncedSyncIcon status={syncStatus} />}
+
             <Typography variant="h3" sx={{ color: column.color }}>
               {column.title}
             </Typography>
-            {tasks && tasks.length > 0 && (
-              <Chip
-                label={tasks?.length}
-                size="small"
-                disabled
-                sx={{
-                  '&.Mui-disabled': {
-                    opacity: 1,
-                  },
-                }}
-              />
-            )}
           </Stack>
-        </Box>
-      )}
+
+          {tasks && tasks.length > 0 && (
+            <Chip
+              label={tasks?.length}
+              size="small"
+              disabled
+              sx={{
+                '&.Mui-disabled': {
+                  opacity: 1,
+                },
+              }}
+            />
+          )}
+        </Stack>
+      </Box>
 
       {tasks &&
         tasks.map(task => (
@@ -134,6 +139,7 @@ export function TodoColumn({
               onDragOver={onDragOverTask}
               startEditing={creatingId === task.id}
               onEditingEnd={finishCreate}
+              syncStatus={syncStatus}
             />
           </div>
         ))}

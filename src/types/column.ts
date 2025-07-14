@@ -5,4 +5,5 @@ export interface Column {
   position: number;
   trashed?: boolean;
   updatedAt: Date;
+  isSynced?: boolean;
 }

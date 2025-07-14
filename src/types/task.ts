@@ -8,4 +8,5 @@ export interface Task {
   columnId: string;
   trashed?: boolean;
   updatedAt: Date;
+  isSynced?: boolean;
 }

@@ -8,6 +8,8 @@ import UndoIcon from '@mui/icons-material/Undo';
 import { Box, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha, darken } from '@mui/material/styles';
 
+import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
+import { SyncStatus } from '@/store/syncStatus';
 import { theme } from '@/styles/theme';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
@@ -22,6 +24,7 @@ interface TodoTaskCardProps {
   onDragOver: (e: DragEvent<HTMLDivElement>, id: string) => void;
   startEditing?: boolean;
   onEditingEnd?: () => void;
+  syncStatus?: SyncStatus;
 }
 
 export function TodoTaskCard({
@@ -34,6 +37,7 @@ export function TodoTaskCard({
   onDragOver,
   startEditing = false,
   onEditingEnd,
+  syncStatus,
 }: TodoTaskCardProps) {
   const [editing, setEditing] = useState(Boolean(startEditing));
   const [title, setTitle] = useState(task.title);
@@ -114,7 +118,9 @@ export function TodoTaskCard({
           boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,
         }}
       >
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={0.5}>
+          {!task.isSynced && !editing && <SyncedSyncIcon status={syncStatus} />}
+
           <Stack direction="row" spacing={1} flex={1}>
             {task.notes && (
               <Tooltip title="Has description">

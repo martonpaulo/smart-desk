@@ -4,6 +4,7 @@ import { Button, Stack } from '@mui/material';
 
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
+import { useSyncStatusStore } from '@/store/syncStatus';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
 import { getNewColumnPosition, isTaskEmpty } from '@/utils/boardHelpers';
@@ -16,6 +17,8 @@ import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 import '@/lib/dragDropTouch';
 
 export function TodoList() {
+  const syncStatus = useSyncStatusStore(s => s.status);
+
   // store selectors
   const columns = useBoardStore(s => s.columns);
   const tasks = useBoardStore(s => s.tasks);
@@ -277,6 +280,7 @@ export function TodoList() {
         onColumnDragEnd={handleColumnDragEnd}
         draggingColumnId={draggingColumnId}
         showAddTaskInput={!isMobile}
+        syncStatus={syncStatus}
       />
     );
   };

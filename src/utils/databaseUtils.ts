@@ -13,6 +13,7 @@ export function mapDBToColumn(rawColumn: RawColumn): Column {
     position: rawColumn.position,
     trashed: rawColumn.trashed,
     updatedAt: new Date(rawColumn.updated_at),
+    isSynced: true,
   };
 }
 
@@ -39,6 +40,7 @@ export function mapDBToTask(rawTask: RawTask): Task {
     columnId: rawTask.column_id,
     trashed: rawTask.trashed,
     updatedAt: new Date(rawTask.updated_at),
+    isSynced: true,
   };
 }
 
