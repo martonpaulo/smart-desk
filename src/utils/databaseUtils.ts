@@ -63,7 +63,7 @@ export function mapDBToIcsCalendar(raw: RawIcsCalendar): IcsCalendar {
     title: raw.title,
     source: raw.source,
     color: raw.color,
-    updatedAt: raw.updated_at,
+    updatedAt: new Date(raw.updated_at),
   };
 }
 
