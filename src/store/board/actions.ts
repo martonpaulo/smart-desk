@@ -13,66 +13,71 @@ import {
   UpdateTaskData,
 } from '@/store/board/types';
 import { theme } from '@/styles/theme';
-import { getLastTaskPositionInColumn, mergeById } from '@/utils/boardHelpers';
+import { getLastTaskPositionInColumn, getNewColumnPosition, mergeById } from '@/utils/boardHelpers';
 
 type Set = StoreApi<BoardState>['setState'];
 type Get = StoreApi<BoardState>['getState'];
 
+// adds a column with dynamic position
 export async function addColumnAction(set: Set, get: Get, data: AddColumnData): Promise<string> {
-  // generate new id up front
+  const columns = get().columns;
   const id = crypto.randomUUID();
+  const position =
+    typeof data.position === 'number' && data.position > 0
+      ? data.position
+      : getNewColumnPosition(columns);
 
   const newCol: SyncColumn = {
     id,
     title: data.title.trim(),
     color: data.color,
-    position: data.position,
+    position,
     trashed: false,
     updatedAt: new Date(),
     isSynced: false,
   };
 
-  // add column locally
   set(state => ({
     columns: [...state.columns, newCol],
     pendingColumns: [...state.pendingColumns, newCol],
   }));
 
-  // fire-and-forget sync
   void get().syncPending();
-
-  // return the new id
   return id;
 }
 
 export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Promise<string> {
-  // ensure at least one column exists
-  if (get().columns.length === 0) {
+  let columns = get().columns;
+
+  if (columns.length === 0) {
     const draft: SyncColumn = {
       id: crypto.randomUUID(),
       title: 'Draft',
       color: theme.palette.primary.main,
-      position: 1,
+      position: getNewColumnPosition(columns),
       trashed: false,
       updatedAt: new Date(),
       isSynced: false,
     };
     set(state => ({
-      columns: [draft],
+      columns: [...state.columns, draft],
       pendingColumns: [...state.pendingColumns, draft],
     }));
+    columns = get().columns;
   }
 
-  const cols = get().columns;
-  const targetId = data.columnId ?? [...cols].sort((a, b) => a.position - b.position)[0].id;
-  const nextPos = getLastTaskPositionInColumn(get().tasks, targetId) + 1;
+  const tasks = get().tasks;
+  const sorted = [...columns].sort((a, b) => a.position - b.position);
+  const targetId = data.columnId ?? sorted[0].id;
+  const nextPos = getLastTaskPositionInColumn(tasks, targetId) + 1;
 
   const newTask: SyncTask = {
     id: crypto.randomUUID(),
     title: data.title.trim(),
-    notes: data.notes?.trim() ?? '',
+    notes: (data.notes ?? '').trim(),
     quantityDone: 0,
-    quantityTarget: data.quantityTarget && data.quantityTarget > 0 ? data.quantityTarget : 1,
+    quantityTarget:
+      typeof data.quantityTarget === 'number' && data.quantityTarget > 0 ? data.quantityTarget : 1,
     position: nextPos,
     columnId: targetId,
     trashed: false,
@@ -80,16 +85,12 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
     isSynced: false,
   };
 
-  // add task locally
   set(state => ({
     tasks: [...state.tasks, newTask],
     pendingTasks: [...state.pendingTasks, newTask],
   }));
 
-  // sync in background
   void get().syncPending();
-
-  // return the new id
   return newTask.id;
 }
 
@@ -101,12 +102,10 @@ export async function syncPendingAction(set: Set, get: Get) {
   for (const col of pendingColumns) {
     try {
       const saved = await upsertColumn(client, col);
-      // mark column as synced
       set(state => ({
         columns: state.columns.map(c => (c.id === saved.id ? { ...saved, isSynced: true } : c)),
       }));
-    } catch (err) {
-      console.error('Column sync failed', col.id, err);
+    } catch {
       stillColumns.push(col);
     }
   }
@@ -118,8 +117,7 @@ export async function syncPendingAction(set: Set, get: Get) {
       set(state => ({
         tasks: state.tasks.map(t => (t.id === saved.id ? { ...saved, isSynced: true } : t)),
       }));
-    } catch (err) {
-      console.error('Task sync failed', task.id, err);
+    } catch {
       stillTasks.push(task);
     }
   }
@@ -138,24 +136,20 @@ export async function syncFromServerAction(set: Set, get: Get) {
     const localCols = get().columns;
     const localTasks = get().tasks;
 
-    // merge by updatedAt
     const mergedColsBase = mergeById(localCols, remoteCols);
     const mergedTasksBase = mergeById(
       localTasks.map(t => ({ ...t, updatedAt: t.updatedAt })),
       remoteTasks,
     );
 
-    // rebuild with sync flags
     const mergedCols: SyncColumn[] = mergedColsBase.map(c => {
       const local = localCols.find(l => l.id === c.id);
-      const isSynced = !local || c.updatedAt >= local.updatedAt;
-      return { ...c, isSynced };
+      return { ...c, isSynced: !local || c.updatedAt >= local.updatedAt };
     });
 
     const mergedTasks: SyncTask[] = mergedTasksBase.map(t => {
       const local = localTasks.find(l => l.id === t.id);
-      const isSynced = !local || t.updatedAt >= local.updatedAt;
-      return { ...t, isSynced };
+      return { ...t, isSynced: !local || t.updatedAt >= local.updatedAt };
     });
 
     set({
@@ -170,8 +164,7 @@ export async function syncFromServerAction(set: Set, get: Get) {
 }
 
 export async function updateColumnAction(set: Set, get: Get, data: UpdateColumnData) {
-  const exists = get().columns.some(c => c.id === data.id);
-  if (!exists) {
+  if (!get().columns.some(c => c.id === data.id)) {
     console.warn(`updateColumnAction: column ${data.id} not found`);
     return;
   }
@@ -184,9 +177,9 @@ export async function updateColumnAction(set: Set, get: Get, data: UpdateColumnD
       if (c.id !== data.id) return c;
       updated = {
         ...c,
-        title: data.title?.trim() ?? c.title,
+        title: typeof data.title === 'string' ? data.title.trim() : c.title,
         color: data.color ?? c.color,
-        position: data.position ?? c.position,
+        position: typeof data.position === 'number' ? data.position : c.position,
         trashed: data.trashed ?? c.trashed,
         updatedAt: now,
         isSynced: false,
@@ -194,7 +187,6 @@ export async function updateColumnAction(set: Set, get: Get, data: UpdateColumnD
       return updated;
     });
 
-    // replace any previous pending for this id
     const pendingColumns = updated
       ? [...state.pendingColumns.filter(c => c.id !== data.id), updated]
       : state.pendingColumns;
@@ -202,13 +194,11 @@ export async function updateColumnAction(set: Set, get: Get, data: UpdateColumnD
     return { columns, pendingColumns };
   });
 
-  // push change up
   await get().syncPending();
 }
 
 export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData) {
-  const exists = get().tasks.some(t => t.id === data.id);
-  if (!exists) {
+  if (!get().tasks.some(t => t.id === data.id)) {
     console.warn(`updateTaskAction: task ${data.id} not found`);
     return;
   }
@@ -221,11 +211,12 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
       if (t.id !== data.id) return t;
       updated = {
         ...t,
-        title: data.title?.trim() ?? t.title,
-        notes: data.notes?.trim() ?? t.notes,
+        title: typeof data.title === 'string' ? data.title.trim() : t.title,
+        notes: typeof data.notes === 'string' ? data.notes.trim() : t.notes,
         quantityDone: data.quantityDone ?? t.quantityDone,
-        quantityTarget: data.quantityTarget ?? t.quantityTarget,
-        position: data.position ?? t.position,
+        quantityTarget:
+          typeof data.quantityTarget === 'number' ? data.quantityTarget : t.quantityTarget,
+        position: typeof data.position === 'number' ? data.position : t.position,
         columnId: data.columnId ?? t.columnId,
         trashed: data.trashed ?? t.trashed,
         updatedAt: now,
@@ -234,7 +225,6 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
       return updated;
     });
 
-    // replace any previous pending for this id
     const pendingTasks = updated
       ? [...state.pendingTasks.filter(t => t.id !== data.id), updated]
       : state.pendingTasks;
@@ -242,6 +232,5 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
     return { tasks, pendingTasks };
   });
 
-  // push change up
   await get().syncPending();
 }

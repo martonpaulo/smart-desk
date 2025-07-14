@@ -18,6 +18,7 @@ import { mergeById } from '@/utils/boardHelpers';
 type Set = StoreApi<SettingsState>['setState'];
 type Get = StoreApi<SettingsState>['getState'];
 
+// Add a new ICS calendar and mark it for sync
 export async function addIcsCalendarAction(
   set: Set,
   get: Get,
@@ -40,65 +41,64 @@ export async function addIcsCalendarAction(
     pendingIcsCalendars: [...state.pendingIcsCalendars, newCal],
   }));
 
-  // fire-and-forget
+  // trigger background sync
   void get().syncPending();
   return id;
 }
 
+// Synchronize all pending ICS calendars
 export async function syncPendingAction(set: Set, get: Get) {
   const client = getSupabaseClient();
-  const { pendingIcsCalendars } = get();
+  const pending = get().pendingIcsCalendars;
+  const still: SyncIcsCalendar[] = [];
 
-  const stillIcsCalendars: SyncIcsCalendar[] = [];
-  for (const cal of pendingIcsCalendars) {
+  for (const cal of pending) {
     try {
       const saved = await upsertIcsCalendar(client, cal);
-      // mark calendar as synced
+      // update local calendar as synced
       set(state => ({
         icsCalendars: state.icsCalendars.map(c =>
           c.id === saved.id ? { ...saved, isSynced: true } : c,
         ),
       }));
     } catch (err) {
-      console.error('ICS calendars sync failed', cal.id, err);
-      stillIcsCalendars.push(cal);
+      console.error('ICS calendar sync failed', cal.id, err);
+      still.push(cal);
     }
   }
-  set({
-    pendingIcsCalendars: stillIcsCalendars,
-  });
+
+  set({ pendingIcsCalendars: still });
 }
 
+// Fetch from server and merge with local state by updatedAt
 export async function syncFromServerAction(set: Set, get: Get) {
   const client = getSupabaseClient();
   try {
-    const remoteCals = await Promise.resolve(fetchIcsCalendars(client));
+    const remote = await fetchIcsCalendars(client);
+    const local = get().icsCalendars;
 
-    const localCals = get().icsCalendars;
+    // merge lists by id, keeping the most recent updatedAt
+    const mergedBase = mergeById(local, remote);
 
-    // merge by updatedAt
-    const mergedIcsCalendarsBase = mergeById(localCals, remoteCals);
-
-    // rebuild with sync flags
-    const mergedIcsCalendars: SyncIcsCalendar[] = mergedIcsCalendarsBase.map(c => {
-      const local = localCals.find(l => l.id === c.id);
-      const isSynced = !local || c.updatedAt >= local.updatedAt;
+    const merged: SyncIcsCalendar[] = mergedBase.map(c => {
+      const localItem = local.find(l => l.id === c.id);
+      const isSynced = !localItem || c.updatedAt >= localItem.updatedAt;
       return { ...c, isSynced };
     });
 
     set({
-      icsCalendars: mergedIcsCalendars,
-      pendingIcsCalendars: mergedIcsCalendars.filter(t => !t.isSynced),
+      icsCalendars: merged,
+      pendingIcsCalendars: merged.filter(c => !c.isSynced),
     });
   } catch (err) {
     console.error('syncFromServer failed', err);
   }
 }
 
+// Update an existing ICS calendar and mark it for sync
 export async function updateIcsCalendarAction(set: Set, get: Get, data: UpdateIcsCalendarData) {
-  const exists = get().icsCalendars.some(c => c.id === data.id);
-  if (!exists) {
-    console.warn(`updateIcsCalendarAction: ICS calendar ${data.id} not found`);
+  if (!get().icsCalendars.some(c => c.id === data.id)) {
+    console.warn(`updateIcsCalendar: ${data.id} not found`);
     return;
   }
 
@@ -110,16 +110,15 @@ export async function updateIcsCalendarAction(set: Set, get: Get, data: UpdateIc
       if (c.id !== data.id) return c;
       updated = {
         ...c,
-        title: data.title?.trim() ?? c.title,
+        title: typeof data.title === 'string' ? data.title.trim() : c.title,
         color: data.color ?? c.color,
-        source: data.source?.trim() ?? c.source,
+        source: typeof data.source === 'string' ? data.source.trim() : c.source,
         updatedAt: now,
         isSynced: false,
       };
       return updated;
     });
 
-    // replace any previous pending for this id
     const pendingIcsCalendars = updated
       ? [...state.pendingIcsCalendars.filter(c => c.id !== data.id), updated]
       : state.pendingIcsCalendars;
@@ -127,13 +126,15 @@ export async function updateIcsCalendarAction(set: Set, get: Get, data: UpdateIc
     return { icsCalendars, pendingIcsCalendars };
   });
 
-  // push change up
+  // trigger background sync
   await get().syncPending();
 }
 
+// Delete an ICS calendar locally and remotely, with retry on failure
 export async function deleteIcsCalendarAction(set: Set, get: Get, data: DeleteIcsCalendarData) {
-  const exists = get().icsCalendars.some(c => c.id === data.id);
-  if (!exists) {
+  const all = get().icsCalendars;
+  const toDelete = all.find(c => c.id === data.id);
+  if (!toDelete) {
     console.warn(`deleteIcsCalendar: ${data.id} not found`);
     return;
   }
@@ -144,26 +145,14 @@ export async function deleteIcsCalendarAction(set: Set, get: Get, data: DeleteIc
     pendingIcsCalendars: state.pendingIcsCalendars.filter(c => c.id !== data.id),
   }));
 
-  // try remote delete
   try {
     await deleteIcsCalendar(getSupabaseClient(), data.id);
   } catch (err) {
     console.error('remote deleteIcsCalendar failed', data.id, err);
-    // if remote delete fails, re-add to pending
+    // re-add to pending for retry
     set(state => ({
-      pendingIcsCalendars: [
-        ...state.pendingIcsCalendars,
-        {
-          id: data.id,
-          title: '',
-          color: '',
-          source: '',
-          updatedAt: new Date(),
-          isSynced: false,
-        },
-      ],
+      pendingIcsCalendars: [...state.pendingIcsCalendars, toDelete],
     }));
-    // re-sync pending
     await get().syncPending();
   }
 }
