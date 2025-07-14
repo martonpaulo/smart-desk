@@ -98,31 +98,54 @@ export async function syncPendingAction(set: Set, get: Get) {
   const client = getSupabaseClient();
   const { pendingColumns, pendingTasks } = get();
 
+  // Run all column upserts concurrently and track failures
+  const columnResults = await Promise.allSettled(
+    pendingColumns.map(col => upsertColumn(client, col)),
+  );
+
+  const currentColumns = get().columns;
+  const updatedColumns = [...currentColumns];
   const stillColumns: Column[] = [];
-  for (const col of pendingColumns) {
-    try {
-      const saved = await upsertColumn(client, col);
-      set(state => ({
-        columns: state.columns.map(c => (c.id === saved.id ? { ...saved, isSynced: true } : c)),
-      }));
-    } catch {
-      stillColumns.push(col);
-    }
-  }
 
+  columnResults.forEach((result, index) => {
+    const original = pendingColumns[index];
+    if (result.status === 'fulfilled') {
+      const saved = result.value;
+      const idx = updatedColumns.findIndex(c => c.id === saved.id);
+      if (idx !== -1) {
+        updatedColumns[idx] = { ...saved, isSynced: true };
+      }
+    } else {
+      stillColumns.push(original);
+    }
+  });
+
+  // Run all task upserts concurrently and track failures
+  const taskResults = await Promise.allSettled(
+    pendingTasks.map(task => upsertTask(client, task)),
+  );
+
+  const currentTasks = get().tasks;
+  const updatedTasks = [...currentTasks];
   const stillTasks: Task[] = [];
-  for (const task of pendingTasks) {
-    try {
-      const saved = await upsertTask(client, task);
-      set(state => ({
-        tasks: state.tasks.map(t => (t.id === saved.id ? { ...saved, isSynced: true } : t)),
-      }));
-    } catch {
-      stillTasks.push(task);
-    }
-  }
 
+  taskResults.forEach((result, index) => {
+    const original = pendingTasks[index];
+    if (result.status === 'fulfilled') {
+      const saved = result.value;
+      const idx = updatedTasks.findIndex(t => t.id === saved.id);
+      if (idx !== -1) {
+        updatedTasks[idx] = { ...saved, isSynced: true };
+      }
+    } else {
+      stillTasks.push(original);
+    }
+  });
+
+  // Persist all updates in a single state change
   set({
+    columns: updatedColumns,
+    tasks: updatedTasks,
     pendingColumns: stillColumns,
     pendingTasks: stillTasks,
   });
