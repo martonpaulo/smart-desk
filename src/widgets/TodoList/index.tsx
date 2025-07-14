@@ -76,7 +76,7 @@ export function TodoList() {
       } else {
         const pos =
           insertionPosition !== undefined ? insertionPosition : getNewColumnPosition(columns);
-        await addColumn({ title: trimmed, color, position: pos });
+        addColumn({ title: trimmed, color, position: pos });
       }
     } catch (err) {
       console.error('Column save failed', err);
@@ -95,10 +95,8 @@ export function TodoList() {
 
   // ── Task handlers (unchanged) ───────────────────────────────────────────
   const handleAddTask = async (title: string, columnId?: string): Promise<string> => {
-    const trimmed = title.trim();
-    if (!trimmed) return '';
     try {
-      return await addTask({ title: trimmed, columnId });
+      return await addTask({ title, columnId });
     } catch (err) {
       console.error('Task add failed', err);
       return '';
@@ -142,9 +140,43 @@ export function TodoList() {
 
   const handleToggleDone = async (id: string) => {
     const task = tasks.find(t => t.id === id);
-    if (!task || task.quantityTarget == null) return;
+    if (!task) return;
+
     const next = (task.quantityDone ?? 0) + 1;
     const value = next > task.quantityTarget ? 0 : next;
+
+    if (value === task.quantityTarget) {
+      const doneColumn = columns.find(c => c.title === 'Done');
+      if (doneColumn) {
+        await updateTask({ id, columnId: doneColumn.id, quantityDone: value });
+      } else {
+        const columnId = await addColumn({
+          title: 'Done',
+          color: '#4caf50',
+          position: columnsToRender.length + 1,
+        });
+        await updateTask({ id, columnId: columnId, quantityDone: value });
+        return;
+      }
+    } else if (value === 0) {
+      const todoColumn = columns.find(c => c.title === 'To Do');
+      if (todoColumn) {
+        await updateTask({ id, columnId: todoColumn.id, quantityDone: value });
+      } else {
+        const columnId = await addColumn({
+          title: 'To Do',
+          color: '#2196f3',
+          position: columnsToRender.length + 1,
+        });
+        await updateTask({ id, columnId: columnId, quantityDone: value });
+        return;
+      }
+    } else {
+      // just update done count
+      await updateTask({ id, quantityDone: value });
+      return;
+    }
+
     try {
       await updateTask({ id, quantityDone: value });
     } catch (err) {

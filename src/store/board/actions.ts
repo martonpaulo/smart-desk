@@ -18,26 +18,35 @@ import { getLastTaskPositionInColumn, mergeById } from '@/utils/boardHelpers';
 type Set = StoreApi<BoardState>['setState'];
 type Get = StoreApi<BoardState>['getState'];
 
-export function addColumnAction(set: Set, get: Get, { title, color, position }: AddColumnData) {
-  set(state => {
-    const newCol: SyncColumn = {
-      id: crypto.randomUUID(),
-      title: title.trim(),
-      color,
-      position,
-      trashed: false,
-      updatedAt: new Date(),
-      isSynced: false,
-    };
+export async function addColumnAction(
+  set: Set,
+  get: Get,
+  { title, color, position }: AddColumnData,
+): Promise<string> {
+  // generate new id up front
+  const id = crypto.randomUUID();
 
-    return {
-      columns: [...state.columns, newCol],
-      pendingColumns: [...state.pendingColumns, newCol],
-    };
-  });
+  const newCol: SyncColumn = {
+    id,
+    title: title.trim(),
+    color,
+    position,
+    trashed: false,
+    updatedAt: new Date(),
+    isSynced: false,
+  };
 
-  // fire‐and‐forget sync
+  // add column locally
+  set(state => ({
+    columns: [...state.columns, newCol],
+    pendingColumns: [...state.pendingColumns, newCol],
+  }));
+
+  // fire-and-forget sync
   void get().syncPending();
+
+  // return the new id
+  return id;
 }
 
 export async function addTaskAction(

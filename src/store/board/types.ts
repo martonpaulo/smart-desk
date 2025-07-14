@@ -7,7 +7,7 @@ export interface BoardState {
   pendingColumns: SyncColumn[];
   pendingTasks: SyncTask[];
 
-  addColumn(data: { title: string; color: string; position: number }): void;
+  addColumn(data: { title: string; color: string; position: number }): Promise<string>;
 
   addTask(data: {
     title: string;
