@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from 'react';
 
 import { isSupabaseLoggedIn } from '@/hooks/useSupabaseAuth';
 import { useBoardStore } from '@/store/board/store';
+import { useSettingsStorage } from '@/store/settings/store';
 
 interface SupabaseSyncProviderProps {
   children: ReactNode;
@@ -11,7 +12,10 @@ interface SupabaseSyncProviderProps {
 
 export function SupabaseSyncProvider({ children }: SupabaseSyncProviderProps) {
   useEffect(() => {
-    // full sync: pull remote changes then push local pending
+    const boardStore = useBoardStore.getState();
+    const settingsStore = useSettingsStorage.getState();
+
+    // full sync: pull remote supabase data then push local pending
     async function fullSync() {
       const loggedIn = await isSupabaseLoggedIn();
       if (!loggedIn) {
@@ -20,36 +24,37 @@ export function SupabaseSyncProvider({ children }: SupabaseSyncProviderProps) {
       }
 
       try {
-        const store = useBoardStore.getState();
-        await store.syncFromServer();
-        await store.syncPending();
+        await boardStore.syncFromServer();
+        await boardStore.syncPending();
+        await settingsStore.syncFromServer();
+        await settingsStore.syncPending();
       } catch (err) {
         console.error('fullSync error', err);
       }
     }
 
-    // periodic sync: only push pending tasks/columns
+    // periodic sync: only push pending supabase & changes
     async function periodicSync() {
       const loggedIn = await isSupabaseLoggedIn();
       if (!loggedIn) return;
 
       try {
-        await useBoardStore.getState().syncPending();
+        await boardStore.syncPending();
+        await settingsStore.syncPending();
       } catch (err) {
-        console.error('periodic syncPending error', err);
+        console.error('periodicSync error', err);
       }
     }
 
-    // initial sync on mount
+    // run once on mount
     void fullSync();
 
     // retry every 10 seconds
     const intervalId = window.setInterval(periodicSync, 10_000);
 
-    // retry when back online
+    // also retry when browser goes back online
     window.addEventListener('online', periodicSync);
 
-    // cleanup on unmount
     return () => {
       clearInterval(intervalId);
       window.removeEventListener('online', periodicSync);

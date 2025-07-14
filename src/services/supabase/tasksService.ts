@@ -28,10 +28,7 @@ export async function upsertTask(client: SupabaseClient, payload: Task): Promise
     throw new Error('User not authenticated');
   }
 
-  const row = mapTaskToDB({
-    task: payload,
-    userId: user.id,
-  });
+  const row = mapTaskToDB(payload, user.id);
 
   const { data, error } = await client
     .from('tasks')

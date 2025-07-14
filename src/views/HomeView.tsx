@@ -13,7 +13,7 @@ import { Clock } from '@/widgets/Clock';
 import { EventAlert } from '@/widgets/EventAlert';
 import { EventList } from '@/widgets/EventList';
 import { EventTimeline } from '@/widgets/EventTimeline';
-import ICSCalendarManager from '@/widgets/ICSCalendarManager';
+import { ICSCalendarManager } from '@/widgets/ICSCalendarManager';
 import { LocalEventsManager } from '@/widgets/LocalEventsManager';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
 import { AppInfo } from '@/widgets/Settings/AppInfo';

@@ -7,34 +7,11 @@ export interface BoardState {
   pendingColumns: SyncColumn[];
   pendingTasks: SyncTask[];
 
-  addColumn(data: { title: string; color: string; position: number }): Promise<string>;
+  addColumn(data: AddColumnData): Promise<string>;
+  addTask(data: AddTaskData): Promise<string>;
 
-  addTask(data: {
-    title: string;
-    notes?: string;
-    quantityTarget?: number;
-    columnId?: string;
-  }): Promise<string>;
-
-  // new update signatures
-  updateColumn(data: {
-    id: string;
-    title?: string;
-    color?: string;
-    position?: number;
-    trashed?: boolean;
-  }): Promise<void>;
-
-  updateTask(data: {
-    id: string;
-    title?: string;
-    notes?: string;
-    quantityDone?: number;
-    quantityTarget?: number;
-    position?: number;
-    columnId?: string;
-    trashed?: boolean;
-  }): Promise<void>;
+  updateColumn(data: UpdateColumnData): Promise<void>;
+  updateTask(data: UpdateTaskData): Promise<void>;
 
   syncPending(): Promise<void>;
   syncFromServer(): Promise<void>;

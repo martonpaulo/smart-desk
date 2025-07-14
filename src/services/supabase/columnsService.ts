@@ -28,10 +28,7 @@ export async function upsertColumn(client: SupabaseClient, payload: Column): Pro
     throw new Error('User not authenticated');
   }
 
-  const row = mapColumnToDB({
-    column: payload,
-    userId: user.id,
-  });
+  const row = mapColumnToDB(payload, user.id);
 
   const { data, error } = await client
     .from('columns')

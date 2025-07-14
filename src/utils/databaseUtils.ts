@@ -1,5 +1,7 @@
 import { Column } from '@/types/column';
+import { IcsCalendar } from '@/types/icsCalendar';
 import { RawColumn } from '@/types/rawColumn';
+import { RawIcsCalendar } from '@/types/rawIcsCalendar';
 import { RawTask } from '@/types/rawTask';
 import { Task } from '@/types/task';
 
@@ -14,12 +16,7 @@ export function mapDBToColumn(rawColumn: RawColumn): Column {
   };
 }
 
-interface MapColumnToDBParams {
-  column: Column;
-  userId: string;
-}
-
-export function mapColumnToDB({ column, userId }: MapColumnToDBParams): RawColumn {
+export function mapColumnToDB(column: Column, userId: string): RawColumn {
   return {
     id: column.id,
     user_id: userId,
@@ -45,12 +42,7 @@ export function mapDBToTask(rawTask: RawTask): Task {
   };
 }
 
-interface MapTaskToDBParams {
-  task: Task;
-  userId: string;
-}
-
-export function mapTaskToDB({ task, userId }: MapTaskToDBParams): RawTask {
+export function mapTaskToDB(task: Task, userId: string): RawTask {
   return {
     id: task.id,
     user_id: userId,
@@ -62,5 +54,26 @@ export function mapTaskToDB({ task, userId }: MapTaskToDBParams): RawTask {
     column_id: task.columnId,
     trashed: task.trashed ?? false,
     updated_at: task.updatedAt.toISOString(),
+  };
+}
+
+export function mapDBToIcsCalendar(raw: RawIcsCalendar): IcsCalendar {
+  return {
+    id: raw.id,
+    title: raw.title,
+    source: raw.source,
+    color: raw.color,
+    updatedAt: raw.updated_at,
+  };
+}
+
+export function mapIcsCalendarToDB(calendar: IcsCalendar, userId: string): RawIcsCalendar {
+  return {
+    id: calendar.id,
+    user_id: userId,
+    title: calendar.title,
+    source: calendar.source,
+    color: calendar.color,
+    updated_at: new Date().toISOString(),
   };
 }

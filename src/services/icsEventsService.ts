@@ -1,15 +1,11 @@
 import { DateTime } from 'luxon';
 
 import type { ICalendar } from '@/types/ICalendar';
-import type { IcsCalendarConfig } from '@/types/IcsCalendarConfig';
+import { IcsCalendar } from '@/types/icsCalendar';
 import type { IEvent } from '@/types/IEvent';
-import { getStoredFilters } from '@/utils/localStorageUtils';
-
-const STORAGE_KEY = 'ics-calendars';
 
 // Fetch events from all configured ICS calendars
-export async function fetchIcsEvents(): Promise<IEvent[]> {
-  const calendars = getStoredFilters<IcsCalendarConfig[]>(STORAGE_KEY) ?? [];
+export async function fetchIcsEvents(calendars: IcsCalendar[]): Promise<IEvent[]> {
   if (calendars.length === 0) return [];
 
   const clientZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
@@ -25,9 +21,9 @@ export async function fetchIcsEvents(): Promise<IEvent[]> {
 
   const fetches = calendars.map(cal => {
     const url = new URL(base);
-    url.searchParams.set('url', cal.url);
+    url.searchParams.set('url', cal.source);
     url.searchParams.set('id', cal.id);
-    url.searchParams.set('name', cal.name);
+    url.searchParams.set('name', cal.title);
     url.searchParams.set('color', cal.color);
     return fetch(url.toString())
       .then(async res => {

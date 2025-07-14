@@ -1,8 +1,8 @@
 import type { StoreApi } from 'zustand';
 
 import { getSupabaseClient } from '@/lib/supabaseClient';
-import { fetchColumns, upsertColumn } from '@/services/supabaseColumnsService';
-import { fetchTasks, upsertTask } from '@/services/supabaseTasksService';
+import { fetchColumns, upsertColumn } from '@/services/supabase/columnsService';
+import { fetchTasks, upsertTask } from '@/services/supabase/tasksService';
 import {
   AddColumnData,
   AddTaskData,
@@ -18,19 +18,15 @@ import { getLastTaskPositionInColumn, mergeById } from '@/utils/boardHelpers';
 type Set = StoreApi<BoardState>['setState'];
 type Get = StoreApi<BoardState>['getState'];
 
-export async function addColumnAction(
-  set: Set,
-  get: Get,
-  { title, color, position }: AddColumnData,
-): Promise<string> {
+export async function addColumnAction(set: Set, get: Get, data: AddColumnData): Promise<string> {
   // generate new id up front
   const id = crypto.randomUUID();
 
   const newCol: SyncColumn = {
     id,
-    title: title.trim(),
-    color,
-    position,
+    title: data.title.trim(),
+    color: data.color,
+    position: data.position,
     trashed: false,
     updatedAt: new Date(),
     isSynced: false,
@@ -49,11 +45,7 @@ export async function addColumnAction(
   return id;
 }
 
-export async function addTaskAction(
-  set: Set,
-  get: Get,
-  { title, notes = '', quantityTarget = 1, columnId }: AddTaskData,
-): Promise<string> {
+export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Promise<string> {
   // ensure at least one column exists
   if (get().columns.length === 0) {
     const draft: SyncColumn = {
@@ -72,15 +64,15 @@ export async function addTaskAction(
   }
 
   const cols = get().columns;
-  const targetId = columnId ?? [...cols].sort((a, b) => a.position - b.position)[0].id;
+  const targetId = data.columnId ?? [...cols].sort((a, b) => a.position - b.position)[0].id;
   const nextPos = getLastTaskPositionInColumn(get().tasks, targetId) + 1;
 
   const newTask: SyncTask = {
     id: crypto.randomUUID(),
-    title: title.trim(),
-    notes: notes.trim(),
+    title: data.title.trim(),
+    notes: data.notes?.trim() ?? '',
     quantityDone: 0,
-    quantityTarget: quantityTarget > 0 ? quantityTarget : 1,
+    quantityTarget: data.quantityTarget && data.quantityTarget > 0 ? data.quantityTarget : 1,
     position: nextPos,
     columnId: targetId,
     trashed: false,
@@ -177,14 +169,10 @@ export async function syncFromServerAction(set: Set, get: Get) {
   }
 }
 
-export async function updateColumnAction(
-  set: Set,
-  get: Get,
-  { id, title, color, position, trashed }: UpdateColumnData,
-) {
-  const exists = get().columns.some(c => c.id === id);
+export async function updateColumnAction(set: Set, get: Get, data: UpdateColumnData) {
+  const exists = get().columns.some(c => c.id === data.id);
   if (!exists) {
-    console.warn(`updateColumnAction: column ${id} not found`);
+    console.warn(`updateColumnAction: column ${data.id} not found`);
     return;
   }
 
@@ -193,13 +181,13 @@ export async function updateColumnAction(
     let updated: SyncColumn | undefined;
 
     const columns = state.columns.map(c => {
-      if (c.id !== id) return c;
+      if (c.id !== data.id) return c;
       updated = {
         ...c,
-        title: title?.trim() ?? c.title,
-        color: color ?? c.color,
-        position: position ?? c.position,
-        trashed: trashed ?? c.trashed,
+        title: data.title?.trim() ?? c.title,
+        color: data.color ?? c.color,
+        position: data.position ?? c.position,
+        trashed: data.trashed ?? c.trashed,
         updatedAt: now,
         isSynced: false,
       };
@@ -208,7 +196,7 @@ export async function updateColumnAction(
 
     // replace any previous pending for this id
     const pendingColumns = updated
-      ? [...state.pendingColumns.filter(c => c.id !== id), updated]
+      ? [...state.pendingColumns.filter(c => c.id !== data.id), updated]
       : state.pendingColumns;
 
     return { columns, pendingColumns };
@@ -218,14 +206,10 @@ export async function updateColumnAction(
   await get().syncPending();
 }
 
-export async function updateTaskAction(
-  set: Set,
-  get: Get,
-  { id, title, notes, quantityDone, quantityTarget, position, columnId, trashed }: UpdateTaskData,
-) {
-  const exists = get().tasks.some(t => t.id === id);
+export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData) {
+  const exists = get().tasks.some(t => t.id === data.id);
   if (!exists) {
-    console.warn(`updateTaskAction: task ${id} not found`);
+    console.warn(`updateTaskAction: task ${data.id} not found`);
     return;
   }
 
@@ -234,16 +218,16 @@ export async function updateTaskAction(
     let updated: SyncTask | undefined;
 
     const tasks = state.tasks.map(t => {
-      if (t.id !== id) return t;
+      if (t.id !== data.id) return t;
       updated = {
         ...t,
-        title: title?.trim() ?? t.title,
-        notes: notes?.trim() ?? t.notes,
-        quantityDone: quantityDone ?? t.quantityDone,
-        quantityTarget: quantityTarget ?? t.quantityTarget,
-        position: position ?? t.position,
-        columnId: columnId ?? t.columnId,
-        trashed: trashed ?? t.trashed,
+        title: data.title?.trim() ?? t.title,
+        notes: data.notes?.trim() ?? t.notes,
+        quantityDone: data.quantityDone ?? t.quantityDone,
+        quantityTarget: data.quantityTarget ?? t.quantityTarget,
+        position: data.position ?? t.position,
+        columnId: data.columnId ?? t.columnId,
+        trashed: data.trashed ?? t.trashed,
         updatedAt: now,
         isSynced: false,
       };
@@ -252,7 +236,7 @@ export async function updateTaskAction(
 
     // replace any previous pending for this id
     const pendingTasks = updated
-      ? [...state.pendingTasks.filter(t => t.id !== id), updated]
+      ? [...state.pendingTasks.filter(t => t.id !== data.id), updated]
       : state.pendingTasks;
 
     return { tasks, pendingTasks };
