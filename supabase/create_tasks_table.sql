@@ -7,6 +7,7 @@ create table if not exists public.tasks (
   notes text default null,
   quantity_done integer not null default 0,
   quantity_target integer not null default 1,
+  daily boolean not null default false,
   position float not null default 0,
   column_id uuid references columns(id) not null,
   trashed boolean not null default false,

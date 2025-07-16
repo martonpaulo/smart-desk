@@ -14,6 +14,7 @@ import { theme } from '@/styles/theme';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
 import { getLastTaskPositionInColumn, getNewColumnPosition, mergeById } from '@/utils/boardHelpers';
+import { RESET_TIME } from '@/utils/resetTime';
 
 type Set = StoreApi<BoardState>['setState'];
 type Get = StoreApi<BoardState>['getState'];
@@ -78,6 +79,7 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
     quantityDone: 0,
     quantityTarget:
       typeof data.quantityTarget === 'number' && data.quantityTarget > 0 ? data.quantityTarget : 1,
+    daily: data.daily ?? false,
     position: nextPos,
     columnId: targetId,
     trashed: false,
@@ -158,6 +160,7 @@ export async function syncFromServerAction(set: Set, get: Get) {
 
     const localCols = get().columns;
     const localTasks = get().tasks;
+    const now = new Date();
 
     const mergedColsBase = mergeById(localCols, remoteCols);
     const mergedTasksBase = mergeById(
@@ -170,16 +173,59 @@ export async function syncFromServerAction(set: Set, get: Get) {
       return { ...c, isSynced: !local || c.updatedAt >= local.updatedAt };
     });
 
+    // ensure Draft exists
+    let draftCol = mergedCols.find(c => c.title === 'Draft');
+    if (!draftCol) {
+      const newDraft: Column = {
+        id: crypto.randomUUID(),
+        title: 'Draft',
+        color: theme.palette.primary.main,
+        position: getNewColumnPosition(mergedCols),
+        trashed: false,
+        updatedAt: now,
+        isSynced: false,
+      };
+      mergedCols.push(newDraft);
+      draftCol = newDraft;
+    }
+
+    // build tasks with sync flag
     const mergedTasks: Task[] = mergedTasksBase.map(t => {
       const local = localTasks.find(l => l.id === t.id);
       return { ...t, isSynced: !local || t.updatedAt >= local.updatedAt };
     });
 
+    // compute today’s reset threshold
+    const [hour, minute] = RESET_TIME.split(':').map(Number);
+    const today = new Date();
+    const resetThreshold = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      hour,
+      minute,
+      0,
+    );
+
+    // reset daily tasks if last update was before reset time
+    const finalTasks: Task[] = mergedTasks.map(task => {
+      if (task.daily && new Date(task.updatedAt) < resetThreshold) {
+        return {
+          ...task,
+          quantityDone: 0,
+          columnId: draftCol!.id,
+          updatedAt: now,
+          isSynced: false,
+        };
+      }
+      return task;
+    });
+
     set({
       columns: mergedCols,
-      tasks: mergedTasks,
+      tasks: finalTasks,
       pendingColumns: mergedCols.filter(c => !c.isSynced),
-      pendingTasks: mergedTasks.filter(t => !t.isSynced),
+      pendingTasks: finalTasks.filter(t => !t.isSynced),
     });
   } catch (err) {
     console.error('syncFromServer failed', err);
@@ -239,6 +285,7 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
         quantityDone: data.quantityDone ?? t.quantityDone,
         quantityTarget:
           typeof data.quantityTarget === 'number' ? data.quantityTarget : t.quantityTarget,
+        daily: data.daily ?? t.daily,
         position: typeof data.position === 'number' ? data.position : t.position,
         columnId: data.columnId ?? t.columnId,
         trashed: data.trashed ?? t.trashed,

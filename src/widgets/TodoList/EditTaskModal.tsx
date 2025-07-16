@@ -1,9 +1,8 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import {
-  alpha,
   Autocomplete,
   Box,
   Checkbox,
@@ -17,7 +16,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 
+import { QuantitySelector } from '@/components/QuantitySelector';
 import { theme } from '@/styles/theme';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
@@ -38,39 +39,52 @@ export function EditTaskModal({
   open,
   onSave,
   onClose,
-  column,
   onDeleteTask,
+  column,
 }: EditTaskModalProps) {
-  const [title, setTitle] = useState('');
-  const [notes, setNotes] = useState('');
+  // always defined states
+  const [title, setTitle] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState<string>('');
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [hoveredDeleteTag, setHoveredDeleteTag] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState<number | ''>('');
-  const [useQuantity, setUseQuantity] = useState(false);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [useQuantity, setUseQuantity] = useState<boolean>(false);
+  const [useDaily, setUseDaily] = useState<boolean>(false);
   const [presets, setPresets] = useState<TagPreset[]>([]);
 
-  // ref para o input de tags
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
 
+  // load saved presets once
   useEffect(() => {
     setPresets(loadTagPresets());
   }, []);
 
-  // reset form quando a task mudar
+  // when task changes populate form with safe defaults
   useEffect(() => {
     if (!task) return;
+
     setTitle(task.title);
-    setNotes(task.notes || '');
-    // setTags(task.tags);
-    setQuantity(task.quantityTarget ?? task.quantityDone ?? '');
-    setUseQuantity(task.quantityDone != null || task.quantityTarget != null);
+    setNotes(task.notes ?? '');
+    //setTags(task.tags ?? []);
+    setQuantity(task.quantityTarget ?? 1);
+    setUseQuantity((task.quantityTarget ?? 0) > 2);
+    setUseDaily(task.daily ?? false);
+
     setTagInput('');
     setEditingTag(null);
+
+    // focus title after dialog opens
+    setTimeout(() => {
+      titleInputRef.current?.focus();
+      const len = titleInputRef.current?.value.length ?? 0;
+      titleInputRef.current?.setSelectionRange(len, len);
+    }, 0);
   }, [task]);
 
-  // quando entrar em modo de edição de tag, foca e posiciona cursor no fim
+  // keep cursor at end when renaming a tag
   useEffect(() => {
     if (editingTag && tagInputRef.current) {
       tagInputRef.current.focus();
@@ -79,113 +93,70 @@ export function EditTaskModal({
     }
   }, [editingTag]);
 
-  // clicar no chip inicia edição
-  const handleChipClick = (tag: string) => {
-    setEditingTag(tag);
-    setTagInput(tag);
-    setTags(prev => prev.filter(t => t !== tag));
-  };
-
-  // deletar tag
-  const handleTagDelete = (tag: string) => {
-    setTags(prev => prev.filter(t => t !== tag));
-    if (editingTag === tag) {
+  // helper to add or rename a tag
+  const commitTag = (value: string) => {
+    if (!value) return;
+    if (editingTag) {
+      // renaming
+      setTags(prev => (prev.includes(value) ? prev : [...prev, value]));
       setEditingTag(null);
-      setTagInput('');
+    } else {
+      // new tag
+      setTags(prev => (prev.includes(value) ? prev : [...prev, value]));
     }
+    // save preset if new
+    if (!presets.find(p => p.name === value)) {
+      const next = [...presets, { name: value, color: COLUMN_COLORS[0].value }];
+      setPresets(next);
+      saveTagPresets(next);
+    }
+    setTagInput('');
   };
 
-  // adicionar ou renomear tag
+  // handle space or enter in the tag textfield
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-
-    if ((e.key === ' ' || e.key === 'Enter') && !isCtrlOrCmd) {
+    if (e.key === ' ' || (e.key === 'Enter' && !(e.ctrlKey || e.metaKey))) {
       e.preventDefault();
-      const value = tagInput.trim();
-      if (!value) return;
-
-      if (editingTag) {
-        // renomear
-        if (!tags.includes(value)) {
-          setTags(prev => [...prev, value]);
-        }
-        setEditingTag(null);
-      } else {
-        // adicionar nova
-        if (!tags.includes(value)) {
-          setTags(prev => [...prev, value]);
-        }
-      }
-      if (!presets.some(p => p.name === value)) {
-        const next = [...presets, { name: value, color: COLUMN_COLORS[0].value }];
-        setPresets(next);
-        saveTagPresets(next);
-      }
-      setTagInput('');
+      commitTag(tagInput.trim());
     }
-
-    if (e.key === 'Enter' && isCtrlOrCmd) {
+    // cmd+enter also adds
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-
-      const value = tagInput.trim();
-      if (value && !tags.includes(value)) {
-        const newTags = [...tags, value];
-        setTags(newTags);
-        setTagInput('');
-        setEditingTag(null);
-
-        if (!presets.some(p => p.name === value)) {
-          const next = [...presets, { name: value, color: COLUMN_COLORS[0].value }];
-          setPresets(next);
-          saveTagPresets(next);
-        }
-
-        // salva fora do setState
-        if (task) {
-          onSave({
-            ...task,
-            title: title.trim(),
-            notes: notes.trim() || undefined,
-            // tags: newTags,
-          });
-        }
+      commitTag(tagInput.trim());
+      // save immediate change
+      if (task) {
+        onSave({
+          ...task,
+          title: title.trim(),
+          notes: notes.trim() || undefined,
+          // tags: tags,
+        });
       }
     }
   };
 
-  // salva e fecha
+  // final save
   const handleSaveAndClose = () => {
     if (!task) return;
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle) return;
-
-    const qty = useQuantity && quantity !== '' ? 0 : undefined;
-    const qtyTotal = useQuantity && quantity !== '' ? Number(quantity) : undefined;
-
+    const newTitle = title.trim();
+    if (!newTitle) return;
     onSave({
       ...task,
-      title: trimmedTitle,
-      notes: notes.trim(),
-      quantityDone: qty ?? task.quantityDone,
-      quantityTarget: qtyTotal ?? task.quantityTarget,
+      title: newTitle,
+      notes: notes.trim() || undefined,
+      // tags,
+      quantityDone: task.quantityDone, // keep existing done count
+      quantityTarget: quantity,
+      daily: useDaily,
     });
+    onClose();
   };
 
-  const titleInputRef = useRef<HTMLInputElement>(null);
-
+  // quick close
   const handleCloseOnly = () => onClose();
 
-  const tagColor = column ? alpha(column.color, 0.65) : undefined;
-  const tagTextColor = tagColor ? theme.palette.getContrastText(tagColor) : undefined;
-
-  const handleQuantityChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const num = Number(value);
-
-    if (!isNaN(num) && num > 0) {
-      setQuantity(num);
-    }
-  };
+  const tagBg = column ? alpha(column.color, 0.65) : undefined;
+  const tagFg = tagBg ? theme.palette.getContrastText(tagBg) : undefined;
 
   return (
     <Dialog
@@ -199,12 +170,7 @@ export function EditTaskModal({
       slotProps={{
         transition: {
           onEntered: () => {
-            if (titleInputRef.current) {
-              const input = titleInputRef.current;
-              input.focus();
-              const len = input.value.length;
-              input.setSelectionRange(len, len);
-            }
+            titleInputRef.current?.focus();
           },
         },
       }}
@@ -227,112 +193,103 @@ export function EditTaskModal({
 
       <DialogContent>
         <Stack spacing={2} mt={1}>
+          {/* Title */}
           <TextField
             label="Title"
             value={title}
             onChange={e => setTitle(e.target.value)}
+            inputRef={titleInputRef}
+            fullWidth
             onKeyDown={e => {
               if (e.key === 'Enter') {
                 e.preventDefault();
                 handleSaveAndClose();
               }
             }}
-            inputRef={titleInputRef}
-            fullWidth
           />
 
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Typography variant="body2" sx={{ flexShrink: 0 }}>
-              Use quantity?
-            </Typography>
-
-            <Checkbox
-              checked={useQuantity}
-              onChange={(_, checked) => {
-                setUseQuantity(checked);
-                if (!checked) setQuantity('');
-              }}
-            />
-            <TextField
-              label="Max quantity"
-              type="number"
-              value={quantity}
-              onChange={handleQuantityChange}
-              disabled={!useQuantity}
-              fullWidth
-            />
+          {/* Quantifiable + Quantity selector */}
+          <Stack>
+            <Stack direction="row" alignItems="center">
+              <Checkbox
+                checked={useQuantity}
+                onChange={(_, checked) => {
+                  setUseQuantity(checked);
+                  if (!checked) setQuantity(1);
+                }}
+              />
+              <Typography variant="body2">Quantifiable</Typography>
+              <QuantitySelector
+                value={quantity}
+                onValueChange={setQuantity}
+                disabled={!useQuantity}
+                minValue={1}
+                maxValue={999}
+                sx={{ ml: 2 }}
+              />
+            </Stack>
+            <Stack direction="row" alignItems="center">
+              <Checkbox checked={useDaily} onChange={(_, checked) => setUseDaily(checked)} />
+              <Typography variant="body2">Daily</Typography>
+            </Stack>
           </Stack>
 
+          {/* Description */}
           <TextField
             label="Description"
             multiline
             minRows={6}
             value={notes}
             onChange={e => setNotes(e.target.value)}
+            fullWidth
             onKeyDown={e => {
-              const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-              if (e.key === 'Enter' && isCtrlOrCmd) {
+              if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 handleSaveAndClose();
               }
             }}
-            fullWidth
           />
 
+          {/* Tags input + chips */}
           <Stack direction="row" spacing={2}>
             <Autocomplete
               freeSolo
               options={presets.map(p => p.name)}
               inputValue={tagInput}
-              onInputChange={(_, value) => setTagInput(value)}
-              onChange={(_, value) => {
-                if (!value) return;
-                const val = String(value).trim();
-                if (!val) return;
-                if (!tags.includes(val)) {
-                  setTags(prev => [...prev, val]);
-                }
-                if (!presets.some(p => p.name === val)) {
-                  const next = [...presets, { name: val, color: COLUMN_COLORS[0].value }];
-                  setPresets(next);
-                  saveTagPresets(next);
-                }
-                setTagInput('');
-                setEditingTag(null);
+              onInputChange={(_, v) => setTagInput(v)}
+              onChange={(_, v) => {
+                const val = String(v).trim();
+                if (val) commitTag(val);
               }}
               renderInput={params => (
                 <TextField
                   {...params}
                   label={editingTag ? 'Edit tag' : 'Add tag'}
                   onKeyDown={handleTagKeyDown}
-                  onBlur={() => {
-                    const value = tagInput.trim();
-                    if (value && !tags.includes(value)) {
-                      setTags(prev => [...prev, value]);
-                      if (!presets.some(p => p.name === value)) {
-                        const next = [...presets, { name: value, color: COLUMN_COLORS[0].value }];
-                        setPresets(next);
-                        saveTagPresets(next);
-                      }
-                    }
-                    setTagInput('');
-                    setEditingTag(null);
-                  }}
+                  onBlur={() => commitTag(tagInput.trim())}
                   inputRef={tagInputRef}
-                  sx={{ minWidth: '200px' }}
+                  sx={{ minWidth: 200 }}
                 />
               )}
             />
 
-            <Box display="flex" flexWrap="wrap" gap={1} overflow="hidden">
+            <Box display="flex" flexWrap="wrap" gap={1}>
               {tags.map(tag => (
                 <Tooltip key={tag} title={hoveredDeleteTag === tag ? 'Delete tag' : 'Edit tag'}>
                   <Chip
                     label={tag}
-                    onClick={() => handleChipClick(tag)}
-                    onDelete={() => handleTagDelete(tag)}
-                    onMouseEnter={() => setHoveredDeleteTag(null)} // clear tooltip if not over delete icon
-                    onMouseLeave={() => setHoveredDeleteTag(null)}
+                    onClick={() => {
+                      setEditingTag(tag);
+                      setTagInput(tag);
+                      setTags(prev => prev.filter(t => t !== tag));
+                    }}
+                    onDelete={() => {
+                      setTags(prev => prev.filter(t => t !== tag));
+                      if (editingTag === tag) {
+                        setEditingTag(null);
+                        setTagInput('');
+                      }
+                    }}
                     deleteIcon={
                       <CancelIcon
                         onMouseEnter={e => {
@@ -343,15 +300,9 @@ export function EditTaskModal({
                       />
                     }
                     sx={{
-                      bgcolor: tagColor,
-                      color: tagTextColor,
-                      cursor: 'pointer',
-                      '& .MuiChip-deleteIcon': {
-                        color: `${tagTextColor} !important`,
-                      },
-                      '&:hover': {
-                        bgcolor: tagColor ? alpha(tagColor, 0.95) : undefined,
-                      },
+                      bgcolor: tagBg,
+                      color: tagFg,
+                      '&:hover': { bgcolor: alpha(tagBg ?? '#000', 0.9) },
                     }}
                   />
                 </Tooltip>

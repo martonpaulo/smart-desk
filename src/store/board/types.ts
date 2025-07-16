@@ -27,6 +27,7 @@ export interface AddTaskData {
   title: string;
   notes?: string;
   quantityTarget?: number;
+  daily?: boolean;
   columnId?: string;
 }
 
@@ -44,6 +45,7 @@ export interface UpdateTaskData {
   notes?: string;
   quantityDone?: number;
   quantityTarget?: number;
+  daily?: boolean;
   position?: number;
   columnId?: string;
   trashed?: boolean;

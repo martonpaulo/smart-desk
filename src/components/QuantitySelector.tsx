@@ -4,12 +4,12 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
+import TextField, { TextFieldProps } from '@mui/material/TextField';
 
 import { theme } from '@/styles/theme';
 import { formatValue, parseValue } from '@/utils/stringUtils';
 
-export interface QuantitySelectorProps {
+export interface QuantitySelectorProps extends Omit<TextFieldProps, 'value' | 'onChange'> {
   value: number;
   onValueChange: (value: number) => void;
   step?: number;
@@ -33,6 +33,7 @@ export function QuantitySelector({
   hasSpace = true,
   formatFn,
   parseFn = parseValue,
+  ...props
 }: QuantitySelectorProps) {
   const getFormattedValue = useCallback(
     (val: number) => (formatFn ?? (v => formatValue(v, suffix, singularSuffix, hasSpace)))(val),
@@ -72,8 +73,14 @@ export function QuantitySelector({
   };
 
   // increment/decrement by step, clamped
-  const handleIncrement = () => onValueChange(getNextStepUp(value));
-  const handleDecrement = () => onValueChange(getNextStepDown(value));
+  const handleIncrement = () => {
+    if (props.disabled) return;
+    onValueChange(getNextStepUp(value));
+  };
+  const handleDecrement = () => {
+    if (props.disabled) return;
+    onValueChange(getNextStepDown(value));
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -100,6 +107,7 @@ export function QuantitySelector({
 
   return (
     <TextField
+      {...props}
       variant="standard"
       value={displayValue}
       onChange={handleInputChange}
@@ -108,6 +116,7 @@ export function QuantitySelector({
       onKeyDown={handleKeyDown}
       fullWidth={false}
       sx={{
+        ...props.sx,
         width: 170,
         '& .MuiInputBase-root': {
           height: theme.spacing(5),
@@ -146,6 +155,7 @@ export function QuantitySelector({
               <IconButton
                 onClick={handleDecrement}
                 sx={{
+                  cursor: props.disabled ? 'not-allowed' : 'pointer',
                   borderTopLeftRadius: 1,
                   borderBottomLeftRadius: 1,
                   borderTopRightRadius: 0,
@@ -161,6 +171,7 @@ export function QuantitySelector({
               <IconButton
                 onClick={handleIncrement}
                 sx={{
+                  cursor: props.disabled ? 'not-allowed' : 'pointer',
                   borderTopLeftRadius: 0,
                   borderBottomLeftRadius: 0,
                   borderTopRightRadius: 1,

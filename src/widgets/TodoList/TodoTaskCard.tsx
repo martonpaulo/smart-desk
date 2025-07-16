@@ -4,6 +4,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckIcon from '@mui/icons-material/Check';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import EditIcon from '@mui/icons-material/Edit';
+import EventRepeatIcon from '@mui/icons-material/EventRepeat';
 import UndoIcon from '@mui/icons-material/Undo';
 import { Box, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha, darken } from '@mui/material/styles';
@@ -119,19 +120,23 @@ export function TodoTaskCard({
         }}
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={0.5}>
-          {!task.isSynced && !editing && <SyncedSyncIcon status={syncStatus} />}
+          <Stack direction="row" spacing={0.5} fontSize="0.8rem" alignItems="center">
+            {!task.isSynced && !editing && <SyncedSyncIcon status={syncStatus} />}
 
-          <Stack direction="row" spacing={1} flex={1}>
             {task.notes && (
-              <Tooltip title="Has description">
-                <DescriptionOutlinedIcon
-                  aria-hidden="true"
-                  fontSize="inherit"
-                  sx={{ color: 'text.secondary', position: 'relative', top: 1 }}
-                />
+              <Tooltip title="Has notes">
+                <DescriptionOutlinedIcon fontSize="inherit" color="action" />
               </Tooltip>
             )}
 
+            {task.daily && (
+              <Tooltip title="Repeat daily">
+                <EventRepeatIcon fontSize="inherit" color="action" />
+              </Tooltip>
+            )}
+          </Stack>
+
+          <Stack direction="row" spacing={1} flex={1}>
             {editing ? (
               <TextField
                 fullWidth

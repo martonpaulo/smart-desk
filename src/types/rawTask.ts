@@ -5,6 +5,7 @@ export interface RawTask {
   notes: string | null;
   quantity_done: number;
   quantity_target: number;
+  daily: boolean;
   position: number;
   column_id: string;
   trashed: boolean;

@@ -4,6 +4,7 @@ export interface Task {
   notes?: string;
   quantityDone: number;
   quantityTarget: number;
+  daily: boolean;
   position: number;
   columnId: string;
   trashed?: boolean;
