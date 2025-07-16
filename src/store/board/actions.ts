@@ -123,9 +123,7 @@ export async function syncPendingAction(set: Set, get: Get) {
   });
 
   // Run all task upserts concurrently and track failures
-  const taskResults = await Promise.allSettled(
-    pendingTasks.map(task => upsertTask(client, task)),
-  );
+  const taskResults = await Promise.allSettled(pendingTasks.map(task => upsertTask(client, task)));
 
   const currentTasks = get().tasks;
   const updatedTasks = [...currentTasks];
@@ -162,69 +160,82 @@ export async function syncFromServerAction(set: Set, get: Get) {
     const localTasks = get().tasks;
     const now = new Date();
 
+    // merge columns and flag sync state
     const mergedColsBase = mergeById(localCols, remoteCols);
-    const mergedTasksBase = mergeById(
-      localTasks.map(t => ({ ...t, updatedAt: t.updatedAt })),
-      remoteTasks,
-    );
-
     const mergedCols: Column[] = mergedColsBase.map(c => {
       const local = localCols.find(l => l.id === c.id);
       return { ...c, isSynced: !local || c.updatedAt >= local.updatedAt };
     });
 
-    // ensure Draft exists
-    let draftCol = mergedCols.find(c => c.title === 'Draft');
-    if (!draftCol) {
-      const newDraft: Column = {
-        id: crypto.randomUUID(),
-        title: 'Draft',
-        color: theme.palette.primary.main,
-        position: getNewColumnPosition(mergedCols),
-        trashed: false,
-        updatedAt: now,
-        isSynced: false,
-      };
-      mergedCols.push(newDraft);
-      draftCol = newDraft;
-    }
-
-    // build tasks with sync flag
+    // merge tasks and flag sync state
+    const mergedTasksBase = mergeById(
+      localTasks.map(t => ({ ...t, updatedAt: t.updatedAt })),
+      remoteTasks,
+    );
     const mergedTasks: Task[] = mergedTasksBase.map(t => {
       const local = localTasks.find(l => l.id === t.id);
       return { ...t, isSynced: !local || t.updatedAt >= local.updatedAt };
     });
 
-    // compute today’s reset threshold
-    const [hour, minute] = RESET_TIME.split(':').map(Number);
-    const today = new Date();
-    const resetThreshold = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      hour,
-      minute,
-      0,
-    );
+    // compute last reset threshold
+    const [H, M] = RESET_TIME.split(':').map(Number);
+    const todayReset = new Date(now.getFullYear(), now.getMonth(), now.getDate(), H, M, 0);
+    const lastReset =
+      now < todayReset
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, H, M, 0)
+        : todayReset;
 
-    // reset daily tasks if last update was before reset time
-    const finalTasks: Task[] = mergedTasks.map(task => {
-      if (task.daily && new Date(task.updatedAt) < resetThreshold) {
-        return {
-          ...task,
-          quantityDone: 0,
-          columnId: draftCol!.id,
+    // find tasks that need resetting
+    const tasksToReset = mergedTasks.filter(t => t.daily && new Date(t.updatedAt) < lastReset);
+
+    const finalCols = mergedCols;
+    let finalTasks: Task[];
+
+    if (tasksToReset.length > 0) {
+      // ensure Draft exists or restore it
+      let draftCol = finalCols.find(c => c.title === 'Draft');
+      if (draftCol) {
+        if (draftCol.trashed) {
+          draftCol.trashed = false;
+          draftCol.updatedAt = now;
+          draftCol.isSynced = false;
+        }
+      } else {
+        draftCol = {
+          id: crypto.randomUUID(),
+          title: 'Draft',
+          color: theme.palette.primary.main,
+          position: getNewColumnPosition(finalCols),
+          trashed: false,
           updatedAt: now,
           isSynced: false,
         };
+        finalCols.push(draftCol);
       }
-      return task;
-    });
 
+      // apply reset to qualifying tasks
+      finalTasks = mergedTasks.map(task => {
+        if (task.daily && new Date(task.updatedAt) < lastReset) {
+          return {
+            ...task,
+            quantityDone: 0,
+            columnId: draftCol!.id,
+            updatedAt: now,
+            isSynced: false,
+          };
+        }
+        return task;
+      });
+    } else {
+      // no resets needed
+      finalTasks = mergedTasks;
+    }
+
+    // commit updated state
     set({
-      columns: mergedCols,
+      columns: finalCols,
       tasks: finalTasks,
-      pendingColumns: mergedCols.filter(c => !c.isSynced),
+      pendingColumns: finalCols.filter(c => !c.isSynced),
       pendingTasks: finalTasks.filter(t => !t.isSynced),
     });
   } catch (err) {

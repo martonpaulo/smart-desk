@@ -254,7 +254,11 @@ export function TodoList() {
   };
 
   const renderColumn = (column: Column) => {
+    console.log('renderColumn', column);
+    const tasksA = tasks.filter(t => t.columnId === column.id);
+    console.log('tasksA', tasksA);
     const colTasks = tasks.filter(t => t.columnId === column.id && !t.trashed);
+    console.log('colTasks', colTasks);
     return (
       <TodoColumn
         key={column.id}

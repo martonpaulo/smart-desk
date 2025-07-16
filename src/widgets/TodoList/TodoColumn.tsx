@@ -67,6 +67,8 @@ export function TodoColumn({
     return id;
   };
 
+  const orderedTasks = tasks.sort((a, b) => a.position - b.position);
+
   const finishCreate = () => setCreatingId(null);
 
   return (
@@ -108,9 +110,9 @@ export function TodoColumn({
             </Typography>
           </Stack>
 
-          {tasks && tasks.length > 0 && (
+          {orderedTasks && orderedTasks.length > 0 && (
             <Chip
-              label={tasks?.length}
+              label={orderedTasks?.length}
               size="small"
               disabled
               sx={{
@@ -123,8 +125,8 @@ export function TodoColumn({
         </Stack>
       </Box>
 
-      {tasks &&
-        tasks.map(task => (
+      {orderedTasks &&
+        orderedTasks.map(task => (
           <div key={task.id}>
             {draggingTaskId && hoverTaskId === task.id && (
               <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
