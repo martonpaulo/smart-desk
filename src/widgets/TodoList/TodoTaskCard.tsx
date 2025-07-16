@@ -173,6 +173,7 @@ export function TodoTaskCard({
                   onClick={() => onOpen(task.id)}
                   variant="body2"
                   sx={{
+                    userSelect: 'none',
                     maxWidth: '100%',
                     overflowWrap: 'anywhere',
                     whiteSpace: 'normal',
