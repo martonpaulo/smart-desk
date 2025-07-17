@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+import { fetchUserId } from '@/services/supabase/userService';
 import { Task } from '@/types/task';
 import { mapDBToTask, mapTaskToDB } from '@/utils/databaseUtils';
 
@@ -18,17 +19,12 @@ export async function fetchTasks(client: SupabaseClient): Promise<Task[]> {
 }
 
 export async function upsertTask(client: SupabaseClient, payload: Task): Promise<Task> {
-  const {
-    data: { user },
-    error: authError,
-  } = await client.auth.getUser();
-
-  if (authError || !user?.id) {
-    console.error('upsertTask auth failed', authError);
+  const userId = await fetchUserId(client);
+  if (!userId) {
     throw new Error('User not authenticated');
   }
 
-  const row = mapTaskToDB(payload, user.id);
+  const row = mapTaskToDB(payload, userId);
 
   const { data, error } = await client
     .from('tasks')

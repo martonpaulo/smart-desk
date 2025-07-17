@@ -1,4 +1,6 @@
 import { getSupabaseClient } from '@/lib/supabaseClient';
+import { fetchUserId } from '@/services/supabase/userService';
+import { useUserStore } from '@/store/userStore';
 
 export async function signInWithGoogle(): Promise<void> {
   const supabase = getSupabaseClient();
@@ -21,7 +23,10 @@ export async function signInWithIdToken(idToken: string): Promise<void> {
   });
   if (error) {
     console.error('Supabase ID token sign in failed', error);
+    return;
   }
+
+  await fetchUserId(supabase);
 }
 
 export async function signOutSupabase(): Promise<void> {
@@ -29,7 +34,10 @@ export async function signOutSupabase(): Promise<void> {
   const { error } = await supabase.auth.signOut();
   if (error) {
     console.error('Supabase sign out failed', error);
+    return;
   }
+
+  useUserStore.getState().setUserId(null);
 }
 
 export async function isSupabaseLoggedIn(): Promise<boolean> {
