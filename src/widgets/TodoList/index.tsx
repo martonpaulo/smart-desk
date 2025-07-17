@@ -75,11 +75,11 @@ export function TodoList() {
 
     try {
       if (activeColumn) {
-        await updateColumn({ id: activeColumn.id, title: trimmed, color });
+        await updateColumn({ id: activeColumn.id, title: trimmed, color, updatedAt: new Date() });
       } else {
         const pos =
           insertionPosition !== undefined ? insertionPosition : getNewColumnPosition(columns);
-        addColumn({ title: trimmed, color, position: pos });
+        addColumn({ title: trimmed, color, position: pos, updatedAt: new Date() });
       }
     } catch (err) {
       console.error('Column save failed', err);
@@ -90,7 +90,7 @@ export function TodoList() {
 
   const handleDeleteColumn = async (id: string) => {
     try {
-      await updateColumn({ id, trashed: true });
+      await updateColumn({ id, trashed: true, updatedAt: new Date() });
     } catch (err) {
       console.error('Column delete failed', err);
     }
@@ -99,7 +99,7 @@ export function TodoList() {
   // ── Task handlers (unchanged) ───────────────────────────────────────────
   const handleAddTask = async (title: string, columnId?: string): Promise<string> => {
     try {
-      return await addTask({ title, columnId });
+      return await addTask({ title, columnId, updatedAt: new Date() });
     } catch (err) {
       console.error('Task add failed', err);
       return '';
@@ -127,7 +127,7 @@ export function TodoList() {
     const trimmed = title.trim();
     if (!trimmed) return;
     try {
-      await updateTask({ id, title: trimmed });
+      await updateTask({ id, title: trimmed, updatedAt: new Date() });
     } catch (err) {
       console.error('Task rename failed', err);
     }
@@ -135,7 +135,7 @@ export function TodoList() {
 
   const handleDeleteTask = async (id: string) => {
     try {
-      await updateTask({ id, trashed: true });
+      await updateTask({ id, trashed: true, updatedAt: new Date() });
     } catch (err) {
       console.error('Task delete failed', err);
     }
@@ -145,45 +145,55 @@ export function TodoList() {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
 
+    const now = new Date();
+
     const next = (task.quantityDone ?? 0) + 1;
     const value = next > task.quantityTarget ? 0 : next;
 
     if (value === task.quantityTarget) {
       const doneColumn = columns.find(c => c.title === 'Done');
       if (doneColumn) {
-        await updateTask({ id, columnId: doneColumn.id, quantityDone: value });
+        await updateTask({ id, columnId: doneColumn.id, quantityDone: value, updatedAt: now });
       } else {
         const columnId = await addColumn({
           title: 'Done',
           color: '#4caf50',
           position: columnsToRender.length + 1,
+          updatedAt: now,
         });
-        await updateTask({ id, columnId: columnId, quantityDone: value });
+        await updateTask({
+          id,
+          columnId: columnId ? columnId : task.columnId,
+          quantityDone: value,
+          updatedAt: now,
+        });
         return;
       }
-    } else if (value === 0) {
+    }
+
+    if (value === 0) {
       const todoColumn = columns.find(c => c.title === 'To Do');
       if (todoColumn) {
-        await updateTask({ id, columnId: todoColumn.id, quantityDone: value });
+        await updateTask({ id, columnId: todoColumn.id, quantityDone: value, updatedAt: now });
       } else {
         const columnId = await addColumn({
           title: 'To Do',
           color: '#2196f3',
           position: columnsToRender.length + 1,
+          updatedAt: now,
         });
-        await updateTask({ id, columnId: columnId, quantityDone: value });
+        await updateTask({
+          id,
+          columnId: columnId ? columnId : task.columnId,
+          quantityDone: value,
+          updatedAt: now,
+        });
         return;
       }
-    } else {
-      // just update done count
-      await updateTask({ id, quantityDone: value });
-      return;
-    }
 
-    try {
-      await updateTask({ id, quantityDone: value });
-    } catch (err) {
-      console.error('Toggle done failed', err);
+      // just update done count
+      await updateTask({ id, quantityDone: value, updatedAt: now });
+      return;
     }
   };
 
@@ -207,7 +217,7 @@ export function TodoList() {
     e.preventDefault();
     if (!draggingTaskId) return;
     try {
-      await updateTask({ id: draggingTaskId, columnId });
+      await updateTask({ id: draggingTaskId, columnId, updatedAt: new Date() });
     } catch (err) {
       console.error('Task move failed', err);
     } finally {
@@ -244,7 +254,7 @@ export function TodoList() {
         sorted.splice(toIdx, 0, moved);
         // batch update new positions
         sorted.forEach((col, i) => {
-          updateColumn({ id: col.id, position: i + 1 });
+          updateColumn({ id: col.id, position: i + 1, updatedAt: new Date() });
         });
       }
     }
@@ -254,11 +264,7 @@ export function TodoList() {
   };
 
   const renderColumn = (column: Column) => {
-    console.log('renderColumn', column);
-    const tasksA = tasks.filter(t => t.columnId === column.id);
-    console.log('tasksA', tasksA);
     const colTasks = tasks.filter(t => t.columnId === column.id && !t.trashed);
-    console.log('colTasks', colTasks);
     return (
       <TodoColumn
         key={column.id}
@@ -291,7 +297,11 @@ export function TodoList() {
 
   return (
     <Stack spacing={2}>
-      <Stack direction={isMobile ? 'column' : 'row'} spacing={2} sx={{ userSelect: 'none' }}>
+      <Stack
+        direction={isMobile ? 'column-reverse' : 'row'}
+        spacing={2}
+        sx={{ userSelect: 'none', alignItems: 'flex-start' }}
+      >
         {columnsToRender
           .slice()
           .sort((a, b) => a.position - b.position)

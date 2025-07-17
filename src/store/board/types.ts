@@ -9,7 +9,6 @@ export interface BoardState {
 
   addColumn(data: AddColumnData): Promise<string>;
   addTask(data: AddTaskData): Promise<string>;
-
   updateColumn(data: UpdateColumnData): Promise<void>;
   updateTask(data: UpdateTaskData): Promise<void>;
 
@@ -21,6 +20,7 @@ export interface AddColumnData {
   title: string;
   color: string;
   position: number;
+  updatedAt: Date;
 }
 
 export interface AddTaskData {
@@ -29,6 +29,7 @@ export interface AddTaskData {
   quantityTarget?: number;
   daily?: boolean;
   columnId?: string;
+  updatedAt: Date;
 }
 
 export interface UpdateColumnData {
@@ -37,6 +38,7 @@ export interface UpdateColumnData {
   color?: string;
   position?: number;
   trashed?: boolean;
+  updatedAt: Date;
 }
 
 export interface UpdateTaskData {
@@ -49,4 +51,5 @@ export interface UpdateTaskData {
   position?: number;
   columnId?: string;
   trashed?: boolean;
+  updatedAt: Date;
 }

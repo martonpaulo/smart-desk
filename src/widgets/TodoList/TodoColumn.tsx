@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { alpha, Box, Chip, darken, IconButton, Stack, Typography } from '@mui/material';
 
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
@@ -60,6 +62,7 @@ export function TodoColumn({
   syncStatus,
 }: TodoColumnProps) {
   const [creatingId, setCreatingId] = useState<string | null>(null);
+  const [hideColumn, setHideColumn] = useState(false);
 
   const handleAddTask = async (colId: string, title: string) => {
     const id = await onAddTask(title, colId);
@@ -100,32 +103,64 @@ export function TodoColumn({
         },
       }}
     >
-      <Box onClick={() => onEditColumn(column)} sx={{ cursor: 'pointer', mb: 1 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Stack direction="row" gap={0.5}>
+      <Box sx={{ cursor: 'pointer', mb: 1 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{
+            userSelect: 'none',
+            mb: 1,
+            cursor: 'pointer',
+            '&:hover .column-hide-btn': { visibility: 'visible' },
+          }}
+        >
+          <Stack direction="row" gap={0.5} alignItems="center">
             {!column.isSynced && <SyncedSyncIcon status={syncStatus} />}
 
-            <Typography variant="h3" sx={{ color: column.color }}>
+            <Typography
+              variant="h3"
+              sx={{ color: column.color }}
+              onClick={() => onEditColumn(column)}
+            >
               {column.title}
             </Typography>
+
+            <IconButton
+              size="small"
+              className="column-hide-btn"
+              onClick={() => setHideColumn(!hideColumn)}
+              sx={{
+                opacity: hideColumn ? 0.5 : 0.8,
+                color: hideColumn ? 'text.secondary' : column.color,
+                visibility: hideColumn ? 'visible' : 'hidden',
+              }}
+            >
+              {hideColumn ? (
+                <VisibilityOffIcon fontSize="small" sx={{ fontSize: '1rem' }} />
+              ) : (
+                <VisibilityIcon fontSize="small" sx={{ fontSize: '1rem' }} />
+              )}
+            </IconButton>
           </Stack>
 
-          {orderedTasks && orderedTasks.length > 0 && (
-            <Chip
-              label={orderedTasks?.length}
-              size="small"
-              disabled
-              sx={{
-                '&.Mui-disabled': {
-                  opacity: 1,
-                },
-              }}
-            />
-          )}
+          <Chip
+            label={orderedTasks?.length}
+            size="small"
+            disabled
+            sx={{
+              '&.Mui-disabled': {
+                opacity: 1,
+                backgroundColor: alpha(column.color, 0.1),
+                fontWeight: '400',
+              },
+            }}
+          />
         </Stack>
       </Box>
 
-      {orderedTasks &&
+      {!hideColumn &&
+        orderedTasks &&
         orderedTasks.map(task => (
           <div key={task.id}>
             {draggingTaskId && hoverTaskId === task.id && (
@@ -150,7 +185,7 @@ export function TodoColumn({
         <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
       )}
 
-      {!creatingId && showAddTaskInput && column.id && (
+      {!creatingId && showAddTaskInput && column.id && !hideColumn && (
         <AddTaskInput
           columnId={column.id}
           columnColor={alpha(darken(column.color, 0.2), 0.15)}

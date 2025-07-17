@@ -22,7 +22,6 @@ export const useBoardStore = create<BoardState>()(
 
       addColumn: data => addColumnAction(set, get, data),
       addTask: data => addTaskAction(set, get, data),
-
       updateColumn: data => updateColumnAction(set, get, data),
       updateTask: data => updateTaskAction(set, get, data),
 

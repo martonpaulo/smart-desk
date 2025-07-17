@@ -1,8 +1,8 @@
-import { IcsCalendar as BaseIcsCalendar } from '@/types/icsCalendar';
+import { IcsCalendar } from '@/types/icsCalendar';
 
 export interface SettingsState {
-  icsCalendars: SyncIcsCalendar[];
-  pendingIcsCalendars: SyncIcsCalendar[];
+  icsCalendars: IcsCalendar[];
+  pendingIcsCalendars: IcsCalendar[];
 
   addIcsCalendar(data: AddIcsCalendarData): Promise<string>;
   updateIcsCalendar(data: UpdateIcsCalendarData): Promise<void>;
@@ -12,15 +12,11 @@ export interface SettingsState {
   syncFromServer(): Promise<void>;
 }
 
-// Extend base types with a sync flag
-export interface SyncIcsCalendar extends BaseIcsCalendar {
-  isSynced: boolean;
-}
-
 export interface AddIcsCalendarData {
   title: string;
   color: string;
   source: string;
+  updatedAt: Date;
 }
 
 export interface UpdateIcsCalendarData {
@@ -28,6 +24,7 @@ export interface UpdateIcsCalendarData {
   title?: string;
   color?: string;
   source?: string;
+  updatedAt: Date;
 }
 
 export interface DeleteIcsCalendarData {

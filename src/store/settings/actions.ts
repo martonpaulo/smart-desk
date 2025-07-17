@@ -10,9 +10,9 @@ import {
   AddIcsCalendarData,
   DeleteIcsCalendarData,
   SettingsState,
-  SyncIcsCalendar,
   UpdateIcsCalendarData,
 } from '@/store/settings/types';
+import { IcsCalendar } from '@/types/icsCalendar';
 import { mergeById } from '@/utils/boardHelpers';
 
 type Set = StoreApi<SettingsState>['setState'];
@@ -25,14 +25,13 @@ export async function addIcsCalendarAction(
   data: AddIcsCalendarData,
 ): Promise<string> {
   const id = crypto.randomUUID();
-  const now = new Date();
 
-  const newCal: SyncIcsCalendar = {
+  const newCal: IcsCalendar = {
     id,
     title: data.title.trim(),
     color: data.color,
     source: data.source.trim(),
-    updatedAt: now,
+    updatedAt: data.updatedAt,
     isSynced: false,
   };
 
@@ -50,7 +49,7 @@ export async function addIcsCalendarAction(
 export async function syncPendingAction(set: Set, get: Get) {
   const client = getSupabaseClient();
   const pending = get().pendingIcsCalendars;
-  const still: SyncIcsCalendar[] = [];
+  const still: IcsCalendar[] = [];
 
   for (const cal of pending) {
     try {
@@ -80,7 +79,7 @@ export async function syncFromServerAction(set: Set, get: Get) {
     // merge lists by id, keeping the most recent updatedAt
     const mergedBase = mergeById(local, remote);
 
-    const merged: SyncIcsCalendar[] = mergedBase.map(c => {
+    const merged: IcsCalendar[] = mergedBase.map(c => {
       const localItem = local.find(l => l.id === c.id);
       const isSynced = !localItem || c.updatedAt >= localItem.updatedAt;
       return { ...c, isSynced };
@@ -103,8 +102,7 @@ export async function updateIcsCalendarAction(set: Set, get: Get, data: UpdateIc
   }
 
   set(state => {
-    const now = new Date();
-    let updated: SyncIcsCalendar | undefined;
+    let updated: IcsCalendar | undefined;
 
     const icsCalendars = state.icsCalendars.map(c => {
       if (c.id !== data.id) return c;
@@ -113,7 +111,7 @@ export async function updateIcsCalendarAction(set: Set, get: Get, data: UpdateIc
         title: typeof data.title === 'string' ? data.title.trim() : c.title,
         color: data.color ?? c.color,
         source: typeof data.source === 'string' ? data.source.trim() : c.source,
-        updatedAt: now,
+        updatedAt: data.updatedAt,
         isSynced: false,
       };
       return updated;

@@ -54,12 +54,16 @@ export function ColumnModal({
   const [title, setTitle] = useState('');
   const [color, setColor] = useState(COLUMN_COLORS[0].value);
   const [modalTitle, setModalTitle] = useState('');
+  const [touched, setTouched] = useState(false);
 
   // Ref for title input
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
+
+    setTouched(false);
+
     if (column) {
       setTitle(column.title);
       setColor(column.color);
@@ -84,6 +88,7 @@ export function ColumnModal({
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
+    setTouched(true);
   };
 
   const handleCloseOnly = () => {
@@ -96,7 +101,7 @@ export function ColumnModal({
       return;
     }
     const posToUse = prevPosition ?? column?.position;
-    onSave(title.trim(), color, posToUse);
+    if (touched) onSave(title.trim(), color, posToUse);
     onClose();
   };
 
@@ -159,7 +164,10 @@ export function ColumnModal({
             select
             label="Color"
             value={color}
-            onChange={e => setColor(e.target.value)}
+            onChange={e => {
+              setColor(e.target.value);
+              setTouched(true);
+            }}
             fullWidth
             slotProps={{
               select: {

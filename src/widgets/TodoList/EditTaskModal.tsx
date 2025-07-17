@@ -53,6 +53,7 @@ export function EditTaskModal({
   const [useQuantity, setUseQuantity] = useState<boolean>(false);
   const [useDaily, setUseDaily] = useState<boolean>(false);
   const [presets, setPresets] = useState<TagPreset[]>([]);
+  const [touched, setTouched] = useState<boolean>(false);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
@@ -65,6 +66,8 @@ export function EditTaskModal({
   // when task changes populate form with safe defaults
   useEffect(() => {
     if (!task) return;
+
+    setTouched(false);
 
     setTitle(task.title);
     setNotes(task.notes ?? '');
@@ -124,7 +127,7 @@ export function EditTaskModal({
       e.preventDefault();
       commitTag(tagInput.trim());
       // save immediate change
-      if (task) {
+      if (task && touched) {
         onSave({
           ...task,
           title: title.trim(),
@@ -140,15 +143,17 @@ export function EditTaskModal({
     if (!task) return;
     const newTitle = title.trim();
     if (!newTitle) return;
-    onSave({
-      ...task,
-      title: newTitle,
-      notes: notes.trim() || undefined,
-      // tags,
-      quantityDone: task.quantityDone, // keep existing done count
-      quantityTarget: quantity,
-      daily: useDaily,
-    });
+    if (touched) {
+      onSave({
+        ...task,
+        title: newTitle,
+        notes: notes.trim() || undefined,
+        // tags,
+        quantityDone: task.quantityDone, // keep existing done count
+        quantityTarget: quantity,
+        daily: useDaily,
+      });
+    }
     onClose();
   };
 
@@ -197,7 +202,10 @@ export function EditTaskModal({
           <TextField
             label="Title"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={e => {
+              setTitle(e.target.value);
+              setTouched(true);
+            }}
             inputRef={titleInputRef}
             fullWidth
             onKeyDown={e => {
@@ -216,12 +224,16 @@ export function EditTaskModal({
                 onChange={(_, checked) => {
                   setUseQuantity(checked);
                   if (!checked) setQuantity(1);
+                  setTouched(true);
                 }}
               />
               <Typography variant="body2">Quantifiable</Typography>
               <QuantitySelector
                 value={quantity}
-                onValueChange={setQuantity}
+                onValueChange={value => {
+                  setQuantity(value);
+                  setTouched(true);
+                }}
                 disabled={!useQuantity}
                 minValue={1}
                 maxValue={999}
@@ -229,7 +241,13 @@ export function EditTaskModal({
               />
             </Stack>
             <Stack direction="row" alignItems="center">
-              <Checkbox checked={useDaily} onChange={(_, checked) => setUseDaily(checked)} />
+              <Checkbox
+                checked={useDaily}
+                onChange={(_, checked) => {
+                  setUseDaily(checked);
+                  setTouched(true);
+                }}
+              />
               <Typography variant="body2">Daily</Typography>
             </Stack>
           </Stack>
@@ -240,7 +258,10 @@ export function EditTaskModal({
             multiline
             minRows={6}
             value={notes}
-            onChange={e => setNotes(e.target.value)}
+            onChange={e => {
+              setNotes(e.target.value);
+              setTouched(true);
+            }}
             fullWidth
             onKeyDown={e => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {

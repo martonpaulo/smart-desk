@@ -28,15 +28,9 @@ export function SupabaseSyncProvider({ children }: SupabaseSyncProviderProps) {
       }
 
       try {
-        await Promise.all([
-          boardStore.syncFromServer(),
-          settingsStore.syncFromServer(),
-        ]);
+        await Promise.all([boardStore.syncFromServer(), settingsStore.syncFromServer()]);
 
-        await Promise.all([
-          boardStore.syncPending(),
-          settingsStore.syncPending(),
-        ]);
+        await Promise.all([boardStore.syncPending(), settingsStore.syncPending()]);
         setStatus('connected');
       } catch (err) {
         console.error('fullSync error', err);
@@ -53,10 +47,7 @@ export function SupabaseSyncProvider({ children }: SupabaseSyncProviderProps) {
       }
 
       try {
-        await Promise.all([
-          boardStore.syncPending(),
-          settingsStore.syncPending(),
-        ]);
+        await Promise.all([boardStore.syncPending(), settingsStore.syncPending()]);
         setStatus('connected');
       } catch (err) {
         console.error('periodicSync error', err);
@@ -67,8 +58,8 @@ export function SupabaseSyncProvider({ children }: SupabaseSyncProviderProps) {
     // run once on mount
     void fullSync();
 
-    // retry every 10 seconds
-    const intervalId = window.setInterval(periodicSync, 10_000);
+    // retry every 30 seconds
+    const intervalId = window.setInterval(periodicSync, 30_000);
 
     // also retry when browser goes back online
     window.addEventListener('online', periodicSync);

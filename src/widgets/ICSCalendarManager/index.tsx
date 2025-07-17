@@ -25,6 +25,8 @@ export function ICSCalendarManager() {
   };
 
   const handleSubmit = (title: string, source: string, color: string) => {
+    const now = new Date();
+
     if (editingIndex != null) {
       if (!window.confirm('Update this calendar configuration?')) return;
       updateCalendar({
@@ -32,12 +34,14 @@ export function ICSCalendarManager() {
         title,
         source,
         color,
+        updatedAt: now,
       });
     } else {
       addCalendar({
         title,
         source,
         color,
+        updatedAt: now,
       });
     }
     cancelEdit();

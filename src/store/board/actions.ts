@@ -21,6 +21,8 @@ type Get = StoreApi<BoardState>['getState'];
 
 // adds a column with dynamic position
 export async function addColumnAction(set: Set, get: Get, data: AddColumnData): Promise<string> {
+  const shouldSyncColumn = !!data.title.trim();
+
   const columns = get().columns;
   const id = crypto.randomUUID();
   const position =
@@ -34,13 +36,13 @@ export async function addColumnAction(set: Set, get: Get, data: AddColumnData): 
     color: data.color,
     position,
     trashed: false,
-    updatedAt: new Date(),
-    isSynced: false,
+    updatedAt: data.updatedAt,
+    isSynced: shouldSyncColumn ? false : true,
   };
 
   set(state => ({
     columns: [...state.columns, newCol],
-    pendingColumns: [...state.pendingColumns, newCol],
+    pendingColumns: shouldSyncColumn ? [...state.pendingColumns, newCol] : state.pendingColumns,
   }));
 
   void get().syncPending();
@@ -48,6 +50,8 @@ export async function addColumnAction(set: Set, get: Get, data: AddColumnData): 
 }
 
 export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Promise<string> {
+  const shouldSyncTask = !!(data.title.trim() || (data.notes && data.notes.trim()));
+
   let columns = get().columns;
 
   if (columns.length === 0) {
@@ -57,8 +61,8 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
       color: theme.palette.primary.main,
       position: getNewColumnPosition(columns),
       trashed: false,
-      updatedAt: new Date(),
-      isSynced: false,
+      updatedAt: data.updatedAt,
+      isSynced: shouldSyncTask ? false : true,
     };
     set(state => ({
       columns: [...state.columns, draft],
@@ -83,13 +87,13 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
     position: nextPos,
     columnId: targetId,
     trashed: false,
-    updatedAt: new Date(),
-    isSynced: false,
+    updatedAt: data.updatedAt,
+    isSynced: shouldSyncTask ? false : true,
   };
 
   set(state => ({
     tasks: [...state.tasks, newTask],
-    pendingTasks: [...state.pendingTasks, newTask],
+    pendingTasks: shouldSyncTask ? [...state.pendingTasks, newTask] : state.pendingTasks,
   }));
 
   void get().syncPending();
@@ -250,7 +254,6 @@ export async function updateColumnAction(set: Set, get: Get, data: UpdateColumnD
   }
 
   set(state => {
-    const now = new Date();
     let updated: Column | undefined;
 
     const columns = state.columns.map(c => {
@@ -261,7 +264,7 @@ export async function updateColumnAction(set: Set, get: Get, data: UpdateColumnD
         color: data.color ?? c.color,
         position: typeof data.position === 'number' ? data.position : c.position,
         trashed: data.trashed ?? c.trashed,
-        updatedAt: now,
+        updatedAt: data.updatedAt,
         isSynced: false,
       };
       return updated;
@@ -284,7 +287,6 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
   }
 
   set(state => {
-    const now = new Date();
     let updated: Task | undefined;
 
     const tasks = state.tasks.map(t => {
@@ -300,7 +302,7 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
         position: typeof data.position === 'number' ? data.position : t.position,
         columnId: data.columnId ?? t.columnId,
         trashed: data.trashed ?? t.trashed,
-        updatedAt: now,
+        updatedAt: data.updatedAt,
         isSynced: false,
       };
       return updated;

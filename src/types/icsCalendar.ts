@@ -4,4 +4,5 @@ export interface IcsCalendar {
   source: string;
   color: string;
   updatedAt: Date;
+  isSynced?: boolean;
 }

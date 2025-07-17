@@ -78,7 +78,7 @@ export function HomeView({
   }, [isMobile, setView]);
 
   return (
-    <Stack p={2} gap={2}>
+    <Stack gap={2} p={isMobile ? 4 : 2}>
       <SettingsButton onClick={() => setSettingsOpen(true)} />
       <SettingsDialog
         open={settingsOpen}
@@ -132,7 +132,11 @@ export function HomeView({
         </Stack>
       )}
 
-      <Stack spacing={2} direction={isMobile ? 'column' : 'row'} alignItems="stretch">
+      <Stack
+        spacing={2}
+        direction={isMobile ? 'column' : 'row'}
+        alignItems={isMobile ? 'stretch' : 'flex-start'}
+      >
         <TodoList />
         <EventList events={events} key={`${now.toISOString()}-EventList`} />
       </Stack>
