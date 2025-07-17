@@ -2,13 +2,23 @@
 
 import { useState } from 'react';
 
-import { Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
 import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
 
-export function AllTasksPage() {
+export default function AllTasksPage() {
   const tasks = useBoardStore(state => state.tasks);
   const columns = useBoardStore(state => state.columns);
   const { isMobile } = useResponsiveness();

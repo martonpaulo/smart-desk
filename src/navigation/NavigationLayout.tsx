@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { Outlet } from 'react-router-dom';
 
 import { Box } from '@mui/material';
 
@@ -10,17 +9,17 @@ import { BottomNav } from '@/navigation/BottomNav';
 import { SideDrawer } from '@/navigation/SideDrawer';
 
 interface NavigationLayoutProps {
-  readonly children?: ReactNode;
+  children: ReactNode;
 }
 
-export function NavigationLayout(_: NavigationLayoutProps) {
+export function NavigationLayout({ children }: NavigationLayoutProps) {
   const { isMobile } = useResponsiveness();
 
   return (
     <Box sx={{ display: 'flex', width: '100%' }}>
       {!isMobile && <SideDrawer />}
       <Box component="main" sx={{ flexGrow: 1, pb: isMobile ? 7 : 0 }}>
-        <Outlet />
+        {children}
       </Box>
       {isMobile && <BottomNav />}
     </Box>

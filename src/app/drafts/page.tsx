@@ -1,12 +1,21 @@
 'use client';
 
-import { Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Box,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
 import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
 
-export function DraftsPage() {
+export default function DraftsPage() {
   const tasks = useBoardStore(state => state.tasks);
   const columns = useBoardStore(state => state.columns);
   const { isMobile } = useResponsiveness();

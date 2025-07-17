@@ -1,13 +1,23 @@
 'use client';
 
 import RestoreIcon from '@mui/icons-material/RestoreFromTrash';
-import { Box, IconButton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
 import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
 
-export function TrashPage() {
+export default function TrashPage() {
   const tasks = useBoardStore(state => state.tasks);
   const updateTask = useBoardStore(state => state.updateTask);
   const columns = useBoardStore(state => state.columns);
