@@ -182,6 +182,9 @@ export function TodoList() {
     if (value === 0) {
       const todoColumn = columns.find(c => c.title === 'To Do');
       if (todoColumn) {
+        if (todoColumn.trashed) {
+          await updateColumn({ id: todoColumn.id, trashed: false, updatedAt: now });
+        }
         await updateTask({ id, columnId: todoColumn.id, quantityDone: value, updatedAt: now });
       } else {
         const columnId = await addColumn({
@@ -273,10 +276,7 @@ export function TodoList() {
 
   const renderColumn = (column: Column) => {
     const colTasks = tasks.filter(t => t.columnId === column.id && !t.trashed);
-    const onHideColumn =
-      column.title === 'Done'
-        ? () => setHideDoneColumn(true)
-        : undefined;
+    const onHideColumn = column.title === 'Done' ? () => setHideDoneColumn(true) : undefined;
     return (
       <TodoColumn
         key={column.id}
