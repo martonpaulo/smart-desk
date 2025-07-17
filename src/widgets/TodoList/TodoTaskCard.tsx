@@ -25,6 +25,7 @@ interface TodoTaskCardProps {
   onDragOver: (e: DragEvent<HTMLDivElement>, id: string) => void;
   startEditing?: boolean;
   onEditingEnd?: () => void;
+  onCreateNext?: () => void;
   syncStatus?: SyncStatus;
 }
 
@@ -38,6 +39,7 @@ export function TodoTaskCard({
   onDragOver,
   startEditing = false,
   onEditingEnd,
+  onCreateNext,
   syncStatus,
 }: TodoTaskCardProps) {
   const [editing, setEditing] = useState(Boolean(startEditing));
@@ -152,6 +154,7 @@ export function TodoTaskCard({
                   if (e.key === 'Enter') {
                     e.stopPropagation();
                     finishEditing();
+                    onCreateNext?.();
                   }
                 }}
                 slotProps={{

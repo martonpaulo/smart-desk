@@ -76,6 +76,12 @@ export function TodoColumn({
 
   const finishCreate = () => setCreatingId(null);
 
+  const createNextTask = async () => {
+    if (column.id) {
+      await handleAddTask(column.id, '');
+    }
+  };
+
   return (
     <Box
       className="todo-column"
@@ -184,6 +190,7 @@ export function TodoColumn({
               onDragOver={onDragOverTask}
               startEditing={creatingId === task.id}
               onEditingEnd={finishCreate}
+              onCreateNext={createNextTask}
               syncStatus={syncStatus}
             />
           </div>
