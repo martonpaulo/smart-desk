@@ -80,6 +80,8 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
     id: crypto.randomUUID(),
     title: data.title.trim(),
     notes: (data.notes ?? '').trim(),
+    important: data.important ?? false,
+    urgent: data.urgent ?? false,
     quantityDone: 0,
     quantityTarget:
       typeof data.quantityTarget === 'number' && data.quantityTarget > 0 ? data.quantityTarget : 1,
@@ -295,6 +297,8 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
         ...t,
         title: typeof data.title === 'string' ? data.title.trim() : t.title,
         notes: typeof data.notes === 'string' ? data.notes.trim() : t.notes,
+        important: data.important ?? t.important,
+        urgent: data.urgent ?? t.urgent,
         quantityDone: data.quantityDone ?? t.quantityDone,
         quantityTarget:
           typeof data.quantityTarget === 'number' ? data.quantityTarget : t.quantityTarget,

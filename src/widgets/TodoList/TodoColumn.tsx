@@ -18,7 +18,7 @@ interface TodoColumnProps {
   isMobile?: boolean;
   onEditColumn: (column: Column) => void;
   onAddColumnAfter: (prevPos: number) => void;
-  onAddTask: (title: string, columnId: string) => Promise<string>;
+  onAddTask: (task: Partial<Task>) => Promise<string>;
   onEditTask: (id: string) => void;
   onRenameTask: (id: string, title: string) => void;
   onToggleDone: (id: string) => void;
@@ -67,7 +67,13 @@ export function TodoColumn({
   const [hideColumn, setHideColumn] = useState(false);
 
   const handleAddTask = async (colId: string, title: string) => {
-    const id = await onAddTask(title, colId);
+    const id = await onAddTask({
+      title,
+      columnId: colId,
+      position: tasks.length + 1,
+      quantityDone: 0,
+      quantityTarget: 1,
+    });
     setCreatingId(id);
     return id;
   };

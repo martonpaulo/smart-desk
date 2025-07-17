@@ -5,6 +5,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EventRepeatIcon from '@mui/icons-material/EventRepeat';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import UndoIcon from '@mui/icons-material/Undo';
 import { Box, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { alpha, darken } from '@mui/material/styles';
@@ -122,6 +123,12 @@ export function TodoTaskCard({
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={0.5}>
           <Stack direction="row" spacing={0.5} fontSize="0.8rem" alignItems="center">
             {!task.isSynced && !editing && <SyncedSyncIcon status={syncStatus} />}
+
+            {task.important && task.urgent && (
+              <Tooltip title="Important and urgent task">
+                <LocalFireDepartmentIcon fontSize="small" color="error" />
+              </Tooltip>
+            )}
 
             {task.notes && (
               <Tooltip title="Has notes">

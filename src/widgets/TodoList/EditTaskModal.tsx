@@ -45,6 +45,8 @@ export function EditTaskModal({
   const [quantity, setQuantity] = useState<number>(1);
   const [useQuantity, setUseQuantity] = useState<boolean>(false);
   const [useDaily, setUseDaily] = useState<boolean>(false);
+  const [important, setImportant] = useState<boolean>(false);
+  const [urgent, setUrgent] = useState<boolean>(false);
   // const [presets, setPresets] = useState<TagPreset[]>([]);
   const [touched, setTouched] = useState<boolean>(false);
 
@@ -68,6 +70,8 @@ export function EditTaskModal({
     setQuantity(task.quantityTarget ?? 1);
     setUseQuantity((task.quantityTarget ?? 0) > 2);
     setUseDaily(task.daily ?? false);
+    setImportant(task.important ?? false);
+    setUrgent(task.urgent ?? false);
 
     // setTagInput('');
     setEditingTag(null);
@@ -145,6 +149,8 @@ export function EditTaskModal({
         quantityDone: task.quantityDone, // keep existing done count
         quantityTarget: quantity,
         daily: useDaily,
+        important,
+        urgent,
       });
     }
     onClose();
@@ -242,6 +248,26 @@ export function EditTaskModal({
                 }}
               />
               <Typography variant="body2">Daily</Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center">
+              <Checkbox
+                checked={important}
+                onChange={(_, checked) => {
+                  setImportant(checked);
+                  setTouched(true);
+                }}
+              />
+              <Typography variant="body2">Important</Typography>
+            </Stack>
+            <Stack direction="row" alignItems="center">
+              <Checkbox
+                checked={urgent}
+                onChange={(_, checked) => {
+                  setUrgent(checked);
+                  setTouched(true);
+                }}
+              />
+              <Typography variant="body2">Urgent</Typography>
             </Stack>
           </Stack>
 

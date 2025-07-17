@@ -5,7 +5,7 @@ import { useIcsEvents } from '@/hooks/useIcsEvents';
 import { useEventStore } from '@/store/eventStore';
 
 export function useEvents(date?: string) {
-  const setRemoteEvents = useEventStore(store => store.setRemoteEvents);
+  const setRemoteEvents = useEventStore(s => s.setRemoteEvents);
 
   const {
     data: googleEvents = [],
@@ -24,20 +24,27 @@ export function useEvents(date?: string) {
   } = useIcsEvents();
 
   const isLoading = loadingGoogle || loadingIcs;
-  const hasError = errorGoogle || errorIcs;
-  const error = googleError || icsError;
+  const bothFailed = Boolean(errorGoogle && errorIcs);
+  const firstError = googleError ?? icsError;
 
   useEffect(() => {
-    if (isLoading || hasError) return;
+    if (isLoading) return;
+    if (bothFailed) return;
 
-    const fetched = [...googleEvents, ...icsEvents];
-    setRemoteEvents(fetched);
-  }, [googleEvents, icsEvents, isLoading, hasError, setRemoteEvents]);
+    const combined = [...(errorGoogle ? [] : googleEvents), ...(errorIcs ? [] : icsEvents)];
+
+    setRemoteEvents(combined);
+  }, [googleEvents, icsEvents, isLoading, errorGoogle, errorIcs, setRemoteEvents, bothFailed]);
 
   function refetchAll() {
     refetchGoogle();
     refetchIcs();
   }
 
-  return { isLoading, isError: hasError, error, refetch: refetchAll };
+  return {
+    isLoading,
+    isError: bothFailed,
+    error: firstError,
+    refetch: refetchAll,
+  };
 }

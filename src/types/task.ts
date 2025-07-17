@@ -2,6 +2,8 @@ export interface Task {
   id: string;
   title: string;
   notes?: string;
+  important: boolean;
+  urgent: boolean;
   quantityDone: number;
   quantityTarget: number;
   daily: boolean;

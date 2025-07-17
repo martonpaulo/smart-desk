@@ -26,6 +26,8 @@ export interface AddColumnData {
 export interface AddTaskData {
   title: string;
   notes?: string;
+  important?: boolean;
+  urgent?: boolean;
   quantityTarget?: number;
   daily?: boolean;
   columnId?: string;
@@ -45,6 +47,8 @@ export interface UpdateTaskData {
   id: string;
   title?: string;
   notes?: string;
+  important?: boolean;
+  urgent?: boolean;
   quantityDone?: number;
   quantityTarget?: number;
   daily?: boolean;

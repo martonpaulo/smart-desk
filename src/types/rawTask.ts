@@ -3,6 +3,8 @@ export interface RawTask {
   user_id: string;
   title: string;
   notes: string | null;
+  important: boolean;
+  urgent: boolean;
   quantity_done: number;
   quantity_target: number;
   daily: boolean;

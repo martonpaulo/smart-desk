@@ -106,9 +106,14 @@ export function TodoList() {
   };
 
   // ── Task handlers (unchanged) ───────────────────────────────────────────
-  const handleAddTask = async (title: string, columnId?: string): Promise<string> => {
+  const handleAddTask = async (task: Partial<Task>): Promise<string> => {
     try {
-      return await addTask({ title, columnId, updatedAt: new Date() });
+      return await addTask({
+        // Default title that will be overridden if task.title exists
+        title: 'New Task',
+        ...task,
+        updatedAt: new Date(),
+      });
     } catch (err) {
       console.error('Task add failed', err);
       return '';
