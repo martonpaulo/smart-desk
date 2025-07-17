@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 
+import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useEventStore } from '@/store/eventStore';
 import { showUndo } from '@/store/undoStore';
 import { theme } from '@/styles/theme';
@@ -27,6 +28,8 @@ import { EditEventModal } from '@/widgets/EventList/EditEventModal';
 import { EventListItem } from '@/widgets/EventList/EventListItem';
 
 export function EventList({ events }: { events: IEvent[] | null }) {
+  const { isMobile } = useResponsiveness();
+
   const deleteEvent = useEventStore(s => s.deleteEvent);
   const addLocalEvent = useEventStore(s => s.addLocalEvent);
   const updateLocalEvent = useEventStore(s => s.updateLocalEvent);
@@ -52,6 +55,7 @@ export function EventList({ events }: { events: IEvent[] | null }) {
 
   return (
     <Stack
+      width={isMobile ? '100%' : 250}
       borderRadius={1}
       p={1.5}
       sx={{

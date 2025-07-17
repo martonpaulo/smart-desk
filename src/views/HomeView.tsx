@@ -16,11 +16,9 @@ import { EventTimeline } from '@/widgets/EventTimeline';
 import { ICSCalendarManager } from '@/widgets/ICSCalendarManager';
 import { LocalEventsManager } from '@/widgets/LocalEventsManager';
 import { SettingsButton, SettingsDialog } from '@/widgets/Settings';
-import { AppInfo } from '@/widgets/Settings/AppInfo';
-import { AuthStatus } from '@/widgets/Settings/AuthStatus';
 import { EventsTrash } from '@/widgets/Settings/EventsTrash';
+import { GeneralSettings } from '@/widgets/Settings/GeneralSettings';
 import { TagPresets } from '@/widgets/Settings/TagPresets';
-import { TodoViewSettings } from '@/widgets/Settings/TodoViewSettings';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
 import { TodoProgress } from '@/widgets/TodoProgress';
@@ -85,10 +83,10 @@ export function HomeView({
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         tabs={{
+          General: <GeneralSettings />,
           'ICS Calendar': <ICSCalendarManager />,
           'Local Events': <LocalEventsManager />,
           'Deleted Events': <EventsTrash />,
-          'Todo View': <TodoViewSettings />,
           Tags: <TagPresets />,
           Auth: (
             <AuthControl
@@ -101,7 +99,6 @@ export function HomeView({
               handleSignOut={handleSignOut}
             />
           ),
-          Status: <AuthStatus />,
           'Sound Alerts': events && (
             <SoundAlert
               currentTime={now}
@@ -115,7 +112,6 @@ export function HomeView({
               onEventChangesAlertToggle={onEventChangesAlertToggle}
             />
           ),
-          Info: <AppInfo />,
         }}
       />
       {!isMobile && (
@@ -135,13 +131,16 @@ export function HomeView({
 
       <Stack
         spacing={2}
-        direction={isMobile ? 'column' : 'row'}
+        direction={isMobile ? 'column-reverse' : 'row'}
         alignItems={isMobile ? 'stretch' : 'flex-start'}
       >
         <TodoList />
-        <Stack spacing={2} flexGrow={1}>
-          <TodoProgress />
-          <EventList events={events} key={`${now.toISOString()}-EventList`} />
+
+        <Stack alignItems="flex-start">
+          <Stack spacing={2}>
+            <TodoProgress alignSelf="flex-end" />
+            <EventList events={events} key={`${now.toISOString()}-EventList`} />
+          </Stack>
         </Stack>
       </Stack>
 

@@ -11,10 +11,7 @@ interface TodoPrefsState {
   setHideDoneColumn: (hide: boolean) => void;
 }
 
-type TodoPrefsData = Pick<
-  TodoPrefsState,
-  'view' | 'trashOpen' | 'hideDoneColumn'
->;
+type TodoPrefsData = Pick<TodoPrefsState, 'view' | 'trashOpen' | 'hideDoneColumn'>;
 
 const STORAGE_KEY = 'todo-prefs';
 
@@ -24,7 +21,7 @@ function loadPrefs(): TodoPrefsData {
       getStoredFilters<TodoPrefsData>(STORAGE_KEY) ?? {
         view: 'board',
         trashOpen: false,
-        hideDoneColumn: false,
+        hideDoneColumn: true,
       }
     );
   } catch {
