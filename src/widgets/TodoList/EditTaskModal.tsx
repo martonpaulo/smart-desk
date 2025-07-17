@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { Delete as DeleteIcon } from '@mui/icons-material';
-import CancelIcon from '@mui/icons-material/Cancel';
+// import CancelIcon from '@mui/icons-material/Cancel';
 import {
-  Autocomplete,
-  Box,
   Checkbox,
-  Chip,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -16,14 +13,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 
 import { QuantitySelector } from '@/components/QuantitySelector';
-import { theme } from '@/styles/theme';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
-import { loadTagPresets, saveTagPresets, TagPreset } from '@/utils/tagPresetsStorage';
-import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 
 interface EditTaskModalProps {
   task: Task | null;
@@ -40,28 +33,28 @@ export function EditTaskModal({
   onSave,
   onClose,
   onDeleteTask,
-  column,
+  // column,
 }: EditTaskModalProps) {
   // always defined states
   const [title, setTitle] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState<string>('');
+  // const [tags, setTags] = useState<string[]>([]);
+  // const [tagInput, setTagInput] = useState<string>('');
   const [editingTag, setEditingTag] = useState<string | null>(null);
-  const [hoveredDeleteTag, setHoveredDeleteTag] = useState<string | null>(null);
+  // const [hoveredDeleteTag, setHoveredDeleteTag] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [useQuantity, setUseQuantity] = useState<boolean>(false);
   const [useDaily, setUseDaily] = useState<boolean>(false);
-  const [presets, setPresets] = useState<TagPreset[]>([]);
+  // const [presets, setPresets] = useState<TagPreset[]>([]);
   const [touched, setTouched] = useState<boolean>(false);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
 
   // load saved presets once
-  useEffect(() => {
-    setPresets(loadTagPresets());
-  }, []);
+  // useEffect(() => {
+  //   setPresets(loadTagPresets());
+  // }, []);
 
   // when task changes populate form with safe defaults
   useEffect(() => {
@@ -76,7 +69,7 @@ export function EditTaskModal({
     setUseQuantity((task.quantityTarget ?? 0) > 2);
     setUseDaily(task.daily ?? false);
 
-    setTagInput('');
+    // setTagInput('');
     setEditingTag(null);
 
     // focus title after dialog opens
@@ -96,47 +89,47 @@ export function EditTaskModal({
     }
   }, [editingTag]);
 
-  // helper to add or rename a tag
-  const commitTag = (value: string) => {
-    if (!value) return;
-    if (editingTag) {
-      // renaming
-      setTags(prev => (prev.includes(value) ? prev : [...prev, value]));
-      setEditingTag(null);
-    } else {
-      // new tag
-      setTags(prev => (prev.includes(value) ? prev : [...prev, value]));
-    }
-    // save preset if new
-    if (!presets.find(p => p.name === value)) {
-      const next = [...presets, { name: value, color: COLUMN_COLORS[0].value }];
-      setPresets(next);
-      saveTagPresets(next);
-    }
-    setTagInput('');
-  };
+  // // helper to add or rename a tag
+  // const commitTag = (value: string) => {
+  //   if (!value) return;
+  //   if (editingTag) {
+  //     // renaming
+  //     setTags(prev => (prev.includes(value) ? prev : [...prev, value]));
+  //     setEditingTag(null);
+  //   } else {
+  //     // new tag
+  //     setTags(prev => (prev.includes(value) ? prev : [...prev, value]));
+  //   }
+  //   // save preset if new
+  //   if (!presets.find(p => p.name === value)) {
+  //     const next = [...presets, { name: value, color: COLUMN_COLORS[0].value }];
+  //     setPresets(next);
+  //     saveTagPresets(next);
+  //   }
+  //   setTagInput('');
+  // };
 
   // handle space or enter in the tag textfield
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === ' ' || (e.key === 'Enter' && !(e.ctrlKey || e.metaKey))) {
-      e.preventDefault();
-      commitTag(tagInput.trim());
-    }
-    // cmd+enter also adds
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      commitTag(tagInput.trim());
-      // save immediate change
-      if (task && touched) {
-        onSave({
-          ...task,
-          title: title.trim(),
-          notes: notes.trim() || undefined,
-          // tags: tags,
-        });
-      }
-    }
-  };
+  // const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === ' ' || (e.key === 'Enter' && !(e.ctrlKey || e.metaKey))) {
+  //     e.preventDefault();
+  //     //commitTag(tagInput.trim());
+  //   }
+  //   // cmd+enter also adds
+  //   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+  //     e.preventDefault();
+  //     // commitTag(tagInput.trim());
+  //     // save immediate change
+  //     if (task && touched) {
+  //       onSave({
+  //         ...task,
+  //         title: title.trim(),
+  //         notes: notes.trim() || undefined,
+  //         // tags: tags,
+  //       });
+  //     }
+  //   }
+  // };
 
   // final save
   const handleSaveAndClose = () => {
@@ -160,8 +153,8 @@ export function EditTaskModal({
   // quick close
   const handleCloseOnly = () => onClose();
 
-  const tagBg = column ? alpha(column.color, 0.65) : undefined;
-  const tagFg = tagBg ? theme.palette.getContrastText(tagBg) : undefined;
+  // const tagBg = column ? alpha(column.color, 0.65) : undefined;
+  // const tagFg = tagBg ? theme.palette.getContrastText(tagBg) : undefined;
 
   return (
     <Dialog
@@ -272,7 +265,7 @@ export function EditTaskModal({
           />
 
           {/* Tags input + chips */}
-          <Stack direction="row" spacing={2}>
+          {/* <Stack direction="row" spacing={2}>
             <Autocomplete
               freeSolo
               options={presets.map(p => p.name)}
@@ -329,7 +322,7 @@ export function EditTaskModal({
                 </Tooltip>
               ))}
             </Box>
-          </Stack>
+          </Stack> */}
         </Stack>
       </DialogContent>
     </Dialog>

@@ -16,13 +16,13 @@ import {
   TextField,
 } from '@mui/material';
 
+import { colorMap } from '@/styles/colors';
 import { loadTagPresets, saveTagPresets, TagPreset } from '@/utils/tagPresetsStorage';
-import { COLUMN_COLORS } from '@/widgets/TodoList/ColumnModal';
 
 export function TagPresets() {
   const [presets, setPresets] = useState<TagPreset[]>([]);
   const [name, setName] = useState('');
-  const [color, setColor] = useState(COLUMN_COLORS[0].value);
+  const [color, setColor] = useState(colorMap.blue.value);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export function TagPresets() {
     setPresets(updated);
     saveTagPresets(updated);
     setName('');
-    setColor(COLUMN_COLORS[0].value);
+    setColor(colorMap.blue.value);
     setEditingIndex(null);
   };
 
@@ -73,22 +73,24 @@ export function TagPresets() {
           sx={{ minWidth: 120 }}
           SelectProps={{
             renderValue: (value: unknown) => {
-              const selected = COLUMN_COLORS.find(c => c.value === value);
+              const selected = Object.values(colorMap).find(
+                (c: { value: string; label: string }) => c.value === value,
+              );
               if (!selected) return null;
               return (
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <StatusIcon sx={{ color: selected.value }} />
-                  <span>{selected.name}</span>
+                  <span>{selected.label}</span>
                 </Stack>
               );
             },
           }}
         >
-          {COLUMN_COLORS.map(opt => (
+          {Object.values(colorMap).map(opt => (
             <MenuItem key={opt.value} value={opt.value}>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <StatusIcon sx={{ color: opt.value }} />
-                <span>{opt.name}</span>
+                <span>{opt.label}</span>
               </Stack>
             </MenuItem>
           ))}
