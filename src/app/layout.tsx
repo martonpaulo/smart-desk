@@ -7,6 +7,7 @@ import { SessionProvider } from 'next-auth/react';
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
+import { RouterProvider } from '@/providers/RouterProvider';
 import { ServiceWorkerProvider } from '@/providers/ServiceWorkerProvider';
 import { SupabaseSyncProvider } from '@/providers/SupabaseSyncProvider';
 import { ZoomProvider } from '@/providers/ZoomProvider';
@@ -37,7 +38,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
               <ReactQueryProvider>
                 <SupabaseSyncProvider>
                   <ZoomProvider>
-                    <AppThemeProvider>{children}</AppThemeProvider>
+                    <RouterProvider>
+                      <AppThemeProvider>{children}</AppThemeProvider>
+                    </RouterProvider>
                   </ZoomProvider>
                 </SupabaseSyncProvider>
               </ReactQueryProvider>
