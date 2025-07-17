@@ -7,9 +7,14 @@ interface TodoPrefsState {
   setView: (view: 'board' | 'list') => void;
   trashOpen: boolean;
   setTrashOpen: (open: boolean) => void;
+  hideDoneColumn: boolean;
+  setHideDoneColumn: (hide: boolean) => void;
 }
 
-type TodoPrefsData = Pick<TodoPrefsState, 'view' | 'trashOpen'>;
+type TodoPrefsData = Pick<
+  TodoPrefsState,
+  'view' | 'trashOpen' | 'hideDoneColumn'
+>;
 
 const STORAGE_KEY = 'todo-prefs';
 
@@ -19,6 +24,7 @@ function loadPrefs(): TodoPrefsData {
       getStoredFilters<TodoPrefsData>(STORAGE_KEY) ?? {
         view: 'board',
         trashOpen: false,
+        hideDoneColumn: false,
       }
     );
   } catch {
@@ -27,6 +33,8 @@ function loadPrefs(): TodoPrefsData {
       setView: () => {},
       trashOpen: false,
       setTrashOpen: () => {},
+      hideDoneColumn: false,
+      setHideDoneColumn: () => {},
     } as TodoPrefsState;
   }
 }
@@ -35,6 +43,7 @@ function persistPrefs(state: TodoPrefsState) {
   const dataToStore: TodoPrefsData = {
     view: state.view,
     trashOpen: state.trashOpen,
+    hideDoneColumn: state.hideDoneColumn,
   };
   setStoredFilters(STORAGE_KEY, dataToStore);
 }
@@ -50,6 +59,12 @@ export const useTodoPrefsStore = create<TodoPrefsState>(set => ({
   setTrashOpen: open =>
     set(state => {
       const next = { ...state, trashOpen: open };
+      return next;
+    }),
+  setHideDoneColumn: hide =>
+    set(state => {
+      const next = { ...state, hideDoneColumn: hide };
+      persistPrefs(next);
       return next;
     }),
 }));

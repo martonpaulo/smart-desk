@@ -23,6 +23,7 @@ import { TagPresets } from '@/widgets/Settings/TagPresets';
 import { TodoViewSettings } from '@/widgets/Settings/TodoViewSettings';
 import { SoundAlert } from '@/widgets/SoundAlert';
 import { TodoList } from '@/widgets/TodoList';
+import { TodoProgress } from '@/widgets/TodoProgress';
 
 interface HomeViewProps {
   dashboardViewState: DashboardViewState;
@@ -138,7 +139,10 @@ export function HomeView({
         alignItems={isMobile ? 'stretch' : 'flex-start'}
       >
         <TodoList />
-        <EventList events={events} key={`${now.toISOString()}-EventList`} />
+        <Stack spacing={2} flexGrow={1}>
+          <TodoProgress />
+          <EventList events={events} key={`${now.toISOString()}-EventList`} />
+        </Stack>
       </Stack>
 
       <EventAlert
