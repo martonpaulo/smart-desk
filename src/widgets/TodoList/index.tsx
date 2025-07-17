@@ -11,6 +11,7 @@ import { Task } from '@/types/task';
 import { getNewColumnPosition, isTaskEmpty } from '@/utils/boardHelpers';
 import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
 import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
+import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 
@@ -49,7 +50,7 @@ export function TodoList() {
 
   const columnsToRender = columns.filter(c => {
     if (c.trashed) return false;
-    if (hideDoneColumn && c.title === 'Done') return false;
+    if (hideDoneColumn && c.title === defaultColumns.done.title) return false;
     return true;
   });
   const boardIsEmpty = columnsToRender.length === 0;
@@ -154,58 +155,50 @@ export function TodoList() {
     if (!task) return;
 
     const now = new Date();
-
-    const next = (task.quantityDone ?? 0) + 1;
+    const next = task.quantityDone + 1;
     const value = next > task.quantityTarget ? 0 : next;
+    let taskColumnId = task.columnId;
 
     if (value === task.quantityTarget) {
-      const doneColumn = columns.find(c => c.title === 'Done');
+      const doneColumn = columns.find(c => c.title === defaultColumns.done.title);
+
       if (doneColumn) {
-        await updateTask({ id, columnId: doneColumn.id, quantityDone: value, updatedAt: now });
+        taskColumnId = doneColumn.id;
+        if (doneColumn.trashed) {
+          await updateColumn({ id: doneColumn.id, trashed: false, updatedAt: now });
+        }
       } else {
-        const columnId = await addColumn({
-          title: 'Done',
-          color: '#4caf50',
+        taskColumnId = await addColumn({
+          title: defaultColumns.done.title,
+          color: defaultColumns.done.color,
           position: columnsToRender.length + 1,
           updatedAt: now,
         });
-        await updateTask({
-          id,
-          columnId: columnId ? columnId : task.columnId,
-          quantityDone: value,
-          updatedAt: now,
-        });
-        return;
       }
     }
 
     if (value === 0) {
-      const todoColumn = columns.find(c => c.title === 'To Do');
+      const todoColumn = columns.find(c => c.title === defaultColumns.todo.title);
+
       if (todoColumn) {
+        taskColumnId = todoColumn.id;
         if (todoColumn.trashed) {
           await updateColumn({ id: todoColumn.id, trashed: false, updatedAt: now });
         }
-        await updateTask({ id, columnId: todoColumn.id, quantityDone: value, updatedAt: now });
-      } else {
-        const columnId = await addColumn({
-          title: 'To Do',
-          color: '#2196f3',
-          position: columnsToRender.length + 1,
-          updatedAt: now,
-        });
-        await updateTask({
-          id,
-          columnId: columnId ? columnId : task.columnId,
-          quantityDone: value,
-          updatedAt: now,
-        });
-        return;
       }
 
-      // just update done count
-      await updateTask({ id, quantityDone: value, updatedAt: now });
-      return;
+      const columnId = await addColumn({
+        title: defaultColumns.todo.title,
+        color: defaultColumns.todo.color,
+        position: columnsToRender.length + 1,
+        updatedAt: now,
+      });
+      taskColumnId = columnId;
     }
+
+    // just update done count
+    await updateTask({ id, columnId: taskColumnId, quantityDone: value, updatedAt: now });
+    return;
   };
 
   // ── Task drag & drop ────────────────────────────────────────────────────
@@ -276,7 +269,8 @@ export function TodoList() {
 
   const renderColumn = (column: Column) => {
     const colTasks = tasks.filter(t => t.columnId === column.id && !t.trashed);
-    const onHideColumn = column.title === 'Done' ? () => setHideDoneColumn(true) : undefined;
+    const onHideColumn =
+      column.title === defaultColumns.done.title ? () => setHideDoneColumn(true) : undefined;
     return (
       <TodoColumn
         key={column.id}

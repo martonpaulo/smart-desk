@@ -1,12 +1,13 @@
 import { LinearProgress, Stack, StackProps, Typography } from '@mui/material';
 
 import { useBoardStore } from '@/store/board/store';
+import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 
 export function TodoProgress(props: StackProps) {
   const tasks = useBoardStore(state => state.tasks);
   const columns = useBoardStore(state => state.columns);
 
-  const doneColumn = columns.find(c => !c.trashed && c.title === 'Done');
+  const doneColumn = columns.find(c => !c.trashed && c.title === defaultColumns.done.title);
   const totalCount = tasks.filter(t => !t.trashed).length;
   const doneCount = doneColumn
     ? tasks.filter(t => !t.trashed && t.columnId === doneColumn.id).length

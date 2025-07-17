@@ -15,24 +15,8 @@ import {
   Tooltip,
 } from '@mui/material';
 
+import { colorMap } from '@/styles/colors';
 import { Column } from '@/types/column';
-
-export const COLUMN_COLORS = [
-  { name: 'Blue', value: '#1976d2' },
-  { name: 'Orange', value: '#ed6c02' },
-  { name: 'Green', value: '#2e7d32' },
-  { name: 'Red', value: '#d32f2f' },
-  { name: 'Purple', value: '#9c27b0' },
-  { name: 'Gray', value: '#616161' },
-  { name: 'Black', value: '#000000' },
-  { name: 'Pink', value: '#e91e63' },
-  { name: 'Cyan', value: '#00bcd4' },
-  { name: 'Teal', value: '#00796b' },
-  { name: 'Lime', value: '#cddc39' },
-  { name: 'Amber', value: '#ffc107' },
-  { name: 'Brown', value: '#795548' },
-  { name: 'Indigo', value: '#3f51b5' },
-];
 
 interface ColumnModalProps {
   open: boolean;
@@ -52,7 +36,7 @@ export function ColumnModal({
   onClose,
 }: ColumnModalProps) {
   const [title, setTitle] = useState('');
-  const [color, setColor] = useState(COLUMN_COLORS[0].value);
+  const [color, setColor] = useState(colorMap.blue.value);
   const [modalTitle, setModalTitle] = useState('');
   const [touched, setTouched] = useState(false);
 
@@ -70,7 +54,7 @@ export function ColumnModal({
       setModalTitle('Edit Column');
     } else {
       setTitle('');
-      setColor(COLUMN_COLORS[0].value);
+      setColor(colorMap.blue.value);
       setModalTitle('Add Column');
     }
 
@@ -172,24 +156,24 @@ export function ColumnModal({
             slotProps={{
               select: {
                 renderValue: (value: unknown) => {
-                  const selected = COLUMN_COLORS.find(c => c.value === value);
+                  const selected = colorMap[value as keyof typeof colorMap];
                   if (!selected) return null;
                   return (
                     <Stack direction="row" alignItems="center" spacing={1}>
                       <StatusIcon sx={{ color: alpha(selected.value, 0.75) }} />
-                      <span>{selected.name}</span>
+                      <span>{selected.label}</span>
                     </Stack>
                   );
                 },
               },
             }}
           >
-            {COLUMN_COLORS.map(opt => (
-              <MenuItem key={opt.value} value={opt.value}>
+            {Object.entries(colorMap).map(([key, opt]) => (
+              <MenuItem key={key} value={opt.value}>
                 <ListItemIcon>
                   <StatusIcon sx={{ color: alpha(opt.value, 0.75) }} />
                 </ListItemIcon>
-                <ListItemText primary={opt.name} />
+                <ListItemText primary={opt.label} />
               </MenuItem>
             ))}
           </TextField>
