@@ -35,6 +35,7 @@ interface TodoColumnProps {
   draggingColumnId?: string | null;
   showAddTaskInput?: boolean;
   syncStatus: SyncStatus;
+  onHideColumn?: () => void;
 }
 
 export function TodoColumn({
@@ -60,6 +61,7 @@ export function TodoColumn({
   draggingColumnId,
   showAddTaskInput = true,
   syncStatus,
+  onHideColumn,
 }: TodoColumnProps) {
   const [creatingId, setCreatingId] = useState<string | null>(null);
   const [hideColumn, setHideColumn] = useState(false);
@@ -129,7 +131,13 @@ export function TodoColumn({
             <IconButton
               size="small"
               className="column-hide-btn"
-              onClick={() => setHideColumn(!hideColumn)}
+              onClick={() => {
+                if (onHideColumn) {
+                  onHideColumn();
+                } else {
+                  setHideColumn(!hideColumn);
+                }
+              }}
               sx={{
                 opacity: hideColumn ? 0.5 : 0.8,
                 color: hideColumn ? 'text.secondary' : column.color,

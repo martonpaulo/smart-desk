@@ -5,6 +5,7 @@ import { Button, Stack } from '@mui/material';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
 import { useSyncStatusStore } from '@/store/syncStatus';
+import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
 import { getNewColumnPosition, isTaskEmpty } from '@/utils/boardHelpers';
@@ -43,7 +44,14 @@ export function TodoList() {
 
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const columnsToRender = columns.filter(c => !c.trashed);
+  const hideDoneColumn = useTodoPrefsStore(state => state.hideDoneColumn);
+  const setHideDoneColumn = useTodoPrefsStore(state => state.setHideDoneColumn);
+
+  const columnsToRender = columns.filter(c => {
+    if (c.trashed) return false;
+    if (hideDoneColumn && c.title === 'Done') return false;
+    return true;
+  });
   const boardIsEmpty = columnsToRender.length === 0;
 
   // ── Column modal open/close ─────────────────────────────────────────────
@@ -265,6 +273,10 @@ export function TodoList() {
 
   const renderColumn = (column: Column) => {
     const colTasks = tasks.filter(t => t.columnId === column.id && !t.trashed);
+    const onHideColumn =
+      column.title === 'Done'
+        ? () => setHideDoneColumn(true)
+        : undefined;
     return (
       <TodoColumn
         key={column.id}
@@ -291,6 +303,7 @@ export function TodoList() {
         draggingColumnId={draggingColumnId}
         showAddTaskInput={!isMobile}
         syncStatus={syncStatus}
+        onHideColumn={onHideColumn}
       />
     );
   };
