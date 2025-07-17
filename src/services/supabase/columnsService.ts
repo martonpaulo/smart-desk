@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+import { fetchUserId } from '@/services/supabase/userService';
 import { Column } from '@/types/column';
 import { mapColumnToDB, mapDBToColumn } from '@/utils/databaseUtils';
 
@@ -18,17 +19,12 @@ export async function fetchColumns(client: SupabaseClient): Promise<Column[]> {
 }
 
 export async function upsertColumn(client: SupabaseClient, payload: Column): Promise<Column> {
-  const {
-    data: { user },
-    error: authError,
-  } = await client.auth.getUser();
-
-  if (authError || !user?.id) {
-    console.error('upsertColumn auth failed', authError);
+  const userId = await fetchUserId(client);
+  if (!userId) {
     throw new Error('User not authenticated');
   }
 
-  const row = mapColumnToDB(payload, user.id);
+  const row = mapColumnToDB(payload, userId);
 
   const { data, error } = await client
     .from('columns')
