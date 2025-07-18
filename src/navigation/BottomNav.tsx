@@ -5,6 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DraftsIcon from '@mui/icons-material/Drafts';
 import HomeIcon from '@mui/icons-material/Home';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -25,6 +26,7 @@ export function BottomNav() {
         <BottomNavigationAction label="Matrix" value="/matrix" icon={<DashboardIcon />} />
         <BottomNavigationAction label="Drafts" value="/drafts" icon={<DraftsIcon />} />
         <BottomNavigationAction label="Trash" value="/trash" icon={<DeleteIcon />} />
+        <BottomNavigationAction label="Settings" value="/settings" icon={<SettingsIcon />} />
       </BottomNavigation>
     </Paper>
   );

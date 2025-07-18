@@ -1,52 +1,89 @@
 'use client';
 
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { useDashboardViewState } from '@/hooks/useDashboardViewState';
+import { useEffect, useState } from 'react';
+
+import { Stack } from '@mui/material';
+
+import { UndoSnackbar } from '@/components/UndoSnackbar';
 import { useLocation } from '@/hooks/useLocation';
+import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useWeather } from '@/hooks/useWeather';
 import { useAudioStore } from '@/store/audioStore';
 import { useEventStore } from '@/store/eventStore';
-import { HomeView } from '@/views/HomeView';
+import { ChangeSnackbar } from '@/widgets/ChangeSnackbar';
+import { Clock } from '@/widgets/Clock';
+import { EventAlert } from '@/widgets/EventAlert';
+import { EventList } from '@/widgets/EventList';
+import { EventTimeline } from '@/widgets/EventTimeline';
+import { TodoList } from '@/widgets/TodoList';
+import { TodoProgress } from '@/widgets/TodoProgress';
 
 export default function HomePage() {
-  const dashboardViewState = useDashboardViewState();
-
   const { latitude, longitude } = useLocation();
-  const {
-    data: weather,
-    isLoading: weatherIsLoading,
-    isError: weatherIsError,
-    error: weatherError,
-  } = useWeather(latitude, longitude);
+  const { data: weather } = useWeather(latitude, longitude);
+  const events = useEventStore(state => state.events);
 
   const setAlertAcknowledged = useEventStore(state => state.setAlertAcknowledged);
-  const audioEnabled = useAudioStore(state => state.audioEnabled);
-  const toggleAudioEnabled = useAudioStore(state => state.toggleAudioEnabled);
-  const isFirstRender = useAudioStore(state => state.isFirstRender);
   const isMeetingAlertEnabled = useAudioStore(state => state.meetingAlertEnabled);
-  const toggleMeetingAlertEnabled = useAudioStore(state => state.toggleMeetingAlertEnabled);
   const isEventChangesAlertEnabled = useAudioStore(state => state.eventChangesAlertEnabled);
-  const toggleEventChangesAlertEnabled = useAudioStore(
-    state => state.toggleEventChangesAlertEnabled,
-  );
+
+  const [now, setNow] = useState(new Date());
+  const { isMobile } = useResponsiveness();
+
+  // tick every minute
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <ErrorBoundary>
-      <HomeView
-        dashboardViewState={dashboardViewState}
+    <Stack gap={2} p={isMobile ? 4 : 2}>
+      {!isMobile && (
+        <Stack direction="row" justifyContent="space-between" gap={2} alignItems="center">
+          <Stack flexGrow={1}>
+            <EventTimeline
+              events={events}
+              currentTime={now}
+              pastWindowHours={3}
+              futureWindowHours={6}
+            />
+          </Stack>
+
+          {weather && <Clock currentTime={now} weather={weather} />}
+        </Stack>
+      )}
+
+      <Stack
+        spacing={2}
+        direction={isMobile ? 'column-reverse' : 'row'}
+        alignItems={isMobile ? 'stretch' : 'flex-start'}
+      >
+        <TodoList />
+
+        <Stack alignItems="flex-start">
+          <Stack spacing={2}>
+            <TodoProgress alignSelf="flex-end" />
+            <EventList events={events} key={`${now.toISOString()}-EventList`} />
+          </Stack>
+        </Stack>
+      </Stack>
+
+      <EventAlert
+        events={null}
         onAlertAcknowledge={setAlertAcknowledged}
-        audioEnabled={audioEnabled}
-        toggleAudioEnabled={toggleAudioEnabled}
-        isFirstRender={isFirstRender}
-        isMeetingAlertEnabled={isMeetingAlertEnabled}
-        onMeetingAlertToggle={toggleMeetingAlertEnabled}
-        isEventChangesAlertEnabled={isEventChangesAlertEnabled}
-        onEventChangesAlertToggle={toggleEventChangesAlertEnabled}
-        weather={weather}
-        weatherIsLoading={weatherIsLoading}
-        weatherIsError={weatherIsError}
-        weatherError={weatherError}
+        alertLeadTimeMinutes={2}
+        meetingAlertEnabled={isMeetingAlertEnabled}
+        key={`${now.toISOString()}-EventAlert`}
       />
-    </ErrorBoundary>
+
+      {events && (
+        <ChangeSnackbar
+          events={events}
+          eventChangesAlertEnabled={isEventChangesAlertEnabled}
+          key={`${now.toISOString()}-ChangeSnackbar`}
+        />
+      )}
+      <UndoSnackbar />
+    </Stack>
   );
 }

@@ -9,6 +9,7 @@ import DraftsIcon from '@mui/icons-material/Drafts';
 import HomeIcon from '@mui/icons-material/Home';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import MenuIcon from '@mui/icons-material/Menu';
+import SettingsIcon from '@mui/icons-material/Settings';
 import {
   Box,
   Divider,
@@ -40,6 +41,7 @@ export function SideDrawer() {
   const secondary = [
     { label: 'Drafts', href: '/drafts', icon: <DraftsIcon /> },
     { label: 'Trash', href: '/trash', icon: <DeleteIcon /> },
+    { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
   ];
 
   return (

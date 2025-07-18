@@ -208,21 +208,25 @@ export function TodoList() {
 
   // ── Task drag & drop ────────────────────────────────────────────────────
   const handleTaskDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
+    if (isMobile) return; // disable drag on mobile
     e.dataTransfer.effectAllowed = 'move';
     setDraggingTaskId(id);
     setHoverTaskId(null);
     setTaskDropColumnId(null);
   };
   const handleTaskDragOver = (e: React.DragEvent<HTMLDivElement>, overId: string) => {
+    if (isMobile) return;
     e.preventDefault();
     if (draggingTaskId && draggingTaskId !== overId) {
       setHoverTaskId(overId);
     }
   };
   const handleTaskColumnDragOver = (columnId: string) => {
+    if (isMobile) return;
     if (draggingTaskId) setTaskDropColumnId(columnId);
   };
   const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, columnId: string) => {
+    if (isMobile) return;
     e.preventDefault();
     if (!draggingTaskId) return;
     try {
@@ -238,18 +242,21 @@ export function TodoList() {
 
   // ── Column drag & drop ──────────────────────────────────────────────────
   const handleColumnDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
+    if (isMobile) return;
     e.dataTransfer.effectAllowed = 'move';
     setDraggingColumnId(id);
     setHoverColumnId(null);
   };
 
   const handleColumnDragOver = (e: React.DragEvent<HTMLDivElement>, overId: string) => {
+    if (isMobile) return;
     e.preventDefault();
     if (!draggingColumnId || draggingColumnId === overId) return;
     setHoverColumnId(overId);
   };
 
   const handleColumnDragEnd = () => {
+    if (isMobile) return;
     if (draggingColumnId) {
       // sort visible columns by position
       const sorted = columnsToRender.slice().sort((a, b) => a.position - b.position);
