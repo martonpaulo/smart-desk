@@ -1,24 +1,13 @@
-import { Alert, AlertColor, Button, CircularProgress, Stack } from '@mui/material';
+'use client';
 
-export interface AuthControlProps {
-  severity: AlertColor;
-  message: string;
-  isLoading: boolean;
-  canSignIn: boolean;
-  canSignOut: boolean;
-  handleSignIn: () => Promise<void>;
-  handleSignOut: () => Promise<void>;
-}
+import { Alert, Button, CircularProgress, Stack } from '@mui/material';
 
-export function AuthControl({
-  severity,
-  message,
-  isLoading,
-  canSignIn,
-  canSignOut,
-  handleSignIn,
-  handleSignOut,
-}: AuthControlProps) {
+import { useDashboardViewState } from '@/hooks/useDashboardViewState';
+
+export default function AccountPage() {
+  const { severity, message, isLoading, canSignIn, canSignOut, handleSignIn, handleSignOut } =
+    useDashboardViewState();
+
   return (
     <Stack spacing={2} alignItems="center" justifyContent="center">
       {isLoading && <CircularProgress />}

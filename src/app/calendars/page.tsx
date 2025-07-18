@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 
 import { Box, Typography } from '@mui/material';
@@ -6,7 +8,7 @@ import { useSettingsStorage } from '@/store/settings/store';
 import { CalendarForm } from '@/widgets/ICSCalendarManager/CalendarForm';
 import { CalendarList } from '@/widgets/ICSCalendarManager/CalendarList';
 
-export function ICSCalendarManager() {
+export default function CalendarManager() {
   const calendars = useSettingsStorage(state => state.icsCalendars);
   const addCalendar = useSettingsStorage(state => state.addIcsCalendar);
   const updateCalendar = useSettingsStorage(state => state.updateIcsCalendar);
@@ -48,7 +50,7 @@ export function ICSCalendarManager() {
   };
 
   return (
-    <Box>
+    <Box p={2} m={2} sx={{ maxWidth: 1000, mx: 'auto' }}>
       <Typography variant="h3" gutterBottom>
         ICS Calendars
       </Typography>

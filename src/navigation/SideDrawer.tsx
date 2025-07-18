@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -37,10 +39,12 @@ export function SideDrawer() {
     { label: 'Home', href: '/', icon: <HomeIcon /> },
     { label: 'All Tasks', href: '/tasks', icon: <ListAltIcon /> },
     { label: 'Matrix', href: '/matrix', icon: <DashboardIcon /> },
+    { label: 'Calendars', href: '/calendars', icon: <CalendarTodayIcon /> },
   ];
   const secondary = [
     { label: 'Drafts', href: '/drafts', icon: <DraftsIcon /> },
     { label: 'Trash', href: '/trash', icon: <DeleteIcon /> },
+    { label: 'Account', href: '/account', icon: <AccountCircleIcon /> },
     { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
   ];
 

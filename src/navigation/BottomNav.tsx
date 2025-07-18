@@ -1,5 +1,7 @@
 'use client';
 
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DraftsIcon from '@mui/icons-material/Drafts';
@@ -24,8 +26,10 @@ export function BottomNav() {
         <BottomNavigationAction label="Home" value="/" icon={<HomeIcon />} />
         <BottomNavigationAction label="Tasks" value="/tasks" icon={<ListAltIcon />} />
         <BottomNavigationAction label="Matrix" value="/matrix" icon={<DashboardIcon />} />
+        <BottomNavigationAction label="Calendars" value="/calendars" icon={<CalendarTodayIcon />} />
         <BottomNavigationAction label="Drafts" value="/drafts" icon={<DraftsIcon />} />
         <BottomNavigationAction label="Trash" value="/trash" icon={<DeleteIcon />} />
+        <BottomNavigationAction label="Account" value="/account" icon={<AccountCircleIcon />} />
         <BottomNavigationAction label="Settings" value="/settings" icon={<SettingsIcon />} />
       </BottomNavigation>
     </Paper>

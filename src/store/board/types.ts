@@ -19,7 +19,7 @@ export interface BoardState {
 export interface AddColumnData {
   title: string;
   color: string;
-  position: number;
+  position?: number;
   updatedAt: Date;
 }
 

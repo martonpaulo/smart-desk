@@ -24,7 +24,7 @@ interface EditTaskModalProps {
   onSave: (task: Task) => void;
   onClose: () => void;
   onDeleteTask: (id: string) => void;
-  column: Column | null;
+  column?: Column | null;
 }
 
 export function EditTaskModal({
