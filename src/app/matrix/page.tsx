@@ -103,7 +103,7 @@ function Quadrant({
                   onOpen={() => onOpen(task)}
                   onRename={() => onRename(task)}
                   onToggleDone={() => onToggleDone(task)}
-                  onDragStart={() => onDragStart(task)}
+                  onDragStart={e => onDragStart(task, e)}
                   onDragOver={onDragOver}
                 />
               </Stack>
@@ -149,22 +149,21 @@ export default function EisenhowerMatrixPage() {
     e.preventDefault();
   };
 
-  const handleDrop = (important: boolean, urgent: boolean) =>
-    async (e: React.DragEvent) => {
-      if (isMobile) return;
-      e.preventDefault();
-      if (!draggingId) return;
-      try {
-        await updateTask({
-          id: draggingId,
-          important,
-          urgent,
-          updatedAt: new Date(),
-        });
-      } finally {
-        setDraggingId(null);
-      }
-    };
+  const handleDrop = (important: boolean, urgent: boolean) => async (e: React.DragEvent) => {
+    if (isMobile) return;
+    e.preventDefault();
+    if (!draggingId) return;
+    try {
+      await updateTask({
+        id: draggingId,
+        important,
+        urgent,
+        updatedAt: new Date(),
+      });
+    } finally {
+      setDraggingId(null);
+    }
+  };
 
   const noop = () => {};
 
