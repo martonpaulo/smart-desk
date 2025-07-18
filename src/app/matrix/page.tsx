@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
@@ -44,11 +46,14 @@ type QuadrantProps = {
   tasks: Task[];
   columns: Column[];
   bgcolor: string;
+  important: boolean;
+  urgent: boolean;
   onOpen: (task: Task) => void;
   onRename: (task: Task) => void;
   onToggleDone: (task: Task) => void;
-  onDragStart: (task: Task) => void;
+  onDragStart: (task: Task, e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
 };
 
 function Quadrant({
@@ -56,14 +61,23 @@ function Quadrant({
   tasks,
   columns,
   bgcolor,
+  important,
+  urgent,
   onOpen,
   onRename,
   onToggleDone,
   onDragStart,
   onDragOver,
+  onDrop,
 }: QuadrantProps) {
   return (
-    <QuadrantContainer bgcolor={bgcolor}>
+    <QuadrantContainer
+      bgcolor={bgcolor}
+      data-important={important}
+      data-urgent={urgent}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
       <QuadrantHeader variant="h6">{title}</QuadrantHeader>
       <Stack
         direction="row"
@@ -120,9 +134,39 @@ export default function EisenhowerMatrixPage() {
   const q3 = active.filter(t => !t.important && t.urgent);
   const q4 = active.filter(t => !t.important && !t.urgent);
 
-  // placeholders for future handlers
+  // ── drag and drop handlers ────────────────────────────────────────────
+  const updateTask = useBoardStore(s => s.updateTask);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
+  const handleDragStart = (task: Task, e: React.DragEvent) => {
+    if (isMobile) return;
+    e.dataTransfer.effectAllowed = 'move';
+    setDraggingId(task.id);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (isMobile) return;
+    e.preventDefault();
+  };
+
+  const handleDrop = (important: boolean, urgent: boolean) =>
+    async (e: React.DragEvent) => {
+      if (isMobile) return;
+      e.preventDefault();
+      if (!draggingId) return;
+      try {
+        await updateTask({
+          id: draggingId,
+          important,
+          urgent,
+          updatedAt: new Date(),
+        });
+      } finally {
+        setDraggingId(null);
+      }
+    };
+
   const noop = () => {};
-  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
 
   // config for each quadrant
   const quadrants = [
@@ -130,21 +174,29 @@ export default function EisenhowerMatrixPage() {
       title: 'Important & Urgent',
       tasks: q1,
       bgcolor: alpha(theme.palette.error.light, 0.25),
+      important: true,
+      urgent: true,
     },
     {
       title: 'Important & Not Urgent',
       tasks: q2,
       bgcolor: alpha(theme.palette.primary.light, 0.25),
+      important: true,
+      urgent: false,
     },
     {
       title: 'Not Important & Urgent',
       tasks: q3,
       bgcolor: alpha(theme.palette.warning.light, 0.25),
+      important: false,
+      urgent: true,
     },
     {
       title: 'Not Important & Not Urgent',
       tasks: q4,
       bgcolor: alpha(theme.palette.grey[100], 0.25),
+      important: false,
+      urgent: false,
     },
   ];
 
@@ -206,18 +258,21 @@ export default function EisenhowerMatrixPage() {
         overflow: 'hidden', // no page scroll
       }}
     >
-      {quadrants.map(({ title, tasks, bgcolor }) => (
+      {quadrants.map(({ title, tasks, bgcolor, important, urgent }) => (
         <Quadrant
           key={title}
           title={title}
           tasks={tasks}
           columns={columns}
           bgcolor={bgcolor}
+          important={important}
+          urgent={urgent}
           onOpen={noop}
           onRename={noop}
           onToggleDone={noop}
-          onDragStart={noop}
+          onDragStart={handleDragStart}
           onDragOver={handleDragOver}
+          onDrop={handleDrop(important, urgent)}
         />
       ))}
     </Box>
