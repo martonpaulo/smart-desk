@@ -20,7 +20,7 @@ export function BottomNav() {
   return (
     <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
       <BottomNavigation value={pathname} onChange={handleChange} showLabels>
-        <BottomNavigationAction value="/" icon={<HomeIcon />} />
+        <BottomNavigationAction value="/board" icon={<HomeIcon />} />
         <BottomNavigationAction value="/tasks" icon={<TaskAltIcon />} />
         <BottomNavigationAction value="/calendars" icon={<CalendarTodayIcon />} />
         <BottomNavigationAction value="/account" icon={<AccountCircleIcon />} />

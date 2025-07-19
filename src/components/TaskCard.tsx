@@ -1,3 +1,5 @@
+'use client';
+
 import { DragEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 import {
@@ -10,10 +12,20 @@ import {
   Security as ShieldIcon,
   Undo as UndoIcon,
 } from '@mui/icons-material';
-import { BoxProps, Tooltip } from '@mui/material';
+import {
+  BoxProps,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Tooltip,
+} from '@mui/material';
 
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
 import * as S from '@/components/TaskCard.styles';
+import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
 import { useSyncStatusStore } from '@/store/syncStatus';
 import type { Task } from '@/types/task';
@@ -39,6 +51,10 @@ export function TaskCard({
   onTaskDragOver,
   ...props
 }: TaskCardProps) {
+  const { isMobile } = useResponsiveness();
+
+  const cardMinHeight = isMobile ? '3.5rem' : 'auto';
+
   // board actions
   const columns = useBoardStore(s => s.columns);
   const addColumn = useBoardStore(s => s.addColumn);
@@ -50,14 +66,16 @@ export function TaskCard({
   const [isEditing, setIsEditing] = useState(editTask);
   const [title, setTitle] = useState(task.title);
   const [initial, setInitial] = useState(task);
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isToggleConfirmOpen, setToggleConfirmOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // sync edit mode if parent toggles it
   useEffect(() => {
     setIsEditing(editTask);
   }, [editTask]);
 
-  // focus input when editing
+  // focus the input when inline‐editing
   useEffect(() => {
     if (isEditing && inputRef.current) {
       const inp = inputRef.current;
@@ -83,7 +101,7 @@ export function TaskCard({
     [onTaskDragOver, task.id],
   );
 
-  // save any edits
+  // common save logic for edits
   const saveTask = useCallback(
     (updated: Task) => {
       if (isTaskEmpty(updated)) return;
@@ -100,7 +118,6 @@ export function TaskCard({
       if (!changed) return;
 
       const now = new Date();
-
       updateTask({ ...updated, updatedAt: now });
       setInitial({ ...updated, updatedAt: now });
     },
@@ -110,24 +127,30 @@ export function TaskCard({
   // finish inline title edit
   const finishInlineEdit = useCallback(() => {
     setIsEditing(false);
-    if (onFinishEditing) onFinishEditing();
+    onFinishEditing?.();
     saveTask({ ...task, title });
   }, [onFinishEditing, saveTask, task, title]);
 
-  // toggle done / undo / increment logic
-  const handleToggleDone = useCallback(async () => {
+  //
+  // MARK AS DONE LOGIC
+  //
+
+  // actual toggle logic, extracted from confirm
+  const doToggleDone = useCallback(async () => {
     const now = new Date();
     const { quantityTarget } = task;
     let { quantityDone, columnId } = task;
     const next = quantityDone + 1;
     quantityDone = next > quantityTarget ? 0 : next;
 
-    // move to Done column when hitting target
+    // move to Done column on target
     if (quantityDone === quantityTarget) {
-      const done = columns.find(c => c.title === defaultColumns.done.title);
-      if (done) {
-        columnId = done.id;
-        if (done.trashed) await updateColumn({ id: done.id, trashed: false, updatedAt: now });
+      const doneCol = columns.find(c => c.title === defaultColumns.done.title);
+      if (doneCol) {
+        columnId = doneCol.id;
+        if (doneCol.trashed) {
+          await updateColumn({ id: doneCol.id, trashed: false, updatedAt: now });
+        }
       } else {
         columnId = await addColumn({
           title: defaultColumns.done.title,
@@ -137,12 +160,14 @@ export function TaskCard({
       }
     }
 
-    // move back to Todo when resetting
+    // reset to Todo when back to zero
     if (quantityDone === 0) {
-      const todo = columns.find(c => c.title === defaultColumns.todo.title);
-      if (todo) {
-        columnId = todo.id;
-        if (todo.trashed) await updateColumn({ id: todo.id, trashed: false, updatedAt: now });
+      const todoCol = columns.find(c => c.title === defaultColumns.todo.title);
+      if (todoCol) {
+        columnId = todoCol.id;
+        if (todoCol.trashed) {
+          await updateColumn({ id: todoCol.id, trashed: false, updatedAt: now });
+        }
       } else {
         columnId = await addColumn({
           title: defaultColumns.todo.title,
@@ -156,14 +181,29 @@ export function TaskCard({
     setInitial(prev => ({ ...prev, quantityDone, columnId, updatedAt: now }));
   }, [addColumn, columns, task, updateColumn, updateTask]);
 
-  // delete via modal
+  // open confirmation dialog instead of window.confirm
+  const handleToggleClick = useCallback(() => {
+    setToggleConfirmOpen(true);
+  }, []);
+
+  // user confirmed toggle
+  const confirmToggle = useCallback(async () => {
+    try {
+      await doToggleDone();
+    } catch (err) {
+      console.error('Failed to toggle done', err);
+    } finally {
+      setToggleConfirmOpen(false);
+    }
+  }, [doToggleDone]);
+
   const handleDelete = useCallback(
     async (id: string) => {
       try {
         const now = new Date();
         await updateTask({ id, trashed: true, updatedAt: now });
         setInitial(prev => ({ ...prev, trashed: true, updatedAt: now }));
-        setModalOpen(false);
+        setEditModalOpen(false);
       } catch (err) {
         console.error('Failed to delete task', err);
       }
@@ -171,21 +211,31 @@ export function TaskCard({
     [updateTask],
   );
 
-  // determine icons
+  // choose icon based on count vs done
   const done = task.quantityDone === task.quantityTarget;
   const isCountTask = task.quantityTarget > 1;
+
   let SecondaryActionIcon = CheckIcon;
-  let secondaryActionTooltip = 'Check task';
+  let secondaryActionTooltip = 'Mark as done';
+  let toggleConfirmTitle = 'Confirm completion';
+  let toggleConfirmText = 'Are you sure you want to mark this task as <b>done</b>?';
+
   if (done) {
     SecondaryActionIcon = UndoIcon;
-    secondaryActionTooltip = 'Uncheck task';
+    secondaryActionTooltip = 'Undo completion';
+    toggleConfirmTitle = 'Confirm undo';
+    toggleConfirmText = 'Are you sure you want to <b>undo</b> this task completion?';
   } else if (isCountTask) {
     SecondaryActionIcon = AddIcon;
-    secondaryActionTooltip = 'Increment task';
+    secondaryActionTooltip = 'Increment count';
+    toggleConfirmTitle = 'Confirm increment';
+    toggleConfirmText = 'Are you sure you want to <b>increment</b> this task?';
   }
 
   const shouldShowIcons =
     !isEditing && (!task.isSynced || task.important || task.urgent || task.notes);
+
+  const itemsGap = isMobile ? 0.75 : 0.5;
 
   return (
     <>
@@ -193,31 +243,34 @@ export function TaskCard({
         color={color}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
+        draggable={!isEditing && !isMobile}
+        minHeight={cardMinHeight}
+        gap={itemsGap}
         {...props}
       >
         {shouldShowIcons && (
-          <S.Icons>
+          <S.Icons gap={itemsGap}>
             {!task.isSynced && (
               <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />
             )}
             {task.important && task.urgent && (
               <Tooltip title="Important & urgent">
-                <FireIcon fontSize="small" color="error" />
+                <FireIcon fontSize={isMobile ? 'medium' : 'small'} color="error" />
               </Tooltip>
             )}
             {task.important && !task.urgent && (
               <Tooltip title="Important">
-                <ShieldIcon fontSize="inherit" color="action" />
+                <ShieldIcon fontSize={isMobile ? 'small' : 'inherit'} color="action" />
               </Tooltip>
             )}
             {task.urgent && !task.important && (
               <Tooltip title="Urgent">
-                <AlertIcon fontSize="inherit" color="warning" />
+                <AlertIcon fontSize={isMobile ? 'small' : 'inherit'} color="warning" />
               </Tooltip>
             )}
             {task.notes && (
               <Tooltip title="Has notes">
-                <NotesIcon fontSize="inherit" color="action" />
+                <NotesIcon fontSize={isMobile ? 'small' : 'inherit'} color="action" />
               </Tooltip>
             )}
           </S.Icons>
@@ -238,9 +291,13 @@ export function TaskCard({
             />
           ) : (
             <>
-              <S.TitleText onClick={() => setModalOpen(true)} done={done} untitled={!task.title}>
+              <S.TitleText
+                onClick={() => setEditModalOpen(true)}
+                done={done}
+                untitled={!task.title}
+                textVariantSize={isMobile ? 'body1' : 'body2'}
+              >
                 {task.title || 'Untitled Task'}
-
                 {task.daily && (
                   <Tooltip title="Repeats daily">
                     <S.RepeatIndicator fontSize="inherit" />
@@ -260,20 +317,22 @@ export function TaskCard({
         {!isEditing && (
           <S.ActionGroup className="action-group">
             <S.ActionWrapper>
-              <Tooltip title="Edit task">
-                <S.ActionIcon
-                  onClick={() => {
-                    setTitle(task.title);
-                    setIsEditing(true);
-                  }}
-                >
-                  <EditIcon fontSize="inherit" />
-                </S.ActionIcon>
-              </Tooltip>
+              {!isMobile && (
+                <Tooltip title="Rename task">
+                  <S.ActionIcon
+                    onClick={() => {
+                      setTitle(task.title);
+                      setIsEditing(true);
+                    }}
+                  >
+                    <EditIcon fontSize={isMobile ? 'small' : 'inherit'} />
+                  </S.ActionIcon>
+                </Tooltip>
+              )}
 
               <Tooltip title={secondaryActionTooltip}>
-                <S.ActionIcon onClick={handleToggleDone}>
-                  <SecondaryActionIcon fontSize="inherit" />
+                <S.ActionIcon onClick={handleToggleClick}>
+                  <SecondaryActionIcon fontSize={isMobile ? 'small' : 'inherit'} />
                 </S.ActionIcon>
               </Tooltip>
             </S.ActionWrapper>
@@ -281,13 +340,28 @@ export function TaskCard({
         )}
       </S.Container>
 
+      {/* edit & delete modal */}
       <EditTaskModal
-        open={isModalOpen}
+        open={isEditModalOpen}
         task={task}
         onSave={saveTask}
-        onClose={() => setModalOpen(false)}
+        onClose={() => setEditModalOpen(false)}
         onDeleteTask={handleDelete}
       />
+
+      {/* confirm dialog for mark‐done */}
+      <Dialog open={isToggleConfirmOpen} onClose={() => setToggleConfirmOpen(false)}>
+        <DialogTitle>{toggleConfirmTitle}</DialogTitle>
+        <DialogContent>
+          <DialogContentText dangerouslySetInnerHTML={{ __html: toggleConfirmText }} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setToggleConfirmOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="primary" onClick={confirmToggle}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

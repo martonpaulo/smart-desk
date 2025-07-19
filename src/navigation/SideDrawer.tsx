@@ -35,7 +35,7 @@ export function SideDrawer() {
   const width = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
   const menu = [
-    { label: 'Home', href: '/', icon: <HomeIcon /> },
+    { label: 'Board', href: '/board', icon: <HomeIcon /> },
     { label: 'All Tasks', href: '/tasks', icon: <TaskAltIcon /> },
     { label: 'Matrix', href: '/matrix', icon: <DashboardIcon /> },
   ];

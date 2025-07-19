@@ -19,7 +19,6 @@ export const Container = styled(Box, {
   display: 'flex',
 
   alignItems: 'center',
-  gap: theme.spacing(0.5),
   transition: transitions.backgroundColor,
   '&:hover': {
     backgroundColor: alpha(color, 0.2),
@@ -31,7 +30,6 @@ export const Icons = styled(Stack)(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   fontSize: theme.typography.body2.fontSize,
-  gap: theme.spacing(0.5),
 }));
 
 export const Content = styled(Stack)({
@@ -49,10 +47,17 @@ export const TitleInput = styled(TextField)(({ theme }) => ({
   },
 }));
 
+interface TitleTextProps {
+  done?: boolean;
+  untitled?: boolean;
+  textVariantSize?: 'body1' | 'body2';
+}
+
 export const TitleText = styled(Typography, {
-  shouldForwardProp: prop => prop !== 'done' && prop !== 'untitled',
-})<{ done: boolean; untitled: boolean }>(({ done, untitled, theme }) => ({
+  shouldForwardProp: prop => prop !== 'done' && prop !== 'untitled' && prop !== 'textVariantSize',
+})<TitleTextProps>(({ done, untitled, textVariantSize = 'body2', theme }) => ({
   ...theme.typography.body2,
+  fontSize: theme.typography[textVariantSize].fontSize,
   userSelect: 'none',
   overflowWrap: 'anywhere',
   whiteSpace: 'normal',
