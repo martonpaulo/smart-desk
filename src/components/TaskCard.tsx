@@ -246,6 +246,8 @@ export function TaskCard({
         draggable={!isEditing && !isMobile}
         minHeight={cardMinHeight}
         gap={itemsGap}
+        paddingX={isMobile ? 2 : 1.5}
+        paddingY={1.5}
         {...props}
       >
         {shouldShowIcons && (
@@ -325,14 +327,14 @@ export function TaskCard({
                       setIsEditing(true);
                     }}
                   >
-                    <EditIcon fontSize={isMobile ? 'small' : 'inherit'} />
+                    <EditIcon fontSize={isMobile ? 'medium' : 'inherit'} />
                   </S.ActionIcon>
                 </Tooltip>
               )}
 
               <Tooltip title={secondaryActionTooltip}>
                 <S.ActionIcon onClick={handleToggleClick}>
-                  <SecondaryActionIcon fontSize={isMobile ? 'small' : 'inherit'} />
+                  <SecondaryActionIcon fontSize={isMobile ? 'medium' : 'inherit'} />
                 </S.ActionIcon>
               </Tooltip>
             </S.ActionWrapper>

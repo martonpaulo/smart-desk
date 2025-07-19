@@ -53,16 +53,21 @@ export default function TasksPage() {
   const counts = {
     all: allTasks.length,
     done: doneTasks.length,
+    total: allTasks.length + doneTasks.length,
     trashed: trashedTasks.length,
   };
 
-  const pageTitles = ['All Tasks', 'Completed Tasks', 'Trashed Tasks'];
+  const percentDone = counts.total > 0 ? Math.round((counts.done / counts.total) * 100) : 0;
+
+  const pageTitles = isMobile
+    ? ['All Tasks', 'Completed', 'Trashed']
+    : ['All Tasks', 'Completed Tasks', 'Trashed Tasks'];
 
   const subtitleAppendix = filter ? ` that match ${filter.toLocaleUpperCase()}` : '';
 
   const pageSubtitles = [
     `You have a total of ${counts.all} task${counts.all !== 1 ? 's' : ''}${subtitleAppendix}`,
-    `You have completed ${counts.done} task${counts.done !== 1 ? 's' : ''}${subtitleAppendix}`,
+    `You have completed ${counts.done} task${counts.done !== 1 ? 's' : ''} of a total of ${counts.total} (${percentDone}%)${subtitleAppendix}`,
     `There are ${counts.trashed} task${counts.trashed !== 1 ? 's' : ''} in the trash${subtitleAppendix}`,
   ];
 
@@ -87,7 +92,7 @@ export default function TasksPage() {
           slotProps={{
             input: {
               sx: {
-                ...theme.typography.body2,
+                ...(!isMobile ? theme.typography.body2 : {}),
               },
             },
           }}
@@ -111,9 +116,9 @@ export default function TasksPage() {
         aria-label="tasks view tabs"
         variant={isMobile ? 'fullWidth' : 'standard'}
       >
-        <Tab label="All Tasks" id="tasks-tab-0" aria-controls="tasks-tabpanel-0" />
-        <Tab label="Completed Tasks" id="tasks-tab-1" aria-controls="tasks-tabpanel-1" />
-        <Tab label="Trashed Tasks" id="tasks-tab-2" aria-controls="tasks-tabpanel-2" />
+        <Tab label={pageTitles[0]} id="tasks-tab-0" aria-controls="tasks-tabpanel-0" />
+        <Tab label={pageTitles[1]} id="tasks-tab-1" aria-controls="tasks-tabpanel-1" />
+        <Tab label={pageTitles[2]} id="tasks-tab-2" aria-controls="tasks-tabpanel-2" />
       </Tabs>
 
       {/* All Tasks panel */}
@@ -124,7 +129,7 @@ export default function TasksPage() {
               <TaskCard
                 key={task.id}
                 task={task}
-                color={colorMap.orange.value}
+                color={colorMap.blue.value}
                 width={cardWidth}
                 editTask={editingTaskId === task.id}
                 onFinishEditing={() => setEditingTaskId(null)}

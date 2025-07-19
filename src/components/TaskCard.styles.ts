@@ -7,7 +7,6 @@ import { transitions } from '@/styles/transitions';
 export const Container = styled(Box, {
   shouldForwardProp: prop => prop !== 'color',
 })<{ color: string }>(({ theme, color }) => ({
-  padding: theme.spacing(1.5),
   borderRadius: theme.shape.borderRadius,
   position: 'relative',
   backgroundColor: alpha(color, 0.15),
