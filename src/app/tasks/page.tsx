@@ -2,84 +2,94 @@
 
 import { useState } from 'react';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Divider, Stack, TextField, Typography } from '@mui/material';
 
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { TaskCard } from '@/components/TaskCard';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
-import { useBoardStore } from '@/store/board/store';
+import { useTasks } from '@/hooks/useTasks';
+import { colorMap } from '@/styles/colors';
+import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
+import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
 
 export default function AllTasksPage() {
-  const tasks = useBoardStore(state => state.tasks);
-  const columns = useBoardStore(state => state.columns);
   const { isMobile } = useResponsiveness();
-  const [search, setSearch] = useState('');
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [filter, setFilter] = useState('');
+  const { allTasks, doneTasks, trashedTasks } = useTasks(filter);
 
-  const filtered = tasks.filter(task => {
-    if (task.trashed) return false;
-    return task.title.toLowerCase().includes(search.toLowerCase());
-  });
+  const cardWidth = isMobile ? '100%' : '250px';
 
-  if (isMobile) {
-    return (
-      <PageContentLayout title="All Tasks" description="Manage your tasks">
-        <TextField
-          label="Search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          variant="outlined"
-        />
-        {filtered.map(task => {
-          const column = columns.find(c => c.id === task.columnId);
-          if (!column) return null;
-          return <TaskCard key={task.id} task={task} color={column.color} />;
-        })}
-        {filtered.length === 0 && <Typography>No tasks found</Typography>}
-      </PageContentLayout>
-    );
-  }
+  const allTasksCount = allTasks.length;
+  const doneTasksCount = doneTasks.length;
+  const trashedCount = trashedTasks.length;
+
+  const allTasksTitle = 'All Tasks';
+  const allTasksSubtitle = `You have a total of ${allTasksCount} task${allTasksCount !== 1 ? 's' : ''}`;
+
+  const doneTasksTitle = 'Completed Tasks';
+  const doneTasksSubtitle = `You have completed ${doneTasksCount} task${doneTasksCount !== 1 ? 's' : ''}!`;
+
+  const trashedTitle = 'Tasks in Trash';
+  const trashedSubtitle = `There are ${trashedCount} task${trashedCount !== 1 ? 's' : ''} in the trash`;
 
   return (
-    <PageContentLayout title="All Tasks" description="Manage your tasks">
+    <PageContentLayout title={allTasksTitle} description={allTasksSubtitle}>
       <TextField
-        label="Search"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
+        placeholder="Filter Tasks by Title"
+        value={filter}
+        onChange={e => setFilter(e.target.value)}
         variant="outlined"
-        sx={{ mb: 2 }}
       />
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Title</TableCell>
-            <TableCell>Column</TableCell>
-            <TableCell align="center">Important</TableCell>
-            <TableCell align="center">Urgent</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filtered.map(task => {
-            const column = columns.find(c => c.id === task.columnId);
-            return (
-              <TableRow key={task.id} hover>
-                <TableCell>{task.title}</TableCell>
-                <TableCell>{column?.title ?? '—'}</TableCell>
-                <TableCell align="center">{task.important ? '✓' : ''}</TableCell>
-                <TableCell align="center">{task.urgent ? '✓' : ''}</TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-      {filtered.length === 0 && <Typography>No tasks found</Typography>}
+
+      <Stack direction="row" gap={1} flexWrap="wrap">
+        {allTasks.map(task => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            color={colorMap.orange.value}
+            width={cardWidth}
+            editTask={editingTaskId === task.id}
+            onFinishEditing={() => setEditingTaskId(null)}
+          />
+        ))}
+
+        {!isMobile && (
+          <AddTaskInput
+            variant="outlined"
+            sx={{ width: cardWidth }}
+            onFinishAdding={newId => setEditingTaskId(newId)}
+          />
+        )}
+      </Stack>
+
+      <Divider flexItem sx={{ mt: 14, mb: 2 }} />
+
+      <Stack spacing={1} mb={4}>
+        <Typography variant="h6">{doneTasksTitle}</Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          {doneTasksSubtitle}
+        </Typography>
+        <Stack direction="row" gap={1} flexWrap="wrap" pt={2}>
+          {doneTasks.map(task => (
+            <TaskCard key={task.id} task={task} color={colorMap.green.value} width={cardWidth} />
+          ))}
+        </Stack>
+      </Stack>
+
+      <Stack spacing={1} mb={4}>
+        <Typography variant="h6">{trashedTitle}</Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          {trashedSubtitle}
+        </Typography>
+        <Stack direction="row" gap={1} flexWrap="wrap" pt={2}>
+          {trashedTasks.map(task => (
+            <TaskCard key={task.id} task={task} color={colorMap.grey.value} width={cardWidth} />
+          ))}
+        </Stack>
+      </Stack>
+
+      {isMobile && <AddTaskFloatButton />}
     </PageContentLayout>
   );
 }

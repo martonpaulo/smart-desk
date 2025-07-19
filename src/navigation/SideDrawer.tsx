@@ -7,11 +7,10 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DeleteIcon from '@mui/icons-material/Delete';
-import DraftsIcon from '@mui/icons-material/Drafts';
 import HomeIcon from '@mui/icons-material/Home';
-import ListAltIcon from '@mui/icons-material/ListAlt';
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import {
   Box,
   Divider,
@@ -37,11 +36,10 @@ export function SideDrawer() {
 
   const menu = [
     { label: 'Home', href: '/', icon: <HomeIcon /> },
-    { label: 'Drafts', href: '/drafts', icon: <DraftsIcon /> },
+    { label: 'All Tasks', href: '/tasks', icon: <TaskAltIcon /> },
     { label: 'Matrix', href: '/matrix', icon: <DashboardIcon /> },
   ];
   const secondary = [
-    { label: 'All Tasks', href: '/tasks', icon: <ListAltIcon /> },
     { label: 'Calendars', href: '/calendars', icon: <CalendarTodayIcon /> },
     { label: 'Trash', href: '/trash', icon: <DeleteIcon /> },
     { label: 'Account', href: '/account', icon: <AccountCircleIcon /> },

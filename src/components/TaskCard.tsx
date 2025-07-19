@@ -206,12 +206,12 @@ export function TaskCard({
               </Tooltip>
             )}
             {task.important && !task.urgent && (
-              <Tooltip title="Important & not urgent">
+              <Tooltip title="Important">
                 <ShieldIcon fontSize="inherit" color="action" />
               </Tooltip>
             )}
             {task.urgent && !task.important && (
-              <Tooltip title="Urgent & not important">
+              <Tooltip title="Urgent">
                 <AlertIcon fontSize="inherit" color="warning" />
               </Tooltip>
             )}

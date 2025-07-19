@@ -3,16 +3,17 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField, { TextFieldProps } from '@mui/material/TextField';
 
 import { useBoardStore } from '@/store/board/store';
+import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 
 interface AddTaskInputProps extends TextFieldProps<'outlined'> {
-  columnId: string;
-  columnColor: string;
+  columnId?: string;
+  columnColor?: string;
   onFinishAdding: (taskId: string) => void;
 }
 
 export function AddTaskInput({
   columnId,
-  columnColor,
+  columnColor = defaultColumns.draft.color,
   onFinishAdding,
   variant = 'outlined',
   ...props
