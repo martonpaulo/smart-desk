@@ -58,5 +58,19 @@ export const theme = createTheme({
         },
       },
     },
+    MuiBottomNavigationAction: {
+      styleOverrides: {
+        root: {
+          minWidth: 48,
+          padding: 4,
+          '& .MuiBottomNavigationAction-label': {
+            fontSize: '0.75rem',
+          },
+          '& .MuiSvgIcon-root': {
+            fontSize: 20,
+          },
+        },
+      },
+    },
   },
 });

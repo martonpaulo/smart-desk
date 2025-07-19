@@ -2,8 +2,6 @@
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import DeleteIcon from '@mui/icons-material/Delete';
 import DraftsIcon from '@mui/icons-material/Drafts';
 import HomeIcon from '@mui/icons-material/Home';
 import ListAltIcon from '@mui/icons-material/ListAlt';
@@ -23,14 +21,13 @@ export function BottomNav() {
   return (
     <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
       <BottomNavigation value={pathname} onChange={handleChange} showLabels>
-        <BottomNavigationAction label="Home" value="/" icon={<HomeIcon />} />
-        <BottomNavigationAction label="Tasks" value="/tasks" icon={<ListAltIcon />} />
-        <BottomNavigationAction label="Matrix" value="/matrix" icon={<DashboardIcon />} />
-        <BottomNavigationAction label="Calendars" value="/calendars" icon={<CalendarTodayIcon />} />
-        <BottomNavigationAction label="Drafts" value="/drafts" icon={<DraftsIcon />} />
-        <BottomNavigationAction label="Trash" value="/trash" icon={<DeleteIcon />} />
-        <BottomNavigationAction label="Account" value="/account" icon={<AccountCircleIcon />} />
-        <BottomNavigationAction label="Settings" value="/settings" icon={<SettingsIcon />} />
+        <BottomNavigationAction value="/" icon={<HomeIcon />} />
+        <BottomNavigationAction value="/drafts" icon={<DraftsIcon />} />
+
+        <BottomNavigationAction value="/tasks" icon={<ListAltIcon />} />
+        <BottomNavigationAction value="/calendars" icon={<CalendarTodayIcon />} />
+        <BottomNavigationAction value="/account" icon={<AccountCircleIcon />} />
+        <BottomNavigationAction value="/settings" icon={<SettingsIcon />} />
       </BottomNavigation>
     </Paper>
   );

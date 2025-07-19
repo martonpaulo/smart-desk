@@ -21,18 +21,16 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { QuantitySelector } from '@/components/QuantitySelector';
+import { useBoardStore } from '@/store/board/store';
 import { Task } from '@/types/task';
 import { formatDuration, parseDuration } from '@/utils/timeUtils';
 
 type TaskContext = 'online' | 'out' | 'afk' | 'talk';
 
-interface AddTaskFloatButtonProps {
-  onAdd: (task: Partial<Task>) => Promise<string>;
-}
-
-export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
+export function AddTaskFloatButton() {
   const theme = useTheme();
-  const zIndex = theme.zIndex.modal;
+  const zIndex = theme.zIndex.modal + 1;
+  const { addTask } = useBoardStore(state => state);
 
   // form open state
   const [open, setOpen] = useState(false);
@@ -43,7 +41,6 @@ export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
   const [title, setTitle] = useState('');
   const [important, setImportant] = useState(false);
   const [urgent, setUrgent] = useState(false);
-  const [eod, setEod] = useState(false);
   const [duration, setDuration] = useState(20);
   const [taskContext, setTaskContext] = useState<TaskContext>('online');
 
@@ -52,26 +49,43 @@ export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
   const [category, setCategory] = useState('');
   const [notes, setNotes] = useState('');
   const [blocked, setBlocked] = useState(false);
+  const [daily, setDaily] = useState(false);
+
+  const onAdd = useCallback(
+    async (task: Partial<Task>): Promise<string> => {
+      try {
+        return await addTask({
+          // Default title that will be overridden if task.title exists
+          title: 'Untitled Task',
+          ...task,
+          updatedAt: new Date(),
+        });
+      } catch (err) {
+        console.error('Task add failed', err);
+        return '';
+      }
+    },
+    [addTask],
+  );
 
   // reset all fields and collapse options
   const resetForm = () => {
     setTitle('');
     setImportant(false);
     setUrgent(false);
-    setEod(false);
     setDuration(20);
     setTaskContext('online');
     setQuantityTarget(1);
     setCategory('');
     setNotes('');
     setBlocked(false);
+    setDaily(false);
     setIsExpanded(false);
   };
 
   const openForm = () => setOpen(true);
   const closeForm = useCallback(() => {
     setOpen(false);
-    resetForm();
   }, []);
 
   // handle click or Enter on title field
@@ -86,7 +100,9 @@ export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
       quantityDone: 0,
       quantityTarget,
     });
+
     closeForm();
+    resetForm();
   }, [title, onAdd, important, urgent, quantityTarget, notes, closeForm]);
 
   // Ctrl/Cmd + Enter anywhere in open form triggers submit
@@ -109,15 +125,15 @@ export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
   const activeFlags = [
     important && 'important',
     urgent && 'urgent',
-    eod && 'eod',
     blocked && 'blocked',
+    daily && 'daily',
   ].filter(Boolean) as string[];
 
   const handleFlagsChange = (_event: unknown, newFlags: string[]) => {
     setImportant(newFlags.includes('important'));
     setUrgent(newFlags.includes('urgent'));
-    setEod(newFlags.includes('eod'));
     setBlocked(newFlags.includes('blocked'));
+    setDaily(newFlags.includes('daily'));
   };
 
   return (
@@ -203,6 +219,7 @@ export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
               <TextField
                 placeholder="Enter a description"
                 multiline
+                minRows={2}
                 fullWidth
                 size="small"
                 value={notes}
@@ -237,7 +254,6 @@ export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
                 aria-label="task flags"
               >
                 <ToggleButton value="urgent">Urgent</ToggleButton>
-                <ToggleButton value="eod">EOD</ToggleButton>
                 <ToggleButton value="important">Important</ToggleButton>
               </ToggleButtonGroup>
 
@@ -318,6 +334,18 @@ export function AddTaskFloatButton({ onAdd }: AddTaskFloatButtonProps) {
                     singularSuffix="time"
                     hasSpace
                   />
+
+                  <ToggleButtonGroup
+                    color="warning"
+                    value={activeFlags}
+                    onChange={handleFlagsChange}
+                    size="small"
+                    aria-label="task flags"
+                  >
+                    <ToggleButton value="daily" color="info">
+                      Daily
+                    </ToggleButton>
+                  </ToggleButtonGroup>
 
                   {/* Blocked flag */}
                   <ToggleButtonGroup

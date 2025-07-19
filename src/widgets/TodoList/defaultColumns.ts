@@ -9,4 +9,8 @@ export const defaultColumns = {
     title: 'Done',
     color: colorMap.green.value,
   },
+  draft: {
+    title: 'Draft',
+    color: colorMap.red.value,
+  },
 };

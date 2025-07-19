@@ -8,7 +8,6 @@ import { NavigationLayout } from '@/navigation/NavigationLayout';
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
-import { ServiceWorkerProvider } from '@/providers/ServiceWorkerProvider';
 import { SupabaseSyncProvider } from '@/providers/SupabaseSyncProvider';
 import { ZoomProvider } from '@/providers/ZoomProvider';
 import { poppins } from '@/styles/fonts';
@@ -33,19 +32,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
       <body suppressHydrationWarning className={poppins.variable}>
         <SessionProvider>
-          <ServiceWorkerProvider>
-            <LocationProvider>
-              <ReactQueryProvider>
-                <SupabaseSyncProvider>
-                  <ZoomProvider>
-                    <AppThemeProvider>
-                      <NavigationLayout>{children}</NavigationLayout>
-                    </AppThemeProvider>
-                  </ZoomProvider>
-                </SupabaseSyncProvider>
-              </ReactQueryProvider>
-            </LocationProvider>
-          </ServiceWorkerProvider>
+          <LocationProvider>
+            <ReactQueryProvider>
+              <SupabaseSyncProvider>
+                <ZoomProvider>
+                  <AppThemeProvider>
+                    <NavigationLayout>{children}</NavigationLayout>
+                  </AppThemeProvider>
+                </ZoomProvider>
+              </SupabaseSyncProvider>
+            </ReactQueryProvider>
+          </LocationProvider>
         </SessionProvider>
       </body>
     </html>

@@ -1,19 +1,11 @@
 'use client';
 
-import {
-  Box,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material';
-
+import { PageContentLayout } from '@/components/PageContentLayout';
+import { TaskCard } from '@/components/TaskCard';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
-import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
+import { colorMap } from '@/styles/colors';
+import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
 
 export default function DraftsPage() {
   const tasks = useBoardStore(state => state.tasks);
@@ -23,43 +15,16 @@ export default function DraftsPage() {
   const draftColumn = columns.find(c => c.title === 'Draft' && !c.trashed);
   const filtered = tasks.filter(t => !t.trashed && t.columnId === draftColumn?.id);
 
-  if (isMobile) {
-    return (
-      <Stack spacing={1} p={1}>
-        {filtered.map(task => (
-          <TodoTaskCard
-            key={task.id}
-            task={task}
-            column={draftColumn!}
-            onOpen={() => {}}
-            onRename={() => {}}
-            onToggleDone={() => {}}
-            onDragStart={() => {}}
-            onDragOver={() => {}}
-          />
-        ))}
-        {filtered.length === 0 && <Typography>No drafts</Typography>}
-      </Stack>
-    );
-  }
+  const title = 'Drafts';
+  const subtitle = `You have ${filtered.length} draft${filtered.length !== 1 ? 's' : ''}`;
 
   return (
-    <Box p={2}>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Title</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filtered.map(task => (
-            <TableRow key={task.id} hover>
-              <TableCell>{task.title}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {filtered.length === 0 && <Typography>No drafts</Typography>}
-    </Box>
+    <PageContentLayout title={title} subtitle={subtitle}>
+      {filtered.map(task => (
+        <TaskCard key={task.id} task={task} color={colorMap.red.value} />
+      ))}
+
+      {isMobile && <AddTaskFloatButton />}
+    </PageContentLayout>
   );
 }

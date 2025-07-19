@@ -13,8 +13,14 @@ import {
 import { theme } from '@/styles/theme';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
-import { getLastTaskPositionInColumn, getNewColumnPosition, mergeById } from '@/utils/boardHelpers';
+import {
+  getLastTaskPositionInColumn,
+  getNewColumnPosition,
+  isTaskEmpty,
+  mergeById,
+} from '@/utils/boardHelpers';
 import { RESET_TIME } from '@/utils/resetTime';
+import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 
 type Set = StoreApi<BoardState>['setState'];
 type Get = StoreApi<BoardState>['getState'];
@@ -50,31 +56,50 @@ export async function addColumnAction(set: Set, get: Get, data: AddColumnData): 
 }
 
 export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Promise<string> {
-  const shouldSyncTask = !!(data.title.trim() || (data.notes && data.notes.trim()));
+  const shouldSyncTask = !isTaskEmpty({ ...data } as Task);
 
+  let columnId = data.columnId;
   let columns = get().columns;
 
-  if (columns.length === 0) {
-    const draft: Column = {
-      id: crypto.randomUUID(),
-      title: 'Draft',
-      color: theme.palette.primary.main,
-      position: getNewColumnPosition(columns),
-      trashed: false,
-      updatedAt: data.updatedAt,
-      isSynced: shouldSyncTask ? false : true,
-    };
-    set(state => ({
-      columns: [...state.columns, draft],
-      pendingColumns: [...state.pendingColumns, draft],
-    }));
-    columns = get().columns;
+  if (columns.length === 0 || !columnId) {
+    const existingDraft = columns.find(c => c.title === defaultColumns.draft.title);
+
+    if (existingDraft) {
+      if (existingDraft.trashed) {
+        existingDraft.trashed = false;
+        existingDraft.updatedAt = data.updatedAt;
+        existingDraft.isSynced = shouldSyncTask ? false : true;
+
+        set(state => ({
+          columns: [...state.columns],
+          pendingColumns: [...state.pendingColumns],
+        }));
+      }
+
+      columnId = existingDraft.id;
+    } else {
+      const draft: Column = {
+        id: crypto.randomUUID(),
+        title: defaultColumns.draft.title,
+        color: defaultColumns.draft.color,
+        position: getNewColumnPosition(columns),
+        trashed: false,
+        updatedAt: data.updatedAt,
+        isSynced: shouldSyncTask ? false : true,
+      };
+
+      columnId = draft.id;
+
+      set(state => ({
+        columns: [...state.columns, draft],
+        pendingColumns: [...state.pendingColumns, draft],
+      }));
+    }
   }
 
+  columns = get().columns;
   const tasks = get().tasks;
-  const sorted = [...columns].sort((a, b) => a.position - b.position);
-  const targetId = data.columnId ?? sorted[0].id;
-  const nextPos = getLastTaskPositionInColumn(tasks, targetId) + 1;
+  const nextPos = getLastTaskPositionInColumn(tasks, columnId) + 1;
 
   const newTask: Task = {
     id: crypto.randomUUID(),
@@ -87,7 +112,7 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
       typeof data.quantityTarget === 'number' && data.quantityTarget > 0 ? data.quantityTarget : 1,
     daily: data.daily ?? false,
     position: nextPos,
-    columnId: targetId,
+    columnId,
     trashed: false,
     updatedAt: data.updatedAt,
     isSynced: shouldSyncTask ? false : true,

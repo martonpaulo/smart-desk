@@ -122,7 +122,9 @@ export function TodoTaskCard({
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={0.5}>
           <Stack direction="row" spacing={0.5} fontSize="0.8rem" alignItems="center">
-            {!task.isSynced && !editing && <SyncedSyncIcon status={syncStatus} />}
+            {!task.isSynced && !editing && (
+              <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />
+            )}
 
             {task.important && task.urgent && (
               <Tooltip title="Important and urgent task">

@@ -124,7 +124,9 @@ export function TodoColumn({
           }}
         >
           <Stack direction="row" gap={0.5} alignItems="center">
-            {!column.isSynced && <SyncedSyncIcon status={syncStatus} />}
+            {!column.isSynced && (
+              <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />
+            )}
 
             <Typography
               variant="h3"

@@ -37,7 +37,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <Stack gap={2} p={isMobile ? 4 : 2}>
+    <Stack gap={2}>
       {!isMobile && (
         <Stack direction="row" justifyContent="space-between" gap={2} alignItems="center">
           <Stack flexGrow={1}>

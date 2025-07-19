@@ -37,12 +37,12 @@ export function SideDrawer() {
 
   const menu = [
     { label: 'Home', href: '/', icon: <HomeIcon /> },
-    { label: 'All Tasks', href: '/tasks', icon: <ListAltIcon /> },
+    { label: 'Drafts', href: '/drafts', icon: <DraftsIcon /> },
     { label: 'Matrix', href: '/matrix', icon: <DashboardIcon /> },
-    { label: 'Calendars', href: '/calendars', icon: <CalendarTodayIcon /> },
   ];
   const secondary = [
-    { label: 'Drafts', href: '/drafts', icon: <DraftsIcon /> },
+    { label: 'All Tasks', href: '/tasks', icon: <ListAltIcon /> },
+    { label: 'Calendars', href: '/calendars', icon: <CalendarTodayIcon /> },
     { label: 'Trash', href: '/trash', icon: <DeleteIcon /> },
     { label: 'Account', href: '/account', icon: <AccountCircleIcon /> },
     { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },

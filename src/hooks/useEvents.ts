@@ -33,7 +33,7 @@ export function useEvents(date?: string) {
 
     const combined = [...(errorGoogle ? [] : googleEvents), ...(errorIcs ? [] : icsEvents)];
 
-    setRemoteEvents(combined);
+    if (combined.length > 0) setRemoteEvents(combined);
   }, [googleEvents, icsEvents, isLoading, errorGoogle, errorIcs, setRemoteEvents, bothFailed]);
 
   function refetchAll() {

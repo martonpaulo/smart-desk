@@ -176,7 +176,6 @@ export function TodoList() {
         taskColumnId = await addColumn({
           title: defaultColumns.done.title,
           color: defaultColumns.done.color,
-          position: columnsToRender.length + 1,
           updatedAt: now,
         });
       }
@@ -190,15 +189,13 @@ export function TodoList() {
         if (todoColumn.trashed) {
           await updateColumn({ id: todoColumn.id, trashed: false, updatedAt: now });
         }
+      } else {
+        taskColumnId = await addColumn({
+          title: defaultColumns.todo.title,
+          color: defaultColumns.todo.color,
+          updatedAt: now,
+        });
       }
-
-      const columnId = await addColumn({
-        title: defaultColumns.todo.title,
-        color: defaultColumns.todo.color,
-        position: columnsToRender.length + 1,
-        updatedAt: now,
-      });
-      taskColumnId = columnId;
     }
 
     // just update done count
@@ -341,7 +338,7 @@ export function TodoList() {
         onClose={closeColumnModal}
       />
 
-      {isMobile && <AddTaskFloatButton onAdd={handleAddTask} />}
+      {isMobile && <AddTaskFloatButton />}
 
       <EditTaskModal
         column={editingTask ? columns.find(c => c.id === editingTask.columnId) || null : null}

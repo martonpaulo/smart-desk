@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import { alpha } from '@mui/material/styles';
 import TextField, { TextFieldProps } from '@mui/material/TextField';
 
 import { theme } from '@/styles/theme';
@@ -125,14 +126,23 @@ export function QuantitySelector({
           lineHeight: theme.typography.body2.lineHeight,
           backgroundColor: 'background.default',
           border: '1px solid',
-          borderColor: 'divider',
           borderRadius: 1,
-          transition: 'border-color 0.1s, box-shadow 0.1s',
 
+          borderColor: alpha(theme.palette.text.primary, 0.23),
+          transition: 'border-color 0.1s, box-shadow 0.1s',
+          '&:hover': {
+            borderColor: alpha(theme.palette.text.primary, 0.87),
+          },
           '&.Mui-focused': {
-            borderColor: 'primary.main',
+            borderColor: theme.palette.primary.main,
             borderWidth: 2,
-            boxShadow: `${theme.shadows[0]}`,
+            boxShadow: theme.shadows[0],
+          },
+          '&.Mui-error': {
+            borderColor: theme.palette.error.main,
+          },
+          '&.Mui-disabled': {
+            borderColor: alpha(theme.palette.text.primary, 0.12),
           },
         },
         '& input': {

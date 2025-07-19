@@ -1,11 +1,11 @@
 import CloudOffIcon from '@mui/icons-material/CloudOff';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import SyncIcon from '@mui/icons-material/Sync';
-import { Box } from '@mui/material';
+import { SvgIconProps } from '@mui/material';
 
 import { useAnimationDelay } from '@/hooks/useAnimationDelay';
 
-interface SyncedSyncIconProps {
+interface SyncedSyncIconProps extends SvgIconProps {
   status?: string; // 'syncing' | 'disconnected' | 'error'
 }
 
@@ -15,19 +15,16 @@ const iconMap = {
   error: { Icon: ErrorOutlineIcon, spin: false },
 };
 
-export function SyncedSyncIcon({ status = 'syncing' }: SyncedSyncIconProps) {
+export function SyncedSyncIcon({ status = 'syncing', ...props }: SyncedSyncIconProps) {
   const animationDelay = useAnimationDelay();
 
   const { Icon, spin } = iconMap[status as keyof typeof iconMap] || iconMap.syncing;
 
   return (
-    <Box
-      component={Icon}
-      fontSize="inherit"
+    <Icon
+      {...props}
       sx={{
-        color: 'text.secondary',
-        alignSelf: 'center',
-        fontSize: '0.8rem',
+        ...props.sx,
         ...(spin && {
           animation: 'spin 1s linear infinite',
           animationDelay,
