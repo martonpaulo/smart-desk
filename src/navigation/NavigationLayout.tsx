@@ -18,7 +18,7 @@ export function NavigationLayout({ children }: NavigationLayoutProps) {
   return (
     <Box sx={{ display: 'flex', width: '100%' }}>
       {!isMobile && <SideDrawer />}
-      <Box component="main" sx={{ flexGrow: 1, pb: isMobile ? 7 : 0, px: 4, py: 2 }}>
+      <Box component="main" sx={{ flexGrow: 1, mb: isMobile ? 8 : 0, px: 4, py: 2 }}>
         <Stack spacing={2}>{children}</Stack>
       </Box>
       {isMobile && <BottomNav />}

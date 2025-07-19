@@ -6,9 +6,11 @@ import {
   DescriptionOutlined as NotesIcon,
   Edit as EditIcon,
   LocalFireDepartment as FireIcon,
+  NotificationsActive as AlertIcon,
+  Security as ShieldIcon,
   Undo as UndoIcon,
 } from '@mui/icons-material';
-import { Tooltip } from '@mui/material';
+import { BoxProps, Tooltip } from '@mui/material';
 
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
 import * as S from '@/components/TaskCard.styles';
@@ -19,20 +21,23 @@ import { isTaskEmpty } from '@/utils/boardHelpers';
 import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 
-interface TaskCardProps {
+interface TaskCardProps extends BoxProps {
   task: Task;
   color: string;
-  startEditing?: boolean;
-  onDragStart?: (e: DragEvent<HTMLDivElement>, id: string) => void;
-  onDragOver?: (e: DragEvent<HTMLDivElement>, id: string) => void;
+  editTask?: boolean;
+  onFinishEditing?: () => void;
+  onTaskDragStart?: (e: DragEvent<HTMLDivElement>, id: string) => void;
+  onTaskDragOver?: (e: DragEvent<HTMLDivElement>, id: string) => void;
 }
 
 export function TaskCard({
   task,
   color,
-  startEditing = false,
-  onDragStart,
-  onDragOver,
+  editTask = false,
+  onFinishEditing,
+  onTaskDragStart,
+  onTaskDragOver,
+  ...props
 }: TaskCardProps) {
   // board actions
   const columns = useBoardStore(s => s.columns);
@@ -42,11 +47,15 @@ export function TaskCard({
   const syncStatus = useSyncStatusStore(s => s.status);
 
   // local state
-  const [isEditing, setIsEditing] = useState(startEditing);
+  const [isEditing, setIsEditing] = useState(editTask);
   const [title, setTitle] = useState(task.title);
   const [initial, setInitial] = useState(task);
   const [isModalOpen, setModalOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setIsEditing(editTask);
+  }, [editTask]);
 
   // focus input when editing
   useEffect(() => {
@@ -61,17 +70,17 @@ export function TaskCard({
   const handleDragStart = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      onDragStart?.(e, task.id);
+      onTaskDragStart?.(e, task.id);
     },
-    [onDragStart, task.id],
+    [onTaskDragStart, task.id],
   );
 
   const handleDragOver = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
-      onDragOver?.(e, task.id);
+      onTaskDragOver?.(e, task.id);
     },
-    [onDragOver, task.id],
+    [onTaskDragOver, task.id],
   );
 
   // save any edits
@@ -101,8 +110,9 @@ export function TaskCard({
   // finish inline title edit
   const finishInlineEdit = useCallback(() => {
     setIsEditing(false);
+    if (onFinishEditing) onFinishEditing();
     saveTask({ ...task, title });
-  }, [saveTask, task, title]);
+  }, [onFinishEditing, saveTask, task, title]);
 
   // toggle done / undo / increment logic
   const handleToggleDone = useCallback(async () => {
@@ -174,20 +184,38 @@ export function TaskCard({
     secondaryActionTooltip = 'Increment task';
   }
 
+  const shouldShowIcons =
+    !isEditing && (!task.isSynced || task.important || task.urgent || task.notes);
+
   return (
     <>
-      <S.Container color={color} onDragStart={handleDragStart} onDragOver={handleDragOver}>
-        {!isEditing && (
+      <S.Container
+        color={color}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        {...props}
+      >
+        {shouldShowIcons && (
           <S.Icons>
-            {!isEditing && !task.isSynced && (
+            {!task.isSynced && (
               <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />
             )}
-            {!isEditing && task.important && task.urgent && (
+            {task.important && task.urgent && (
               <Tooltip title="Important & urgent">
                 <FireIcon fontSize="small" color="error" />
               </Tooltip>
             )}
-            {!isEditing && task.notes && (
+            {task.important && !task.urgent && (
+              <Tooltip title="Important & not urgent">
+                <ShieldIcon fontSize="inherit" color="action" />
+              </Tooltip>
+            )}
+            {task.urgent && !task.important && (
+              <Tooltip title="Urgent & not important">
+                <AlertIcon fontSize="inherit" color="warning" />
+              </Tooltip>
+            )}
+            {task.notes && (
               <Tooltip title="Has notes">
                 <NotesIcon fontSize="inherit" color="action" />
               </Tooltip>
@@ -205,7 +233,7 @@ export function TaskCard({
               onBlur={finishInlineEdit}
               onKeyDown={e =>
                 (e.key === 'Enter' && finishInlineEdit()) ||
-                (e.key === 'Escape' && setIsEditing(false))
+                (e.key === 'Escape' && setIsEditing(false) && onFinishEditing?.())
               }
             />
           ) : (

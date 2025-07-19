@@ -44,7 +44,7 @@ export function EditTaskModal({
   // const [hoveredDeleteTag, setHoveredDeleteTag] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [useQuantity, setUseQuantity] = useState<boolean>(false);
-  const [useDaily, setUseDaily] = useState<boolean>(false);
+  const [useDaily, setUseDaily] = useState<boolean>(task?.daily ?? false);
   const [important, setImportant] = useState<boolean>(false);
   const [urgent, setUrgent] = useState<boolean>(false);
   // const [presets, setPresets] = useState<TagPreset[]>([]);
@@ -185,6 +185,11 @@ export function EditTaskModal({
           <IconButton
             aria-label="delete task"
             onClick={() => {
+              if (useDaily) {
+                // you cannot delete daily tasks
+                alert('You cannot delete daily tasks. Please uncheck the "Daily" option first.');
+                return;
+              }
               if (task) onDeleteTask(task.id);
               onClose();
             }}

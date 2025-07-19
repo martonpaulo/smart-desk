@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -6,11 +6,11 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { alpha, Box, Chip, darken, IconButton, Stack, Typography } from '@mui/material';
 
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
+import { TaskCard } from '@/components/TaskCard';
 import { SyncStatus } from '@/store/syncStatus';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
 import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
-import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
 
 interface TodoColumnProps {
   column: Column;
@@ -44,10 +44,6 @@ export function TodoColumn({
   isMobile = false,
   onEditColumn,
   onAddColumnAfter,
-  onAddTask,
-  onEditTask,
-  onRenameTask,
-  onToggleDone,
   onDragStart,
   onDragOverTask,
   onTaskColumnDragOver,
@@ -66,21 +62,11 @@ export function TodoColumn({
   const [creatingId, setCreatingId] = useState<string | null>(null);
   const [hideColumn, setHideColumn] = useState(false);
 
-  const handleAddTask = async (colId: string, title: string) => {
-    const id = await onAddTask({
-      title,
-      columnId: colId,
-      position: tasks.length + 1,
-      quantityDone: 0,
-      quantityTarget: 1,
-    });
-    setCreatingId(id);
-    return id;
-  };
+  useEffect(() => {
+    console.log(creatingId);
+  }, [creatingId]);
 
   const orderedTasks = tasks.sort((a, b) => a.position - b.position);
-
-  const finishCreate = () => setCreatingId(null);
 
   return (
     <Box
@@ -175,38 +161,33 @@ export function TodoColumn({
         </Stack>
       </Box>
 
-      {!hideColumn &&
-        orderedTasks &&
-        orderedTasks.map(task => (
-          <div key={task.id}>
-            {draggingTaskId && hoverTaskId === task.id && (
-              <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
-            )}
-            <TodoTaskCard
+      <Stack gap={1}>
+        {!hideColumn &&
+          orderedTasks &&
+          orderedTasks.map(task => (
+            <TaskCard
+              key={task.id}
               task={task}
-              column={column}
-              onOpen={onEditTask}
-              onRename={onRenameTask}
-              onToggleDone={onToggleDone}
-              onDragStart={onDragStart}
-              onDragOver={onDragOverTask}
-              startEditing={creatingId === task.id}
-              onEditingEnd={finishCreate}
-              syncStatus={syncStatus}
+              color={column.color}
+              editTask={creatingId === task.id}
+              onFinishEditing={() => setCreatingId(null)}
+              onTaskDragOver={onDragOverTask}
+              onTaskDragStart={onDragStart}
             />
-          </div>
-        ))}
+          ))}
+
+        {!creatingId && showAddTaskInput && column.id && !hideColumn && (
+          <AddTaskInput
+            columnId={column.id}
+            columnColor={alpha(darken(column.color, 0.2), 0.15)}
+            onFinishAdding={id => setCreatingId(id)}
+            variant="outlined"
+          />
+        )}
+      </Stack>
 
       {draggingTaskId && !hoverTaskId && taskDropColumnId === column.id && (
         <Box height={4} bgcolor={column.color} mb={0.5} borderRadius={2} />
-      )}
-
-      {!creatingId && showAddTaskInput && column.id && !hideColumn && (
-        <AddTaskInput
-          columnId={column.id}
-          columnColor={alpha(darken(column.color, 0.2), 0.15)}
-          onAdd={handleAddTask}
-        />
       )}
 
       <IconButton

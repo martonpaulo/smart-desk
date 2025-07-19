@@ -16,11 +16,11 @@ import {
   useTheme,
 } from '@mui/material';
 
+import { TaskCard } from '@/components/TaskCard';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
 import type { Column } from '@/types/column';
 import type { Task } from '@/types/task';
-import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
 
 // styled Paper for each quadrant
 const QuadrantContainer = styled(Paper, {
@@ -63,9 +63,6 @@ function Quadrant({
   bgcolor,
   important,
   urgent,
-  onOpen,
-  onRename,
-  onToggleDone,
   onDragStart,
   onDragOver,
   onDrop,
@@ -96,13 +93,10 @@ function Quadrant({
             const column = columns.find(c => c.id === task.columnId);
             if (!column) return null;
             return (
-              <Stack width="45%" key={task.id}>
-                <TodoTaskCard
+              <Stack width="45%" key={task.id} gap={1}>
+                <TaskCard
                   task={task}
-                  column={column}
-                  onOpen={() => onOpen(task)}
-                  onRename={() => onRename(task)}
-                  onToggleDone={() => onToggleDone(task)}
+                  color={column.color}
                   onDragStart={e => onDragStart(task, e)}
                   onDragOver={onDragOver}
                 />
@@ -215,18 +209,7 @@ export default function EisenhowerMatrixPage() {
                     tasks.map(task => {
                       const column = columns.find(c => c.id === task.columnId);
                       if (!column) return null;
-                      return (
-                        <TodoTaskCard
-                          key={task.id}
-                          task={task}
-                          column={column}
-                          onOpen={noop}
-                          onRename={noop}
-                          onToggleDone={noop}
-                          onDragStart={noop}
-                          onDragOver={handleDragOver}
-                        />
-                      );
+                      return <TaskCard key={task.id} task={task} color={column.color} />;
                     })
                   ) : (
                     <Typography variant="body2" color="textSecondary">

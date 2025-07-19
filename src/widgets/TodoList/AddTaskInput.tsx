@@ -1,28 +1,42 @@
 import AddIcon from '@mui/icons-material/Add';
 import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
+import TextField, { TextFieldProps } from '@mui/material/TextField';
 
-interface AddTaskInputProps {
+import { useBoardStore } from '@/store/board/store';
+
+interface AddTaskInputProps extends TextFieldProps<'outlined'> {
   columnId: string;
   columnColor: string;
-  onAdd: (columnId: string, title: string) => Promise<string>;
-  onStartEdit?: (id: string) => void;
+  onFinishAdding: (taskId: string) => void;
 }
 
-export function AddTaskInput({ columnId, columnColor, onAdd, onStartEdit }: AddTaskInputProps) {
-  const handleFocus = async () => {
-    const id = await onAdd(columnId, '');
-    onStartEdit?.(id);
+export function AddTaskInput({
+  columnId,
+  columnColor,
+  onFinishAdding,
+  variant = 'outlined',
+  ...props
+}: AddTaskInputProps) {
+  const addTask = useBoardStore(state => state.addTask);
+
+  const handleAddTask = async () => {
+    const id = await addTask({
+      title: '',
+      columnId,
+      updatedAt: new Date(),
+    });
+    onFinishAdding(id);
   };
 
   return (
     <TextField
-      fullWidth
+      {...props}
       size="small"
+      variant={variant}
       placeholder="New task"
-      onFocus={handleFocus}
-      inputProps={{ readOnly: true }}
+      onFocus={handleAddTask}
       sx={{
+        ...props.sx,
         borderColor: columnColor,
         '& input': {
           cursor: 'pointer',
@@ -45,6 +59,7 @@ export function AddTaskInput({ columnId, columnColor, onAdd, onStartEdit }: AddT
         },
       }}
       slotProps={{
+        htmlInput: { readOnly: true },
         input: {
           sx: theme => ({
             fontSize: theme.typography.body2.fontSize,

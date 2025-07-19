@@ -13,9 +13,9 @@ import {
   Typography,
 } from '@mui/material';
 
+import { TaskCard } from '@/components/TaskCard';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
-import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
 
 export default function TrashPage() {
   const tasks = useBoardStore(state => state.tasks);
@@ -36,15 +36,7 @@ export default function TrashPage() {
           const column = columns.find(c => c.id === task.columnId) ?? columns[0];
           return (
             <Box key={task.id} position="relative">
-              <TodoTaskCard
-                task={task}
-                column={column}
-                onOpen={() => {}}
-                onRename={() => {}}
-                onToggleDone={() => {}}
-                onDragStart={() => {}}
-                onDragOver={() => {}}
-              />
+              <TaskCard task={task} color={column.color} />
               <IconButton
                 aria-label="restore"
                 onClick={() => handleRestore(task.id)}

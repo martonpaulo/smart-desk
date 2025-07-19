@@ -3,6 +3,7 @@
 import { Checkbox, Stack, TextField, Typography } from '@mui/material';
 import { DateTime } from 'luxon';
 
+import { PageContentLayout } from '@/components/PageContentLayout';
 import { ResetZoomButton } from '@/components/ResetZoomButton';
 import { ServiceStatusIcon } from '@/components/ServiceStatusIcon';
 import { ZoomSelector } from '@/components/ZoomSelector';
@@ -35,7 +36,7 @@ export default function SettingsPage() {
   const now = new Date();
 
   return (
-    <Stack spacing={3} px={2}>
+    <PageContentLayout title="Settings" description="Configure your app preferences">
       <SoundAlert
         currentTime={now}
         events={events}
@@ -101,6 +102,6 @@ export default function SettingsPage() {
           <Typography variant="body2">{formattedBuildDate}</Typography>
         </Stack>
       </Stack>
-    </Stack>
+    </PageContentLayout>
   );
 }

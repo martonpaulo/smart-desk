@@ -2,6 +2,7 @@
 
 import { Alert, Button, CircularProgress, Stack } from '@mui/material';
 
+import { PageContentLayout } from '@/components/PageContentLayout';
 import { useDashboardViewState } from '@/hooks/useDashboardViewState';
 
 export default function AccountPage() {
@@ -9,7 +10,7 @@ export default function AccountPage() {
     useDashboardViewState();
 
   return (
-    <Stack spacing={2} alignItems="center" justifyContent="center">
+    <PageContentLayout title="Account" description="Manage your account settings">
       {isLoading && <CircularProgress />}
 
       <Alert severity={severity}>{message}</Alert>
@@ -32,6 +33,6 @@ export default function AccountPage() {
           Sign out
         </Button>
       </Stack>
-    </Stack>
+    </PageContentLayout>
   );
 }

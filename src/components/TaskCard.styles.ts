@@ -17,6 +17,8 @@ export const Container = styled(Box, {
   '&:active': { cursor: 'grabbing' },
   boxShadow: `0 1px 3px ${alpha(color, 0.1)}`,
   display: 'flex',
+
+  alignItems: 'center',
   gap: theme.spacing(0.5),
   transition: transitions.backgroundColor,
   '&:hover': {

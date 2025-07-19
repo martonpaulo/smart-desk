@@ -3,8 +3,6 @@
 import { useState } from 'react';
 
 import {
-  Box,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -14,9 +12,10 @@ import {
   Typography,
 } from '@mui/material';
 
+import { PageContentLayout } from '@/components/PageContentLayout';
+import { TaskCard } from '@/components/TaskCard';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
-import { TodoTaskCard } from '@/widgets/TodoList/TodoTaskCard';
 
 export default function AllTasksPage() {
   const tasks = useBoardStore(state => state.tasks);
@@ -31,7 +30,7 @@ export default function AllTasksPage() {
 
   if (isMobile) {
     return (
-      <Stack spacing={1} p={1}>
+      <PageContentLayout title="All Tasks" description="Manage your tasks">
         <TextField
           label="Search"
           value={search}
@@ -41,26 +40,15 @@ export default function AllTasksPage() {
         {filtered.map(task => {
           const column = columns.find(c => c.id === task.columnId);
           if (!column) return null;
-          return (
-            <TodoTaskCard
-              key={task.id}
-              task={task}
-              column={column}
-              onOpen={() => {}}
-              onRename={() => {}}
-              onToggleDone={() => {}}
-              onDragStart={() => {}}
-              onDragOver={() => {}}
-            />
-          );
+          return <TaskCard key={task.id} task={task} color={column.color} />;
         })}
         {filtered.length === 0 && <Typography>No tasks found</Typography>}
-      </Stack>
+      </PageContentLayout>
     );
   }
 
   return (
-    <Box p={2}>
+    <PageContentLayout title="All Tasks" description="Manage your tasks">
       <TextField
         label="Search"
         value={search}
@@ -92,6 +80,6 @@ export default function AllTasksPage() {
         </TableBody>
       </Table>
       {filtered.length === 0 && <Typography>No tasks found</Typography>}
-    </Box>
+    </PageContentLayout>
   );
 }

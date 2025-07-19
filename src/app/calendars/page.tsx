@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 
-import { Box, Typography } from '@mui/material';
-
+import { PageContentLayout } from '@/components/PageContentLayout';
 import { useSettingsStorage } from '@/store/settings/store';
 import { CalendarForm } from '@/widgets/ICSCalendarManager/CalendarForm';
 import { CalendarList } from '@/widgets/ICSCalendarManager/CalendarList';
@@ -50,10 +49,7 @@ export default function CalendarManager() {
   };
 
   return (
-    <Box p={2} m={2} sx={{ maxWidth: 1000, mx: 'auto' }}>
-      <Typography variant="h3" gutterBottom>
-        ICS Calendars
-      </Typography>
+    <PageContentLayout title="Calendar Manager" description="Manage your ICS calendars">
       <CalendarList calendars={calendars} onEdit={startEdit} onDelete={handleDelete} />
       <CalendarForm
         initial={editingIndex != null ? calendars[editingIndex] : undefined}
@@ -61,6 +57,6 @@ export default function CalendarManager() {
         onSubmit={handleSubmit}
         onCancel={cancelEdit}
       />
-    </Box>
+    </PageContentLayout>
   );
 }
