@@ -25,12 +25,14 @@ import {
 
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
 import * as S from '@/components/TaskCard.styles';
+import { defaultColumns } from '@/config/defaultColumns';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
 import { useSyncStatusStore } from '@/store/syncStatus';
+import { InterfaceSound } from '@/types/interfaceSound';
 import type { Task } from '@/types/task';
 import { isTaskEmpty } from '@/utils/boardHelpers';
-import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
+import { playInterfaceSound } from '@/utils/soundPlayer';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 
 interface TaskCardProps extends BoxProps {
@@ -142,9 +144,11 @@ export function TaskCard({
     let { quantityDone, columnId } = task;
     const next = quantityDone + 1;
     quantityDone = next > quantityTarget ? 0 : next;
+    let soundId: InterfaceSound = 'info';
 
     // move to Done column on target
     if (quantityDone === quantityTarget) {
+      soundId = 'completed';
       const doneCol = columns.find(c => c.title === defaultColumns.done.title);
       if (doneCol) {
         columnId = doneCol.id;
@@ -162,6 +166,7 @@ export function TaskCard({
 
     // reset to Todo when back to zero
     if (quantityDone === 0) {
+      soundId = 'error';
       const todoCol = columns.find(c => c.title === defaultColumns.todo.title);
       if (todoCol) {
         columnId = todoCol.id;
@@ -177,6 +182,7 @@ export function TaskCard({
       }
     }
 
+    playInterfaceSound(soundId);
     await updateTask({ id: task.id, quantityDone, columnId, updatedAt: now });
     setInitial(prev => ({ ...prev, quantityDone, columnId, updatedAt: now }));
   }, [addColumn, columns, task, updateColumn, updateTask]);

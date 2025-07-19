@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 
-import { colorMap } from '@/styles/colors';
+import { colors } from '@/config/colors';
 import { Column } from '@/types/column';
 
 interface ColumnModalProps {
@@ -36,7 +36,7 @@ export function ColumnModal({
   onClose,
 }: ColumnModalProps) {
   const [title, setTitle] = useState('');
-  const [color, setColor] = useState(colorMap.blue.value);
+  const [color, setColor] = useState(colors.blue.value);
   const [modalTitle, setModalTitle] = useState('');
   const [touched, setTouched] = useState(false);
 
@@ -54,7 +54,7 @@ export function ColumnModal({
       setModalTitle('Edit Column');
     } else {
       setTitle('');
-      setColor(colorMap.blue.value);
+      setColor(colors.blue.value);
       setModalTitle('Add Column');
     }
 
@@ -156,7 +156,7 @@ export function ColumnModal({
             slotProps={{
               select: {
                 renderValue: (value: unknown) => {
-                  const selected = colorMap[value as keyof typeof colorMap];
+                  const selected = colors[value as keyof typeof colors];
                   if (!selected) return null;
                   return (
                     <Stack direction="row" alignItems="center" spacing={1}>
@@ -168,7 +168,7 @@ export function ColumnModal({
               },
             }}
           >
-            {Object.entries(colorMap).map(([key, opt]) => (
+            {Object.entries(colors).map(([key, opt]) => (
               <MenuItem key={key} value={opt.value}>
                 <ListItemIcon>
                   <StatusIcon sx={{ color: alpha(opt.value, 0.75) }} />

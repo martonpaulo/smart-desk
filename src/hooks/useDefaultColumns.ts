@@ -1,5 +1,5 @@
+import { defaultColumns } from '@/config/defaultColumns';
 import { useBoardStore } from '@/store/board/store';
-import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 
 type ColumnKey = keyof typeof defaultColumns;
 

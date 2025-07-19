@@ -6,6 +6,7 @@ import { SessionProvider } from 'next-auth/react';
 
 import { NavigationLayout } from '@/navigation/NavigationLayout';
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
+import { InterfaceSoundProvider } from '@/providers/InterfaceSoundProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { SupabaseSyncProvider } from '@/providers/SupabaseSyncProvider';
@@ -17,6 +18,17 @@ import '@/lib/dragDropTouch';
 interface RootLayoutProps {
   readonly children: ReactNode;
 }
+
+const providers = [
+  SessionProvider,
+  LocationProvider,
+  ReactQueryProvider,
+  SupabaseSyncProvider,
+  InterfaceSoundProvider,
+  ZoomProvider,
+  AppThemeProvider,
+  NavigationLayout,
+];
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
@@ -31,19 +43,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
 
       <body suppressHydrationWarning className={poppins.variable}>
-        <SessionProvider>
-          <LocationProvider>
-            <ReactQueryProvider>
-              <SupabaseSyncProvider>
-                <ZoomProvider>
-                  <AppThemeProvider>
-                    <NavigationLayout>{children}</NavigationLayout>
-                  </AppThemeProvider>
-                </ZoomProvider>
-              </SupabaseSyncProvider>
-            </ReactQueryProvider>
-          </LocationProvider>
-        </SessionProvider>
+        {providers.reduceRight((children, Provider) => {
+          return <Provider>{children}</Provider>;
+        }, children)}
       </body>
     </html>
   );

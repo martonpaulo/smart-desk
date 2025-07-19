@@ -1,16 +1,16 @@
-import { colorMap } from '@/styles/colors';
+import { colors } from '@/config/colors';
 
 export const defaultColumns = {
   todo: {
     title: 'To Do',
-    color: colorMap.blue.value,
+    color: colors.blue.value,
   },
   done: {
     title: 'Done',
-    color: colorMap.green.value,
+    color: colors.green.value,
   },
   draft: {
     title: 'Draft',
-    color: colorMap.red.value,
+    color: colors.red.value,
   },
 };

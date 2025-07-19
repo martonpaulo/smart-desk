@@ -2,8 +2,8 @@ import AddIcon from '@mui/icons-material/Add';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField, { TextFieldProps } from '@mui/material/TextField';
 
+import { defaultColumns } from '@/config/defaultColumns';
 import { useBoardStore } from '@/store/board/store';
-import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 
 interface AddTaskInputProps extends TextFieldProps<'outlined'> {
   columnId?: string;

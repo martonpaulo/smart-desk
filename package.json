@@ -42,6 +42,7 @@
     "@tanstack/react-query-persist-client": "^5.80.7",
     "axios": "^1.10.0",
     "babel-plugin-react-compiler": "^19.1.0-rc.2",
+    "howler": "^2.2.4",
     "ical.js": "^2.1.0",
     "luxon": "^3.6.1",
     "next": "15.3.3",
@@ -50,6 +51,7 @@
     "openmeteo": "^1.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-sounds": "^1.0.25",
     "react-text-to-speech": "^2.1.0",
     "zustand": "^5.0.5"
   },

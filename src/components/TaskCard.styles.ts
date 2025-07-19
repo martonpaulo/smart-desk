@@ -2,7 +2,7 @@ import { Refresh as RepeatIcon } from '@mui/icons-material';
 import { Box, ButtonGroup, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 
-import { transitions } from '@/styles/transitions';
+import { transitions } from '@/config/transitions';
 
 export const Container = styled(Box, {
   shouldForwardProp: prop => prop !== 'color',

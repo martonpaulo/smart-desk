@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { Button, Stack } from '@mui/material';
 
+import { defaultColumns } from '@/config/defaultColumns';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
 import { useSyncStatusStore } from '@/store/syncStatus';
@@ -11,7 +12,6 @@ import { Task } from '@/types/task';
 import { getNewColumnPosition, isTaskEmpty } from '@/utils/boardHelpers';
 import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
 import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
-import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 

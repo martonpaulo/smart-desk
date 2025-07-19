@@ -1,7 +1,7 @@
 import { LinearProgress, Stack, StackProps, Typography } from '@mui/material';
 
+import { defaultColumns } from '@/config/defaultColumns';
 import { useBoardStore } from '@/store/board/store';
-import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 
 export function TodoProgress(props: StackProps) {
   const tasks = useBoardStore(state => state.tasks);

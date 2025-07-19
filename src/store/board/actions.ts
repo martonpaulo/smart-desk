@@ -1,5 +1,6 @@
 import type { StoreApi } from 'zustand';
 
+import { defaultColumns } from '@/config/defaultColumns';
 import { getSupabaseClient } from '@/lib/supabaseClient';
 import { fetchColumns, upsertColumn } from '@/services/supabase/columnsService';
 import { fetchTasks, upsertTask } from '@/services/supabase/tasksService';
@@ -20,7 +21,6 @@ import {
   mergeById,
 } from '@/utils/boardHelpers';
 import { RESET_TIME } from '@/utils/resetTime';
-import { defaultColumns } from '@/widgets/TodoList/defaultColumns';
 
 type Set = StoreApi<BoardState>['setState'];
 type Get = StoreApi<BoardState>['getState'];

@@ -6,9 +6,9 @@ import { Box, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { TaskCard } from '@/components/TaskCard';
+import { colors } from '@/config/colors';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useTasks } from '@/hooks/useTasks';
-import { colorMap } from '@/styles/colors';
 import { theme } from '@/styles/theme';
 import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
 import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
@@ -101,6 +101,7 @@ export default function TasksPage() {
         {!isMobile && (
           <AddTaskInput
             variant="outlined"
+            columnColor={colors.grey.value}
             sx={{ width: cardWidth }}
             onFinishAdding={newId => setEditingTaskId(newId)}
           />
@@ -129,7 +130,7 @@ export default function TasksPage() {
               <TaskCard
                 key={task.id}
                 task={task}
-                color={colorMap.blue.value}
+                color={colors.blue.value}
                 width={cardWidth}
                 editTask={editingTaskId === task.id}
                 onFinishEditing={() => setEditingTaskId(null)}
@@ -148,7 +149,7 @@ export default function TasksPage() {
         {doneTasks.length > 0 ? (
           <Stack direction="row" gap={1} flexWrap="wrap">
             {doneTasks.map(task => (
-              <TaskCard key={task.id} task={task} color={colorMap.green.value} width={cardWidth} />
+              <TaskCard key={task.id} task={task} color={colors.green.value} width={cardWidth} />
             ))}
           </Stack>
         ) : (
@@ -161,7 +162,7 @@ export default function TasksPage() {
         {trashedTasks.length > 0 ? (
           <Stack direction="row" gap={1} flexWrap="wrap">
             {trashedTasks.map(task => (
-              <TaskCard key={task.id} task={task} color={colorMap.grey.value} width={cardWidth} />
+              <TaskCard key={task.id} task={task} color={colors.grey.value} width={cardWidth} />
             ))}
           </Stack>
         ) : (
