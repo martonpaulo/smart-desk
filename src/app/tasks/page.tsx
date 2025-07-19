@@ -67,7 +67,7 @@ export default function TasksPage() {
 
   const pageSubtitles = [
     `You have a total of ${counts.all} task${counts.all !== 1 ? 's' : ''}${subtitleAppendix}`,
-    `You have completed ${counts.done} task${counts.done !== 1 ? 's' : ''} of a total of ${counts.total} (${percentDone}%)${subtitleAppendix}`,
+    `You completed ${counts.done} task${counts.done !== 1 ? 's' : ''} of ${counts.total} tasks (${percentDone}%)${subtitleAppendix}`,
     `There are ${counts.trashed} task${counts.trashed !== 1 ? 's' : ''} in the trash${subtitleAppendix}`,
   ];
 

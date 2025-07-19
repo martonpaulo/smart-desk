@@ -50,6 +50,13 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        '*': {
+          touchAction: 'manipulation',
+        },
+      },
+    },
     MuiChip: {
       styleOverrides: {
         sizeSmall: {
