@@ -15,14 +15,18 @@ export function PageContentLayout({
   ...props
 }: PageContentLayoutProps) {
   return (
-    <Stack gap={2} {...props}>
-      <Typography variant="h2">{title}</Typography>
+    <>
+      <title>{`${title} | Smart Desk`}</title>
 
-      <Typography variant="subtitle1" color="textSecondary">
-        {description}
-      </Typography>
+      <Stack gap={2} {...props}>
+        <Typography variant="h2">{title}</Typography>
 
-      {children}
-    </Stack>
+        <Typography variant="subtitle1" color="textSecondary">
+          {description}
+        </Typography>
+
+        {children}
+      </Stack>
+    </>
   );
 }

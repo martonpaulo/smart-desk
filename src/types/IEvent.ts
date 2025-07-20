@@ -7,7 +7,7 @@ export interface IEvent {
   title: string;
   attendeeCount?: number;
   calendar?: ICalendar;
-  aknowledged?: boolean;
+  acknowledged?: boolean;
   trashed?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

@@ -52,6 +52,7 @@ Ensure the Supabase project `Site URL` matches the domain you deploy to.
 ## Database setup on Supabase
 
 Create `tasks`, `columns` and `events` tables with row level security enabled and policies based on the `user_id` column. The columns used in the hooks are:
+
 ### `tasks`
 
 - `id` uuid primary key
@@ -63,6 +64,7 @@ Create `tasks`, `columns` and `events` tables with row level security enabled an
 - `quantity` integer
 - `quantity_total` integer
 - timestamp columns (`created_at`, `updated_at`)
+
 ### `columns`
 
 - `id` text primary key
@@ -81,7 +83,7 @@ Create `tasks`, `columns` and `events` tables with row level security enabled an
 - `title` text
 - `attendee_count` integer
 - `calendar` text
-- `aknowledged` boolean
+- `acknowledged` boolean
 - timestamp columns (`created_at`, `updated_at`)
 
 Enable policies so that each logged in user can only read and write their own rows.

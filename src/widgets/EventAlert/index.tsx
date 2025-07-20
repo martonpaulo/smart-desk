@@ -37,7 +37,7 @@ export function EventAlert({
       (eventStatus === 'current' ||
         (eventStatus === 'future' &&
           calculateMinutesUntilEvent(event, now) <= alertLeadTimeMinutes)) &&
-      !event.aknowledged &&
+      !event.acknowledged &&
       !shownRef.current.has(event.id)
     );
   });

@@ -75,7 +75,7 @@ export const useEventStore = create<EventState>((set, get) => ({
   },
   setAlertAcknowledged: id => {
     set(state => {
-      const updatedEvents = state.events.map(e => (e.id === id ? { ...e, aknowledged: true } : e));
+      const updatedEvents = state.events.map(e => (e.id === id ? { ...e, acknowledged: true } : e));
       return { events: updatedEvents };
     });
   },
