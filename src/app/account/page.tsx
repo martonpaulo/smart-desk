@@ -1,8 +1,9 @@
 'use client';
 
-import { Alert, Button, CircularProgress, Stack } from '@mui/material';
+import { Alert, Button, CircularProgress, Stack, Typography } from '@mui/material';
 
 import { PageContentLayout } from '@/components/PageContentLayout';
+import { ServiceStatusIcon } from '@/components/ServiceStatusIcon';
 import { useDashboardViewState } from '@/hooks/useDashboardViewState';
 
 export default function AccountPage() {
@@ -32,6 +33,19 @@ export default function AccountPage() {
         >
           Sign out
         </Button>
+
+        <Stack spacing={1.5}>
+          <Typography variant="h3">Connection Status</Typography>
+
+          <Stack direction="row" alignItems="center" gap={0.5}>
+            <Typography variant="body2">Google Calendar</Typography>
+            <ServiceStatusIcon service="google" />
+          </Stack>
+          <Stack direction="row" alignItems="center" gap={0.5}>
+            <Typography variant="body2">Supabase</Typography>
+            <ServiceStatusIcon service="supabase" />
+          </Stack>
+        </Stack>
       </Stack>
     </PageContentLayout>
   );

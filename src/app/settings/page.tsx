@@ -7,7 +7,6 @@ import { DateTime } from 'luxon';
 
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { ResetZoomButton } from '@/components/ResetZoomButton';
-import { ServiceStatusIcon } from '@/components/ServiceStatusIcon';
 import { ZoomSelector } from '@/components/ZoomSelector';
 import { useAudioStore } from '@/store/audioStore';
 import { useEventStore } from '@/store/eventStore';
@@ -83,19 +82,6 @@ export default function SettingsPage() {
           <Typography variant="body2">Set zoom level</Typography>
           <ZoomSelector />
           <ResetZoomButton>Reset</ResetZoomButton>
-        </Stack>
-      </Stack>
-
-      <Stack spacing={1.5}>
-        <Typography variant="h3">Connection Status</Typography>
-
-        <Stack direction="row" alignItems="center" gap={0.5}>
-          <Typography variant="body2">Google Calendar</Typography>
-          <ServiceStatusIcon service="google" />
-        </Stack>
-        <Stack direction="row" alignItems="center" gap={0.5}>
-          <Typography variant="body2">Supabase</Typography>
-          <ServiceStatusIcon service="supabase" />
         </Stack>
       </Stack>
 

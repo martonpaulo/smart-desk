@@ -10,6 +10,7 @@ import { eisenhowerQuadrants } from '@/config/eisenhowerQuadrants';
 import { useTasks } from '@/hooks/useTasks';
 import { useBoardStore } from '@/store/board/store';
 import type { Task } from '@/types/task';
+import { playInterfaceSound } from '@/utils/soundPlayer';
 
 export default function EisenhowerMatrixPage() {
   const updateTask = useBoardStore(s => s.updateTask);
@@ -32,9 +33,7 @@ export default function EisenhowerMatrixPage() {
   };
 
   const handleDrop =
-    (important: boolean, urgent: boolean) => async (
-      e: React.DragEvent<HTMLDivElement>,
-    ) => {
+    (important: boolean, urgent: boolean) => async (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       if (!draggingId) return;
 
@@ -44,10 +43,16 @@ export default function EisenhowerMatrixPage() {
         return;
       }
 
+      // early exit for same quadrant
       if (task.important === important && task.urgent === urgent) {
         setDraggingId(null);
+        playInterfaceSound('snap');
         return;
       }
+
+      // immediate feedback
+      setDraggingId(null);
+      playInterfaceSound('shift');
 
       await updateTask({
         id: draggingId,
@@ -55,7 +60,6 @@ export default function EisenhowerMatrixPage() {
         urgent,
         updatedAt: new Date(),
       });
-      setDraggingId(null);
     };
 
   return (
@@ -64,28 +68,30 @@ export default function EisenhowerMatrixPage() {
       description="Decide what matters, not just what screams for attention"
     >
       <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-        {eisenhowerQuadrants.map(({ title, color, important, urgent, signals, examples, action }) => {
-          const tasks = activeTasks.filter(t => t.important === important && t.urgent === urgent);
+        {eisenhowerQuadrants.map(
+          ({ title, color, important, urgent, questions, examples, action }) => {
+            const tasks = activeTasks.filter(t => t.important === important && t.urgent === urgent);
 
-          return (
-            <EisenhowerQuadrant
-              key={`${important}-${urgent}`}
-              title={title}
-              tasks={tasks}
-              signals={signals}
-              examples={examples}
-              action={action}
-              quadrantColor={color}
-              important={important}
-              urgent={urgent}
-              isDragInProgress={!!draggingId}
-              onTaskDragStart={handleDragStart}
-              onTaskDragOver={handleDragOver}
-              onTaskDragEnd={handleDragEnd}
-              onTaskDrop={handleDrop(important, urgent)}
-            />
-          );
-        })}
+            return (
+              <EisenhowerQuadrant
+                key={`${important}-${urgent}`}
+                title={title}
+                tasks={tasks}
+                questions={questions}
+                examples={examples}
+                action={action}
+                quadrantColor={color}
+                important={important}
+                urgent={urgent}
+                isDragInProgress={!!draggingId}
+                onTaskDragStart={handleDragStart}
+                onTaskDragOver={handleDragOver}
+                onTaskDragEnd={handleDragEnd}
+                onTaskDrop={handleDrop(important, urgent)}
+              />
+            );
+          },
+        )}
       </Stack>
     </PageContentLayout>
   );

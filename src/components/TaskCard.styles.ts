@@ -50,11 +50,13 @@ interface TitleTextProps {
   done?: boolean;
   untitled?: boolean;
   textVariantSize?: 'body1' | 'body2';
+  showActions?: boolean;
 }
 
 export const TitleText = styled(Typography, {
-  shouldForwardProp: prop => prop !== 'done' && prop !== 'untitled' && prop !== 'textVariantSize',
-})<TitleTextProps>(({ done, untitled, textVariantSize = 'body2', theme }) => ({
+  shouldForwardProp: prop =>
+    prop !== 'done' && prop !== 'untitled' && prop !== 'textVariantSize' && prop !== 'showActions',
+})<TitleTextProps>(({ done, untitled, textVariantSize = 'body2', theme, showActions }) => ({
   ...theme.typography.body2,
   fontSize: theme.typography[textVariantSize].fontSize,
   userSelect: 'none',
@@ -66,7 +68,7 @@ export const TitleText = styled(Typography, {
   gap: theme.spacing(0.25),
   color: untitled ? theme.palette.text.disabled : theme.palette.text.primary,
   '&:hover': {
-    textDecoration: done ? 'line-through' : 'underline',
+    textDecoration: showActions ? (done ? 'line-through' : 'underline') : 'none',
   },
 }));
 

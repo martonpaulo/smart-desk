@@ -6,7 +6,6 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import DeleteIcon from '@mui/icons-material/Delete';
 import HomeIcon from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -41,7 +40,6 @@ export function SideDrawer() {
   ];
   const secondary = [
     { label: 'Calendars', href: '/calendars', icon: <CalendarTodayIcon /> },
-    { label: 'Trash', href: '/trash', icon: <DeleteIcon /> },
     { label: 'Account', href: '/account', icon: <AccountCircleIcon /> },
     { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
   ];

@@ -3,7 +3,7 @@ import {
   NotificationsActive as AlertIcon,
   Security as ShieldIcon,
 } from '@mui/icons-material';
-import { alpha, Paper, Stack, Typography, useTheme } from '@mui/material';
+import { alpha, darken, Paper, Stack, Typography, useTheme } from '@mui/material';
 import type { DragEvent, ElementType } from 'react';
 
 import { TaskCard } from '@/components/TaskCard';
@@ -16,7 +16,7 @@ interface EisenhowerQuadrantProps {
   quadrantColor: string; // CSS color string
   important: boolean;
   urgent: boolean;
-  signals: string[];
+  questions: string[];
   examples: string[];
   isDragInProgress: boolean;
   onTaskDragStart: (task: Task, e: DragEvent<HTMLDivElement>) => void;
@@ -32,6 +32,8 @@ export function EisenhowerQuadrant({
   quadrantColor,
   important,
   urgent,
+  questions,
+  examples,
   isDragInProgress,
   onTaskDragStart,
   onTaskDragOver,
@@ -60,6 +62,8 @@ export function EisenhowerQuadrant({
     hasIcon = false;
   }
 
+  const examplesText = `Examples: ${examples.join(', ')}`;
+
   return (
     <Paper
       data-important={important}
@@ -69,9 +73,12 @@ export function EisenhowerQuadrant({
       sx={{
         bgcolor: alpha(quadrantColor, 0.1),
         p: 2,
+        minHeight: 320,
         boxShadow: 1,
         borderRadius: theme.shape.borderRadius,
-        border: isDragInProgress ? `2px dashed ${quadrantColor}` : undefined,
+        boxSizing: 'border-box',
+        border: isDragInProgress ? `3px dashed ${quadrantColor}` : undefined,
+        position: 'relative',
       }}
     >
       <Stack direction="row" alignItems="center" gap={1} mb={1}>
@@ -81,50 +88,72 @@ export function EisenhowerQuadrant({
           {title}
         </Typography>
       </Stack>
-      <Typography variant="subtitle2" color="textSecondary" mb={2}>
-        {action}
-      </Typography>
 
-      {isDragInProgress ? (
-        <Stack gap={1}>
-          <Typography variant="subtitle2">Signals</Typography>
-          <Stack component="ul" gap={0.5} sx={{ pl: 2, listStyle: 'disc' }}>
-            {signals.map(signal => (
-              <Typography component="li" variant="body2" key={signal}>
-                {signal}
-              </Typography>
-            ))}
-          </Stack>
-          <Typography variant="subtitle2">Examples</Typography>
-          <Stack component="ul" gap={0.5} sx={{ pl: 2, listStyle: 'disc' }}>
-            {examples.map(example => (
-              <Typography component="li" variant="body2" key={example}>
-                {example}
-              </Typography>
-            ))}
-          </Stack>
-        </Stack>
-      ) : (
-        <Stack direction="row" flexWrap="wrap" gap={1}>
-          {tasks.length === 0 ? (
-            <Typography variant="body2" color="textSecondary">
-              No tasks found
-            </Typography>
-          ) : (
-            tasks.map(task => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                color={quadrantColor}
-                eisenhowerIcons={false}
-                onTaskDragStart={onTaskDragStart}
-                onTaskDragOver={onTaskDragOver}
-                onTaskDragEnd={onTaskDragEnd}
-              />
-            ))
-          )}
-        </Stack>
+      {!isDragInProgress && (
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: alpha(darken(quadrantColor, 0.4), 0.6),
+            position: 'absolute',
+            bottom: 16,
+            right: 16,
+          }}
+        >
+          {`${action.toLocaleUpperCase()}!`}
+        </Typography>
       )}
+
+      <Stack
+        gap={2.5}
+        textAlign="center"
+        p={2}
+        sx={{
+          color: theme.palette.text.secondary,
+          position: 'absolute',
+          top: 48,
+          left: 0,
+          right: 0,
+          visibility: isDragInProgress ? 'visible' : 'hidden',
+          pointerEvents: 'none',
+        }}
+      >
+        <Stack component="ul" gap={1} sx={{ listStyle: 'none', p: 0, m: 0 }}>
+          {questions.map(question => (
+            <Typography component="li" key={question}>
+              {question}
+            </Typography>
+          ))}
+        </Stack>
+        <Typography variant="body2">{examplesText}</Typography>
+      </Stack>
+
+      <Stack
+        direction="row"
+        flexWrap="wrap"
+        gap={1}
+        sx={{
+          opacity: isDragInProgress ? 0.001 : 1,
+        }}
+      >
+        {tasks.length === 0 ? (
+          <Typography variant="body2" color="textSecondary">
+            No tasks found
+          </Typography>
+        ) : (
+          tasks.map(task => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              color={quadrantColor}
+              eisenhowerIcons={false}
+              showActions={!isDragInProgress}
+              onTaskDragStart={(_id, e) => onTaskDragStart(task, e)}
+              onTaskDragOver={(_id, e) => onTaskDragOver(e)}
+              onTaskDragEnd={onTaskDragEnd}
+            />
+          ))
+        )}
+      </Stack>
     </Paper>
   );
 }

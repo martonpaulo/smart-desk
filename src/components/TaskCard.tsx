@@ -40,6 +40,7 @@ interface TaskCardProps extends BoxProps {
   color: string;
   eisenhowerIcons?: boolean;
   editTask?: boolean;
+  showActions?: boolean;
   onFinishEditing?: () => void;
   onTaskDragStart?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragOver?: (id: string, e: DragEvent<HTMLDivElement>) => void;
@@ -51,6 +52,7 @@ export function TaskCard({
   color,
   eisenhowerIcons = true,
   editTask = false,
+  showActions = true,
   onFinishEditing,
   onTaskDragStart,
   onTaskDragOver,
@@ -158,11 +160,11 @@ export function TaskCard({
     let { quantityDone, columnId } = task;
     const next = quantityDone + 1;
     quantityDone = next > quantityTarget ? 0 : next;
-    let soundId: InterfaceSound = 'info';
+    let soundId: InterfaceSound = 'increment';
 
     // move to Done column on target
     if (quantityDone === quantityTarget) {
-      soundId = 'completed';
+      soundId = 'done';
       const doneCol = columns.find(c => c.title === defaultColumns.done.title);
       if (doneCol) {
         columnId = doneCol.id;
@@ -180,7 +182,7 @@ export function TaskCard({
 
     // reset to Todo when back to zero
     if (quantityDone === 0) {
-      soundId = 'error';
+      soundId = 'reset';
       const todoCol = columns.find(c => c.title === defaultColumns.todo.title);
       if (todoCol) {
         columnId = todoCol.id;
@@ -321,6 +323,7 @@ export function TaskCard({
                 done={done}
                 untitled={!task.title}
                 textVariantSize={isMobile ? 'body1' : 'body2'}
+                showActions={showActions}
               >
                 {task.title || 'Untitled Task'}
                 {task.daily && (
@@ -339,7 +342,7 @@ export function TaskCard({
           )}
         </S.Content>
 
-        {!isEditing && (
+        {!isEditing && showActions && (
           <S.ActionGroup className="action-group">
             <S.ActionWrapper>
               {!isMobile && (

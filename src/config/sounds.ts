@@ -1,11 +1,17 @@
 export const sounds = {
-  completed: {
+  done: {
     id: 'notification/completed',
   },
-  info: {
+  increment: {
     id: 'notification/info',
   },
-  error: {
+  reset: {
     id: 'notification/error',
+  },
+  snap: {
+    id: 'ui/radio_select',
+  },
+  shift: {
+    id: 'ui/copy',
   },
 };
