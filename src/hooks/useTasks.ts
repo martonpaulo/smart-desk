@@ -38,6 +38,7 @@ export function useTasks(filterTitle = '') {
           t.title.toLowerCase().includes(filterTitle.toLowerCase()),
       )
       .sort((a, b) => {
+        if (a.blocked !== b.blocked) return a.blocked ? 1 : -1;
         if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
         if (a.important !== b.important) return a.important ? -1 : 1;
         return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();

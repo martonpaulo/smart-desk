@@ -107,6 +107,7 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
     notes: (data.notes ?? '').trim(),
     important: data.important ?? false,
     urgent: data.urgent ?? false,
+    blocked: data.blocked ?? false,
     quantityDone: 0,
     quantityTarget:
       typeof data.quantityTarget === 'number' && data.quantityTarget > 0 ? data.quantityTarget : 1,
@@ -324,6 +325,7 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
         notes: typeof data.notes === 'string' ? data.notes.trim() : t.notes,
         important: data.important ?? t.important,
         urgent: data.urgent ?? t.urgent,
+        blocked: data.blocked ?? t.blocked,
         quantityDone: data.quantityDone ?? t.quantityDone,
         quantityTarget:
           typeof data.quantityTarget === 'number' ? data.quantityTarget : t.quantityTarget,

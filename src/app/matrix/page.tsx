@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { Stack } from '@mui/material';
+import { FormControlLabel, FormGroup, Stack, Switch, useTheme } from '@mui/material';
 
 import { EisenhowerQuadrant } from '@/components/EisenhowerQuadrant';
 import { PageContentLayout } from '@/components/PageContentLayout';
@@ -18,6 +18,8 @@ export default function EisenhowerMatrixPage() {
   const { activeTasks } = useTasks();
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [showBlockedTasks, setShowBlockedTasks] = useState(false);
+  const theme = useTheme();
 
   const handleDragStart = (task: Task, e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -67,10 +69,32 @@ export default function EisenhowerMatrixPage() {
       title="Eisenhower Matrix"
       description="Decide what matters, not just what screams for attention"
     >
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showBlockedTasks}
+              onChange={e => setShowBlockedTasks(e.target.checked)}
+            />
+          }
+          label="Show Blocked Tasks"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              ...theme.typography.body2,
+            },
+          }}
+        />
+      </FormGroup>
+
       <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
         {eisenhowerQuadrants.map(
           ({ title, color, important, urgent, questions, examples, action }) => {
-            const tasks = activeTasks.filter(t => t.important === important && t.urgent === urgent);
+            const tasks = activeTasks.filter(
+              t =>
+                t.important === important &&
+                t.urgent === urgent &&
+                (showBlockedTasks || !t.blocked),
+            );
 
             return (
               <EisenhowerQuadrant

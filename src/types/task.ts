@@ -4,6 +4,7 @@ export interface Task {
   notes?: string;
   important: boolean;
   urgent: boolean;
+  blocked: boolean;
   quantityDone: number;
   quantityTarget: number;
   daily: boolean;

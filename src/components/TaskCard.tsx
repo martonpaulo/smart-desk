@@ -6,6 +6,7 @@ import {
   AddCircleOutline as AddIcon,
   Check as CheckIcon,
   DescriptionOutlined as NotesIcon,
+  DoDisturbOutlined as PauseIcon,
   Edit as EditIcon,
   LocalFireDepartment as FireIcon,
   NotificationsActive as AlertIcon,
@@ -26,6 +27,7 @@ import {
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
 import * as S from '@/components/TaskCard.styles';
 import { TaskModal } from '@/components/TaskModal';
+import { customColors } from '@/config/customColors';
 import { defaultColumns } from '@/config/defaultColumns';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
@@ -129,6 +131,7 @@ export function TaskCard({
         updated.notes !== initial.notes ||
         updated.important !== initial.important ||
         updated.urgent !== initial.urgent ||
+        updated.blocked !== initial.blocked ||
         updated.daily !== initial.daily ||
         updated.quantityDone !== initial.quantityDone ||
         updated.quantityTarget !== initial.quantityTarget ||
@@ -241,15 +244,16 @@ export function TaskCard({
   }
 
   const shouldShowIcons = eisenhowerIcons
-    ? !isEditing && (!task.isSynced || task.important || task.urgent || task.notes)
-    : !isEditing && (!task.isSynced || task.notes);
+    ? !isEditing && (!task.isSynced || task.important || task.urgent || task.notes || task.blocked)
+    : !isEditing && (!task.isSynced || task.notes || task.blocked);
 
   const itemsGap = isMobile ? 0.75 : 0.5;
+  const opacity = task.blocked ? 0.5 : 1;
 
   return (
     <>
       <S.Container
-        color={color}
+        color={task.blocked && !isEditing ? customColors.grey.value : color}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
@@ -262,23 +266,28 @@ export function TaskCard({
         {...props}
       >
         {shouldShowIcons && (
-          <S.Icons gap={itemsGap}>
+          <S.Icons gap={itemsGap} sx={{ opacity }}>
             {!task.isSynced && (
               <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />
             )}
-            {task.important && task.urgent && eisenhowerIcons && (
+            {!task.blocked && task.important && task.urgent && eisenhowerIcons && (
               <Tooltip title="Important & urgent">
                 <FireIcon fontSize={isMobile ? 'medium' : 'small'} color="error" />
               </Tooltip>
             )}
-            {task.important && !task.urgent && eisenhowerIcons && (
+            {!task.blocked && task.important && !task.urgent && eisenhowerIcons && (
               <Tooltip title="Important">
                 <ShieldIcon fontSize={isMobile ? 'small' : 'inherit'} color="action" />
               </Tooltip>
             )}
-            {task.urgent && !task.important && eisenhowerIcons && (
+            {!task.blocked && task.urgent && !task.important && eisenhowerIcons && (
               <Tooltip title="Urgent">
                 <AlertIcon fontSize={isMobile ? 'small' : 'inherit'} color="warning" />
+              </Tooltip>
+            )}
+            {task.blocked && (
+              <Tooltip title="Blocked">
+                <PauseIcon fontSize={isMobile ? 'small' : 'inherit'} color="action" />
               </Tooltip>
             )}
             {task.notes && (
@@ -310,17 +319,18 @@ export function TaskCard({
                 untitled={!task.title}
                 textVariantSize={isMobile ? 'body1' : 'body2'}
                 showActions={showActions}
+                sx={{ opacity }}
               >
                 {task.title || 'Untitled Task'}
-                {task.daily && (
+                {!task.blocked && task.daily && (
                   <Tooltip title="Repeats daily">
                     <S.RepeatIndicator fontSize="inherit" />
                   </Tooltip>
                 )}
               </S.TitleText>
 
-              {isCountTask && (
-                <S.QuantityText>
+              {!task.blocked && isCountTask && (
+                <S.QuantityText sx={{ opacity }}>
                   ({task.quantityDone}/{task.quantityTarget})
                 </S.QuantityText>
               )}

@@ -28,6 +28,7 @@ interface TaskForm {
   daily: boolean;
   important: boolean;
   urgent: boolean;
+  blocked: boolean;
 }
 
 interface TaskModalProps {
@@ -54,6 +55,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       daily: task?.daily ?? false,
       important: task?.important ?? false,
       urgent: task?.urgent ?? false,
+      blocked: task?.blocked ?? false,
       ...newProperties, // spread any additional properties for new tasks
     }),
     [task, newProperties],
@@ -89,7 +91,8 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       form.quantityTarget !== init.quantityTarget ||
       form.daily !== init.daily ||
       form.important !== init.important ||
-      form.urgent !== init.urgent
+      form.urgent !== init.urgent ||
+      form.blocked !== init.blocked
     );
   };
 
@@ -110,6 +113,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       daily: form.daily,
       important: form.important,
       urgent: form.urgent,
+      blocked: form.blocked,
     };
 
     try {
@@ -235,8 +239,8 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
               />
             </Stack>
 
-            {/* Daily, Important, Urgent flags */}
-            {['daily', 'important', 'urgent'].map(flag => (
+            {/* Daily, Important, Urgent, Blocked flags */}
+            {['daily', 'important', 'urgent', 'blocked'].map(flag => (
               <Stack key={flag} direction="row" alignItems="center">
                 <Checkbox
                   checked={form[flag as keyof TaskForm] as boolean}

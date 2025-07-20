@@ -7,6 +7,7 @@ create table if not exists public.tasks (
   notes text default null,
   important boolean not null default false,
   urgent boolean not null default false,
+  blocked boolean not null default false,
   quantity_done integer not null default 0,
   quantity_target integer not null default 1,
   daily boolean not null default false,

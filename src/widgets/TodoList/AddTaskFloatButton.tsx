@@ -68,11 +68,17 @@ export function AddTaskFloatButton() {
     [addTask],
   );
 
+  const openForm = () => setOpen(true);
+  const closeForm = useCallback(() => {
+    setOpen(false);
+  }, []);
+
   // reset all fields and collapse options
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setTitle('');
     setImportant(false);
     setUrgent(false);
+    setBlocked(false);
     setDuration(20);
     setTaskContext('online');
     setQuantityTarget(1);
@@ -81,11 +87,6 @@ export function AddTaskFloatButton() {
     setBlocked(false);
     setDaily(false);
     setIsExpanded(false);
-  };
-
-  const openForm = () => setOpen(true);
-  const closeForm = useCallback(() => {
-    setOpen(false);
   }, []);
 
   // handle click or Enter on title field
@@ -97,13 +98,14 @@ export function AddTaskFloatButton() {
       notes: notes.trim() || undefined,
       important,
       urgent,
+      blocked,
       quantityDone: 0,
       quantityTarget,
     });
 
     closeForm();
     resetForm();
-  }, [title, onAdd, important, urgent, quantityTarget, notes, closeForm]);
+  }, [title, onAdd, notes, important, urgent, blocked, quantityTarget, closeForm, resetForm]);
 
   // Ctrl/Cmd + Enter anywhere in open form triggers submit
   useEffect(() => {

@@ -5,6 +5,7 @@ export interface RawTask {
   notes: string | null;
   important: boolean;
   urgent: boolean;
+  blocked: boolean;
   quantity_done: number;
   quantity_target: number;
   daily: boolean;
