@@ -17,4 +17,7 @@ export const sounds = {
   shift: {
     id: 'ui/copy',
   },
+  trash: {
+    id: 'system/trash',
+  },
 };

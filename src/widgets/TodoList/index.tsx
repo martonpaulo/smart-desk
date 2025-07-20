@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { Button, Stack } from '@mui/material';
 
+import { TaskModal } from '@/components/TaskModal';
 import { defaultColumns } from '@/config/defaultColumns';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
@@ -9,10 +10,9 @@ import { useSyncStatusStore } from '@/store/syncStatus';
 import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
-import { getNewColumnPosition, isTaskEmpty } from '@/utils/boardHelpers';
+import { getNewColumnPosition } from '@/utils/boardHelpers';
 import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
 import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
-import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 
 // Safari PWA drag-drop fix
@@ -126,17 +126,6 @@ export function TodoList() {
     setEditingTask(task);
   };
 
-  const handleSaveTask = (updated: Task) => {
-    if (isTaskEmpty(updated)) return;
-    try {
-      updateTask({ ...updated });
-    } catch (err) {
-      console.error('Task save failed', err);
-    } finally {
-      setEditingTask(null);
-    }
-  };
-
   const handleRenameTask = async (id: string, title: string) => {
     const trimmed = title.trim();
     if (!trimmed) return;
@@ -144,14 +133,6 @@ export function TodoList() {
       await updateTask({ id, title: trimmed, updatedAt: new Date() });
     } catch (err) {
       console.error('Task rename failed', err);
-    }
-  };
-
-  const handleDeleteTask = async (id: string) => {
-    try {
-      await updateTask({ id, trashed: true, updatedAt: new Date() });
-    } catch (err) {
-      console.error('Task delete failed', err);
     }
   };
 
@@ -340,13 +321,10 @@ export function TodoList() {
 
       {isMobile && <AddTaskFloatButton />}
 
-      <EditTaskModal
-        column={editingTask ? columns.find(c => c.id === editingTask.columnId) || null : null}
+      <TaskModal
         open={Boolean(editingTask)}
         task={editingTask}
-        onSave={handleSaveTask}
         onClose={() => setEditingTask(null)}
-        onDeleteTask={handleDeleteTask}
       />
     </Stack>
   );

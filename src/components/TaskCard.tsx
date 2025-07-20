@@ -25,6 +25,7 @@ import {
 
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
 import * as S from '@/components/TaskCard.styles';
+import { TaskModal } from '@/components/TaskModal';
 import { defaultColumns } from '@/config/defaultColumns';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
@@ -33,7 +34,6 @@ import { InterfaceSound } from '@/types/interfaceSound';
 import type { Task } from '@/types/task';
 import { isTaskEmpty } from '@/utils/boardHelpers';
 import { playInterfaceSound } from '@/utils/soundPlayer';
-import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 
 interface TaskCardProps extends BoxProps {
   task: Task;
@@ -219,20 +219,6 @@ export function TaskCard({
     }
   }, [doToggleDone]);
 
-  const handleDelete = useCallback(
-    async (id: string) => {
-      try {
-        const now = new Date();
-        await updateTask({ id, trashed: true, updatedAt: now });
-        setInitial(prev => ({ ...prev, trashed: true, updatedAt: now }));
-        setEditModalOpen(false);
-      } catch (err) {
-        console.error('Failed to delete task', err);
-      }
-    },
-    [updateTask],
-  );
-
   // choose icon based on count vs done
   const done = task.quantityDone === task.quantityTarget;
   const isCountTask = task.quantityTarget > 1;
@@ -369,13 +355,7 @@ export function TaskCard({
       </S.Container>
 
       {/* edit & delete modal */}
-      <EditTaskModal
-        open={isEditModalOpen}
-        task={task}
-        onSave={saveTask}
-        onClose={() => setEditModalOpen(false)}
-        onDeleteTask={handleDelete}
-      />
+      <TaskModal open={isEditModalOpen} task={task} onClose={() => setEditModalOpen(false)} />
 
       {/* confirm dialog for mark‐done */}
       <Dialog open={isToggleConfirmOpen} onClose={() => setToggleConfirmOpen(false)}>
