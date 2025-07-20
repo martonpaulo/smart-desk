@@ -38,15 +38,17 @@ import { EditTaskModal } from '@/widgets/TodoList/EditTaskModal';
 interface TaskCardProps extends BoxProps {
   task: Task;
   color: string;
+  eisenhowerIcons?: boolean;
   editTask?: boolean;
   onFinishEditing?: () => void;
-  onTaskDragStart?: (e: DragEvent<HTMLDivElement>, id: string) => void;
-  onTaskDragOver?: (e: DragEvent<HTMLDivElement>, id: string) => void;
+  onTaskDragStart?: (id: string, e: DragEvent<HTMLDivElement>) => void;
+  onTaskDragOver?: (id: string, e: DragEvent<HTMLDivElement>) => void;
 }
 
 export function TaskCard({
   task,
   color,
+  eisenhowerIcons = true,
   editTask = false,
   onFinishEditing,
   onTaskDragStart,
@@ -90,7 +92,7 @@ export function TaskCard({
   const handleDragStart = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      onTaskDragStart?.(e, task.id);
+      onTaskDragStart?.(task.id, e);
     },
     [onTaskDragStart, task.id],
   );
@@ -98,7 +100,7 @@ export function TaskCard({
   const handleDragOver = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
-      onTaskDragOver?.(e, task.id);
+      onTaskDragOver?.(task.id, e);
     },
     [onTaskDragOver, task.id],
   );
@@ -238,8 +240,9 @@ export function TaskCard({
     toggleConfirmText = 'Are you sure you want to <b>increment</b> this task?';
   }
 
-  const shouldShowIcons =
-    !isEditing && (!task.isSynced || task.important || task.urgent || task.notes);
+  const shouldShowIcons = eisenhowerIcons
+    ? !isEditing && (!task.isSynced || task.important || task.urgent || task.notes)
+    : !isEditing && (!task.isSynced || task.notes);
 
   const itemsGap = isMobile ? 0.75 : 0.5;
 
@@ -261,17 +264,17 @@ export function TaskCard({
             {!task.isSynced && (
               <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />
             )}
-            {task.important && task.urgent && (
+            {task.important && task.urgent && eisenhowerIcons && (
               <Tooltip title="Important & urgent">
                 <FireIcon fontSize={isMobile ? 'medium' : 'small'} color="error" />
               </Tooltip>
             )}
-            {task.important && !task.urgent && (
+            {task.important && !task.urgent && eisenhowerIcons && (
               <Tooltip title="Important">
                 <ShieldIcon fontSize={isMobile ? 'small' : 'inherit'} color="action" />
               </Tooltip>
             )}
-            {task.urgent && !task.important && (
+            {task.urgent && !task.important && eisenhowerIcons && (
               <Tooltip title="Urgent">
                 <AlertIcon fontSize={isMobile ? 'small' : 'inherit'} color="warning" />
               </Tooltip>

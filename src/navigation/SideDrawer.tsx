@@ -31,7 +31,7 @@ const COLLAPSED_WIDTH = 60;
 export function SideDrawer() {
   const theme = useTheme();
   const pathname = usePathname() || '/';
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const width = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
   const menu = [

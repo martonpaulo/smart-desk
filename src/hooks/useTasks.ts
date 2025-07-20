@@ -28,7 +28,7 @@ export function useTasks(filterTitle = '') {
   }, [doneColPromise]);
 
   // all but done & trashed sorted by urgent→important→oldest update
-  const allTasks = useMemo(() => {
+  const activeTasks = useMemo(() => {
     if (!doneColumn) return [];
     return tasks
       .filter(
@@ -65,7 +65,7 @@ export function useTasks(filterTitle = '') {
   }, [tasks, filterTitle]);
 
   return {
-    allTasks,
+    activeTasks,
     doneTasks,
     trashedTasks,
   };

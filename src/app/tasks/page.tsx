@@ -6,7 +6,7 @@ import { Box, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { TaskCard } from '@/components/TaskCard';
-import { colors } from '@/config/colors';
+import { customColors } from '@/config/customColors';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useTasks } from '@/hooks/useTasks';
 import { theme } from '@/styles/theme';
@@ -47,26 +47,26 @@ export default function TasksPage() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   // fetch tasks (filtered by title)
-  const { allTasks, doneTasks, trashedTasks } = useTasks(filter);
+  const { activeTasks, doneTasks, trashedTasks } = useTasks(filter);
 
   // counts & dynamic titles/subtitles
   const counts = {
-    all: allTasks.length,
+    all: activeTasks.length,
     done: doneTasks.length,
-    total: allTasks.length + doneTasks.length,
+    total: activeTasks.length + doneTasks.length,
     trashed: trashedTasks.length,
   };
 
   const percentDone = counts.total > 0 ? Math.round((counts.done / counts.total) * 100) : 0;
 
   const pageTitles = isMobile
-    ? ['All Tasks', 'Completed', 'Trashed']
-    : ['All Tasks', 'Completed Tasks', 'Trashed Tasks'];
+    ? ['Tasks', 'Completed', 'Trashed']
+    : ['Active Tasks', 'Completed Tasks', 'Trashed Tasks'];
 
   const subtitleAppendix = filter ? ` that match ${filter.toLocaleUpperCase()}` : '';
 
   const pageSubtitles = [
-    `You have a total of ${counts.all} task${counts.all !== 1 ? 's' : ''}${subtitleAppendix}`,
+    `You have a total of ${counts.all} active task${counts.all !== 1 ? 's' : ''}${subtitleAppendix}`,
     `You completed ${counts.done} task${counts.done !== 1 ? 's' : ''} of ${counts.total} tasks (${percentDone}%)${subtitleAppendix}`,
     `There are ${counts.trashed} task${counts.trashed !== 1 ? 's' : ''} in the trash${subtitleAppendix}`,
   ];
@@ -101,7 +101,7 @@ export default function TasksPage() {
         {!isMobile && (
           <AddTaskInput
             variant="outlined"
-            columnColor={colors.grey.value}
+            columnColor={customColors.grey.value}
             sx={{ width: cardWidth }}
             onFinishAdding={newId => setEditingTaskId(newId)}
           />
@@ -122,15 +122,15 @@ export default function TasksPage() {
         <Tab label={pageTitles[2]} id="tasks-tab-2" aria-controls="tasks-tabpanel-2" />
       </Tabs>
 
-      {/* All Tasks panel */}
+      {/* Active Tasks panel */}
       <TabPanel value={activeTab} index={0}>
-        {allTasks.length > 0 ? (
+        {activeTasks.length > 0 ? (
           <Stack direction="row" gap={1} flexWrap="wrap">
-            {allTasks.map(task => (
+            {activeTasks.map(task => (
               <TaskCard
                 key={task.id}
                 task={task}
-                color={colors.blue.value}
+                color={customColors.blue.value}
                 width={cardWidth}
                 editTask={editingTaskId === task.id}
                 onFinishEditing={() => setEditingTaskId(null)}
@@ -149,7 +149,12 @@ export default function TasksPage() {
         {doneTasks.length > 0 ? (
           <Stack direction="row" gap={1} flexWrap="wrap">
             {doneTasks.map(task => (
-              <TaskCard key={task.id} task={task} color={colors.green.value} width={cardWidth} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                color={customColors.green.value}
+                width={cardWidth}
+              />
             ))}
           </Stack>
         ) : (
@@ -162,7 +167,12 @@ export default function TasksPage() {
         {trashedTasks.length > 0 ? (
           <Stack direction="row" gap={1} flexWrap="wrap">
             {trashedTasks.map(task => (
-              <TaskCard key={task.id} task={task} color={colors.grey.value} width={cardWidth} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                color={customColors.grey.value}
+                width={cardWidth}
+              />
             ))}
           </Stack>
         ) : (

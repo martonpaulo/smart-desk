@@ -1,0 +1,71 @@
+import { customColors } from '@/config/customColors';
+
+export const eisenhowerQuadrants = [
+  {
+    title: 'Important & Urgent',
+    color: customColors.red.value,
+    important: true,
+    urgent: true,
+    action: 'Do it now',
+    signals: [
+      "There's a deadline today or very soon",
+      'Ignoring it has serious consequences',
+      'You feel pressure and it truly matters',
+      "It's blocking progress or creating stress",
+      "It's a crisis, emergency, or critical issue",
+    ],
+    examples: ['tasks with critical deadline', 'project launch', 'medical emergency'],
+  },
+  {
+    title: 'Important',
+    color: customColors.blue.value,
+    important: true,
+    urgent: false,
+    action: 'Plan it',
+    signals: [
+      'It helps your goals, health, or growth',
+      "No deadline, but you'll regret delaying it",
+      "It's quiet work that feels valuable long-term",
+      'You always say “I should really do this...”',
+      'You need to make time for it, not wait',
+    ],
+    examples: [
+      'high-impact work',
+      'personal growth',
+      'self-care',
+      'studying',
+      'exercise',
+      'relationship building',
+    ],
+  },
+  {
+    title: 'Urgent',
+    color: customColors.orange.value,
+    important: false,
+    urgent: true,
+    action: 'Minimize or Delegate',
+    signals: [
+      'Feels urgent, but someone else wants it done',
+      "You're interrupted and it breaks your focus",
+      "Doesn't move you closer to any goal",
+      'Could be done by someone else',
+      'You finish it and wonder: “Why did I even do that?”',
+    ],
+    examples: ['emails', 'meetings', 'bugs', 'phone calls', 'last-minute tasks'],
+  },
+  {
+    title: 'Not Important & Not Urgent',
+    color: customColors.grey.value,
+    important: false,
+    urgent: false,
+    action: 'Eliminate',
+    signals: [
+      "It's a distraction or time filler",
+      "You're avoiding something else",
+      "No one will notice if it's never done",
+      'You feel tired or guilty afterward',
+      "It doesn't help anything — just noise",
+    ],
+    examples: ['scrolling', 'gossip', 'busywork', 'random notifications'],
+  },
+];

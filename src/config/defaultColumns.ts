@@ -1,16 +1,16 @@
-import { colors } from '@/config/colors';
+import { customColors } from '@/config/customColors';
 
 export const defaultColumns = {
   todo: {
     title: 'To Do',
-    color: colors.blue.value,
+    color: customColors.blue.value,
   },
   done: {
     title: 'Done',
-    color: colors.green.value,
+    color: customColors.green.value,
   },
   draft: {
     title: 'Draft',
-    color: colors.red.value,
+    color: customColors.red.value,
   },
 };

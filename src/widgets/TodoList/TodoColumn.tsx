@@ -89,7 +89,7 @@ export function TodoColumn({
         p: 1.5,
         bgcolor: alpha(column.color, 0.1),
         borderRadius: 1,
-        boxShadow: `0 1px 3px ${alpha(darken(column.color, 0.1), 0.1)}`,
+        boxShadow: 1,
         position: 'relative',
         touchAction: 'none',
         '&:hover .add-column-btn': {
@@ -171,8 +171,8 @@ export function TodoColumn({
               color={column.color}
               editTask={creatingId === task.id}
               onFinishEditing={() => setCreatingId(null)}
-              onTaskDragOver={onDragOverTask}
-              onTaskDragStart={onDragStart}
+              onTaskDragOver={(id, e) => onDragOverTask(e, id)}
+              onTaskDragStart={(id, e) => onDragStart(e, id)}
             />
           ))}
 

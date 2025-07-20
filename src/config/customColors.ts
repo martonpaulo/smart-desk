@@ -22,7 +22,7 @@ import {
 
 import { ColorMap } from '@/types/color';
 
-export const colors: ColorMap = {
+export const customColors: ColorMap = {
   blue: { label: 'Blue', value: blue[500] },
   green: { label: 'Green', value: green[500] },
   red: { label: 'Red', value: red[500] },
