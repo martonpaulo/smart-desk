@@ -9,7 +9,7 @@ import type { DragEvent, ElementType } from 'react';
 import { TaskCard } from '@/components/TaskCard';
 import type { Task } from '@/types/task';
 
-interface MatrixQuadrantProps {
+interface EisenhowerQuadrantProps {
   title: string;
   tasks: Task[];
   quadrantColor: string; // CSS color string
@@ -22,7 +22,7 @@ interface MatrixQuadrantProps {
   onTaskDrop: (e: DragEvent<HTMLDivElement>) => void;
 }
 
-export function MatrixQuadrant({
+export function EisenhowerQuadrant({
   title,
   tasks,
   quadrantColor,
@@ -31,7 +31,7 @@ export function MatrixQuadrant({
   onTaskDragStart,
   onTaskDragOver,
   onTaskDrop,
-}: MatrixQuadrantProps) {
+}: EisenhowerQuadrantProps) {
   const theme = useTheme();
 
   // Set default icon

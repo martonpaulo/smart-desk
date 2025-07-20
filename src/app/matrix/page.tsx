@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { Stack } from '@mui/material';
 
-import { MatrixQuadrant } from '@/components/MatrixQuadrant';
+import { EisenhowerQuadrant } from '@/components/EisenhowerQuadrant';
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { eisenhowerQuadrants } from '@/config/eisenhowerQuadrants';
 import { useTasks } from '@/hooks/useTasks';
@@ -49,7 +49,7 @@ export default function EisenhowerMatrixPage() {
           const tasks = activeTasks.filter(t => t.important === important && t.urgent === urgent);
 
           return (
-            <MatrixQuadrant
+            <EisenhowerQuadrant
               key={`${important}-${urgent}`}
               title={title}
               tasks={tasks}
