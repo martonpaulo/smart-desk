@@ -43,6 +43,7 @@ interface TaskCardProps extends BoxProps {
   onFinishEditing?: () => void;
   onTaskDragStart?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragOver?: (id: string, e: DragEvent<HTMLDivElement>) => void;
+  onTaskDragEnd?: (id: string, e: DragEvent<HTMLDivElement>) => void;
 }
 
 export function TaskCard({
@@ -53,6 +54,7 @@ export function TaskCard({
   onFinishEditing,
   onTaskDragStart,
   onTaskDragOver,
+  onTaskDragEnd,
   ...props
 }: TaskCardProps) {
   const { isMobile } = useResponsiveness();
@@ -73,6 +75,7 @@ export function TaskCard({
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isToggleConfirmOpen, setToggleConfirmOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setDragging] = useState(false);
 
   // sync edit mode if parent toggles it
   useEffect(() => {
@@ -92,6 +95,7 @@ export function TaskCard({
   const handleDragStart = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
       e.stopPropagation();
+      setDragging(true);
       onTaskDragStart?.(task.id, e);
     },
     [onTaskDragStart, task.id],
@@ -103,6 +107,14 @@ export function TaskCard({
       onTaskDragOver?.(task.id, e);
     },
     [onTaskDragOver, task.id],
+  );
+
+  const handleDragEnd = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      setDragging(false);
+      onTaskDragEnd?.(task.id, e);
+    },
+    [onTaskDragEnd, task.id],
   );
 
   // common save logic for edits
@@ -252,11 +264,13 @@ export function TaskCard({
         color={color}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
         draggable={!isEditing && !isMobile}
         minHeight={cardMinHeight}
         gap={itemsGap}
         paddingX={isMobile ? 2 : 1.5}
         paddingY={1.5}
+        sx={{ cursor: isDragging ? 'grabbing' : undefined }}
         {...props}
       >
         {shouldShowIcons && (
