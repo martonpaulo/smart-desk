@@ -5,6 +5,9 @@ export const sounds = {
   increment: {
     id: 'notification/info',
   },
+  info: {
+    id: 'notification/info',
+  },
   reset: {
     id: 'notification/error',
   },
