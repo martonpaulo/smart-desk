@@ -110,3 +110,10 @@ export function getDateLabel(date: Date | null | undefined | string): string {
   // different year: include year
   return `${wd}, ${day} ${mo} ${target.getFullYear()}`;
 }
+
+export function toLocalDateString(date?: Date) {
+  if (!date) return '';
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60 * 1000);
+  return localDate.toISOString().split('T')[0];
+}

@@ -42,7 +42,7 @@ export function PriorityFlag({
       Icon = ShieldIcon;
       tooltipLabel = 'Important';
       color = 'action';
-      paddingTop = isMobile ? 0 : 0.25;
+      paddingTop = isMobile ? 0 : 0.35;
       fontSize = isMobile ? 18 : 14;
     } else if (task.urgent) {
       Icon = AlertIcon;

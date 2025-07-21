@@ -47,7 +47,7 @@ export default function TasksPage() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   // fetch tasks (filtered by title)
-  const { activeTasks, doneTasks, trashedTasks } = useTasks({ title: filter });
+  const { activeTasks, doneTasks, trashedTasks, noDateTasks } = useTasks({ title: filter });
 
   // counts & dynamic titles/subtitles
   const counts = {
@@ -55,20 +55,29 @@ export default function TasksPage() {
     done: doneTasks.length,
     total: activeTasks.length + doneTasks.length,
     trashed: trashedTasks.length,
+    noDate: noDateTasks.length,
   };
 
   const percentDone = counts.total > 0 ? Math.round((counts.done / counts.total) * 100) : 0;
 
   const pageTitles = isMobile
-    ? ['Tasks', 'Completed', 'Trashed']
-    : ['Active Tasks', 'Completed Tasks', 'Trashed Tasks'];
+    ? ['Tasks', 'No Date', 'Completed', 'Trashed']
+    : ['Active Tasks', 'No Date Tasks', 'Completed Tasks', 'Trashed Tasks'];
 
   const subtitleAppendix = filter ? ` that match ${filter.toLocaleUpperCase()}` : '';
 
   const pageSubtitles = [
     `You have a total of ${counts.all} active task${counts.all !== 1 ? 's' : ''}${subtitleAppendix}`,
+    `There are ${counts.noDate} task${counts.noDate !== 1 ? 's' : ''} without a planned date${subtitleAppendix}`,
     `You completed ${counts.done} task${counts.done !== 1 ? 's' : ''} of ${counts.total} tasks (${percentDone}%)${subtitleAppendix}`,
     `There are ${counts.trashed} task${counts.trashed !== 1 ? 's' : ''} in the trash${subtitleAppendix}`,
+  ];
+
+  const emptyListMessage = [
+    'No active tasks found',
+    'No tasks without a planned date',
+    'No completed tasks found',
+    'No trashed tasks found',
   ];
 
   // width for each card
@@ -117,9 +126,14 @@ export default function TasksPage() {
         aria-label="tasks view tabs"
         variant={isMobile ? 'fullWidth' : 'standard'}
       >
-        <Tab label={pageTitles[0]} id="tasks-tab-0" aria-controls="tasks-tabpanel-0" />
-        <Tab label={pageTitles[1]} id="tasks-tab-1" aria-controls="tasks-tabpanel-1" />
-        <Tab label={pageTitles[2]} id="tasks-tab-2" aria-controls="tasks-tabpanel-2" />
+        {pageTitles.map((title, index) => (
+          <Tab
+            key={index}
+            label={title}
+            id={`tasks-tab-${index}`}
+            aria-controls={`tasks-tabpanel-${index}`}
+          />
+        ))}
       </Tabs>
 
       {/* Active Tasks panel */}
@@ -138,14 +152,32 @@ export default function TasksPage() {
             ))}
           </Stack>
         ) : (
-          <Typography>No tasks found</Typography>
+          <Typography>{emptyListMessage[0]}</Typography>
         )}
         {/* on mobile, floating add button */}
         {isMobile && <AddTaskFloatButton />}
       </TabPanel>
 
-      {/* Completed Tasks panel */}
+      {/* No Date Tasks panel */}
       <TabPanel value={activeTab} index={1}>
+        {noDateTasks.length > 0 ? (
+          <Stack direction="row" gap={1} flexWrap="wrap">
+            {noDateTasks.map(task => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                color={customColors.yellow.value}
+                width={cardWidth}
+              />
+            ))}
+          </Stack>
+        ) : (
+          <Typography>{emptyListMessage[1]}</Typography>
+        )}
+      </TabPanel>
+
+      {/* Completed Tasks panel */}
+      <TabPanel value={activeTab} index={2}>
         {doneTasks.length > 0 ? (
           <Stack direction="row" gap={1} flexWrap="wrap">
             {doneTasks.map(task => (
@@ -158,12 +190,12 @@ export default function TasksPage() {
             ))}
           </Stack>
         ) : (
-          <Typography>No completed tasks</Typography>
+          <Typography>{emptyListMessage[2]}</Typography>
         )}
       </TabPanel>
 
       {/* Trashed Tasks panel */}
-      <TabPanel value={activeTab} index={2}>
+      <TabPanel value={activeTab} index={3}>
         {trashedTasks.length > 0 ? (
           <Stack direction="row" gap={1} flexWrap="wrap">
             {trashedTasks.map(task => (
@@ -176,7 +208,7 @@ export default function TasksPage() {
             ))}
           </Stack>
         ) : (
-          <Typography>No trashed tasks</Typography>
+          <Typography>{emptyListMessage[3]}</Typography>
         )}
       </TabPanel>
     </PageContentLayout>

@@ -9,6 +9,10 @@ export function isTaskEmpty(task: Task): boolean {
 
 // pure sort: active tasks by blocked, urgent, important, then oldest planned/updated
 export function sortActive(a: Task, b: Task): number {
+  // Sort tasks without title to the end
+  if (a.title.trim() === '' && b.title.trim() !== '') return 1;
+  if (a.title.trim() !== '' && b.title.trim() === '') return -1;
+
   if (a.blocked !== b.blocked) return a.blocked ? 1 : -1;
   if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
   if (a.important !== b.important) return a.important ? -1 : 1;

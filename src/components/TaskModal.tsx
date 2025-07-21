@@ -18,6 +18,7 @@ import { QuantitySelector } from '@/components/QuantitySelector';
 import { useBoardStore } from '@/store/board/store';
 import { Task } from '@/types/task';
 import { playInterfaceSound } from '@/utils/soundPlayer';
+import { toLocalDateString } from '@/utils/timeUtils';
 
 // all form fields in one object for easy compare
 interface TaskForm {
@@ -226,19 +227,24 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
             fullWidth
             value={
               form.plannedDate instanceof Date
-                ? form.plannedDate.toISOString().split('T')[0]
+                ? toLocalDateString(form.plannedDate)
                 : (form.plannedDate ?? '')
             }
             onChange={e => {
               const val = e.target.value;
               setForm(prev => ({
                 ...prev,
-                plannedDate: val ? new Date(val) : undefined,
+                // avoid UTC shift by creating date with explicit time
+                plannedDate: val ? new Date(val + 'T00:00:00') : undefined,
               }));
             }}
             slotProps={{
               inputLabel: { shrink: true },
-              htmlInput: { min: new Date().toISOString().split('T')[0] },
+              htmlInput: {
+                min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+                  .toISOString()
+                  .split('T')[0],
+              },
             }}
           />
 

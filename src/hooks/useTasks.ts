@@ -53,6 +53,10 @@ export function useTasks(filters: TaskFilters = {}) {
       .sort(sortActive);
   }, [doneColumn, allTasks, matchesFilters]);
 
+  const noDateTasks = useMemo(() => {
+    return activeTasks.filter((t: Task) => !t.plannedDate);
+  }, [activeTasks]);
+
   // tasks in done column, newest first
   const doneTasks = useMemo(() => {
     // prevents errors if done column is not yet loaded
@@ -68,5 +72,5 @@ export function useTasks(filters: TaskFilters = {}) {
     return allTasks.filter(t => t.trashed && matchesFilters(t)).sort(sortByUpdatedDesc);
   }, [allTasks, matchesFilters]);
 
-  return { allTasks, activeTasks, doneTasks, trashedTasks };
+  return { allTasks, activeTasks, doneTasks, trashedTasks, noDateTasks };
 }
