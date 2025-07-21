@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { alpha, Box, Chip, IconButton, Stack, Typography } from '@mui/material';
 
@@ -62,11 +61,6 @@ export function TodoColumn({
   onHideColumn,
 }: TodoColumnProps) {
   const [creatingId, setCreatingId] = useState<string | null>(null);
-  const [hideColumn, setHideColumn] = useState(false);
-
-  useEffect(() => {
-    console.log(creatingId);
-  }, [creatingId]);
 
   // const orderedTasks = tasks.sort((a, b) => a.position - b.position);
 
@@ -127,24 +121,14 @@ export function TodoColumn({
             <IconButton
               size="small"
               className="column-hide-btn"
-              onClick={() => {
-                if (onHideColumn) {
-                  onHideColumn();
-                } else {
-                  setHideColumn(!hideColumn);
-                }
-              }}
+              onClick={onHideColumn}
               sx={{
-                opacity: hideColumn ? 0.5 : 0.8,
-                color: hideColumn ? 'text.secondary' : column.color,
-                visibility: hideColumn ? 'visible' : 'hidden',
+                opacity: 0.8,
+                color: column.color,
+                visibility: 'hidden',
               }}
             >
-              {hideColumn ? (
-                <VisibilityOffIcon fontSize="small" sx={{ fontSize: '1rem' }} />
-              ) : (
-                <VisibilityIcon fontSize="small" sx={{ fontSize: '1rem' }} />
-              )}
+              <VisibilityOffIcon fontSize="small" sx={{ fontSize: '1rem' }} />
             </IconButton>
           </Stack>
 
@@ -164,8 +148,7 @@ export function TodoColumn({
       </Box>
 
       <Stack gap={1}>
-        {!hideColumn &&
-          tasks &&
+        {tasks &&
           tasks.map(task => (
             <TaskCard
               key={task.id}
@@ -179,7 +162,7 @@ export function TodoColumn({
             />
           ))}
 
-        {!creatingId && showAddTaskInput && column.id && !hideColumn && (
+        {!creatingId && showAddTaskInput && column.id && (
           <AddTaskInput
             taskProperties={{ plannedDate: new Date() }}
             columnProperties={column}

@@ -15,6 +15,7 @@ import { Clock } from '@/widgets/Clock';
 import { EventAlert } from '@/widgets/EventAlert';
 import { EventList } from '@/widgets/EventList';
 import { EventTimeline } from '@/widgets/EventTimeline';
+import { HiddenColumnsList } from '@/widgets/HiddenColumnsList';
 import { TodoList } from '@/widgets/TodoList';
 import { TodoProgress } from '@/widgets/TodoProgress';
 
@@ -64,6 +65,7 @@ export default function BoardPage() {
           <Stack spacing={2}>
             <TodoProgress alignSelf="flex-end" />
             <EventList events={events} key={`${now.toISOString()}-EventList`} />
+            <HiddenColumnsList />
           </Stack>
         </Stack>
       </Stack>

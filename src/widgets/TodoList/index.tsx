@@ -51,11 +51,13 @@ export function TodoList({ showDate }: TodoListProps) {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const hideDoneColumn = useTodoPrefsStore(state => state.hideDoneColumn);
-  const setHideDoneColumn = useTodoPrefsStore(state => state.setHideDoneColumn);
+  const hiddenColumnIds = useTodoPrefsStore(state => state.hiddenColumnIds);
+  const toggleHiddenColumn = useTodoPrefsStore(state => state.toggleHiddenColumn);
 
   const columnsToRender = columns.filter(c => {
     if (c.trashed) return false;
     if (hideDoneColumn && c.title === defaultColumns.done.title) return false;
+    if (hiddenColumnIds.includes(c.id)) return false;
     return true;
   });
   const boardIsEmpty = columnsToRender.length === 0;
@@ -264,8 +266,7 @@ export function TodoList({ showDate }: TodoListProps) {
 
   const renderColumn = (column: Column) => {
     const colTasks = tasks.filter(t => t.columnId === column.id);
-    const onHideColumn =
-      column.title === defaultColumns.done.title ? () => setHideDoneColumn(true) : undefined;
+    const onHideColumn = () => toggleHiddenColumn(column.id);
     return (
       <TodoColumn
         key={column.id}
