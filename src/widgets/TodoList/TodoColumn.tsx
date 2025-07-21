@@ -3,19 +3,20 @@ import { useEffect, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { alpha, Box, Chip, darken, IconButton, Stack, Typography } from '@mui/material';
+import { alpha, Box, Chip, IconButton, Stack, Typography } from '@mui/material';
 
+import { AddTaskInput } from '@/components/AddTaskInput';
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
 import { TaskCard } from '@/components/TaskCard';
 import { SyncStatus } from '@/store/syncStatus';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
-import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
 
 interface TodoColumnProps {
   column: Column;
   tasks: Task[];
   isMobile?: boolean;
+  showDate?: boolean;
   onEditColumn: (column: Column) => void;
   onAddColumnAfter: (prevPos: number) => void;
   onAddTask: (task: Partial<Task>) => Promise<string>;
@@ -42,6 +43,7 @@ export function TodoColumn({
   column,
   tasks,
   isMobile = false,
+  showDate = true,
   onEditColumn,
   onAddColumnAfter,
   onDragStart,
@@ -66,7 +68,7 @@ export function TodoColumn({
     console.log(creatingId);
   }, [creatingId]);
 
-  const orderedTasks = tasks.sort((a, b) => a.position - b.position);
+  // const orderedTasks = tasks.sort((a, b) => a.position - b.position);
 
   return (
     <Box
@@ -147,7 +149,7 @@ export function TodoColumn({
           </Stack>
 
           <Chip
-            label={orderedTasks?.length}
+            label={tasks?.length}
             size="small"
             disabled
             sx={{
@@ -163,11 +165,12 @@ export function TodoColumn({
 
       <Stack gap={1}>
         {!hideColumn &&
-          orderedTasks &&
-          orderedTasks.map(task => (
+          tasks &&
+          tasks.map(task => (
             <TaskCard
               key={task.id}
               task={task}
+              showDate={showDate}
               color={column.color}
               editTask={creatingId === task.id}
               onFinishEditing={() => setCreatingId(null)}
@@ -178,8 +181,8 @@ export function TodoColumn({
 
         {!creatingId && showAddTaskInput && column.id && !hideColumn && (
           <AddTaskInput
-            columnId={column.id}
-            columnColor={alpha(darken(column.color, 0.2), 0.15)}
+            taskProperties={{ plannedDate: new Date() }}
+            columnProperties={column}
             onFinishAdding={id => setCreatingId(id)}
             variant="outlined"
           />

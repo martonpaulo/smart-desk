@@ -6,11 +6,7 @@ import {
   AddCircleOutline as AddIcon,
   Check as CheckIcon,
   DescriptionOutlined as NotesIcon,
-  DoDisturbOutlined as PauseIcon,
   Edit as EditIcon,
-  LocalFireDepartment as FireIcon,
-  NotificationsActive as AlertIcon,
-  Security as ShieldIcon,
   Undo as UndoIcon,
 } from '@mui/icons-material';
 import {
@@ -22,8 +18,10 @@ import {
   DialogContentText,
   DialogTitle,
   Tooltip,
+  useTheme,
 } from '@mui/material';
 
+import { PriorityFlag } from '@/components/PriorityFlag';
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
 import * as S from '@/components/TaskCard.styles';
 import { TaskModal } from '@/components/TaskModal';
@@ -34,8 +32,9 @@ import { useBoardStore } from '@/store/board/store';
 import { useSyncStatusStore } from '@/store/syncStatus';
 import { InterfaceSound } from '@/types/interfaceSound';
 import type { Task } from '@/types/task';
-import { isTaskEmpty } from '@/utils/boardHelpers';
 import { playInterfaceSound } from '@/utils/soundPlayer';
+import { isTaskEmpty } from '@/utils/taskUtils';
+import { getDateLabel } from '@/utils/timeUtils';
 
 interface TaskCardProps extends BoxProps {
   task: Task;
@@ -43,6 +42,7 @@ interface TaskCardProps extends BoxProps {
   eisenhowerIcons?: boolean;
   editTask?: boolean;
   showActions?: boolean;
+  showDate?: boolean;
   onFinishEditing?: () => void;
   onTaskDragStart?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragOver?: (id: string, e: DragEvent<HTMLDivElement>) => void;
@@ -55,6 +55,7 @@ export function TaskCard({
   eisenhowerIcons = true,
   editTask = false,
   showActions = true,
+  showDate = true,
   onFinishEditing,
   onTaskDragStart,
   onTaskDragOver,
@@ -62,6 +63,7 @@ export function TaskCard({
   ...props
 }: TaskCardProps) {
   const { isMobile } = useResponsiveness();
+  const theme = useTheme();
 
   const cardMinHeight = isMobile ? '3.5rem' : 'auto';
 
@@ -243,10 +245,6 @@ export function TaskCard({
     toggleConfirmText = 'Are you sure you want to <b>increment</b> this task?';
   }
 
-  const shouldShowIcons = eisenhowerIcons
-    ? !isEditing && (!task.isSynced || task.important || task.urgent || task.notes || task.blocked)
-    : !isEditing && (!task.isSynced || task.notes || task.blocked);
-
   const itemsGap = isMobile ? 0.75 : 0.5;
   const opacity = task.blocked ? 0.5 : 1;
 
@@ -265,38 +263,8 @@ export function TaskCard({
         sx={{ cursor: isDragging ? 'grabbing' : undefined }}
         {...props}
       >
-        {shouldShowIcons && (
-          <S.Icons gap={itemsGap} sx={{ opacity }}>
-            {!task.isSynced && (
-              <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />
-            )}
-            {!task.blocked && task.important && task.urgent && eisenhowerIcons && (
-              <Tooltip title="Important & urgent">
-                <FireIcon fontSize={isMobile ? 'medium' : 'small'} color="error" />
-              </Tooltip>
-            )}
-            {!task.blocked && task.important && !task.urgent && eisenhowerIcons && (
-              <Tooltip title="Important">
-                <ShieldIcon fontSize={isMobile ? 'small' : 'inherit'} color="action" />
-              </Tooltip>
-            )}
-            {!task.blocked && task.urgent && !task.important && eisenhowerIcons && (
-              <Tooltip title="Urgent">
-                <AlertIcon fontSize={isMobile ? 'small' : 'inherit'} color="warning" />
-              </Tooltip>
-            )}
-            {task.blocked && (
-              <Tooltip title="Blocked">
-                <PauseIcon fontSize={isMobile ? 'small' : 'inherit'} color="action" />
-              </Tooltip>
-            )}
-            {task.notes && (
-              <Tooltip title="Has notes">
-                <NotesIcon fontSize={isMobile ? 'small' : 'inherit'} color="action" />
-              </Tooltip>
-            )}
-          </S.Icons>
-        )}
+        <PriorityFlag task={task} showEisenhowerIcons={eisenhowerIcons} sx={{ opacity }} />
+        {!task.isSynced && <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />}
 
         <S.Content>
           {isEditing ? (
@@ -313,26 +281,42 @@ export function TaskCard({
             />
           ) : (
             <>
-              <S.TitleText
-                onClick={() => setEditModalOpen(true)}
-                done={done}
-                untitled={!task.title}
-                textVariantSize={isMobile ? 'body1' : 'body2'}
-                showActions={showActions}
-                sx={{ opacity }}
-              >
-                {task.title || 'Untitled Task'}
-                {!task.blocked && task.daily && (
-                  <Tooltip title="Repeats daily">
-                    <S.RepeatIndicator fontSize="inherit" />
+              <S.TitleGroup>
+                {task.notes && (
+                  <Tooltip title="Has notes">
+                    <NotesIcon
+                      color="action"
+                      sx={{ fontSize: theme.typography.caption.fontSize, alignSelf: 'center' }}
+                    />
                   </Tooltip>
                 )}
-              </S.TitleText>
 
-              {!task.blocked && isCountTask && (
-                <S.QuantityText sx={{ opacity }}>
-                  ({task.quantityDone}/{task.quantityTarget})
-                </S.QuantityText>
+                <S.TitleText
+                  onClick={() => setEditModalOpen(true)}
+                  done={done}
+                  untitled={!task.title}
+                  textVariantSize={isMobile ? 'body1' : 'body2'}
+                  showActions={showActions}
+                  sx={{ opacity }}
+                >
+                  {task.title || 'Untitled Task'}
+
+                  {!task.blocked && task.daily && (
+                    <Tooltip title="Repeats daily">
+                      <S.RepeatIndicator fontSize="inherit" />
+                    </Tooltip>
+                  )}
+                </S.TitleText>
+
+                {!task.blocked && isCountTask && (
+                  <S.QuantityText sx={{ opacity }}>
+                    ({task.quantityDone}/{task.quantityTarget})
+                  </S.QuantityText>
+                )}
+              </S.TitleGroup>
+
+              {showDate && (
+                <S.DateText sx={{ opacity }}>{getDateLabel(task.plannedDate)}</S.DateText>
               )}
             </>
           )}

@@ -5,6 +5,7 @@ import { Button, Stack } from '@mui/material';
 import { TaskModal } from '@/components/TaskModal';
 import { defaultColumns } from '@/config/defaultColumns';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
+import { useTasks } from '@/hooks/useTasks';
 import { useBoardStore } from '@/store/board/store';
 import { useSyncStatusStore } from '@/store/syncStatus';
 import { useTodoPrefsStore } from '@/store/todoPrefsStore';
@@ -18,12 +19,16 @@ import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 // Safari PWA drag-drop fix
 import '@/lib/dragDropTouch';
 
-export function TodoList() {
+interface TodoListProps {
+  showDate?: boolean;
+}
+
+export function TodoList({ showDate }: TodoListProps) {
   const syncStatus = useSyncStatusStore(s => s.status);
+  const { activeTasks: tasks } = useTasks({ date: new Date() });
 
   // store selectors
   const columns = useBoardStore(s => s.columns);
-  const tasks = useBoardStore(s => s.tasks);
   const addColumn = useBoardStore(s => s.addColumn);
   const addTask = useBoardStore(s => s.addTask);
   const updateColumn = useBoardStore(s => s.updateColumn);
@@ -258,7 +263,7 @@ export function TodoList() {
   };
 
   const renderColumn = (column: Column) => {
-    const colTasks = tasks.filter(t => t.columnId === column.id && !t.trashed);
+    const colTasks = tasks.filter(t => t.columnId === column.id);
     const onHideColumn =
       column.title === defaultColumns.done.title ? () => setHideDoneColumn(true) : undefined;
     return (
@@ -267,6 +272,7 @@ export function TodoList() {
         column={column}
         tasks={colTasks}
         isMobile={isMobile}
+        showDate={showDate}
         onEditColumn={openEditColumnModal}
         onAddColumnAfter={openInsertColumnModal}
         onAddTask={handleAddTask}

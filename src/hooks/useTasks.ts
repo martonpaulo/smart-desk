@@ -1,73 +1,72 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDefaultColumns } from '@/hooks/useDefaultColumns';
 import { useBoardStore } from '@/store/board/store';
 import type { Column } from '@/types/column';
+import type { Task } from '@/types/task';
+import { sortActive, sortByUpdatedDesc } from '@/utils/taskUtils';
+import { isSameDay } from '@/utils/timeUtils';
 
-export function useTasks(filterTitle = '') {
-  const tasks = useBoardStore(state => state.tasks);
+interface TaskFilters {
+  title?: string;
+  date?: Date;
+}
 
-  // defaultColumns returns a Promise<Column|undefined>
-  const doneColPromise = useDefaultColumns('done');
+export function useTasks(filters: TaskFilters = {}) {
+  const { title = '', date } = filters;
+  const allTasks = useBoardStore(s => s.tasks);
+
+  // fetch done‑column info once
+  const doneColumnPromise = useDefaultColumns('done');
   const [doneColumn, setDoneColumn] = useState<Column | null>(null);
 
-  // resolve the promise once
   useEffect(() => {
     let mounted = true;
-    doneColPromise
+    doneColumnPromise
       .then(col => {
-        if (mounted && col) setDoneColumn(col);
+        if (mounted) setDoneColumn(col ?? null);
       })
       .catch(() => {
-        // optionally handle errors
         if (mounted) setDoneColumn(null);
       });
     return () => {
       mounted = false;
     };
-  }, [doneColPromise]);
+  }, [doneColumnPromise]);
 
-  // all but done & trashed sorted by urgent→important→oldest update
+  // common filter by title & optional date
+  const matchesFilters = useCallback(
+    (task: Task): boolean => {
+      const matchesTitle = task.title.toLowerCase().includes(title.toLowerCase());
+      const matchesDate = !date ? true : isSameDay(task.plannedDate, date);
+      return matchesTitle && matchesDate;
+    },
+    [title, date],
+  );
+
+  // tasks not done, not trashed, sorted by priority & date
   const activeTasks = useMemo(() => {
     if (!doneColumn) return [];
-    return tasks
-      .filter(
-        t =>
-          !t.trashed &&
-          t.columnId !== doneColumn.id &&
-          t.title.toLowerCase().includes(filterTitle.toLowerCase()),
-      )
-      .sort((a, b) => {
-        if (a.blocked !== b.blocked) return a.blocked ? 1 : -1;
-        if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
-        if (a.important !== b.important) return a.important ? -1 : 1;
-        return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-      });
-  }, [doneColumn, tasks, filterTitle]);
 
-  // done column tasks newest first
+    return allTasks
+      .filter(t => !t.trashed && t.columnId !== doneColumn.id && matchesFilters(t))
+      .sort(sortActive);
+  }, [doneColumn, allTasks, matchesFilters]);
+
+  // tasks in done column, newest first
   const doneTasks = useMemo(() => {
+    // prevents errors if done column is not yet loaded
     if (!doneColumn) return [];
-    return tasks
-      .filter(
-        t =>
-          !t.trashed &&
-          t.columnId === doneColumn.id &&
-          t.title.toLowerCase().includes(filterTitle.toLowerCase()),
-      )
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  }, [doneColumn, tasks, filterTitle]);
 
-  // trashed newest first
+    return allTasks
+      .filter(t => !t.trashed && t.columnId === doneColumn.id && matchesFilters(t))
+      .sort(sortByUpdatedDesc);
+  }, [doneColumn, allTasks, matchesFilters]);
+
+  // trashed tasks, newest first
   const trashedTasks = useMemo(() => {
-    return tasks
-      .filter(t => t.trashed && t.title.toLowerCase().includes(filterTitle.toLowerCase()))
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  }, [tasks, filterTitle]);
+    return allTasks.filter(t => t.trashed && matchesFilters(t)).sort(sortByUpdatedDesc);
+  }, [allTasks, matchesFilters]);
 
-  return {
-    activeTasks,
-    doneTasks,
-    trashedTasks,
-  };
+  return { allTasks, activeTasks, doneTasks, trashedTasks };
 }

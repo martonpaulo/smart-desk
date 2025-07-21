@@ -58,7 +58,7 @@ export default function BoardPage() {
         direction={isMobile ? 'column-reverse' : 'row'}
         alignItems={isMobile ? 'stretch' : 'flex-start'}
       >
-        <TodoList />
+        <TodoList showDate={false} />
 
         <Stack alignItems="flex-start">
           <Stack spacing={2}>

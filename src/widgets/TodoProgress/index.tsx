@@ -1,17 +1,12 @@
 import { LinearProgress, Stack, StackProps, Typography } from '@mui/material';
 
-import { defaultColumns } from '@/config/defaultColumns';
-import { useBoardStore } from '@/store/board/store';
+import { useTasks } from '@/hooks/useTasks';
 
 export function TodoProgress(props: StackProps) {
-  const tasks = useBoardStore(state => state.tasks);
-  const columns = useBoardStore(state => state.columns);
+  const { activeTasks, doneTasks } = useTasks({ date: new Date() });
 
-  const doneColumn = columns.find(c => !c.trashed && c.title === defaultColumns.done.title);
-  const totalCount = tasks.filter(t => !t.trashed).length;
-  const doneCount = doneColumn
-    ? tasks.filter(t => !t.trashed && t.columnId === doneColumn.id).length
-    : 0;
+  const totalCount = activeTasks.length + doneTasks.length;
+  const doneCount = doneTasks.length;
 
   const percentage = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
 

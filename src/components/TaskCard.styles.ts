@@ -25,19 +25,15 @@ export const Container = styled(Box, {
   flexWrap: 'wrap',
 }));
 
-export const Icons = styled(Stack)(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  fontSize: theme.typography.body2.fontSize,
-}));
-
 export const Content = styled(Stack)({
-  flex: 1,
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: '0.25rem',
-  flexWrap: 'wrap',
+  flexDirection: 'column',
 });
+
+export const TitleGroup = styled(Stack)(() => ({
+  flexDirection: 'row',
+
+  gap: '0.25rem',
+}));
 
 export const TitleInput = styled(TextField)(({ theme }) => ({
   width: '100%',
@@ -83,6 +79,12 @@ export const QuantityText = styled(Typography)(({ theme }) => ({
   ...theme.typography.caption,
   userSelect: 'none',
   textDecoration: 'none',
+}));
+
+export const DateText = styled(Typography)(({ theme }) => ({
+  ...theme.typography.caption,
+  userSelect: 'none',
+  color: theme.palette.text.secondary,
 }));
 
 export const ActionGroup = styled(Box)({

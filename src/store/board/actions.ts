@@ -14,13 +14,9 @@ import {
 import { theme } from '@/styles/theme';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
-import {
-  getLastTaskPositionInColumn,
-  getNewColumnPosition,
-  isTaskEmpty,
-  mergeById,
-} from '@/utils/boardHelpers';
+import { getLastTaskPositionInColumn, getNewColumnPosition, mergeById } from '@/utils/boardHelpers';
 import { RESET_TIME } from '@/utils/resetTime';
+import { isTaskEmpty } from '@/utils/taskUtils';
 
 type Set = StoreApi<BoardState>['setState'];
 type Get = StoreApi<BoardState>['getState'];
@@ -108,6 +104,7 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
     important: data.important ?? false,
     urgent: data.urgent ?? false,
     blocked: data.blocked ?? false,
+    plannedDate: data.plannedDate,
     quantityDone: 0,
     quantityTarget:
       typeof data.quantityTarget === 'number' && data.quantityTarget > 0 ? data.quantityTarget : 1,
@@ -251,6 +248,7 @@ export async function syncFromServerAction(set: Set, get: Get) {
           return {
             ...task,
             quantityDone: 0,
+            plannedDate: new Date(),
             columnId: draftCol!.id,
             updatedAt: now,
             isSynced: false,
@@ -326,6 +324,7 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
         important: data.important ?? t.important,
         urgent: data.urgent ?? t.urgent,
         blocked: data.blocked ?? t.blocked,
+        plannedDate: data.plannedDate ?? t.plannedDate,
         quantityDone: data.quantityDone ?? t.quantityDone,
         quantityTarget:
           typeof data.quantityTarget === 'number' ? data.quantityTarget : t.quantityTarget,

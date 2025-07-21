@@ -28,6 +28,7 @@ export interface AddTaskData {
   notes?: string;
   important?: boolean;
   blocked?: boolean;
+  plannedDate?: Date;
   urgent?: boolean;
   quantityTarget?: number;
   daily?: boolean;
@@ -51,6 +52,7 @@ export interface UpdateTaskData {
   important?: boolean;
   urgent?: boolean;
   blocked?: boolean;
+  plannedDate?: Date;
   quantityDone?: number;
   quantityTarget?: number;
   daily?: boolean;

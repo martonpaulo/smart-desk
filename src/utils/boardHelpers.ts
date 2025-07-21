@@ -48,10 +48,3 @@ export function mergeById<T extends { id: string; updatedAt: Date }>(
   });
   return Array.from(map.values());
 }
-
-export function isTaskEmpty(task: Task): boolean {
-  const isTitleEmpty = task.title.trim() === '';
-  const isNotesEmpty = !task.notes || task.notes.trim() === '';
-
-  return isTitleEmpty && isNotesEmpty;
-}

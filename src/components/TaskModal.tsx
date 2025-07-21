@@ -29,6 +29,7 @@ interface TaskForm {
   important: boolean;
   urgent: boolean;
   blocked: boolean;
+  plannedDate?: Date;
 }
 
 interface TaskModalProps {
@@ -56,6 +57,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       important: task?.important ?? false,
       urgent: task?.urgent ?? false,
       blocked: task?.blocked ?? false,
+      plannedDate: task?.plannedDate ?? undefined,
       ...newProperties, // spread any additional properties for new tasks
     }),
     [task, newProperties],
@@ -92,7 +94,8 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       form.daily !== init.daily ||
       form.important !== init.important ||
       form.urgent !== init.urgent ||
-      form.blocked !== init.blocked
+      form.blocked !== init.blocked ||
+      (form.plannedDate?.getTime() ?? 0) !== (init.plannedDate?.getTime() ?? 0)
     );
   };
 
@@ -114,6 +117,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       important: form.important,
       urgent: form.urgent,
       blocked: form.blocked,
+      plannedDate: form.plannedDate ? new Date(form.plannedDate) : undefined,
     };
 
     try {
@@ -212,6 +216,29 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
                 e.preventDefault();
                 saveAndClose();
               }
+            }}
+          />
+
+          {/* Planned date selector */}
+          <TextField
+            label="Planned Date"
+            type="date"
+            fullWidth
+            value={
+              form.plannedDate instanceof Date
+                ? form.plannedDate.toISOString().split('T')[0]
+                : (form.plannedDate ?? '')
+            }
+            onChange={e => {
+              const val = e.target.value;
+              setForm(prev => ({
+                ...prev,
+                plannedDate: val ? new Date(val) : undefined,
+              }));
+            }}
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: { min: new Date().toISOString().split('T')[0] },
             }}
           />
 

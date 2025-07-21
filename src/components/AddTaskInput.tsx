@@ -1,30 +1,37 @@
 import AddIcon from '@mui/icons-material/Add';
+import { alpha, darken } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField, { TextFieldProps } from '@mui/material/TextField';
 
 import { defaultColumns } from '@/config/defaultColumns';
 import { useBoardStore } from '@/store/board/store';
+import { Column } from '@/types/column';
+import { Task } from '@/types/task';
 
 interface AddTaskInputProps extends TextFieldProps<'outlined'> {
-  columnId?: string;
-  columnColor?: string;
+  taskProperties?: Partial<Task>;
+  columnProperties?: Partial<Column>;
   onFinishAdding: (taskId: string) => void;
 }
 
 export function AddTaskInput({
-  columnId,
-  columnColor = defaultColumns.draft.color,
+  taskProperties,
+  columnProperties,
   onFinishAdding,
   variant = 'outlined',
   ...props
 }: AddTaskInputProps) {
   const addTask = useBoardStore(state => state.addTask);
 
+  const columnColor = columnProperties?.color || defaultColumns.draft.color;
+  const color = alpha(darken(columnColor, 0.2), 0.15);
+
   const handleAddTask = async () => {
     const id = await addTask({
       title: '',
-      columnId,
+      columnId: columnProperties?.id,
       updatedAt: new Date(),
+      ...taskProperties,
     });
     onFinishAdding(id);
   };
@@ -38,24 +45,24 @@ export function AddTaskInput({
       onFocus={handleAddTask}
       sx={{
         ...props.sx,
-        borderColor: columnColor,
+        borderColor: color,
         '& input': {
           cursor: 'pointer',
         },
         '& .MuiInputBase-root': {
           cursor: 'pointer',
           transition: 'background-color 0.15s',
-          '&:hover': { backgroundColor: columnColor },
+          '&:hover': { backgroundColor: color },
         },
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
-            borderColor: columnColor,
+            borderColor: color,
           },
           '&:hover fieldset': {
-            borderColor: columnColor,
+            borderColor: color,
           },
           '&.Mui-focused fieldset': {
-            borderColor: columnColor,
+            borderColor: color,
           },
         },
       }}

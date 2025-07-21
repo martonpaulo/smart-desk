@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { Box, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 
+import { AddTaskInput } from '@/components/AddTaskInput';
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { TaskCard } from '@/components/TaskCard';
 import { customColors } from '@/config/customColors';
@@ -11,7 +12,6 @@ import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useTasks } from '@/hooks/useTasks';
 import { theme } from '@/styles/theme';
 import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
-import { AddTaskInput } from '@/widgets/TodoList/AddTaskInput';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -47,7 +47,7 @@ export default function TasksPage() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   // fetch tasks (filtered by title)
-  const { activeTasks, doneTasks, trashedTasks } = useTasks(filter);
+  const { activeTasks, doneTasks, trashedTasks } = useTasks({ title: filter });
 
   // counts & dynamic titles/subtitles
   const counts = {
@@ -101,7 +101,7 @@ export default function TasksPage() {
         {!isMobile && (
           <AddTaskInput
             variant="outlined"
-            columnColor={customColors.grey.value}
+            columnProperties={{ color: customColors.grey.value }}
             sx={{ width: cardWidth }}
             onFinishAdding={newId => setEditingTaskId(newId)}
           />
