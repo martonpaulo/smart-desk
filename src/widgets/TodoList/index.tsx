@@ -57,7 +57,7 @@ export function TodoList({ showDate }: TodoListProps) {
   const columnsToRender = columns.filter(c => {
     if (c.trashed) return false;
     if (hideDoneColumn && c.title === defaultColumns.done.title) return false;
-    if (hiddenColumnIds.includes(c.id)) return false;
+    if (hiddenColumnIds && hiddenColumnIds.includes(c.id)) return false;
     return true;
   });
   const boardIsEmpty = columnsToRender.length === 0;

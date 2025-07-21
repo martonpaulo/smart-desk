@@ -1,6 +1,9 @@
 import { createTheme } from '@mui/material';
 
+import { customShadows } from '@/styles/shadows';
+
 export const theme = createTheme({
+  shadows: customShadows,
   transitions: {
     duration: {
       shortest: 75,
@@ -40,6 +43,10 @@ export const theme = createTheme({
       fontSize: '0.9125rem',
       fontWeight: 400,
     },
+    h5: {
+      fontSize: '0.875rem',
+      fontWeight: 500,
+    },
     body1: {
       fontSize: '1rem',
       fontWeight: 300,
@@ -50,6 +57,15 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiAccordion: {
+      styleOverrides: {
+        root: {
+          '&:before': {
+            display: 'none',
+          },
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         '*': {

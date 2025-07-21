@@ -1,11 +1,13 @@
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   IconButton,
   List,
   ListItem,
-  ListItemSecondaryAction,
   ListItemText,
-  Stack,
   Typography,
 } from '@mui/material';
 
@@ -17,27 +19,27 @@ export function HiddenColumnsList() {
   const hiddenIds = useTodoPrefsStore(state => state.hiddenColumnIds);
   const toggleHidden = useTodoPrefsStore(state => state.toggleHiddenColumn);
 
-  const hiddenColumns = columns.filter(
-    c => !c.trashed && hiddenIds.includes(c.id),
-  );
+  const hiddenColumns = columns.filter(c => !c.trashed && hiddenIds?.includes(c.id));
 
   if (hiddenColumns.length === 0) return null;
 
   return (
-    <Stack spacing={1}>
-      <Typography variant="h3">Hidden Columns</Typography>
-      <List dense disablePadding>
-        {hiddenColumns.map(col => (
-          <ListItem key={col.id} sx={{ pl: 0 }}>
-            <ListItemText primary={col.title} sx={{ color: col.color }} />
-            <ListItemSecondaryAction>
+    <Accordion sx={{ boxShadow: 1 }}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography variant="h4">Hidden Columns</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <List dense disablePadding>
+          {hiddenColumns.map(col => (
+            <ListItem key={col.id} sx={{ pl: 0 }}>
+              <ListItemText primary={col.title} sx={{ color: col.color }} />
               <IconButton edge="end" onClick={() => toggleHidden(col.id)}>
                 <VisibilityIcon fontSize="small" />
               </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
-    </Stack>
+            </ListItem>
+          ))}
+        </List>
+      </AccordionDetails>
+    </Accordion>
   );
 }

@@ -7,7 +7,7 @@ import { Box, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { AddTaskInput } from '@/components/AddTaskInput';
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { TaskCard } from '@/components/TaskCard';
-import { customColors } from '@/config/customColors';
+import { customColors } from '@/styles/colors';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useTasks } from '@/hooks/useTasks';
 import { theme } from '@/styles/theme';

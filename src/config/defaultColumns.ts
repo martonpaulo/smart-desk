@@ -1,4 +1,4 @@
-import { customColors } from '@/config/customColors';
+import { customColors } from '@/styles/colors';
 
 export const defaultColumns = {
   todo: {

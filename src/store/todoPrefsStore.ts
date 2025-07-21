@@ -22,14 +22,15 @@ const STORAGE_KEY = 'todo-prefs';
 
 function loadPrefs(): TodoPrefsData {
   try {
-    return (
-      getStoredFilters<TodoPrefsData>(STORAGE_KEY) ?? {
-        view: 'board',
-        trashOpen: false,
-        hideDoneColumn: true,
-        hiddenColumnIds: [],
-      }
-    );
+    const prefs = getStoredFilters<TodoPrefsData>(STORAGE_KEY) ?? {
+      view: 'board',
+      trashOpen: false,
+      hideDoneColumn: true,
+      hiddenColumnIds: [],
+    };
+    // Ensure hiddenColumnIds is always an array
+    prefs.hiddenColumnIds = prefs.hiddenColumnIds || [];
+    return prefs;
   } catch {
     return {
       view: 'board',
@@ -75,10 +76,10 @@ export const useTodoPrefsStore = create<TodoPrefsState>(set => ({
     }),
   toggleHiddenColumn: id =>
     set(state => {
-      const exists = state.hiddenColumnIds.includes(id);
-      const nextIds = exists
-        ? state.hiddenColumnIds.filter(cid => cid !== id)
-        : [...state.hiddenColumnIds, id];
+      // Ensure hiddenColumnIds exists before accessing it
+      const hiddenColumnIds = state.hiddenColumnIds || [];
+      const exists = hiddenColumnIds.includes(id);
+      const nextIds = exists ? hiddenColumnIds.filter(cid => cid !== id) : [...hiddenColumnIds, id];
       const next = { ...state, hiddenColumnIds: nextIds };
       persistPrefs(next);
       return next;

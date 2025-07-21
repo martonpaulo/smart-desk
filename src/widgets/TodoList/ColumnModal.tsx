@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 
-import { customColors } from '@/config/customColors';
+import { customColors } from '@/styles/colors';
 import { Column } from '@/types/column';
 
 interface ColumnModalProps {
