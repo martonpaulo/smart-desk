@@ -7,9 +7,9 @@ import { Box, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { AddTaskInput } from '@/components/AddTaskInput';
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { TaskCard } from '@/components/TaskCard';
-import { customColors } from '@/styles/colors';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useTasks } from '@/hooks/useTasks';
+import { customColors } from '@/styles/colors';
 import { theme } from '@/styles/theme';
 import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
 
