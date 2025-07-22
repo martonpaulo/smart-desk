@@ -53,19 +53,23 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const date = searchParams.get('date');
-    console.log('Date parameter:', date);
+    const startIso = searchParams.get('start');
+    const endIso = searchParams.get('end');
 
-    // If date is provided, use it; otherwise default to today
-    let targetDate = new Date();
-    if (date) {
-      targetDate = new Date(date);
-      if (isNaN(targetDate.getTime())) {
+    let rangeStart = new Date();
+    rangeStart.setHours(0, 0, 0, 0);
+    let rangeEnd = new Date();
+    rangeEnd.setHours(23, 59, 59, 999);
+
+    if (startIso && endIso) {
+      const start = new Date(startIso);
+      const end = new Date(endIso);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
+        rangeStart = start;
+        rangeEnd = end;
+      } else {
         return NextResponse.json<ApiResponse<null>>(
-          {
-            success: false,
-            error: 'Invalid date format. Use YYYY-MM-DD.',
-          },
+          { success: false, error: 'Invalid date range.' },
           { status: 400 },
         );
       }
@@ -75,7 +79,7 @@ export async function GET(request: NextRequest) {
     const api = new GoogleCalendarAPI(session.accessToken);
 
     console.log('Fetching events...');
-    const { events, calendars } = await api.getAllTodaysEvents();
+    const { events, calendars } = await api.getEventsInRange(rangeStart, rangeEnd);
     console.log('Fetched events:', events.length, 'calendars:', calendars.length);
 
     const eventList = mapGoogleEventsToEvents(events, calendars);

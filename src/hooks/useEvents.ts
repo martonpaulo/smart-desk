@@ -4,7 +4,7 @@ import { useGoogleEvents } from '@/hooks/useGoogleEvents';
 import { useIcsEvents } from '@/hooks/useIcsEvents';
 import { useEventStore } from '@/store/eventStore';
 
-export function useEvents(date?: string) {
+export function useEvents(start?: Date, end?: Date) {
   const setRemoteEvents = useEventStore(s => s.setRemoteEvents);
 
   const {
@@ -13,7 +13,7 @@ export function useEvents(date?: string) {
     isError: errorGoogle,
     error: googleError,
     refetch: refetchGoogle,
-  } = useGoogleEvents(date);
+  } = useGoogleEvents(start, end);
 
   const {
     data: icsEvents = [],
@@ -21,7 +21,7 @@ export function useEvents(date?: string) {
     isError: errorIcs,
     error: icsError,
     refetch: refetchIcs,
-  } = useIcsEvents();
+  } = useIcsEvents(start, end);
 
   const isLoading = loadingGoogle || loadingIcs;
   const bothFailed = Boolean(errorGoogle && errorIcs);

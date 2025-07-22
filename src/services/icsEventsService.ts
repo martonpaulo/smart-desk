@@ -5,14 +5,18 @@ import { IcsCalendar } from '@/types/icsCalendar';
 import type { IEvent } from '@/types/IEvent';
 
 // Fetch events from all configured ICS calendars
-export async function fetchIcsEvents(calendars: IcsCalendar[]): Promise<IEvent[]> {
+export async function fetchIcsEvents(
+  calendars: IcsCalendar[],
+  start?: Date,
+  end?: Date,
+): Promise<IEvent[]> {
   if (calendars.length === 0) return [];
 
   const clientZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-  const now = DateTime.now().setZone(clientZone);
 
-  const startIso = now.minus({ days: 1 }).startOf('day').toISO()!;
-  const endIso = now.plus({ days: 1 }).endOf('day').toISO()!;
+  const now = DateTime.now().setZone(clientZone);
+  const startIso = (start ? DateTime.fromJSDate(start) : now.minus({ days: 1 }).startOf('day')).toISO()!;
+  const endIso = (end ? DateTime.fromJSDate(end) : now.plus({ days: 1 }).endOf('day')).toISO()!;
 
   const base = new URL('/api/ics-calendar', window.location.origin);
   base.searchParams.set('timezone', clientZone);

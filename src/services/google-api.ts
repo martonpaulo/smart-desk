@@ -107,31 +107,16 @@ export class GoogleCalendarAPI {
     }
   }
 
-  async getAllTodaysEvents(): Promise<{
-    events: GoogleCalendarEvent[];
-    calendars: GoogleCalendar[];
-  }> {
+  async getEventsInRange(
+    start: Date,
+    end: Date,
+  ): Promise<{ events: GoogleCalendarEvent[]; calendars: GoogleCalendar[] }> {
     try {
-      // Get all calendars first
       const calendars = await this.getCalendarList();
 
-      // Set up time range for today
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
+      const timeMin = start.toISOString();
+      const timeMax = end.toISOString();
 
-      const yesterday = new Date(start);
-      yesterday.setDate(start.getDate() - 1);
-
-      const end = new Date();
-      end.setHours(23, 59, 59, 999);
-
-      const tomorrow = new Date(end);
-      tomorrow.setDate(end.getDate() + 1);
-
-      const timeMin = yesterday.toISOString();
-      const timeMax = tomorrow.toISOString();
-
-      // Fetch events from all calendars concurrently
       const eventPromises = calendars.map(calendar =>
         this.getCalendarEvents(calendar.id, timeMin, timeMax).then(events =>
           events.map(event => ({ ...event, calendarId: calendar.id })),
@@ -141,12 +126,28 @@ export class GoogleCalendarAPI {
       const eventArrays = await Promise.all(eventPromises);
       const allEvents = eventArrays.flat();
 
-      return {
-        events: allEvents,
-        calendars,
-      };
+      return { events: allEvents, calendars };
     } catch (error) {
-      this.handleError(error, "fetching today's events");
+      this.handleError(error, 'fetching events');
     }
+  }
+
+  async getAllTodaysEvents(): Promise<{
+    events: GoogleCalendarEvent[];
+    calendars: GoogleCalendar[];
+  }> {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const yesterday = new Date(start);
+    yesterday.setDate(start.getDate() - 1);
+
+    const tomorrow = new Date(end);
+    tomorrow.setDate(end.getDate() + 1);
+
+    return this.getEventsInRange(yesterday, tomorrow);
   }
 }

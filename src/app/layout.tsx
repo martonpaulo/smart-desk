@@ -6,6 +6,7 @@ import { SessionProvider } from 'next-auth/react';
 
 import { NavigationLayout } from '@/navigation/NavigationLayout';
 import { AppThemeProvider } from '@/providers/AppThemeProvider';
+import { DateAdapterProvider } from '@/providers/DateAdapterProvider';
 import { InterfaceSoundProvider } from '@/providers/InterfaceSoundProvider';
 import { LocationProvider } from '@/providers/LocationProvider';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
@@ -26,6 +27,7 @@ const providers = [
   SupabaseSyncProvider,
   InterfaceSoundProvider,
   ZoomProvider,
+  DateAdapterProvider,
   AppThemeProvider,
   NavigationLayout,
 ];
