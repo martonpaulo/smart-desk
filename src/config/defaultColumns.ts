@@ -13,4 +13,8 @@ export const defaultColumns = {
     title: 'Draft',
     color: customColors.red.value,
   },
+  events: {
+    title: 'Events',
+    color: customColors.violet.value,
+  },
 };

@@ -65,9 +65,29 @@ export function useDefaultColumns(columnKey: ColumnKey) {
     return todoCol;
   };
 
+  const initializeEventsColumn = async () => {
+    let eventsCol = allColumns.find(c => c.title === defaultColumns.events.title);
+
+    if (!eventsCol) {
+      await addColumn({
+        title: defaultColumns.events.title,
+        color: defaultColumns.events.color,
+        updatedAt: new Date(),
+      });
+      eventsCol = allColumns.find(c => c.title === defaultColumns.events.title);
+    }
+
+    if (eventsCol && eventsCol.trashed) {
+      await updateColumn({ id: eventsCol.id, trashed: false, updatedAt: new Date() });
+    }
+
+    return eventsCol;
+  };
+
   if (columnKey === 'draft') return initializeDraftColumn();
   if (columnKey === 'done') return initializeDoneColumn();
   if (columnKey === 'todo') return initializeTodoColumn();
+  if (columnKey === 'events') return initializeEventsColumn();
 
   if (Object.keys(defaultColumns).includes(columnKey)) {
     throw new Error(`Column ${columnKey} is not implemented in useDefaultColumns`);

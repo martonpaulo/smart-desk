@@ -3,6 +3,7 @@
 import { Box } from '@mui/material';
 
 import type { CalendarView } from '@/app/calendar/[[...date]]/page';
+import { useEvents } from '@/hooks/useEvents';
 import { DayView } from '@/views/DayView';
 import { MonthView } from '@/views/MonthView';
 import { ScheduleView } from '@/views/ScheduleView';
@@ -24,6 +25,8 @@ export function CalendarViewContainer({
   onViewChange,
   onNavigate,
 }: CalendarViewContainerProps) {
+  useEvents();
+
   const commonProps = {
     currentDate,
     onDateChange,

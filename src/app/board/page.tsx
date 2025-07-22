@@ -25,6 +25,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { useLocation } from '@/hooks/useLocation';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useWeather } from '@/hooks/useWeather';
+import { processEventsColumn } from '@/services/eventsColumnService';
 import { useAudioStore } from '@/store/audioStore';
 import { useEventStore } from '@/store/eventStore';
 
@@ -34,6 +35,11 @@ export default function BoardPage() {
   const events = useEventStore(state => state.events);
   // Fetch events when visiting the board so data is available without opening the account page
   useEvents();
+
+  // create tasks from all-day events once per day
+  useEffect(() => {
+    void processEventsColumn();
+  }, [events]);
 
   const setAlertAcknowledged = useEventStore(state => state.setAlertAcknowledged);
   const isMeetingAlertEnabled = useAudioStore(state => state.meetingAlertEnabled);

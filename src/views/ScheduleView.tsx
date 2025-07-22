@@ -218,7 +218,7 @@ export function ScheduleView({ onNavigate }: ScheduleViewProps) {
                   >
                     <ListItemText
                       primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        <>
                           <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                             {event.title}
                           </Typography>
@@ -230,10 +230,10 @@ export function ScheduleView({ onNavigate }: ScheduleViewProps) {
                               sx={{ fontSize: '0.7rem', height: 20 }}
                             />
                           )}
-                        </Box>
+                        </>
                       }
                       secondary={
-                        <Box>
+                        <>
                           {!event.allDay && (
                             <Typography variant="body2" color="text.secondary">
                               {new Date(event.start).toLocaleTimeString('en-US', {
@@ -269,7 +269,7 @@ export function ScheduleView({ onNavigate }: ScheduleViewProps) {
                               {event.description}
                             </Typography>
                           )}
-                        </Box>
+                        </>
                       }
                     />
                   </ListItem>
