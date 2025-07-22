@@ -24,7 +24,11 @@ export function BottomNav() {
   // Prefetch target routes for snappier navigation
   useEffect(() => {
     routesToRender.forEach(route => {
-      router.prefetch(route.href).catch(() => {});
+      try {
+        router.prefetch(route.href);
+      } catch (error) {
+        console.error(`Failed to prefetch route ${route.href}:`, error);
+      }
     });
   }, [router, routesToRender]);
 

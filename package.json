@@ -27,7 +27,7 @@
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
     "format": "prettier --check \"**/*.{ts,tsx,json}\"",
     "format:fix": "prettier --write \"**/*.{ts,tsx,json}\"",
-    "fix": "npm run lint:fix && npm run format:fix",
+    "fix": "prettier --write \"**/*.{ts,tsx,json}\" --log-level silent && eslint 'src/**/*.{ts,tsx}' --fix",
     "clear": "rm -rf .next node_modules package-lock.json && npm cache clean --force && npm install --verbose && npm run dev",
     "zip": "node scripts/zip.mjs",
     "issues": "bash scripts/issues.sh"

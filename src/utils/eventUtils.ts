@@ -17,10 +17,10 @@ export function computeEventStatus(event: Event, now?: Date): EventStatus {
 }
 
 export function filterNonFullDayEvents(events: Event[]): Event[] {
-  return events.filter(({ start, end }) => {
-    const startMs = new Date(start).getTime();
-    const endMs = new Date(end).getTime();
-    return endMs - startMs < FULL_DAY_MS;
+  return events.filter(event => {
+    const startMs = new Date(event.start).getTime();
+    const endMs = new Date(event.end).getTime();
+    return endMs - startMs < FULL_DAY_MS && !event.allDay;
   });
 }
 

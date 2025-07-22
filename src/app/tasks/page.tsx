@@ -16,10 +16,9 @@ const AddTaskInput = dynamic(
   () => import('@/components/task/AddTaskInput').then(m => m.AddTaskInput),
   { ssr: false },
 );
-const TaskCard = dynamic(
-  () => import('@/components/task/TaskCard').then(m => m.TaskCard),
-  { ssr: false },
-);
+const TaskCard = dynamic(() => import('@/components/task/TaskCard').then(m => m.TaskCard), {
+  ssr: false,
+});
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useTasks } from '@/hooks/useTasks';
 import { customColors } from '@/styles/colors';

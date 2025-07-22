@@ -15,13 +15,13 @@ const EventTimeline = dynamic(
   () => import('@/components/timeline/EventTimeline').then(m => m.EventTimeline),
   { ssr: false },
 );
-const EventList = dynamic(
-  () => import('@/components/event/EventList').then(m => m.EventList),
-  { ssr: false },
-);
+const EventList = dynamic(() => import('@/components/event/EventList').then(m => m.EventList), {
+  ssr: false,
+});
 import { HiddenColumnsList } from '@/components/HiddenColumnsList';
 import { TodoProgress } from '@/components/Progress';
 import { UndoSnackbar } from '@/components/UndoSnackbar';
+import { useEvents } from '@/hooks/useEvents';
 import { useLocation } from '@/hooks/useLocation';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useWeather } from '@/hooks/useWeather';
@@ -32,6 +32,8 @@ export default function BoardPage() {
   const { latitude, longitude } = useLocation();
   const { data: weather } = useWeather(latitude, longitude);
   const events = useEventStore(state => state.events);
+  // Fetch events when visiting the board so data is available without opening the account page
+  useEvents();
 
   const setAlertAcknowledged = useEventStore(state => state.setAlertAcknowledged);
   const isMeetingAlertEnabled = useAudioStore(state => state.meetingAlertEnabled);
