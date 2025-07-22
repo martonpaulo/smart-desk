@@ -2,12 +2,22 @@
 
 import { useState } from 'react';
 
-import { FormControlLabel, FormGroup, Stack, Switch, useTheme } from '@mui/material';
+import {
+  Alert,
+  Button,
+  FormControlLabel,
+  FormGroup,
+  Snackbar,
+  Stack,
+  Switch,
+  useTheme,
+} from '@mui/material';
 
 import { EisenhowerQuadrant } from '@/components/EisenhowerQuadrant';
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { eisenhowerQuadrants } from '@/config/eisenhowerQuadrants';
 import { useTasks } from '@/hooks/useTasks';
+import { useTaskSelection } from '@/hooks/useTaskSelection';
 import { useBoardStore } from '@/store/board/store';
 import type { Task } from '@/types/task';
 import { playInterfaceSound } from '@/utils/soundPlayer';
@@ -19,7 +29,18 @@ export default function EisenhowerMatrixPage() {
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [showBlockedTasks, setShowBlockedTasks] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [updatedCount, setUpdatedCount] = useState(0);
   const theme = useTheme();
+
+  const {
+    isSelecting,
+    selectedIds,
+    selectedCount,
+    toggleSelecting,
+    selectTask,
+    clearSelection,
+  } = useTaskSelection();
 
   const handleDragStart = (task: Task, e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -64,6 +85,20 @@ export default function EisenhowerMatrixPage() {
       });
     };
 
+  const handleSetToToday = async () => {
+    const today = new Date();
+    const count = selectedIds.size;
+    await Promise.all(
+      Array.from(selectedIds).map(id =>
+        updateTask({ id, plannedDate: today, updatedAt: today }),
+      ),
+    );
+    setUpdatedCount(count);
+    setSnackbarOpen(true);
+    clearSelection();
+    toggleSelecting();
+  };
+
   return (
     <PageContentLayout
       title="Eisenhower Matrix"
@@ -85,6 +120,20 @@ export default function EisenhowerMatrixPage() {
           }}
         />
       </FormGroup>
+
+      <Stack direction="row" gap={2} mb={2}>
+        <Button
+          variant={isSelecting ? 'contained' : 'outlined'}
+          onClick={toggleSelecting}
+        >
+          {isSelecting ? 'Cancel Selection' : 'Select Tasks'}
+        </Button>
+        {isSelecting && selectedCount > 0 && (
+          <Button variant="contained" onClick={handleSetToToday}>
+            Set to Today
+          </Button>
+        )}
+      </Stack>
 
       <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
         {eisenhowerQuadrants.map(
@@ -112,11 +161,24 @@ export default function EisenhowerMatrixPage() {
                 onTaskDragOver={handleDragOver}
                 onTaskDragEnd={handleDragEnd}
                 onTaskDrop={handleDrop(important, urgent)}
+                selectable={isSelecting}
+                selectedTaskIds={selectedIds}
+                onTaskSelectChange={selectTask}
               />
             );
           },
         )}
       </Stack>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setSnackbarOpen(false)}>
+          {`Updated ${updatedCount} task${updatedCount !== 1 ? 's' : ''}`}
+        </Alert>
+      </Snackbar>
     </PageContentLayout>
   );
 }
