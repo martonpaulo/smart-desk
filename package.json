@@ -23,10 +23,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "issues": "bash scripts/issues.sh",
-    "fix": "prettier --write \"**/*.{ts,tsx,json}\" --log-level silent && eslint 'src/**/*.{ts,tsx}' --fix",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "format": "prettier --check \"**/*.{ts,tsx,json}\"",
+    "format:fix": "prettier --write \"**/*.{ts,tsx,json}\"",
+    "fix": "npm run lint:fix && npm run format:fix",
     "clear": "rm -rf .next node_modules package-lock.json && npm cache clean --force && npm install --verbose && npm run dev",
-    "zip": "node scripts/zip.mjs"
+    "zip": "node scripts/zip.mjs",
+    "issues": "bash scripts/issues.sh"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
