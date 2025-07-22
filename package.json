@@ -30,7 +30,8 @@
     "fix": "prettier --write \"**/*.{ts,tsx,json}\" --log-level silent && eslint 'src/**/*.{ts,tsx}' --fix",
     "clear": "rm -rf .next node_modules package-lock.json && npm cache clean --force && npm install --verbose && npm run dev",
     "zip": "node scripts/zip.mjs",
-    "issues": "bash scripts/issues.sh"
+    "issues": "bash scripts/issues.sh",
+    "ship": "set -x && npm run format:fix && npm run lint:fix && npm run build && git add . && git commit -m \"$npm_config_msg\" && git push"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
