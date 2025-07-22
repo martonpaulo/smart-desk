@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon';
 
-import type { IEvent } from '@/types/IEvent';
-import { IEventStatus } from '@/widgets/EventTimeline/ITimelineEvent';
+import type { Event } from '@/types/Event';
+import { EventStatus } from '@/widgets/EventTimeline/ITimelineEvent';
 
 const FULL_DAY_MS = 24 * 60 * 60 * 1000;
 
-export function computeEventStatus(event: IEvent, now?: Date): IEventStatus {
+export function computeEventStatus(event: Event, now?: Date): EventStatus {
   if (!now) now = new Date();
   const nowMs = now.getTime();
   const startMs = new Date(event.start).getTime();
@@ -16,7 +16,7 @@ export function computeEventStatus(event: IEvent, now?: Date): IEventStatus {
   return 'current';
 }
 
-export function filterNonFullDayEvents(events: IEvent[]): IEvent[] {
+export function filterNonFullDayEvents(events: Event[]): Event[] {
   return events.filter(({ start, end }) => {
     const startMs = new Date(start).getTime();
     const endMs = new Date(end).getTime();
@@ -24,7 +24,7 @@ export function filterNonFullDayEvents(events: IEvent[]): IEvent[] {
   });
 }
 
-export function filterFullDayEventsForTodayInUTC(events: IEvent[], now?: Date): IEvent[] {
+export function filterFullDayEventsForTodayInUTC(events: Event[], now?: Date): Event[] {
   if (!now) now = new Date();
 
   const today = DateTime.fromJSDate(now);
@@ -50,7 +50,7 @@ export function filterFullDayEventsForTodayInUTC(events: IEvent[], now?: Date): 
   });
 }
 
-export function filterCurrentOrFutureEvents(events: IEvent[], now?: Date): IEvent[] {
+export function filterCurrentOrFutureEvents(events: Event[], now?: Date): Event[] {
   if (!now) now = new Date();
   return events.filter(event => {
     const status = computeEventStatus(event, now);
@@ -58,7 +58,7 @@ export function filterCurrentOrFutureEvents(events: IEvent[], now?: Date): IEven
   });
 }
 
-export function filterTodayEvents(events: IEvent[], now?: Date): IEvent[] {
+export function filterTodayEvents(events: Event[], now?: Date): Event[] {
   if (!now) now = new Date();
   const todayStart = new Date(now);
   todayStart.setHours(0, 0, 0, 0);
@@ -78,11 +78,11 @@ export function filterTodayEvents(events: IEvent[], now?: Date): IEvent[] {
   });
 }
 
-export function sortEventsByStart(events: IEvent[]): IEvent[] {
+export function sortEventsByStart(events: Event[]): Event[] {
   return [...events].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 }
 
-export function calculateMinutesUntilEvent(event: IEvent, now?: Date): number {
+export function calculateMinutesUntilEvent(event: Event, now?: Date): number {
   if (!now) now = new Date();
   const startMs = new Date(event.start).getTime();
   const nowMs = now.getTime();
@@ -96,7 +96,7 @@ export function formattedTime(date: Date | string): string {
   return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-export function formatEventTimeRange(event: IEvent): string {
+export function formatEventTimeRange(event: Event): string {
   const start = new Date(event.start);
   const end = new Date(event.end);
 
@@ -106,7 +106,7 @@ export function formatEventTimeRange(event: IEvent): string {
   return `${startTime} - ${endTime}`;
 }
 
-export function getUpcomingEventLabel(event: IEvent, now?: Date): string {
+export function getUpcomingEventLabel(event: Event, now?: Date): string {
   const eventStatus = computeEventStatus(event, now);
   const minutesUntilEvent = calculateMinutesUntilEvent(event, now);
   if (eventStatus === 'past') return 'past';
@@ -115,13 +115,13 @@ export function getUpcomingEventLabel(event: IEvent, now?: Date): string {
   return `in ${minutesUntilEvent} min`;
 }
 
-export function getAttendeeCountLabel(event: IEvent): string {
+export function getAttendeeCountLabel(event: Event): string {
   if (!event.attendeeCount) return '';
   if (event.attendeeCount < 2) return '';
   return `${event.attendeeCount} attendees`;
 }
 
-export function isTimeAvailable(events: IEvent[], time: Date): boolean {
+export function isTimeAvailable(events: Event[], time: Date): boolean {
   const timeObj = new Date(time);
   const timeMs = timeObj.getTime();
   return !events.some(event => {
@@ -131,7 +131,7 @@ export function isTimeAvailable(events: IEvent[], time: Date): boolean {
   });
 }
 
-function areEventsEqual(firstEvent: IEvent, secondEvent: IEvent): boolean {
+function areEventsEqual(firstEvent: Event, secondEvent: Event): boolean {
   const firstEventStart = new Date(firstEvent.start);
   const firstEventEnd = new Date(firstEvent.end);
   const secondEventStart = new Date(secondEvent.start);
@@ -147,9 +147,9 @@ function areEventsEqual(firstEvent: IEvent, secondEvent: IEvent): boolean {
   );
 }
 
-export function mergeEvents(prevEvents: IEvent[], nextEvents: IEvent[]): IEvent[] {
+export function mergeEvents(prevEvents: Event[], nextEvents: Event[]): Event[] {
   const prevEventsMap = new Map(prevEvents.map(event => [event.id, event]));
-  const mergedEvents: IEvent[] = [];
+  const mergedEvents: Event[] = [];
 
   for (const event of nextEvents) {
     const oldObj = prevEventsMap.get(event.id);

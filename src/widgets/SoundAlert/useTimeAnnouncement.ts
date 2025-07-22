@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 
-import { IEvent } from '@/types/IEvent';
+import { Event } from '@/types/Event';
 import { ISpeechStatus } from '@/types/ISpeechStatus';
 import { isTimeAvailable } from '@/utils/eventUtils';
 
 interface UseTimeAnnouncementOptions {
   now: Date;
-  events: IEvent[];
+  events: Event[];
   audioEnabled: boolean;
   intervalMinutes: number;
   includeMeetings: boolean;

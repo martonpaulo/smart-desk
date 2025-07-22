@@ -5,14 +5,14 @@ import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 
 import { useAlertSound } from '@/hooks/useAlertSound';
+import type { Event } from '@/types/Event';
 import { IAlertType } from '@/types/IAlertType';
-import type { IEvent } from '@/types/IEvent';
 import { filterNonFullDayEvents, filterTodayEvents } from '@/utils/eventUtils';
 import { parseBold } from '@/widgets/ChangeSnackbar/textUtils';
 import { useEventChanges } from '@/widgets/ChangeSnackbar/useEventChanges';
 
 interface ChangeSnackbarProps {
-  events: IEvent[];
+  events: Event[];
   eventChangesAlertEnabled: boolean;
 }
 

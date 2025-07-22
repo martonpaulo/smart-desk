@@ -14,12 +14,12 @@ import {
 } from '@mui/material';
 import { DateTime } from 'luxon';
 
-import { IEvent } from '@/types/IEvent';
+import { Event } from '@/types/Event';
 
 interface EditEventModalProps {
   open: boolean;
-  event: IEvent | null;
-  onSave: (event: IEvent) => void;
+  event: Event | null;
+  onSave: (event: Event) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
 }

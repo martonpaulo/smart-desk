@@ -2,8 +2,8 @@ import ICAL from 'ical.js';
 import { DateTime } from 'luxon';
 import { NextRequest, NextResponse } from 'next/server';
 
+import type { Event } from '@/types/Event';
 import type { ICalendar } from '@/types/ICalendar';
-import type { IEvent } from '@/types/IEvent';
 
 function toDateInZone(time: ICAL.Time | Date, zone: string): Date {
   if (time instanceof Date) {
@@ -23,8 +23,8 @@ function extractEvents(
   start: Date,
   end: Date,
   calendarMeta: ICalendar,
-): IEvent[] {
-  const events: IEvent[] = [];
+): Event[] {
+  const events: Event[] = [];
   const comps = root.getAllSubcomponents('vevent');
 
   for (const comp of comps) {
@@ -54,6 +54,7 @@ function extractEvents(
           end: e,
           title: item.summary || baseTitle,
           attendeeCount: item.component.getAllProperties('attendee').length,
+          description: item.description,
           calendar: calendarMeta,
         });
       }
@@ -73,6 +74,7 @@ function extractEvents(
         end: e,
         title: baseTitle,
         attendeeCount: baseCount,
+        description: String(comp.getFirstPropertyValue('description') || ''),
         calendar: calendarMeta,
       });
     }

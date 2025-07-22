@@ -1,8 +1,8 @@
 import type { ApiResponse } from '@/services/api';
-import type { IEvent } from '@/types/IEvent';
+import type { Event } from '@/types/Event';
 
 // fetch events from Google calendar endpoint
-export async function fetchGoogleEvents(start?: Date, end?: Date): Promise<IEvent[]> {
+export async function fetchGoogleEvents(start?: Date, end?: Date): Promise<Event[]> {
   const endpoint = new URL('/api/google-calendar', window.location.origin);
   if (start && end) {
     endpoint.searchParams.set('start', start.toISOString());
@@ -24,7 +24,7 @@ export async function fetchGoogleEvents(start?: Date, end?: Date): Promise<IEven
     throw new Error(message);
   }
 
-  const result = (await response.json()) as ApiResponse<IEvent[]>;
+  const result = (await response.json()) as ApiResponse<Event[]>;
   if (!result.success) {
     throw new Error(result.error);
   }

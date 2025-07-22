@@ -1,11 +1,11 @@
 import type { GoogleCalendar, GoogleCalendarEvent } from '@/services/api';
+import type { Event } from '@/types/Event';
 import type { ICalendar } from '@/types/ICalendar';
-import type { IEvent } from '@/types/IEvent';
 
 export function mapGoogleEventToEvent(
   event: GoogleCalendarEvent & { calendarId?: string },
   calendars: GoogleCalendar[],
-): IEvent | null {
+): Event | null {
   try {
     // Find the calendar for this event
     const calendar = calendars.find(cal => cal.id === event.calendarId);
@@ -56,6 +56,8 @@ export function mapGoogleEventToEvent(
       end,
       title: event.summary || 'Untitled Event',
       attendeeCount: event.attendees?.length || 0,
+      allDay: isAllDay,
+      description: event.description || '',
       calendar: mappedCalendar,
     };
   } catch (error) {
@@ -67,9 +69,9 @@ export function mapGoogleEventToEvent(
 export function mapGoogleEventsToEvents(
   events: (GoogleCalendarEvent & { calendarId?: string })[],
   calendars: GoogleCalendar[],
-): IEvent[] {
+): Event[] {
   return events
     .map(event => mapGoogleEventToEvent(event, calendars))
-    .filter((evt): evt is IEvent => evt !== null)
+    .filter((evt): evt is Event => evt !== null)
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 }

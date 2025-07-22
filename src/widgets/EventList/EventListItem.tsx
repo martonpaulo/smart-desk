@@ -11,7 +11,7 @@ import {
 
 import { MinutesChip } from '@/components/MinutesChip';
 import { theme } from '@/styles/theme';
-import { IEvent } from '@/types/IEvent';
+import { Event } from '@/types/Event';
 import {
   calculateMinutesUntilEvent,
   computeEventStatus,
@@ -19,7 +19,7 @@ import {
 } from '@/utils/eventUtils';
 
 interface EventListItemProps {
-  event: IEvent;
+  event: Event;
   onClick: () => void;
   color?: string;
 }

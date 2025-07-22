@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth';
 import type { ApiResponse } from '@/services/api';
 import { mapGoogleEventsToEvents } from '@/services/event-mapper';
 import { GoogleCalendarAPI, GoogleCalendarError } from '@/services/google-api';
-import type { IEvent } from '@/types/IEvent';
+import type { Event } from '@/types/Event';
 
 export async function GET(request: NextRequest) {
   console.log('Calendar API route called:', request.url);
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
     const eventList = mapGoogleEventsToEvents(events, calendars);
     console.log('Mapped events:', eventList.length);
 
-    return NextResponse.json<ApiResponse<IEvent[]>>({
+    return NextResponse.json<ApiResponse<Event[]>>({
       success: true,
       data: eventList,
     });

@@ -1,15 +1,15 @@
 import { DateTime } from 'luxon';
 
+import type { Event } from '@/types/Event';
 import type { ICalendar } from '@/types/ICalendar';
 import { IcsCalendar } from '@/types/icsCalendar';
-import type { IEvent } from '@/types/IEvent';
 
 // Fetch events from all configured ICS calendars
 export async function fetchIcsEvents(
   calendars: IcsCalendar[],
   start?: Date,
   end?: Date,
-): Promise<IEvent[]> {
+): Promise<Event[]> {
   if (calendars.length === 0) return [];
 
   const clientZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
@@ -39,19 +39,20 @@ export async function fetchIcsEvents(
           } | null;
           throw new Error(errorJson?.error ?? 'Failed to fetch ICS events');
         }
-        const events = (await res.json()) as IEvent[];
+        const events = (await res.json()) as Event[];
         return events.map(ev => ({
           id: ev.id,
           start: new Date(ev.start),
           end: new Date(ev.end),
           title: ev.title,
           attendeeCount: ev.attendeeCount,
+          description: ev.description,
           calendar: ev.calendar as ICalendar,
         }));
       })
       .catch(err => {
         console.error('ICS fetch failed', err);
-        return [] as IEvent[];
+        return [] as Event[];
       });
   });
 

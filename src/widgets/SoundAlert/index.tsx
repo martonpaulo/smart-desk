@@ -13,14 +13,14 @@ import {
 } from '@mui/material';
 
 import { useSpeech } from '@/hooks/useSpeech';
-import type { IEvent } from '@/types/IEvent';
+import type { Event } from '@/types/Event';
 import { buildAnnouncement } from '@/widgets/SoundAlert/announcementUtils';
 import { IntervalSelector } from '@/widgets/SoundAlert/IntervalSelector';
 import { useTimeAnnouncement } from '@/widgets/SoundAlert/useTimeAnnouncement';
 
 interface SoundAlertProps {
   currentTime: Date;
-  events: IEvent[];
+  events: Event[];
   onAudioToggle: () => void;
   isAudioOn: boolean;
   isFirstRender: boolean;

@@ -1,6 +1,6 @@
 import { AlertColor } from '@mui/material';
 
-import { IEvent } from '@/types/IEvent';
+import { Event } from '@/types/Event';
 
 export interface DashboardViewState {
   severity: AlertColor;
@@ -9,7 +9,7 @@ export interface DashboardViewState {
   canSignIn: boolean;
   canSignOut: boolean;
   showEvents: boolean;
-  events: IEvent[] | null;
+  events: Event[] | null;
   handleSignIn: () => Promise<void>;
   handleSignOut: () => Promise<void>;
 }

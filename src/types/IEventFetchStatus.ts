@@ -1,4 +1,4 @@
-export enum IEventFetchStatus {
+export enum EventFetchStatus {
   LOADING = 'loading',
   ERROR = 'error',
   NO_PAYLOAD = 'no-payload',

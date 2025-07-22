@@ -1,10 +1,10 @@
 import { Chip, ChipProps } from '@mui/material';
 
-import { IEvent } from '@/types/IEvent';
+import { Event } from '@/types/Event';
 import { computeEventStatus, getUpcomingEventLabel } from '@/utils/eventUtils';
 
 interface MinutesChipProps extends ChipProps {
-  event: IEvent;
+  event: Event;
 }
 
 export function MinutesChip({ event, ...props }: MinutesChipProps) {

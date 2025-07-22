@@ -1,10 +1,12 @@
 import { ICalendar } from '@/types/ICalendar';
 
-export interface IEvent {
+export interface Event {
   id: string;
   start: Date;
   end: Date;
   title: string;
+  allDay?: boolean;
+  description?: string;
   attendeeCount?: number;
   calendar?: ICalendar;
   acknowledged?: boolean;

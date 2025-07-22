@@ -15,12 +15,12 @@ import {
 
 import { MinutesChip } from '@/components/MinutesChip';
 import { useAlertSound } from '@/hooks/useAlertSound';
+import type { Event } from '@/types/Event';
 import { IAlertType } from '@/types/IAlertType';
-import type { IEvent } from '@/types/IEvent';
 import { formatEventTimeRange, getAttendeeCountLabel } from '@/utils/eventUtils';
 
 interface EventDialogProps {
-  event: IEvent | null;
+  event: Event | null;
   onAlertAcknowledge: () => void;
   meetingAlertEnabled: boolean;
 }

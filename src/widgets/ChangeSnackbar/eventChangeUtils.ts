@@ -1,11 +1,8 @@
-import { IEvent } from '@/types/IEvent';
+import { Event } from '@/types/Event';
 import { formattedTime } from '@/utils/eventUtils';
 
 // Compare two lists of events and return human-readable change messages
-export function getEventChangeMessages(
-  previousEvents: IEvent[],
-  currentEvents: IEvent[],
-): string[] {
+export function getEventChangeMessages(previousEvents: Event[], currentEvents: Event[]): string[] {
   const prevMap = new Map(previousEvents.map(evt => [evt.id, evt]));
   const currMap = new Map(currentEvents.map(evt => [evt.id, evt]));
   const messages: string[] = [];

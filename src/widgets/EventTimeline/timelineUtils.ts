@@ -1,4 +1,4 @@
-import type { IEvent } from '@/types/IEvent';
+import type { Event } from '@/types/Event';
 import { computeEventStatus, sortEventsByStart } from '@/utils/eventUtils';
 import { ITimelineEvent } from '@/widgets/EventTimeline/ITimelineEvent';
 
@@ -13,7 +13,7 @@ interface HourIndicator {
 }
 
 function calculateEventBounds(
-  event: IEvent,
+  event: Event,
   referenceTime: Date,
   pastHours: number,
   futureHours: number,
@@ -67,7 +67,7 @@ function getNextHourBoundary(date: Date): Date {
 }
 
 export function layoutTimelineEvents(
-  events: IEvent[],
+  events: Event[],
   referenceTime: Date,
   pastHours: number,
   futureHours: number,

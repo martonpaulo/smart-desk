@@ -1,6 +1,6 @@
 import { Box, Typography, useTheme } from '@mui/material';
 
-import type { IEvent } from '@/types/IEvent';
+import type { Event } from '@/types/Event';
 import { filterNonFullDayEvents } from '@/utils/eventUtils';
 import { CurrentIndicator } from '@/widgets/EventTimeline/CurrentIndicator';
 import { EventBar } from '@/widgets/EventTimeline/EventBar';
@@ -13,7 +13,7 @@ import {
 } from '@/widgets/EventTimeline/timelineUtils';
 
 interface EventTimelineProps {
-  events: IEvent[] | null;
+  events: Event[] | null;
   currentTime: Date;
   pastWindowHours: number;
   futureWindowHours: number;

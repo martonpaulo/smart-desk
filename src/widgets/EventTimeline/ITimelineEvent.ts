@@ -1,10 +1,10 @@
-import type { IEvent } from '@/types/IEvent';
+import type { Event } from '@/types/Event';
 
-export type IEventStatus = 'past' | 'current' | 'future';
+export type EventStatus = 'past' | 'current' | 'future';
 
-export interface ITimelineEvent extends IEvent {
+export interface ITimelineEvent extends Event {
   level: number;
-  status: IEventStatus;
+  status: EventStatus;
   startPosition: number;
   width: number;
 }

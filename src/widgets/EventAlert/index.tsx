@@ -1,4 +1,4 @@
-import { IEvent } from '@/types/IEvent';
+import { Event } from '@/types/Event';
 import {
   calculateMinutesUntilEvent,
   computeEventStatus,
@@ -9,7 +9,7 @@ import {
 import { EventDialog } from '@/widgets/EventAlert/EventDialog';
 
 interface EventAlertProps {
-  events: IEvent[] | null;
+  events: Event[] | null;
   onAlertAcknowledge: (eventId: string) => void;
   alertLeadTimeMinutes: number;
   meetingAlertEnabled: boolean;

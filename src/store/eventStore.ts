@@ -1,19 +1,19 @@
 import { create } from 'zustand';
 
-import type { IEvent } from '@/types/IEvent';
+import type { Event } from '@/types/Event';
 import { mergeEvents } from '@/utils/eventUtils';
 import { loadHiddenEventIds, saveHiddenEventIds } from '@/utils/hiddenEventsStorage';
 
 interface EventState {
-  events: IEvent[];
-  remoteEvents: IEvent[];
-  localEvents: IEvent[];
-  trash: IEvent[];
+  events: Event[];
+  remoteEvents: Event[];
+  localEvents: Event[];
+  trash: Event[];
   hiddenEvents: string[];
-  setLocalEvents: (events: IEvent[]) => void;
-  setRemoteEvents: (list: IEvent[]) => void;
-  addLocalEvent: (event: IEvent) => void;
-  updateLocalEvent: (event: IEvent) => void;
+  setLocalEvents: (events: Event[]) => void;
+  setRemoteEvents: (list: Event[]) => void;
+  addLocalEvent: (event: Event) => void;
+  updateLocalEvent: (event: Event) => void;
   deleteEvent: (id: string) => void;
   restoreEvent: (id: string) => void;
   setAlertAcknowledged: (id: string) => void;
