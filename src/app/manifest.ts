@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next';
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Smart Desk',
-    short_name: 'SmartDesk',
+    short_name: 'Smart Desk',
     description: 'A smart desk application for managing tasks and schedules',
     lang: 'en-US',
     start_url: '/',
