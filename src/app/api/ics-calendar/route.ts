@@ -48,7 +48,8 @@ function extractEvents(
         if (e < start) continue;
         if (s > end) break;
         events.push({
-          id: uid,
+          // Combine UID and start time to uniquely identify each occurrence
+          id: `${uid}_${s.toISOString()}`,
           start: s,
           end: e,
           title: item.summary || baseTitle,
@@ -66,7 +67,8 @@ function extractEvents(
       }
       if (e < start || s > end) continue;
       events.push({
-        id: uid,
+        // Non-recurring events also combine UID and start for stability
+        id: `${uid}_${s.toISOString()}`,
         start: s,
         end: e,
         title: baseTitle,
