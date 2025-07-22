@@ -6,7 +6,7 @@ import { dateFnsLocalizer } from 'react-big-calendar';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 
-import { IEvent } from '@/types/IEvent';
+import type { IEvent } from '@/types/IEvent';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
@@ -36,6 +36,11 @@ export function BigCalendar({ events, date, view, onNavigate, onViewChange }: Bi
     title: ev.title,
   }));
 
+  const getEventStyle = (event: IEvent) => {
+    const backgroundColor = event.calendar?.color;
+    return backgroundColor ? { style: { backgroundColor } } : {};
+  };
+
   return (
     <Calendar
       localizer={localizer}
@@ -46,6 +51,7 @@ export function BigCalendar({ events, date, view, onNavigate, onViewChange }: Bi
       view={view}
       onNavigate={onNavigate}
       onView={v => onViewChange(v as CalendarViewType)}
+      eventPropGetter={getEventStyle}
       style={{ height: '70vh' }}
     />
   );
