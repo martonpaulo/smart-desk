@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Add as AddIcon } from '@mui/icons-material';
 import {
   alpha,
+  Box,
   Chip,
   darken,
   InputAdornment,
@@ -15,6 +16,7 @@ import {
 import { EditEventModal } from '@/components/event/EditEventModal';
 import { EventListItem } from '@/components/event/EventListItem';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
+import { useEventListPrefsStore } from '@/store/eventListPrefsStore';
 import { useEventStore } from '@/store/eventStore';
 import { showUndo } from '@/store/undoStore';
 import { theme } from '@/styles/theme';
@@ -29,6 +31,11 @@ import { generateId } from '@/utils/idUtils';
 
 export function EventList({ events }: { events: Event[] | null }) {
   const { isMobile } = useResponsiveness();
+  const storedWidth = useEventListPrefsStore(state => state.width);
+  const setStoredWidth = useEventListPrefsStore(state => state.setWidth);
+  const [width, setWidth] = useState(storedWidth);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
 
   const deleteEvent = useEventStore(s => s.deleteEvent);
   const addLocalEvent = useEventStore(s => s.addLocalEvent);
@@ -53,18 +60,45 @@ export function EventList({ events }: { events: Event[] | null }) {
   const columnColor = alpha(theme.palette.primary.light, 0.2);
   const darkenColor = alpha(theme.palette.primary.light, 0.4);
 
+  const onMouseMove = (e: MouseEvent) => {
+    const delta = e.clientX - startX.current;
+    const newWidth = Math.max(200, startWidth.current + delta);
+    setWidth(newWidth);
+  };
+
+  const stopResize = (e: MouseEvent) => {
+    const delta = e.clientX - startX.current;
+    const finalWidth = Math.max(200, startWidth.current + delta);
+    setWidth(finalWidth);
+    setStoredWidth(finalWidth);
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', stopResize);
+  };
+
+  const startResize = (e: React.MouseEvent<HTMLDivElement>) => {
+    startX.current = e.clientX;
+    startWidth.current = width;
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', stopResize);
+  };
+
+  useEffect(() => {
+    setWidth(storedWidth);
+  }, [storedWidth]);
+
   return (
-    <Stack
-      width={isMobile ? '100%' : 250}
-      borderRadius={1}
-      p={1.5}
-      sx={{
-        boxShadow: `0 1px 3px ${alpha(darken(columnColor, 0.5), 0.1)}`,
-        borderWidth: 1,
-        borderStyle: 'solid',
-        borderColor: darkenColor,
-      }}
-    >
+    <Box sx={{ display: 'flex' }}>
+      <Stack
+        width={isMobile ? '100%' : width}
+        borderRadius={1}
+        p={1.5}
+        sx={{
+          boxShadow: `0 1px 3px ${alpha(darken(columnColor, 0.5), 0.1)}`,
+          borderWidth: 1,
+          borderStyle: 'solid',
+          borderColor: darkenColor,
+        }}
+      >
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
         <Typography variant="h3" color="primary">
           Event List
@@ -153,7 +187,19 @@ export function EventList({ events }: { events: Event[] | null }) {
           showUndo('Event deleted', () => useEventStore.getState().restoreEvent(id));
         }}
         onSave={updateLocalEvent}
-      />
-    </Stack>
+        />
+      </Stack>
+      {!isMobile && (
+        <Box
+          onMouseDown={startResize}
+          sx={{
+            width: theme => theme.spacing(0.5),
+            cursor: 'col-resize',
+            ml: 0.5,
+            userSelect: 'none',
+          }}
+        />
+      )}
+    </Box>
   );
 }
