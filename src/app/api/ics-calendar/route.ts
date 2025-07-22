@@ -6,8 +6,18 @@ import type { ICalendar } from '@/types/ICalendar';
 import type { IEvent } from '@/types/IEvent';
 
 function toDateInZone(time: ICAL.Time | Date, zone: string): Date {
-  const d = time instanceof Date ? time : time.toJSDate();
-  return DateTime.fromJSDate(d).setZone(zone).toJSDate();
+  if (time instanceof Date) {
+    return DateTime.fromJSDate(time).setZone(zone).toJSDate();
+  }
+  if (time.isDate && (!time.zone || time.zone.tzid === 'floating')) {
+    return DateTime.fromObject(
+      { year: time.year, month: time.month, day: time.day },
+      { zone },
+    )
+      .startOf('day')
+      .toJSDate();
+  }
+  return DateTime.fromJSDate(time.toJSDate()).setZone(zone).toJSDate();
 }
 
 function extractEvents(
@@ -32,7 +42,12 @@ function extractEvents(
       while ((nextTime = iter.next())) {
         const { startDate, endDate, item } = ev.getOccurrenceDetails(nextTime);
         const s = toDateInZone(startDate, zone);
-        const e = toDateInZone(endDate, zone);
+        let e = toDateInZone(endDate, zone);
+        if (startDate.isDate && endDate.isDate) {
+          e = new Date(e);
+          e.setDate(e.getDate() - 1);
+          e.setHours(23, 59, 59, 999);
+        }
         if (e < start) continue;
         if (s > end) break;
         events.push({
@@ -46,7 +61,12 @@ function extractEvents(
       }
     } else {
       const s = toDateInZone(ev.startDate, zone);
-      const e = toDateInZone(ev.endDate, zone);
+      let e = toDateInZone(ev.endDate, zone);
+      if (ev.startDate.isDate && ev.endDate.isDate) {
+        e = new Date(e);
+        e.setDate(e.getDate() - 1);
+        e.setHours(23, 59, 59, 999);
+      }
       if (e < start || s > end) continue;
       events.push({
         id: uid,

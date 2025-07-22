@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Box, Tab, Tabs } from '@mui/material';
 import {
@@ -13,15 +13,27 @@ import {
   startOfWeek,
   startOfYear,
 } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventStore } from '@/store/eventStore';
+import { parseDateFromSlug } from '@/utils/dateSlug';
 import { BigCalendar, CalendarViewType, YearView } from '@/widgets/EventCalendar';
 
-export default function CalendarPage() {
+interface CalendarPageProps {
+  params: { date?: string[] };
+}
+
+export default function CalendarPage({ params }: CalendarPageProps) {
   const [view, setView] = useState<CalendarViewType | 'year'>('month');
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const initialDate = useMemo(() => parseDateFromSlug(params.date), [params.date]);
+  const [currentDate, setCurrentDate] = useState(initialDate);
+  const router = useRouter();
+
+  useEffect(() => {
+    setCurrentDate(initialDate);
+  }, [initialDate]);
 
   const { start, end } = useMemo(() => {
     switch (view) {
@@ -44,6 +56,18 @@ export default function CalendarPage() {
     setView(value as CalendarViewType | 'year');
   };
 
+  const navigateToDate = (date: Date) => {
+    setCurrentDate(date);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    let path = `/calendar/${year}`;
+    if (view !== 'year') path += `/${month}`;
+    if (view === 'day') path += `/${day}`;
+    router.push(path);
+  };
+
   return (
     <PageContentLayout title="Calendar" description="Your events in one place">
       <Tabs value={view} onChange={handleViewChange} sx={{ mb: 2 }}>
@@ -53,14 +77,14 @@ export default function CalendarPage() {
         <Tab label="Year" value="year" />
       </Tabs>
       {view === 'year' ? (
-        <YearView date={currentDate} onChange={setCurrentDate} />
+        <YearView date={currentDate} onChange={navigateToDate} />
       ) : (
         <Box>
           <BigCalendar
             events={events}
             date={currentDate}
             view={view}
-            onNavigate={setCurrentDate}
+            onNavigate={navigateToDate}
             onViewChange={setView}
           />
         </Box>
