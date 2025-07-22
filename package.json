@@ -1,7 +1,7 @@
 {
   "name": "smart-desk",
   "version": "0.1.0",
-  "homepage": "https://www.martonpaulo.com",
+  "homepage": "https://www.martonpaulo.com/smartdesk",
   "author": {
     "name": "Marton Paulo",
     "email": "info@martonpaulo.com",
@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/example/smart-desk.git"
+    "url": "https://github.com/martonpaulo/smart-desk"
   },
   "license": "MIT",
   "private": true,
@@ -41,7 +41,6 @@
     "@tanstack/query-sync-storage-persister": "^5.80.7",
     "@tanstack/react-query": "^5.80.7",
     "@tanstack/react-query-persist-client": "^5.80.7",
-    "@types/react-big-calendar": "^1.16.2",
     "axios": "^1.10.0",
     "babel-plugin-react-compiler": "^19.1.0-rc.2",
     "date-fns": "^4.1.0",
@@ -53,7 +52,6 @@
     "node-ical": "^0.20.1",
     "openmeteo": "^1.2.0",
     "react": "^19.0.0",
-    "react-big-calendar": "^1.19.4",
     "react-dom": "^19.0.0",
     "react-sounds": "^1.0.25",
     "react-text-to-speech": "^2.1.0",
@@ -72,5 +70,11 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "prettier": "^3.5.3",
     "typescript": "^5"
+  },
+  "bugs": {
+    "url": "https://github.com/martonpaulo/smart-desk/issues"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

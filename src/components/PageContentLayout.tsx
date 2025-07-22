@@ -2,6 +2,10 @@ import { ReactNode } from 'react';
 
 import { Stack, StackProps, Typography } from '@mui/material';
 
+import { appMetadata } from '@/config/seo';
+
+export const metadata = appMetadata;
+
 interface PageContentLayoutProps extends StackProps {
   title?: string;
   description?: string;
