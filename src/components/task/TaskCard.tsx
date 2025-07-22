@@ -12,6 +12,7 @@ import {
 import {
   BoxProps,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -43,6 +44,9 @@ interface TaskCardProps extends BoxProps {
   editTask?: boolean;
   showActions?: boolean;
   showDate?: boolean;
+  selectable?: boolean;
+  selected?: boolean;
+  onSelectChange?: (id: string, selected: boolean) => void;
   onFinishEditing?: () => void;
   onTaskDragStart?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragOver?: (id: string, e: DragEvent<HTMLDivElement>) => void;
@@ -56,6 +60,9 @@ export function TaskCard({
   editTask = false,
   showActions = true,
   showDate = true,
+  selectable = false,
+  selected = false,
+  onSelectChange,
   onFinishEditing,
   onTaskDragStart,
   onTaskDragOver,
@@ -252,17 +259,27 @@ export function TaskCard({
     <>
       <S.Container
         color={task.blocked && !isEditing ? customColors.grey.value : color}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        draggable={!isEditing && !isMobile}
+        onDragStart={selectable ? undefined : handleDragStart}
+        onDragOver={selectable ? undefined : handleDragOver}
+        onDragEnd={selectable ? undefined : handleDragEnd}
+        draggable={!isEditing && !isMobile && !selectable}
         minHeight={cardMinHeight}
         gap={itemsGap}
         paddingX={isMobile ? 2 : 1.5}
         paddingY={1.5}
         sx={{ cursor: isDragging ? 'grabbing' : undefined }}
+        selected={selected}
         {...props}
       >
+        {selectable && (
+          <Checkbox
+            size="small"
+            checked={selected}
+            onChange={e => onSelectChange?.(task.id, e.target.checked)}
+            inputProps={{ 'aria-label': 'Select task' }}
+            sx={{ p: 0 }}
+          />
+        )}
         <PriorityFlag task={task} showEisenhowerIcons={eisenhowerIcons} sx={{ opacity }} />
         {!task.isSynced && <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />}
 

@@ -26,6 +26,9 @@ interface EisenhowerQuadrantProps {
   onTaskDragOver: (e: DragEvent<HTMLDivElement>) => void;
   onTaskDragEnd: () => void;
   onTaskDrop: (e: DragEvent<HTMLDivElement>) => void;
+  selectable?: boolean;
+  selectedTaskIds?: Set<string>;
+  onTaskSelectChange?: (id: string, selected: boolean) => void;
 }
 
 export function EisenhowerQuadrant({
@@ -42,6 +45,9 @@ export function EisenhowerQuadrant({
   onTaskDragOver,
   onTaskDragEnd,
   onTaskDrop,
+  selectable = false,
+  selectedTaskIds = new Set<string>(),
+  onTaskSelectChange,
 }: EisenhowerQuadrantProps) {
   const theme = useTheme();
   const [openTaskModal, setOpenTaskModal] = useState(false);
@@ -152,7 +158,10 @@ export function EisenhowerQuadrant({
                 task={task}
                 color={quadrantColor}
                 eisenhowerIcons={false}
-                showActions={!isDragInProgress}
+                showActions={!isDragInProgress && !selectable}
+                selectable={selectable}
+                selected={selectedTaskIds.has(task.id)}
+                onSelectChange={onTaskSelectChange}
                 onTaskDragStart={(_id, e) => onTaskDragStart(task, e)}
                 onTaskDragOver={(_id, e) => onTaskDragOver(e)}
                 onTaskDragEnd={onTaskDragEnd}

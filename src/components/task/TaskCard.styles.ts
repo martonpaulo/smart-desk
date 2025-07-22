@@ -5,11 +5,11 @@ import { alpha, styled } from '@mui/material/styles';
 import { transitions } from '@/styles/transitions';
 
 export const Container = styled(Box, {
-  shouldForwardProp: prop => prop !== 'color',
-})<{ color: string }>(({ theme, color }) => ({
+  shouldForwardProp: prop => prop !== 'color' && prop !== 'selected',
+})<{ color: string; selected?: boolean }>(({ theme, color, selected }) => ({
   borderRadius: theme.shape.borderRadius,
   position: 'relative',
-  backgroundColor: alpha(color, 0.15),
+  backgroundColor: alpha(color, selected ? 0.25 : 0.15),
   touchAction: 'none',
   cursor: 'grab',
   '&:hover .action-group': { visibility: 'visible' },
@@ -20,7 +20,7 @@ export const Container = styled(Box, {
   alignItems: 'center',
   transition: transitions.backgroundColor,
   '&:hover': {
-    backgroundColor: alpha(color, 0.2),
+    backgroundColor: alpha(color, selected ? 0.3 : 0.2),
   },
   flexWrap: 'wrap',
 }));
