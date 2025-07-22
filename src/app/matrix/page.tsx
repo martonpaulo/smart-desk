@@ -33,14 +33,8 @@ export default function EisenhowerMatrixPage() {
   const [updatedCount, setUpdatedCount] = useState(0);
   const theme = useTheme();
 
-  const {
-    isSelecting,
-    selectedIds,
-    selectedCount,
-    toggleSelecting,
-    selectTask,
-    clearSelection,
-  } = useTaskSelection();
+  const { isSelecting, selectedIds, selectedCount, toggleSelecting, selectTask, clearSelection } =
+    useTaskSelection();
 
   const handleDragStart = (task: Task, e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -89,9 +83,7 @@ export default function EisenhowerMatrixPage() {
     const today = new Date();
     const count = selectedIds.size;
     await Promise.all(
-      Array.from(selectedIds).map(id =>
-        updateTask({ id, plannedDate: today, updatedAt: today }),
-      ),
+      Array.from(selectedIds).map(id => updateTask({ id, plannedDate: today, updatedAt: today })),
     );
     setUpdatedCount(count);
     setSnackbarOpen(true);
@@ -122,10 +114,7 @@ export default function EisenhowerMatrixPage() {
       </FormGroup>
 
       <Stack direction="row" gap={2} mb={2}>
-        <Button
-          variant={isSelecting ? 'contained' : 'outlined'}
-          onClick={toggleSelecting}
-        >
+        <Button variant={isSelecting ? 'contained' : 'outlined'} onClick={toggleSelecting}>
           {isSelecting ? 'Cancel Selection' : 'Select Tasks'}
         </Button>
         {isSelecting && selectedCount > 0 && (

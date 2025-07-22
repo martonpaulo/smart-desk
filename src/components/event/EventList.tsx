@@ -99,94 +99,94 @@ export function EventList({ events }: { events: Event[] | null }) {
           borderColor: darkenColor,
         }}
       >
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
-        <Typography variant="h3" color="primary">
-          Event List
-        </Typography>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
+          <Typography variant="h3" color="primary">
+            Event List
+          </Typography>
 
-        {upcomingEvents && upcomingEvents.length > 0 && (
-          <Chip
-            label={upcomingEvents?.length}
+          {upcomingEvents && upcomingEvents.length > 0 && (
+            <Chip
+              label={upcomingEvents?.length}
+              size="small"
+              disabled
+              sx={{
+                '&.Mui-disabled': {
+                  opacity: 1,
+                },
+              }}
+            />
+          )}
+        </Stack>
+
+        <List dense disablePadding>
+          {upcomingEvents.map(ev => (
+            <EventListItem
+              key={ev.id}
+              event={ev}
+              onClick={() => setSelectedEvent(ev)}
+              color={columnColor}
+            />
+          ))}
+        </List>
+
+        <Stack direction="row" alignItems="center" spacing={0}>
+          <TextField
+            fullWidth
             size="small"
-            disabled
+            placeholder="New event"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleAdd();
+            }}
             sx={{
-              '&.Mui-disabled': {
-                opacity: 1,
+              borderColor: columnColor,
+              '& input': {
+                cursor: 'pointer',
+              },
+              '& .MuiInputBase-root': {
+                cursor: 'pointer',
+                transition: 'background-color 0.15s',
+                '&:hover': { backgroundColor: columnColor },
+              },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: columnColor,
+                },
+                '&:hover fieldset': {
+                  borderColor: columnColor,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: columnColor,
+                },
+              },
+            }}
+            slotProps={{
+              input: {
+                sx: theme => ({
+                  fontSize: theme.typography.body2.fontSize,
+                  lineHeight: theme.typography.body2.lineHeight,
+                  fontWeight: theme.typography.body2.fontWeight,
+                }),
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AddIcon color="action" fontSize="small" />
+                  </InputAdornment>
+                ),
               },
             }}
           />
-        )}
-      </Stack>
+        </Stack>
 
-      <List dense disablePadding>
-        {upcomingEvents.map(ev => (
-          <EventListItem
-            key={ev.id}
-            event={ev}
-            onClick={() => setSelectedEvent(ev)}
-            color={columnColor}
-          />
-        ))}
-      </List>
-
-      <Stack direction="row" alignItems="center" spacing={0}>
-        <TextField
-          fullWidth
-          size="small"
-          placeholder="New event"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter') handleAdd();
+        <EditEventModal
+          open={!!selectedEvent}
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onDelete={id => {
+            deleteEvent(id);
+            showUndo('Event deleted', () => useEventStore.getState().restoreEvent(id));
           }}
-          sx={{
-            borderColor: columnColor,
-            '& input': {
-              cursor: 'pointer',
-            },
-            '& .MuiInputBase-root': {
-              cursor: 'pointer',
-              transition: 'background-color 0.15s',
-              '&:hover': { backgroundColor: columnColor },
-            },
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: columnColor,
-              },
-              '&:hover fieldset': {
-                borderColor: columnColor,
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: columnColor,
-              },
-            },
-          }}
-          slotProps={{
-            input: {
-              sx: theme => ({
-                fontSize: theme.typography.body2.fontSize,
-                lineHeight: theme.typography.body2.lineHeight,
-                fontWeight: theme.typography.body2.fontWeight,
-              }),
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AddIcon color="action" fontSize="small" />
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-      </Stack>
-
-      <EditEventModal
-        open={!!selectedEvent}
-        event={selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        onDelete={id => {
-          deleteEvent(id);
-          showUndo('Event deleted', () => useEventStore.getState().restoreEvent(id));
-        }}
-        onSave={updateLocalEvent}
+          onSave={updateLocalEvent}
         />
       </Stack>
       {!isMobile && (
