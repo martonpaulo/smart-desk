@@ -21,17 +21,14 @@ function saveLastRun(date: Date): void {
 }
 
 function afterResetTime(now: Date): boolean {
-  const [h, m] = RESET_TIME.split(':').map(Number);
-  const reset = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    h,
-    m,
-    0,
-    0,
-  );
-  return now.getTime() >= reset.getTime();
+  const [H, M] = RESET_TIME.split(':').map(Number);
+  const todayReset = new Date(now.getFullYear(), now.getMonth(), now.getDate(), H, M, 0);
+  const lastReset =
+    now < todayReset
+      ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, H, M, 0)
+      : todayReset;
+
+  return now >= lastReset;
 }
 
 function filterTodaysAllDayEvents(events: Event[], today: Date): Event[] {
@@ -88,5 +85,7 @@ async function ensureEventsColumn(): Promise<Column | null> {
     updatedAt: new Date(),
   });
 
-  return useBoardStore.getState().columns.find(c => c.title === defaultColumns.events.title) ?? null;
+  return (
+    useBoardStore.getState().columns.find(c => c.title === defaultColumns.events.title) ?? null
+  );
 }
