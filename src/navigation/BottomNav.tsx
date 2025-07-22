@@ -1,12 +1,9 @@
 'use client';
 
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import HomeIcon from '@mui/icons-material/Home';
-import SettingsIcon from '@mui/icons-material/Settings';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
+
+import { routes } from '@/navigation/routes';
 
 export function BottomNav() {
   const pathname = usePathname(); // current URL path
@@ -17,14 +14,17 @@ export function BottomNav() {
     router.push(newValue);
   };
 
+  // Filter routes that should be shown on mobile navigation
+  const routesToRender = [...routes.primary, ...routes.secondary].filter(
+    route => route.showOnMobile,
+  );
+
   return (
     <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
       <BottomNavigation value={pathname} onChange={handleChange} showLabels>
-        <BottomNavigationAction value="/board" icon={<HomeIcon />} />
-        <BottomNavigationAction value="/tasks" icon={<TaskAltIcon />} />
-        <BottomNavigationAction value="/calendars" icon={<CalendarTodayIcon />} />
-        <BottomNavigationAction value="/account" icon={<AccountCircleIcon />} />
-        <BottomNavigationAction value="/settings" icon={<SettingsIcon />} />
+        {routesToRender.map(route => (
+          <BottomNavigationAction key={route.href} value={route.href} icon={route.icon} />
+        ))}
       </BottomNavigation>
     </Paper>
   );

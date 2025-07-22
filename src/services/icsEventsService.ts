@@ -15,7 +15,9 @@ export async function fetchIcsEvents(
   const clientZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
   const now = DateTime.now().setZone(clientZone);
-  const startIso = (start ? DateTime.fromJSDate(start) : now.minus({ days: 1 }).startOf('day')).toISO()!;
+  const startIso = (
+    start ? DateTime.fromJSDate(start) : now.minus({ days: 1 }).startOf('day')
+  ).toISO()!;
   const endIso = (end ? DateTime.fromJSDate(end) : now.plus({ days: 1 }).endOf('day')).toISO()!;
 
   const base = new URL('/api/ics-calendar', window.location.origin);

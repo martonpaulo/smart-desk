@@ -3,12 +3,7 @@
 import { Calendar } from 'react-big-calendar';
 import { dateFnsLocalizer } from 'react-big-calendar';
 
-import {
-  format,
-  getDay,
-  parse,
-  startOfWeek,
-} from 'date-fns';
+import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 
 import { IEvent } from '@/types/IEvent';
@@ -33,13 +28,7 @@ interface BigCalendarProps {
   onViewChange: (view: CalendarViewType) => void;
 }
 
-export function BigCalendar({
-  events,
-  date,
-  view,
-  onNavigate,
-  onViewChange,
-}: BigCalendarProps) {
+export function BigCalendar({ events, date, view, onNavigate, onViewChange }: BigCalendarProps) {
   const mapped = events.map(ev => ({
     ...ev,
     start: new Date(ev.start),

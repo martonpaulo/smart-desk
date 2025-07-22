@@ -2,14 +2,8 @@
 
 import { useState } from 'react';
 
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import HomeIcon from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu';
-import SettingsIcon from '@mui/icons-material/Settings';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import {
   Box,
   Divider,
@@ -24,6 +18,8 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { routes } from '@/navigation/routes';
+
 const EXPANDED_WIDTH = 200;
 const COLLAPSED_WIDTH = 60;
 
@@ -32,17 +28,6 @@ export function SideDrawer() {
   const pathname = usePathname() || '/';
   const [collapsed, setCollapsed] = useState(true);
   const width = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
-
-  const menu = [
-    { label: 'Board', href: '/board', icon: <HomeIcon /> },
-    { label: 'All Tasks', href: '/tasks', icon: <TaskAltIcon /> },
-    { label: 'Matrix', href: '/matrix', icon: <DashboardIcon /> },
-  ];
-  const secondary = [
-    { label: 'Calendars', href: '/calendars', icon: <CalendarTodayIcon /> },
-    { label: 'Account', href: '/account', icon: <AccountCircleIcon /> },
-    { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
-  ];
 
   return (
     <Drawer
@@ -73,7 +58,7 @@ export function SideDrawer() {
       <Divider />
 
       <List>
-        {menu.map(({ label, href, icon }) => (
+        {routes.primary.map(({ label, href, icon }) => (
           <ListItemButton
             key={href}
             component={Link}
@@ -101,7 +86,7 @@ export function SideDrawer() {
 
         <Divider sx={{ my: 1 }} />
 
-        {secondary.map(({ label, href, icon }) => (
+        {routes.secondary.map(({ label, href, icon }) => (
           <ListItemButton
             key={href}
             component={Link}

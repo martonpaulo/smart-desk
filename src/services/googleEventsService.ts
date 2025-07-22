@@ -2,10 +2,7 @@ import type { ApiResponse } from '@/services/api';
 import type { IEvent } from '@/types/IEvent';
 
 // fetch events from Google calendar endpoint
-export async function fetchGoogleEvents(
-  start?: Date,
-  end?: Date,
-): Promise<IEvent[]> {
+export async function fetchGoogleEvents(start?: Date, end?: Date): Promise<IEvent[]> {
   const endpoint = new URL('/api/google-calendar', window.location.origin);
   if (start && end) {
     endpoint.searchParams.set('start', start.toISOString());

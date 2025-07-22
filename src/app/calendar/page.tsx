@@ -1,9 +1,18 @@
 'use client';
 
-import { useMemo,useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { Box, Tab,Tabs } from '@mui/material';
-import { endOfDay, endOfMonth, endOfWeek, endOfYear,startOfDay, startOfMonth, startOfWeek, startOfYear } from 'date-fns';
+import { Box, Tab, Tabs } from '@mui/material';
+import {
+  endOfDay,
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+} from 'date-fns';
 
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { useEvents } from '@/hooks/useEvents';
