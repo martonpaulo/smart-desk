@@ -1,7 +1,6 @@
 import type { Event } from '@/types/Event';
+import { ITimelineEvent } from '@/types/ITimelineEvent';
 import { computeEventStatus, sortEventsByStart } from '@/utils/eventUtils';
-import { ITimelineEvent } from '@/widgets/EventTimeline/ITimelineEvent';
-
 interface Bounds {
   startPercent: number;
   widthPercent: number;

@@ -12,6 +12,8 @@ import {
   Typography,
 } from '@mui/material';
 
+import { EditEventModal } from '@/components/event/EditEventModal';
+import { EventListItem } from '@/components/event/EventListItem';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useEventStore } from '@/store/eventStore';
 import { showUndo } from '@/store/undoStore';
@@ -24,8 +26,6 @@ import {
   sortEventsByStart,
 } from '@/utils/eventUtils';
 import { generateId } from '@/utils/idUtils';
-import { EditEventModal } from '@/widgets/EventList/EditEventModal';
-import { EventListItem } from '@/widgets/EventList/EventListItem';
 
 export function EventList({ events }: { events: Event[] | null }) {
   const { isMobile } = useResponsiveness();

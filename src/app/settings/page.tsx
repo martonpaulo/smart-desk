@@ -7,13 +7,13 @@ import { DateTime } from 'luxon';
 
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { ResetZoomButton } from '@/components/ResetZoomButton';
+import { SoundAlert } from '@/components/sound/SoundAlert';
 import { ZoomSelector } from '@/components/ZoomSelector';
 import { useAudioStore } from '@/store/audioStore';
 import { useEventStore } from '@/store/eventStore';
 import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { RESET_TIME } from '@/utils/resetTime';
 import { playInterfaceSound } from '@/utils/soundPlayer';
-import { SoundAlert } from '@/widgets/SoundAlert';
 
 export default function SettingsPage() {
   const [enabled, setEnabled] = useSoundEnabled();

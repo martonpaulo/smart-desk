@@ -4,20 +4,20 @@ import { useEffect, useState } from 'react';
 
 import { Stack } from '@mui/material';
 
+import { EventAlert } from '@/components/alert/EventAlert';
+import { Clock } from '@/components/Clock';
+import { TodoList } from '@/components/column/TodoList';
+import { ChangeSnackbar } from '@/components/event/ChangeSnackbar';
+import { EventList } from '@/components/event/EventList';
+import { HiddenColumnsList } from '@/components/HiddenColumnsList';
+import { TodoProgress } from '@/components/Progress';
+import { EventTimeline } from '@/components/timeline/EventTimeline';
 import { UndoSnackbar } from '@/components/UndoSnackbar';
 import { useLocation } from '@/hooks/useLocation';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useWeather } from '@/hooks/useWeather';
 import { useAudioStore } from '@/store/audioStore';
 import { useEventStore } from '@/store/eventStore';
-import { ChangeSnackbar } from '@/widgets/ChangeSnackbar';
-import { Clock } from '@/widgets/Clock';
-import { EventAlert } from '@/widgets/EventAlert';
-import { EventList } from '@/widgets/EventList';
-import { EventTimeline } from '@/widgets/EventTimeline';
-import { HiddenColumnsList } from '@/widgets/HiddenColumnsList';
-import { TodoList } from '@/widgets/TodoList';
-import { TodoProgress } from '@/widgets/TodoProgress';
 
 export default function BoardPage() {
   const { latitude, longitude } = useLocation();

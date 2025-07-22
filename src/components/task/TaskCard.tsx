@@ -23,8 +23,8 @@ import {
 
 import { PriorityFlag } from '@/components/PriorityFlag';
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
-import * as S from '@/components/TaskCard.styles';
-import { TaskModal } from '@/components/TaskModal';
+import * as S from '@/components/task/TaskCard.styles';
+import { TaskModal } from '@/components/task/TaskModal';
 import { defaultColumns } from '@/config/defaultColumns';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';

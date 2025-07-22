@@ -12,11 +12,11 @@ import {
   Typography,
 } from '@mui/material';
 
+import { IntervalSelector } from '@/components/sound/IntervalSelector';
 import { useSpeech } from '@/hooks/useSpeech';
+import { useTimeAnnouncement } from '@/hooks/useTimeAnnouncement';
 import type { Event } from '@/types/Event';
-import { buildAnnouncement } from '@/widgets/SoundAlert/announcementUtils';
-import { IntervalSelector } from '@/widgets/SoundAlert/IntervalSelector';
-import { useTimeAnnouncement } from '@/widgets/SoundAlert/useTimeAnnouncement';
+import { buildAnnouncement } from '@/utils/announcementUtils';
 
 interface SoundAlertProps {
   currentTime: Date;

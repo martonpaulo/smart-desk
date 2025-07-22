@@ -1,16 +1,16 @@
 import { Box, Typography, useTheme } from '@mui/material';
 
+import { CurrentIndicator } from '@/components/timeline/CurrentIndicator';
+import { EventBar } from '@/components/timeline/EventBar';
+import { TimeIndicator } from '@/components/timeline/TimeIndicator';
 import type { Event } from '@/types/Event';
 import { filterNonFullDayEvents } from '@/utils/eventUtils';
-import { CurrentIndicator } from '@/widgets/EventTimeline/CurrentIndicator';
-import { EventBar } from '@/widgets/EventTimeline/EventBar';
-import { TimeIndicator } from '@/widgets/EventTimeline/TimeIndicator';
 import {
   calculateCurrentTimePercentage,
   formatHourLabel,
   generateHourlyIndicators,
   layoutTimelineEvents,
-} from '@/widgets/EventTimeline/timelineUtils';
+} from '@/utils/timelineUtils';
 
 interface EventTimelineProps {
   events: Event[] | null;

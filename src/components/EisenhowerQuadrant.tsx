@@ -8,8 +8,8 @@ import {
 } from '@mui/icons-material';
 import { alpha, darken, IconButton, Paper, Stack, Typography, useTheme } from '@mui/material';
 
-import { TaskCard } from '@/components/TaskCard';
-import { TaskModal } from '@/components/TaskModal';
+import { TaskCard } from '@/components/task/TaskCard';
+import { TaskModal } from '@/components/task/TaskModal';
 import type { Task } from '@/types/task';
 
 interface EisenhowerQuadrantProps {

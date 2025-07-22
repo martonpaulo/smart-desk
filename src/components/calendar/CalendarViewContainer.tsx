@@ -3,11 +3,11 @@
 import { Box } from '@mui/material';
 
 import type { CalendarView } from '@/app/calendar/[[...date]]/page';
-import { DayView } from '@/components/calendar/views/DayView';
-import { MonthView } from '@/components/calendar/views/MonthView';
-import { ScheduleView } from '@/components/calendar/views/ScheduleView';
-import { WeekView } from '@/components/calendar/views/WeekView';
-import { YearView } from '@/components/calendar/views/YearView';
+import { DayView } from '@/views/DayView';
+import { MonthView } from '@/views/MonthView';
+import { ScheduleView } from '@/views/ScheduleView';
+import { WeekView } from '@/views/WeekView';
+import { YearView } from '@/views/YearView';
 
 interface CalendarViewContainerProps {
   currentDate: Date;

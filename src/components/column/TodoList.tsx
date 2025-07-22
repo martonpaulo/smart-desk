@@ -2,7 +2,10 @@ import { useState } from 'react';
 
 import { Button, Stack } from '@mui/material';
 
-import { TaskModal } from '@/components/TaskModal';
+import { ColumnModal } from '@/components/column/ColumnModal';
+import { TodoColumn } from '@/components/column/TodoColumn';
+import { AddTaskFloatButton } from '@/components/task/AddTaskFloatButton';
+import { TaskModal } from '@/components/task/TaskModal';
 import { defaultColumns } from '@/config/defaultColumns';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useTasks } from '@/hooks/useTasks';
@@ -12,9 +15,6 @@ import { useTodoPrefsStore } from '@/store/todoPrefsStore';
 import { Column } from '@/types/column';
 import { Task } from '@/types/task';
 import { getNewColumnPosition } from '@/utils/boardHelpers';
-import { AddTaskFloatButton } from '@/widgets/TodoList/AddTaskFloatButton';
-import { ColumnModal } from '@/widgets/TodoList/ColumnModal';
-import { TodoColumn } from '@/widgets/TodoList/TodoColumn';
 
 // Safari PWA drag-drop fix
 import '@/lib/dragDropTouch';

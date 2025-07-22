@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 
+import { CalendarForm } from '@/components/manager/CalendarForm';
+import { CalendarList } from '@/components/manager/CalendarList';
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { useSettingsStorage } from '@/store/settings/store';
-import { CalendarForm } from '@/widgets/ICSCalendarManager/CalendarForm';
-import { CalendarList } from '@/widgets/ICSCalendarManager/CalendarList';
 
 export default function CalendarManager() {
   const calendars = useSettingsStorage(state => state.icsCalendars);

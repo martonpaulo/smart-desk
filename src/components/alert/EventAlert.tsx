@@ -1,3 +1,4 @@
+import { EventDialog } from '@/components/alert/EventDialog';
 import { Event } from '@/types/Event';
 import {
   calculateMinutesUntilEvent,
@@ -6,7 +7,6 @@ import {
   filterNonFullDayEvents,
   sortEventsByStart,
 } from '@/utils/eventUtils';
-import { EventDialog } from '@/widgets/EventAlert/EventDialog';
 
 interface EventAlertProps {
   events: Event[] | null;

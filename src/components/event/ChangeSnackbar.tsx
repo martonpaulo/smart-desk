@@ -1,15 +1,15 @@
-import { SyntheticEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 
 import { useAlertSound } from '@/hooks/useAlertSound';
+import { useEventChanges } from '@/hooks/useEventChanges';
 import type { Event } from '@/types/Event';
 import { IAlertType } from '@/types/IAlertType';
 import { filterNonFullDayEvents, filterTodayEvents } from '@/utils/eventUtils';
-import { parseBold } from '@/widgets/ChangeSnackbar/textUtils';
-import { useEventChanges } from '@/widgets/ChangeSnackbar/useEventChanges';
+import { parseBold } from '@/utils/textUtils';
 
 interface ChangeSnackbarProps {
   events: Event[];
@@ -41,7 +41,7 @@ export function ChangeSnackbar({ events, eventChangesAlertEnabled }: ChangeSnack
     if (enabledRef.current) playRef.current();
   }, [changes]);
 
-  const handleClose = (_event: SyntheticEvent | Event, reason?: string) => {
+  const handleClose = (_event: unknown, reason?: string) => {
     if (reason === 'clickaway') return;
     setOpen(false);
   };
