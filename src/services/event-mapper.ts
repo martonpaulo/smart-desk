@@ -11,24 +11,24 @@ export function mapGoogleEventToEvent(
     const calendar = calendars.find(cal => cal.id === event.calendarId);
 
     // Parse start and end times
-  const startTime = event.start.dateTime || event.start.date;
-  const endTime = event.end.dateTime || event.end.date;
+    const startTime = event.start.dateTime || event.start.date;
+    const endTime = event.end.dateTime || event.end.date;
 
     if (!startTime || !endTime) {
       console.warn('Event missing start or end time:', event.id);
       return null;
     }
 
-  const isAllDay = Boolean(event.start.date) && Boolean(event.end.date);
-  const parseDate = (value: string) =>
-    isAllDay ? new Date(`${value}T00:00:00`) : new Date(value);
+    const isAllDay = Boolean(event.start.date) && Boolean(event.end.date);
+    const parseDate = (value: string) =>
+      isAllDay ? new Date(`${value}T00:00:00`) : new Date(value);
 
-  const start = parseDate(startTime);
-  const end = parseDate(endTime);
-  if (isAllDay) {
-    end.setDate(end.getDate() - 1);
-    end.setHours(23, 59, 59, 999);
-  }
+    const start = parseDate(startTime);
+    const end = parseDate(endTime);
+    if (isAllDay) {
+      end.setDate(end.getDate() - 1);
+      end.setHours(23, 59, 59, 999);
+    }
 
     // Validate dates
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {

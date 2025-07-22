@@ -10,10 +10,7 @@ function toDateInZone(time: ICAL.Time | Date, zone: string): Date {
     return DateTime.fromJSDate(time).setZone(zone).toJSDate();
   }
   if (time.isDate && (!time.zone || time.zone.tzid === 'floating')) {
-    return DateTime.fromObject(
-      { year: time.year, month: time.month, day: time.day },
-      { zone },
-    )
+    return DateTime.fromObject({ year: time.year, month: time.month, day: time.day }, { zone })
       .startOf('day')
       .toJSDate();
   }
