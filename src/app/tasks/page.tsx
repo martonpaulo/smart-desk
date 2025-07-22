@@ -3,11 +3,23 @@
 import { useState } from 'react';
 
 import { Box, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
+import dynamic from 'next/dynamic';
 
 import { PageContentLayout } from '@/components/PageContentLayout';
-import { AddTaskFloatButton } from '@/components/task/AddTaskFloatButton';
-import { AddTaskInput } from '@/components/task/AddTaskInput';
-import { TaskCard } from '@/components/task/TaskCard';
+
+// Lazy loaded components reduce the initial bundle size
+const AddTaskFloatButton = dynamic(
+  () => import('@/components/task/AddTaskFloatButton').then(m => m.AddTaskFloatButton),
+  { ssr: false },
+);
+const AddTaskInput = dynamic(
+  () => import('@/components/task/AddTaskInput').then(m => m.AddTaskInput),
+  { ssr: false },
+);
+const TaskCard = dynamic(
+  () => import('@/components/task/TaskCard').then(m => m.TaskCard),
+  { ssr: false },
+);
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useTasks } from '@/hooks/useTasks';
 import { customColors } from '@/styles/colors';

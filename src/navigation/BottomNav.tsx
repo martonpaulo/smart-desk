@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -18,6 +20,13 @@ export function BottomNav() {
   const routesToRender = [...routes.primary, ...routes.secondary].filter(
     route => route.showOnMobile,
   );
+
+  // Prefetch target routes for snappier navigation
+  useEffect(() => {
+    routesToRender.forEach(route => {
+      router.prefetch(route.href).catch(() => {});
+    });
+  }, [router, routesToRender]);
 
   return (
     <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>

@@ -3,15 +3,24 @@
 import { useEffect, useState } from 'react';
 
 import { Stack } from '@mui/material';
+import dynamic from 'next/dynamic';
 
 import { EventAlert } from '@/components/alert/EventAlert';
 import { Clock } from '@/components/Clock';
 import { TodoList } from '@/components/column/TodoList';
 import { ChangeSnackbar } from '@/components/event/ChangeSnackbar';
-import { EventList } from '@/components/event/EventList';
+
+// Lazily load heavy components to speed up initial render
+const EventTimeline = dynamic(
+  () => import('@/components/timeline/EventTimeline').then(m => m.EventTimeline),
+  { ssr: false },
+);
+const EventList = dynamic(
+  () => import('@/components/event/EventList').then(m => m.EventList),
+  { ssr: false },
+);
 import { HiddenColumnsList } from '@/components/HiddenColumnsList';
 import { TodoProgress } from '@/components/Progress';
-import { EventTimeline } from '@/components/timeline/EventTimeline';
 import { UndoSnackbar } from '@/components/UndoSnackbar';
 import { useLocation } from '@/hooks/useLocation';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
