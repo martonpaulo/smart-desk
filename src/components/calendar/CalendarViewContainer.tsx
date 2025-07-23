@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 
 import type { CalendarView } from '@/app/calendar/[[...date]]/page';
 import { useEvents } from '@/hooks/useEvents';
+import { endOfDay, monthRange, startOfDay, weekRange } from '@/utils/dateRange';
 import { DayView } from '@/views/DayView';
 import { MonthView } from '@/views/MonthView';
 import { ScheduleView } from '@/views/ScheduleView';
@@ -25,7 +26,31 @@ export function CalendarViewContainer({
   onViewChange,
   onNavigate,
 }: CalendarViewContainerProps) {
-  useEvents();
+  let rangeStart: Date | undefined;
+  let rangeEnd: Date | undefined;
+
+  switch (currentView) {
+    case 'day':
+      rangeStart = startOfDay(currentDate);
+      rangeEnd = endOfDay(currentDate);
+      break;
+    case 'week': {
+      const range = weekRange(currentDate);
+      rangeStart = range.start;
+      rangeEnd = range.end;
+      break;
+    }
+    case 'month': {
+      const range = monthRange(currentDate);
+      rangeStart = range.start;
+      rangeEnd = range.end;
+      break;
+    }
+    default:
+      break;
+  }
+
+  const { isLoading } = useEvents(rangeStart, rangeEnd);
 
   const commonProps = {
     currentDate,
@@ -35,7 +60,12 @@ export function CalendarViewContainer({
   };
 
   return (
-    <Box sx={{ height: '100%', overflow: 'auto' }}>
+    <Box sx={{ height: '100%', overflow: 'auto', position: 'relative' }}>
+      {isLoading && (
+        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0 }}>
+          <Box sx={{ height: 2, bgcolor: 'primary.main', opacity: 0.3 }} />
+        </Box>
+      )}
       {currentView === 'day' && <DayView {...commonProps} />}
       {currentView === 'week' && <WeekView {...commonProps} />}
       {currentView === 'month' && <MonthView {...commonProps} />}
