@@ -21,6 +21,10 @@ export function useTaskSelection() {
     });
   };
 
+  const selectAll = (ids: string[]) => {
+    setSelectedIds(new Set(ids));
+  };
+
   const clearSelection = () => setSelectedIds(new Set());
 
   const selectedCount = selectedIds.size;
@@ -31,6 +35,7 @@ export function useTaskSelection() {
     selectedCount,
     toggleSelecting,
     selectTask,
+    selectAll,
     clearSelection,
   };
 }

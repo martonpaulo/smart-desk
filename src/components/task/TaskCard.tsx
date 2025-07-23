@@ -90,6 +90,12 @@ export function TaskCard({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setDragging] = useState(false);
 
+  const toggleSelected = useCallback(() => {
+    if (selectable) {
+      onSelectChange?.(task.id, !selected);
+    }
+  }, [onSelectChange, selectable, selected, task.id]);
+
   // sync edit mode if parent toggles it
   useEffect(() => {
     setIsEditing(editTask);
@@ -267,6 +273,7 @@ export function TaskCard({
         gap={itemsGap}
         paddingX={isMobile ? 2 : 1.5}
         paddingY={1.5}
+        onClick={toggleSelected}
         sx={{ cursor: isDragging ? 'grabbing' : undefined }}
         selected={selected}
         {...props}
@@ -275,6 +282,7 @@ export function TaskCard({
           <Checkbox
             size="small"
             checked={selected}
+            onClick={e => e.stopPropagation()}
             onChange={e => onSelectChange?.(task.id, e.target.checked)}
             inputProps={{ 'aria-label': 'Select task' }}
             sx={{ p: 0 }}
@@ -309,7 +317,7 @@ export function TaskCard({
                 )}
 
                 <S.TitleText
-                  onClick={() => setEditModalOpen(true)}
+                  onClick={selectable ? toggleSelected : () => setEditModalOpen(true)}
                   done={done}
                   untitled={!task.title}
                   textVariantSize={isMobile ? 'body1' : 'body2'}
