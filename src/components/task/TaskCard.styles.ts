@@ -10,6 +10,7 @@ export const Container = styled(Box, {
   borderRadius: theme.shape.borderRadius,
   position: 'relative',
   backgroundColor: alpha(color, selected ? 0.25 : 0.15),
+  border: selected ? `2px solid ${theme.palette.primary.main}` : 'none',
   touchAction: 'none',
   cursor: 'grab',
   '&:hover .action-group': { visibility: 'visible' },
