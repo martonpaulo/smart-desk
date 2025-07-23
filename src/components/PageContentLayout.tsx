@@ -8,12 +8,14 @@ export const metadata = appMetadata;
 
 interface PageContentLayoutProps extends StackProps {
   title?: string;
+  hideTitleLabel?: boolean;
   description?: string;
   children: ReactNode;
 }
 
 export function PageContentLayout({
   title,
+  hideTitleLabel = false,
   description,
   children,
   ...props
@@ -23,11 +25,13 @@ export function PageContentLayout({
       <title>{`${title} | Smart Desk`}</title>
 
       <Stack gap={2} {...props}>
-        <Typography variant="h2">{title}</Typography>
+        {!hideTitleLabel && <Typography variant="h2">{title}</Typography>}
 
-        <Typography variant="subtitle1" color="textSecondary">
-          {description}
-        </Typography>
+        {description && (
+          <Typography variant="subtitle1" color="textSecondary">
+            {description}
+          </Typography>
+        )}
 
         {children}
       </Stack>

@@ -32,7 +32,7 @@ export function DayView({ currentDate }: DayViewProps) {
   const getEventsForHour = (hour: number) => {
     return dayEvents.filter(event => {
       const eventStart = new Date(event.start);
-      return eventStart.getHours() === hour;
+      return eventStart.getHours() === hour && event.allDay !== true;
     });
   };
 

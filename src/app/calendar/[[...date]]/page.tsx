@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Box } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
@@ -20,7 +20,38 @@ export default function CalendarPage() {
   const { isMobile } = useResponsiveness();
   // Parse the current date and view from the URL
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [currentView, setCurrentView] = useState<CalendarView>('month');
+  const [currentView, setCurrentView] = useState<CalendarView | null>(null);
+
+  const navigateToDate = useCallback(
+    (date: Date, view: CalendarView) => {
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+
+      let path = '/calendar';
+
+      switch (view) {
+        case 'schedule':
+          path = '/calendar/schedule';
+          break;
+        case 'year':
+          path = `/calendar/${year}`;
+          break;
+        case 'month':
+          path = `/calendar/${year}/${month.toString().padStart(2, '0')}`;
+          break;
+        case 'day':
+          path = `/calendar/${year}/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}`;
+          break;
+        case 'week':
+          path = `/calendar/${year}/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/week`;
+          break;
+      }
+
+      router.push(path);
+    },
+    [router],
+  );
 
   useEffect(() => {
     const pathSegments = pathname.split('/').filter(Boolean);
@@ -30,6 +61,7 @@ export default function CalendarPage() {
       // Default to current month
       setCurrentDate(new Date());
       setCurrentView(isMobile ? 'schedule' : 'month');
+      navigateToDate(new Date(), isMobile ? 'schedule' : 'month');
       return;
     }
 
@@ -61,44 +93,18 @@ export default function CalendarPage() {
     } else {
       setCurrentView(isMobile ? 'schedule' : 'month');
     }
-  }, [pathname, isMobile]);
-
-  const handleDateChange = (newDate: Date) => {
-    setCurrentDate(newDate);
-    navigateToDate(newDate, currentView);
-  };
+  }, [pathname, isMobile, navigateToDate]);
 
   const handleViewChange = (newView: CalendarView) => {
     setCurrentView(newView);
     navigateToDate(currentDate, newView);
   };
 
-  const navigateToDate = (date: Date, view: CalendarView) => {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-
-    let path = '/calendar';
-
-    switch (view) {
-      case 'schedule':
-        path = '/calendar/schedule';
-        break;
-      case 'year':
-        path = `/calendar/${year}`;
-        break;
-      case 'month':
-        path = `/calendar/${year}/${month.toString().padStart(2, '0')}`;
-        break;
-      case 'day':
-        path = `/calendar/${year}/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}`;
-        break;
-      case 'week':
-        path = `/calendar/${year}/${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/week`;
-        break;
+  const handleDateChange = (newDate: Date) => {
+    if (currentView) {
+      setCurrentDate(newDate);
+      navigateToDate(newDate, currentView);
     }
-
-    router.push(path);
   };
 
   const getPageTitle = () => {
@@ -124,26 +130,28 @@ export default function CalendarPage() {
   };
 
   return (
-    <PageContentLayout title={getPageTitle()}>
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <CalendarNavigation
-          currentDate={currentDate}
-          currentView={currentView}
-          onDateChange={handleDateChange}
-          onViewChange={handleViewChange}
-          onNavigate={navigateToDate}
-        />
-
-        <Box sx={{ flex: 1, overflow: 'hidden' }}>
-          <CalendarViewContainer
+    <PageContentLayout title={getPageTitle()} hideTitleLabel>
+      {currentView && (
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <CalendarNavigation
             currentDate={currentDate}
             currentView={currentView}
             onDateChange={handleDateChange}
             onViewChange={handleViewChange}
             onNavigate={navigateToDate}
           />
+
+          <Box sx={{ flex: 1, overflow: 'hidden' }}>
+            <CalendarViewContainer
+              currentDate={currentDate}
+              currentView={currentView}
+              onDateChange={handleDateChange}
+              onViewChange={handleViewChange}
+              onNavigate={navigateToDate}
+            />
+          </Box>
         </Box>
-      </Box>
+      )}
     </PageContentLayout>
   );
 }

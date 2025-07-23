@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { ChevronLeft, ChevronRight, MoreVert, Today } from '@mui/icons-material';
+import { ChevronLeft, ChevronRight, MoreVert } from '@mui/icons-material';
 import { Box, Button, ButtonGroup, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 
 import type { CalendarView } from '@/app/calendar/[[...date]]/page';
@@ -111,7 +111,7 @@ export function CalendarNavigation({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        p: 2,
+        pb: 2,
         borderBottom: 1,
         borderColor: 'divider',
         flexWrap: 'wrap',
@@ -124,9 +124,9 @@ export function CalendarNavigation({
           <ChevronLeft />
         </IconButton>
 
-        <IconButton onClick={handleToday} size="small" title="Today">
-          <Today />
-        </IconButton>
+        <Button onClick={handleToday} size="small" title="Today">
+          Today
+        </Button>
 
         <IconButton onClick={() => handleNavigation('next')} size="small">
           <ChevronRight />

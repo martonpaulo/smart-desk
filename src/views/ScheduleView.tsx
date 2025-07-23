@@ -1,11 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-
 import {
   Box,
-  Button,
-  ButtonGroup,
   Chip,
   Divider,
   List,
@@ -25,12 +21,9 @@ interface ScheduleViewProps {
   onNavigate: (date: Date, view: 'day' | 'week' | 'month' | 'year' | 'schedule') => void;
 }
 
-type ScheduleFilter = 'upcoming' | 'today' | 'week' | 'month';
-
 export function ScheduleView({ onNavigate }: ScheduleViewProps) {
   const theme = useTheme();
   const events = useEventStore(state => state.events);
-  const [filter, setFilter] = useState<ScheduleFilter>('upcoming');
 
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -46,29 +39,10 @@ export function ScheduleView({ onNavigate }: ScheduleViewProps) {
       (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
     );
 
-    switch (filter) {
-      case 'today':
-        return sortedEvents.filter(event => {
-          const eventDate = new Date(event.start);
-          return eventDate >= today && eventDate < tomorrow;
-        });
-      case 'week':
-        return sortedEvents.filter(event => {
-          const eventDate = new Date(event.start);
-          return eventDate >= today && eventDate < nextWeek;
-        });
-      case 'month':
-        return sortedEvents.filter(event => {
-          const eventDate = new Date(event.start);
-          return eventDate >= today && eventDate < nextMonth;
-        });
-      case 'upcoming':
-      default:
-        return sortedEvents.filter(event => {
-          const eventDate = new Date(event.start);
-          return eventDate >= now;
-        });
-    }
+    return sortedEvents.filter(event => {
+      const eventDate = new Date(event.start);
+      return eventDate >= now;
+    });
   };
 
   const filteredEvents = getFilteredEvents();
@@ -125,36 +99,6 @@ export function ScheduleView({ onNavigate }: ScheduleViewProps) {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Filter buttons */}
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <ButtonGroup size="small" variant="outlined" fullWidth>
-          <Button
-            onClick={() => setFilter('today')}
-            variant={filter === 'today' ? 'contained' : 'outlined'}
-          >
-            Today
-          </Button>
-          <Button
-            onClick={() => setFilter('week')}
-            variant={filter === 'week' ? 'contained' : 'outlined'}
-          >
-            This Week
-          </Button>
-          <Button
-            onClick={() => setFilter('month')}
-            variant={filter === 'month' ? 'contained' : 'outlined'}
-          >
-            This Month
-          </Button>
-          <Button
-            onClick={() => setFilter('upcoming')}
-            variant={filter === 'upcoming' ? 'contained' : 'outlined'}
-          >
-            Upcoming
-          </Button>
-        </ButtonGroup>
-      </Box>
-
       {/* Events list */}
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {Object.keys(eventGroups).length === 0 ? (
@@ -172,10 +116,7 @@ export function ScheduleView({ onNavigate }: ScheduleViewProps) {
               No events found
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {filter === 'today' && 'No events scheduled for today'}
-              {filter === 'week' && 'No events scheduled for this week'}
-              {filter === 'month' && 'No events scheduled for this month'}
-              {filter === 'upcoming' && 'No upcoming events'}
+              No upcoming events
             </Typography>
           </Box>
         ) : (
