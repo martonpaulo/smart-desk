@@ -18,6 +18,7 @@ const EventTimeline = dynamic(
 const EventList = dynamic(() => import('@/components/event/EventList').then(m => m.EventList), {
   ssr: false,
 });
+import { DailyTimeLoadIndicator } from '@/components/DailyTimeLoadIndicator';
 import { HiddenColumnsList } from '@/components/HiddenColumnsList';
 import { TodoProgress } from '@/components/Progress';
 import { UndoSnackbar } from '@/components/UndoSnackbar';
@@ -80,7 +81,10 @@ export default function BoardPage() {
 
         <Stack alignItems="flex-start">
           <Stack spacing={2}>
-            <TodoProgress alignSelf="flex-end" />
+            <Stack direction="row" gap={1} alignSelf="flex-end" alignItems="center">
+              <DailyTimeLoadIndicator />
+              <TodoProgress />
+            </Stack>
             <EventList events={events} key={`${now.toISOString()}-EventList`} />
             <HiddenColumnsList />
           </Stack>
