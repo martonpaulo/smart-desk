@@ -15,11 +15,12 @@ import {
   Typography,
 } from '@mui/material';
 
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { QuantitySelector } from '@/components/QuantitySelector';
 import { useBoardStore } from '@/store/board/store';
 import { Task } from '@/types/task';
 import { playInterfaceSound } from '@/utils/soundPlayer';
-import { toLocalDateString } from '@/utils/timeUtils';
+import { formatDuration, parseDuration, toLocalDateString } from '@/utils/timeUtils';
 
 // all form fields in one object for easy compare
 interface TaskForm {
@@ -32,6 +33,7 @@ interface TaskForm {
   urgent: boolean;
   blocked: boolean;
   plannedDate?: Date;
+  estimatedTime?: number;
 }
 
 interface TaskModalProps {
@@ -45,6 +47,8 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
   // grab both actions in one subscription
   const addTask = useBoardStore(s => s.addTask);
   const updateTask = useBoardStore(s => s.updateTask);
+
+  const [isTrashConfirmOpen, setTrashConfirmOpen] = useState(false);
 
   const titleRef = useRef<HTMLInputElement>(null);
 
@@ -60,6 +64,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       urgent: task?.urgent ?? false,
       blocked: task?.blocked ?? false,
       plannedDate: task?.plannedDate ?? undefined,
+      estimatedTime: task?.estimatedTime ?? undefined,
       ...newProperties, // spread any additional properties for new tasks
     }),
     [task, newProperties],
@@ -97,7 +102,8 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       form.important !== init.important ||
       form.urgent !== init.urgent ||
       form.blocked !== init.blocked ||
-      (form.plannedDate?.getTime() ?? 0) !== (init.plannedDate?.getTime() ?? 0)
+      (form.plannedDate?.getTime() ?? 0) !== (init.plannedDate?.getTime() ?? 0) ||
+      form.estimatedTime !== init.estimatedTime
     );
   };
 
@@ -120,6 +126,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       urgent: form.urgent,
       blocked: form.blocked,
       plannedDate: form.plannedDate ? new Date(form.plannedDate) : undefined,
+      estimatedTime: form.estimatedTime,
     };
 
     try {
@@ -144,14 +151,11 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
 
   // mark as trashed
   const deleteAndClose = () => {
-    if (form.daily) {
-      window.alert('Cannot delete a daily task. Uncheck Daily first.');
-      return;
-    }
     if (!task) {
       onClose?.();
       return;
     }
+    setTrashConfirmOpen(false);
     try {
       playInterfaceSound('trash');
       // mark as trashed instead of deleting
@@ -204,7 +208,10 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
 
         {task && (
           <Tooltip title="Delete task">
-            <IconButton onClick={deleteAndClose} sx={{ position: 'absolute', top: 8, right: 8 }}>
+            <IconButton
+              onClick={() => setTrashConfirmOpen(true)}
+              sx={{ position: 'absolute', top: 8, right: 8 }}
+            >
               <DeleteIcon />
             </IconButton>
           </Tooltip>
@@ -228,6 +235,26 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
               }
             }}
           />
+
+          <Stack direction="row" alignItems="center">
+            <Typography variant="body2">Estimated Time</Typography>
+
+            <QuantitySelector
+              value={form.estimatedTime ?? null}
+              placeholder="not set"
+              onValueChange={value =>
+                value !== null && setForm(f => ({ ...f, estimatedTime: value }))
+              }
+              step={20}
+              minValue={1}
+              maxValue={480}
+              formatFn={formatDuration}
+              parseFn={parseDuration}
+              sx={{ ml: 2 }}
+            />
+          </Stack>
+
+          {/* Planned date input */}
 
           <Stack direction="row" spacing={2} alignItems="center">
             {/* Planned date selector */}
@@ -340,6 +367,16 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
           />
         </Stack>
       </DialogContent>
+
+      <ConfirmDialog
+        open={isTrashConfirmOpen}
+        title="Confirm Delete"
+        content="Are you sure you want to send this task to the <strong>trash</strong>? You can restore it later."
+        onCancel={() => setTrashConfirmOpen(false)}
+        onConfirm={deleteAndClose}
+        confirmButtonText="Delete"
+        cancelButtonText="Cancel"
+      />
     </Dialog>
   );
 }

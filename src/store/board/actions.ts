@@ -104,6 +104,7 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
     important: data.important ?? false,
     urgent: data.urgent ?? false,
     blocked: data.blocked ?? false,
+    estimatedTime: data.estimatedTime,
     plannedDate: data.plannedDate,
     quantityDone: 0,
     quantityTarget:
@@ -324,6 +325,7 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
         important: data.important ?? t.important,
         urgent: data.urgent ?? t.urgent,
         blocked: data.blocked ?? t.blocked,
+        estimatedTime: data.estimatedTime ?? t.estimatedTime,
         plannedDate: data.plannedDate ?? t.plannedDate,
         quantityDone: data.quantityDone ?? t.quantityDone,
         quantityTarget:

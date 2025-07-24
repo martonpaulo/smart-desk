@@ -41,7 +41,7 @@ export function AddTaskFloatButton() {
   const [title, setTitle] = useState('');
   const [important, setImportant] = useState(false);
   const [urgent, setUrgent] = useState(false);
-  const [duration, setDuration] = useState(20);
+  const [estimatedTime, setEstimatedTime] = useState(20);
   const [taskContext, setTaskContext] = useState<TaskContext>('online');
 
   // optional fields
@@ -79,7 +79,7 @@ export function AddTaskFloatButton() {
     setImportant(false);
     setUrgent(false);
     setBlocked(false);
-    setDuration(20);
+    setEstimatedTime(20);
     setTaskContext('online');
     setQuantityTarget(1);
     setCategory('');
@@ -101,11 +101,25 @@ export function AddTaskFloatButton() {
       blocked,
       quantityDone: 0,
       quantityTarget,
+      daily,
+      estimatedTime,
     });
 
     closeForm();
     resetForm();
-  }, [title, onAdd, notes, important, urgent, blocked, quantityTarget, closeForm, resetForm]);
+  }, [
+    title,
+    onAdd,
+    notes,
+    important,
+    urgent,
+    blocked,
+    quantityTarget,
+    daily,
+    estimatedTime,
+    closeForm,
+    resetForm,
+  ]);
 
   // Ctrl/Cmd + Enter anywhere in open form triggers submit
   useEffect(() => {
@@ -282,8 +296,8 @@ export function AddTaskFloatButton() {
               </TextField>
 
               <QuantitySelector
-                value={duration}
-                onValueChange={v => v !== null && setDuration(v)}
+                value={estimatedTime}
+                onValueChange={v => v !== null && setEstimatedTime(v)}
                 step={20}
                 minValue={1}
                 maxValue={480}

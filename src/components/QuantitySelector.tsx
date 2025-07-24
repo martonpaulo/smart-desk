@@ -11,7 +11,7 @@ import { theme } from '@/styles/theme';
 import { formatValue, parseValue } from '@/utils/stringUtils';
 
 export interface QuantitySelectorProps extends Omit<TextFieldProps, 'value' | 'onChange'> {
-  value: number;
+  value: number | null;
   onValueChange: (value: number) => void;
   step?: number;
   minValue?: number;
@@ -21,6 +21,7 @@ export interface QuantitySelectorProps extends Omit<TextFieldProps, 'value' | 'o
   suffix?: string;
   singularSuffix?: string;
   hasSpace?: boolean;
+  placeholder?: string;
 }
 
 export function QuantitySelector({
@@ -34,62 +35,67 @@ export function QuantitySelector({
   hasSpace = true,
   formatFn,
   parseFn = parseValue,
+  placeholder,
   ...props
 }: QuantitySelectorProps) {
-  const getFormattedValue = useCallback(
-    (val: number) => (formatFn ?? (v => formatValue(v, suffix, singularSuffix, hasSpace)))(val),
+  // format display or return empty on null to show placeholder
+  const formatDisplay = useCallback(
+    (val: number | null) =>
+      val === null
+        ? ''
+        : (formatFn ?? (v => formatValue(v, suffix, singularSuffix, hasSpace)))(val),
     [formatFn, suffix, singularSuffix, hasSpace],
   );
 
-  const [displayValue, setDisplayValue] = useState<string>(getFormattedValue(value));
+  // keep local text state
+  const [displayValue, setDisplayValue] = useState<string>(formatDisplay(value));
 
-  // whenever external value prop changes, resync displayValue
+  // sync when external value changes
   useEffect(() => {
-    setDisplayValue(getFormattedValue(value));
-  }, [value, suffix, singularSuffix, hasSpace, formatFn, getFormattedValue]);
+    setDisplayValue(formatDisplay(value));
+  }, [value, formatDisplay]);
 
   // apply min/max bounds safely
   const clamp = (v: number) => Math.min(Math.max(v, minValue), maxValue);
 
-  // commit the text in the input back to a numeric minute value
+  // commit user input back to number
   const commitDisplayValue = () => {
     const parsed = parseFn(displayValue);
     const clamped = clamp(parsed);
     onValueChange(clamped);
   };
 
-  // handle blur or Enter → commit
-  const handleBlur = () => commitDisplayValue();
-
-  // Round up to nearest multiple of step
-  const getNextStepUp = (value: number) => {
-    const remainder = value % step;
-    return remainder === 0 ? clamp(value + step) : clamp(value + (step - remainder));
+  // step calculations
+  const getNextStepUp = (v: number) => {
+    const rem = v % step;
+    return clamp(rem === 0 ? v + step : v + (step - rem));
+  };
+  const getNextStepDown = (v: number) => {
+    const rem = v % step;
+    return clamp(rem === 0 ? v - step : v - rem);
   };
 
-  // Round down to previous multiple of step
-  const getNextStepDown = (value: number) => {
-    const remainder = value % step;
-    return remainder === 0 ? clamp(value - step) : clamp(value - remainder);
-  };
-
-  // increment/decrement by step, clamped
+  // treat null as minValue for increments
   const handleIncrement = () => {
     if (props.disabled) return;
-    onValueChange(getNextStepUp(value));
+    const base = value ?? minValue;
+    onValueChange(getNextStepUp(base));
   };
   const handleDecrement = () => {
     if (props.disabled) return;
-    onValueChange(getNextStepDown(value));
+    const base = value ?? minValue;
+    onValueChange(getNextStepDown(base));
   };
 
+  // keyboard handlers
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       commitDisplayValue();
+      return;
     }
 
     if (e.key === 'ArrowUp') {
-      e.preventDefault(); // avoid cursor jump
+      e.preventDefault();
       handleIncrement();
     }
 
@@ -102,17 +108,18 @@ export function QuantitySelector({
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
     e.target.select();
   };
-
-  // live‐update the raw text, but don’t commit until blur/Enter
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => setDisplayValue(e.target.value);
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setDisplayValue(e.target.value);
+  };
 
   return (
     <TextField
       {...props}
       variant="standard"
       value={displayValue}
+      placeholder={placeholder}
       onChange={handleInputChange}
-      onBlur={handleBlur}
+      onBlur={commitDisplayValue}
       onFocus={handleFocus}
       onKeyDown={handleKeyDown}
       fullWidth={false}
@@ -127,7 +134,6 @@ export function QuantitySelector({
           backgroundColor: 'background.default',
           border: '1px solid',
           borderRadius: 1,
-
           borderColor: alpha(theme.palette.text.primary, 0.23),
           transition: 'border-color 0.1s, box-shadow 0.1s',
           '&:hover': {
@@ -155,13 +161,7 @@ export function QuantitySelector({
           inputMode: 'numeric',
           type: 'tel',
           startAdornment: (
-            <InputAdornment
-              position="start"
-              sx={{
-                bgcolor: 'action.hover',
-                maxBlockSize: '100%',
-              }}
-            >
+            <InputAdornment position="start" sx={{ bgcolor: 'action.hover', maxBlockSize: '100%' }}>
               <IconButton
                 onClick={handleDecrement}
                 sx={{

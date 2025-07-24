@@ -29,6 +29,8 @@ export interface AddTaskData {
   important?: boolean;
   blocked?: boolean;
   plannedDate?: Date;
+  estimatedTime?: number;
+  quantityDone?: number;
   urgent?: boolean;
   quantityTarget?: number;
   daily?: boolean;
@@ -55,6 +57,7 @@ export interface UpdateTaskData {
   plannedDate?: Date;
   quantityDone?: number;
   quantityTarget?: number;
+  estimatedTime?: number;
   daily?: boolean;
   position?: number;
   columnId?: string;

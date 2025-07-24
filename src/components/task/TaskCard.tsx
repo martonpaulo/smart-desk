@@ -9,7 +9,7 @@ import {
   SkipNext as SkipNextIcon,
   Undo as UndoIcon,
 } from '@mui/icons-material';
-import { BoxProps, Checkbox, Tooltip, useTheme } from '@mui/material';
+import { BoxProps, Checkbox, Stack, Tooltip, useTheme } from '@mui/material';
 
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PriorityFlag } from '@/components/PriorityFlag';
@@ -316,43 +316,59 @@ export function TaskCard({
             />
           ) : (
             <>
-              <S.TitleGroup>
-                {task.notes && (
-                  <Tooltip title="Has notes">
-                    <NotesIcon
-                      color="action"
-                      sx={{ fontSize: theme.typography.caption.fontSize, alignSelf: 'center' }}
-                    />
-                  </Tooltip>
-                )}
+              <S.FirstRow>
+                <S.TitleGroup>
+                  {task.notes && (
+                    <Tooltip title="Has notes">
+                      <NotesIcon
+                        color="action"
+                        sx={{
+                          fontSize: theme.typography.caption.fontSize,
+                          alignSelf: 'center',
+                          marginRight: 0.5,
+                        }}
+                      />
+                    </Tooltip>
+                  )}
 
-                <S.TitleText
-                  onClick={selectable ? toggleSelected : () => setEditModalOpen(true)}
-                  done={done}
-                  untitled={!task.title}
-                  textVariantSize={isMobile ? 'body1' : 'body2'}
-                  showActions={showActions}
-                  sx={{ opacity }}
-                >
-                  {task.title || 'Untitled Task'}
+                  <S.TitleText
+                    onClick={selectable ? toggleSelected : () => setEditModalOpen(true)}
+                    done={done}
+                    untitled={!task.title}
+                    textVariantSize={isMobile ? 'body1' : 'body2'}
+                    showActions={showActions}
+                    sx={{ opacity }}
+                  >
+                    {task.title || 'Untitled Task'}
+                  </S.TitleText>
 
                   {!task.blocked && task.daily && (
                     <Tooltip title="Repeats daily">
                       <S.RepeatIndicator fontSize="inherit" />
                     </Tooltip>
                   )}
-                </S.TitleText>
+                </S.TitleGroup>
 
-                {!task.blocked && isCountTask && (
-                  <S.QuantityText sx={{ opacity }}>
-                    ({task.quantityDone}/{task.quantityTarget})
-                  </S.QuantityText>
+                <Stack>
+                  {!task.blocked && isCountTask && (
+                    <S.QuantityText sx={{ opacity }}>
+                      {task.quantityDone}/{task.quantityTarget}
+                    </S.QuantityText>
+                  )}
+                </Stack>
+              </S.FirstRow>
+
+              <Stack direction="row" alignItems="center" gap={0.5} sx={{ opacity }}>
+                {task.estimatedTime && (
+                  <S.EstimatedTimeText sx={{ opacity }}>
+                    {task.estimatedTime} min
+                  </S.EstimatedTimeText>
                 )}
-              </S.TitleGroup>
 
-              {showDate && (
-                <S.DateText sx={{ opacity }}>{getDateLabel(task.plannedDate)}</S.DateText>
-              )}
+                {showDate && (
+                  <S.DateText sx={{ opacity }}>{getDateLabel(task.plannedDate)}</S.DateText>
+                )}
+              </Stack>
             </>
           )}
         </S.Content>

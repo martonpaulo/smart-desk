@@ -17,23 +17,28 @@ export const Container = styled(Box, {
   '&:active': { cursor: 'grabbing' },
   boxShadow: `0 1px 3px ${alpha(color, 0.1)}`,
   display: 'flex',
-
   alignItems: 'center',
   transition: transitions.backgroundColor,
   '&:hover': {
     backgroundColor: alpha(color, selected ? 0.3 : 0.2),
   },
-  flexWrap: 'wrap',
 }));
 
 export const Content = styled(Stack)({
   flexDirection: 'column',
+  flexGrow: 1,
 });
+
+export const FirstRow = styled(Stack)(() => ({
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  gap: 4,
+}));
 
 export const TitleGroup = styled(Stack)(() => ({
   flexDirection: 'row',
-
-  gap: '0.25rem',
+  display: 'inline-flex',
+  flexWrap: 'wrap',
 }));
 
 export const TitleInput = styled(TextField)(({ theme }) => ({
@@ -57,12 +62,8 @@ export const TitleText = styled(Typography, {
   ...theme.typography.body2,
   fontSize: theme.typography[textVariantSize].fontSize,
   userSelect: 'none',
-  overflowWrap: 'anywhere',
-  whiteSpace: 'normal',
   textDecoration: done ? 'line-through' : 'none',
   cursor: 'pointer',
-  display: 'flex',
-  gap: theme.spacing(0.25),
   color: untitled ? theme.palette.text.disabled : theme.palette.text.primary,
   '&:hover': {
     textDecoration: showActions ? (done ? 'line-through' : 'underline') : 'none',
@@ -76,8 +77,16 @@ export const RepeatIndicator = styled(RepeatIcon)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
+export const EstimatedTimeText = styled(Typography)(({ theme }) => ({
+  ...theme.typography.caption,
+  color: theme.palette.text.secondary,
+  userSelect: 'none',
+  textDecoration: 'none',
+}));
+
 export const QuantityText = styled(Typography)(({ theme }) => ({
   ...theme.typography.caption,
+  color: theme.palette.text.secondary,
   userSelect: 'none',
   textDecoration: 'none',
 }));

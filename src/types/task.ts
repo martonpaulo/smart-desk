@@ -6,6 +6,7 @@ export interface Task {
   urgent: boolean;
   blocked: boolean;
   plannedDate?: Date;
+  estimatedTime?: number; // in minutes
   quantityDone: number;
   quantityTarget: number;
   daily: boolean;

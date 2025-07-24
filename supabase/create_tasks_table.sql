@@ -8,6 +8,7 @@ create table if not exists public.tasks (
   important boolean not null default false,
   urgent boolean not null default false,
   blocked boolean not null default false,
+  estimated_time integer default null,
   planned_date timestamptz default null,
   quantity_done integer not null default 0,
   quantity_target integer not null default 1,
