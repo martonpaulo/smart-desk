@@ -6,22 +6,12 @@ import {
   AddCircleOutline as AddIcon,
   Check as CheckIcon,
   DescriptionOutlined as NotesIcon,
-  Edit as EditIcon,
+  SkipNext as SkipNextIcon,
   Undo as UndoIcon,
 } from '@mui/icons-material';
-import {
-  BoxProps,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Tooltip,
-  useTheme,
-} from '@mui/material';
+import { BoxProps, Checkbox, Tooltip, useTheme } from '@mui/material';
 
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PriorityFlag } from '@/components/PriorityFlag';
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
 import * as S from '@/components/task/TaskCard.styles';
@@ -89,6 +79,7 @@ export function TaskCard({
   const [isToggleConfirmOpen, setToggleConfirmOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setDragging] = useState(false);
+  const [isNextDayConfirmOpen, setNextDayConfirmOpen] = useState(false);
 
   const toggleSelected = useCallback(() => {
     if (selectable) {
@@ -244,22 +235,41 @@ export function TaskCard({
   let SecondaryActionIcon = CheckIcon;
   let secondaryActionTooltip = 'Mark as done';
   let toggleConfirmTitle = 'Confirm completion';
-  let toggleConfirmText = 'Are you sure you want to mark this task as <b>done</b>?';
+  let toggleConfirmText = 'Are you sure you want to mark this task as <strong>done</strong>?';
 
   if (done) {
     SecondaryActionIcon = UndoIcon;
     secondaryActionTooltip = 'Undo completion';
     toggleConfirmTitle = 'Confirm undo';
-    toggleConfirmText = 'Are you sure you want to <b>undo</b> this task completion?';
+    toggleConfirmText = 'Are you sure you want to <strong>undo</strong> this task completion?';
   } else if (isCountTask) {
     SecondaryActionIcon = AddIcon;
     secondaryActionTooltip = 'Increment count';
     toggleConfirmTitle = 'Confirm increment';
-    toggleConfirmText = 'Are you sure you want to <b>increment</b> this task?';
+    toggleConfirmText = 'Are you sure you want to <strong>increment</strong> this task?';
   }
 
   const itemsGap = isMobile ? 0.75 : 0.5;
   const opacity = task.blocked ? 0.5 : 1;
+
+  const handleNextDayClick = useCallback(() => setNextDayConfirmOpen(true), []);
+  const doSendToNextDay = useCallback(async () => {
+    const base = task.plannedDate ? new Date(task.plannedDate) : new Date();
+    const next = new Date(base);
+    next.setDate(base.getDate() + 1);
+    const now = new Date();
+    playInterfaceSound('send');
+    await updateTask({ ...task, plannedDate: next, updatedAt: now });
+  }, [task, updateTask]);
+  const confirmSendToNextDay = useCallback(async () => {
+    try {
+      await doSendToNextDay();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setNextDayConfirmOpen(false);
+    }
+  }, [doSendToNextDay]);
 
   return (
     <>
@@ -351,14 +361,9 @@ export function TaskCard({
           <S.ActionGroup className="action-group">
             <S.ActionWrapper>
               {!isMobile && (
-                <Tooltip title="Rename task">
-                  <S.ActionIcon
-                    onClick={() => {
-                      setTitle(task.title);
-                      setIsEditing(true);
-                    }}
-                  >
-                    <EditIcon fontSize={isMobile ? 'medium' : 'inherit'} />
+                <Tooltip title="Send to next day">
+                  <S.ActionIcon onClick={handleNextDayClick}>
+                    <SkipNextIcon fontSize={isMobile ? 'medium' : 'inherit'} />
                   </S.ActionIcon>
                 </Tooltip>
               )}
@@ -376,19 +381,21 @@ export function TaskCard({
       {/* edit & delete modal */}
       <TaskModal open={isEditModalOpen} task={task} onClose={() => setEditModalOpen(false)} />
 
-      {/* confirm dialog for mark‐done */}
-      <Dialog open={isToggleConfirmOpen} onClose={() => setToggleConfirmOpen(false)}>
-        <DialogTitle>{toggleConfirmTitle}</DialogTitle>
-        <DialogContent>
-          <DialogContentText dangerouslySetInnerHTML={{ __html: toggleConfirmText }} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setToggleConfirmOpen(false)}>Cancel</Button>
-          <Button variant="contained" color="primary" onClick={confirmToggle}>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmDialog
+        open={isToggleConfirmOpen}
+        title={toggleConfirmTitle}
+        onCancel={() => setToggleConfirmOpen(false)}
+        onConfirm={confirmToggle}
+        content={toggleConfirmText}
+      />
+
+      <ConfirmDialog
+        open={isNextDayConfirmOpen}
+        title="Confirm send to next day"
+        content="Are you sure you want to send this task to the <strong>next day</strong>?"
+        onCancel={() => setNextDayConfirmOpen(false)}
+        onConfirm={confirmSendToNextDay}
+      />
     </>
   );
 }

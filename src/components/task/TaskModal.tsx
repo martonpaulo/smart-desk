@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
+  Button,
   Checkbox,
   Dialog,
   DialogContent,
@@ -182,6 +183,14 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
     }
   };
 
+  const today = new Date();
+
+  const disableTodayButton =
+    form.plannedDate instanceof Date &&
+    form.plannedDate.getDate() === today.getDate() &&
+    form.plannedDate.getMonth() === today.getMonth() &&
+    form.plannedDate.getFullYear() === today.getFullYear();
+
   return (
     <Dialog
       open={open}
@@ -220,33 +229,55 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
             }}
           />
 
-          {/* Planned date selector */}
-          <TextField
-            label="Planned Date"
-            type="date"
-            fullWidth
-            value={
-              form.plannedDate instanceof Date
-                ? toLocalDateString(form.plannedDate)
-                : (form.plannedDate ?? '')
-            }
-            onChange={e => {
-              const val = e.target.value;
-              setForm(prev => ({
-                ...prev,
-                // avoid UTC shift by creating date with explicit time
-                plannedDate: val ? new Date(val + 'T00:00:00') : undefined,
-              }));
-            }}
-            slotProps={{
-              inputLabel: { shrink: true },
-              htmlInput: {
-                min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-                  .toISOString()
-                  .split('T')[0],
-              },
-            }}
-          />
+          <Stack direction="row" spacing={2} alignItems="center">
+            {/* Planned date selector */}
+            <TextField
+              label="Planned Date"
+              type="date"
+              fullWidth
+              value={
+                form.plannedDate instanceof Date
+                  ? toLocalDateString(form.plannedDate)
+                  : (form.plannedDate ?? '')
+              }
+              onChange={e => {
+                const val = e.target.value;
+                setForm(prev => ({
+                  ...prev,
+                  // avoid UTC shift by creating date with explicit time
+                  plannedDate: val ? new Date(val + 'T00:00:00') : undefined,
+                }));
+              }}
+              slotProps={{
+                inputLabel: { shrink: true },
+                htmlInput: {
+                  min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .split('T')[0],
+                },
+              }}
+            />
+
+            <Button
+              variant="contained"
+              disableElevation
+              size="large"
+              disabled={disableTodayButton}
+              onClick={() => setForm(prev => ({ ...prev, plannedDate: new Date() }))}
+              sx={{ ml: 1 }}
+            >
+              Today
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              disabled={!form.plannedDate}
+              onClick={() => setForm(prev => ({ ...prev, plannedDate: undefined }))}
+              sx={{ ml: 1 }}
+            >
+              Clear
+            </Button>
+          </Stack>
 
           {/* Quantifiable option */}
           <Stack>

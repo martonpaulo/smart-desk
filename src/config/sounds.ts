@@ -20,4 +20,7 @@ export const sounds = {
   trash: {
     id: 'system/trash',
   },
+  send: {
+    id: 'ui/send',
+  },
 };
