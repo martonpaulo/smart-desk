@@ -81,7 +81,7 @@ export default function BoardPage() {
 
         <Stack alignItems="flex-start">
           <Stack spacing={2}>
-            <Stack direction="row" gap={1} alignSelf="flex-end" alignItems="center">
+            <Stack direction="row" gap={1} justifyContent="space-between" alignItems="center">
               <DailyTimeLoadIndicator />
               <TodoProgress />
             </Stack>

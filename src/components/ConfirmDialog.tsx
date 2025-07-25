@@ -6,8 +6,8 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import DOMPurify from 'dompurify';
-import parse from 'html-react-parser';
+
+import { parseSafeHtml } from '@/utils/textUtils';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -28,7 +28,7 @@ export function ConfirmDialog({
   cancelButtonText = 'Cancel',
   confirmButtonText = 'Confirm',
 }: ConfirmDialogProps) {
-  const safeHtml = parse(DOMPurify.sanitize(content, { USE_PROFILES: { html: true } }));
+  const safeHtml = parseSafeHtml(content);
 
   return (
     <Dialog open={open} onClose={onCancel}>

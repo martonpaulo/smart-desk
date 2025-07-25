@@ -1,22 +1,24 @@
-import { Box, Stack, Tooltip, Typography } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { Box, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 
 import { useBoardStore } from '@/store/board/store';
 import { useEventStore } from '@/store/eventStore';
 import { filterNonFullDayEvents, filterTodayEvents } from '@/utils/eventUtils';
+import { parseSafeHtml } from '@/utils/textUtils';
+import { getTimeLoadState } from '@/utils/timeLoadUtils';
 import { formatDuration, isSameDay } from '@/utils/timeUtils';
 
 export function DailyTimeLoadIndicator() {
   const tasks = useBoardStore(state => state.tasks);
   const events = useEventStore(state => state.events);
-  const { palette } = useTheme();
+
+  const theme = useTheme();
 
   const today = new Date();
 
   // Sum estimated time of tasks planned for today
   const taskMinutes = tasks
     .filter(t => !t.trashed && isSameDay(t.plannedDate, today))
-    .reduce((total, task) => total + (task.estimatedTime ?? 0), 0);
+    .reduce((total, task) => total + (task.estimatedTime ?? 0) * (task.quantityTarget ?? 1), 0);
 
   // Filter and sum durations of non all-day events happening today
   const todaysEvents = filterTodayEvents(filterNonFullDayEvents(events ?? []), today);
@@ -30,28 +32,30 @@ export function DailyTimeLoadIndicator() {
   const totalMinutes = taskMinutes + eventMinutes;
   const formatted = formatDuration(totalMinutes);
 
-  // choose color based on total planned time
-  let color: string = 'success.main';
-  if (totalMinutes > 8 * 60) color = 'grey.800';
-  else if (totalMinutes > 6 * 60) color = 'error.main';
-  else if (totalMinutes > 4 * 60) color = 'warning.main';
+  const { label, color, tooltip } = getTimeLoadState(totalMinutes);
 
   return (
-    <Tooltip title="Includes all planned tasks and timed events for today">
-      <Box
-        sx={{
-          border: `1px solid ${palette.divider}`,
-          borderRadius: 1,
-          px: 1,
-          py: 0.5,
-        }}
-      >
-        <Stack direction="row" spacing={0.5} alignItems="center">
-          <Typography variant="body2" color={color}>
-            {`\u{1F552} ${formatted} planned today`}
+    <Stack direction="column" spacing={0.5}>
+      <Tooltip title={parseSafeHtml(tooltip)}>
+        <Stack direction="row" gap={0.5} alignItems="center" sx={{ cursor: 'pointer' }}>
+          <Box
+            style={{
+              width: theme.spacing(1.5),
+              height: theme.spacing(1.5),
+              borderRadius: '50%',
+              backgroundColor: color,
+            }}
+          />
+
+          <Typography variant="body2" color={color} fontWeight="bold">
+            {label}
           </Typography>
         </Stack>
-      </Box>
-    </Tooltip>
+      </Tooltip>
+
+      <Typography variant="body2" color={color}>
+        {formatted}
+      </Typography>
+    </Stack>
   );
 }

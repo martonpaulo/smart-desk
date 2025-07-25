@@ -1,5 +1,8 @@
 import { Fragment, ReactElement } from 'react';
 
+import DOMPurify from 'dompurify';
+import parse from 'html-react-parser';
+
 export function parseBold(input: string): ReactElement {
   const parts = input.split(/(<b>.*?<\/b>)/g);
 
@@ -14,4 +17,9 @@ export function parseBold(input: string): ReactElement {
       })}
     </>
   );
+}
+
+export function parseSafeHtml(content: string) {
+  const safeHtml = parse(DOMPurify.sanitize(content, { USE_PROFILES: { html: true } }));
+  return safeHtml;
 }
