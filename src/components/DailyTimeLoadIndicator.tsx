@@ -37,7 +37,7 @@ export function DailyTimeLoadIndicator() {
   return (
     <Stack direction="column" spacing={0.5}>
       <Tooltip title={parseSafeHtml(tooltip)}>
-        <Stack direction="row" gap={0.5} alignItems="center" sx={{ cursor: 'pointer' }}>
+        <Stack direction="row" gap={0.5} alignItems="center" sx={{ cursor: 'help' }}>
           <Box
             style={{
               width: theme.spacing(1.5),

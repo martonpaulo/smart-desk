@@ -113,7 +113,43 @@ export function getDateLabel(date: Date | null | undefined | string): string {
 
 export function toLocalDateString(date?: Date) {
   if (!date) return '';
-  const offset = date.getTimezoneOffset();
-  const localDate = new Date(date.getTime() - offset * 60 * 1000);
+  const datetime = new Date(date);
+  const offset = datetime.getTimezoneOffset();
+  const localDate = new Date(datetime.getTime() - offset * 60 * 1000);
   return localDate.toISOString().split('T')[0];
 }
+
+// return in format 9pm, 10:30am, 3:15pm, 8pm, 3am
+export function toLocalTimeString(date?: Date) {
+  if (!date) return '';
+  const datetime = new Date(date);
+  const hours = datetime.getHours();
+  const minutes = datetime.getMinutes();
+  const meridiem = hours >= 12 ? 'pm' : 'am';
+  const formattedHours = hours % 12 || 12; // convert 0 to 12 for 12-hour format
+  const formattedMinutes = minutes > 0 ? `:${String(minutes).padStart(2, '0')}` : '';
+  return `${formattedHours}${formattedMinutes}${meridiem}`;
+}
+
+export function isWeekday(date: Date | null | undefined): boolean {
+  if (!date) return false;
+  const day = date.getDay();
+  return day !== 0 && day !== 6; // exclude Sunday (0) and Saturday (6)
+}
+
+export function isPast(date: Date | null | undefined): boolean {
+  if (!date) return false;
+  const now = new Date();
+  const datetime = new Date(date);
+  return datetime.getTime() < now.getTime();
+}
+
+export const weekDays = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];

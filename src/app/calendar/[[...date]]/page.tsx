@@ -5,13 +5,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 
+import { CalendarView } from '@/calendar/types/CalendarView';
 import { CalendarNavigation } from '@/components/calendar/CalendarNavigation';
 import { CalendarViewContainer } from '@/components/calendar/CalendarViewContainer';
 import { PageContentLayout } from '@/components/PageContentLayout';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { parseDateFromSlug } from '@/utils/dateSlug';
-
-export type CalendarView = 'day' | 'week' | 'month' | 'year' | 'schedule';
 
 export default function CalendarPage() {
   const pathname = usePathname();

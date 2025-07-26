@@ -1,9 +1,17 @@
 import { createTheme } from '@mui/material';
 
-import { customShadows } from '@/styles/shadows';
+import { customBreakpoints } from '@/shared/theme/breakpoints';
+import { customShadows } from '@/shared/theme/shadows';
+import { customShapes } from '@/shared/theme/shapes';
+
+const baseTheme = createTheme();
 
 export const theme = createTheme({
-  shadows: customShadows,
+  shape: customShapes,
+  shadows: {
+    ...baseTheme.shadows,
+    ...customShadows,
+  },
   transitions: {
     duration: {
       shortest: 75,
@@ -16,14 +24,7 @@ export const theme = createTheme({
     },
   },
   breakpoints: {
-    values: {
-      mobileSm: 300,
-      mobileLg: 600,
-      tabletSm: 750,
-      tabletLg: 900,
-      laptopSm: 1050,
-      laptopLg: 1200,
-    },
+    values: customBreakpoints,
   },
   typography: {
     fontFamily: 'var(--font-poppins)',

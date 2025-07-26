@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '@/lib/supabaseClient';
-import { fetchUserId } from '@/services/supabase/userService';
+import { fetchUserId } from '@/shared/services/supabaseUserService';
 import { useUserStore } from '@/store/userStore';
 
 export async function signInWithGoogle(): Promise<void> {

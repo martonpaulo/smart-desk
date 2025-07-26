@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, MoreVert } from '@mui/icons-material';
 import { Box, Button, ButtonGroup, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 
-import type { CalendarView } from '@/app/calendar/[[...date]]/page';
+import { CalendarView } from '@/calendar/types/CalendarView';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 
 interface CalendarNavigationProps {

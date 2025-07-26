@@ -2,14 +2,15 @@
 
 import { Box, Paper, Typography, useTheme } from '@mui/material';
 
+import { CalendarView } from '@/calendar/types/CalendarView';
 import { EventCard } from '@/components/calendar/EventCard';
 import { useEventStore } from '@/store/eventStore';
 
 interface DayViewProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
-  onViewChange: (view: 'day' | 'week' | 'month' | 'year' | 'schedule') => void;
-  onNavigate: (date: Date, view: 'day' | 'week' | 'month' | 'year' | 'schedule') => void;
+  onViewChange: (view: CalendarView) => void;
+  onNavigate: (date: Date, view: CalendarView) => void;
 }
 
 export function DayView({ currentDate }: DayViewProps) {

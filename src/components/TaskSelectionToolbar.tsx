@@ -32,7 +32,13 @@ export function TaskSelectionToolbar({
         zIndex: theme.zIndex.appBar,
       }}
     >
-      <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        flexWrap="wrap"
+        gap={1}
+      >
         <Typography variant="body2" sx={{ ml: 1 }}>
           {`${selectedCount} selected`}
         </Typography>

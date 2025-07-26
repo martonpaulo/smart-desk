@@ -11,14 +11,15 @@ import {
   useTheme,
 } from '@mui/material';
 
+import { CalendarView } from '@/calendar/types/CalendarView';
 import { useEventStore } from '@/store/eventStore';
 import { Event } from '@/types/Event';
 
 interface ScheduleViewProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
-  onViewChange: (view: 'day' | 'week' | 'month' | 'year' | 'schedule') => void;
-  onNavigate: (date: Date, view: 'day' | 'week' | 'month' | 'year' | 'schedule') => void;
+  onViewChange: (view: CalendarView) => void;
+  onNavigate: (date: Date, view: CalendarView) => void;
 }
 
 export function ScheduleView({ onNavigate }: ScheduleViewProps) {

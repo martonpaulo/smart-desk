@@ -113,7 +113,9 @@ export default function EisenhowerMatrixPage() {
     const now = new Date();
     const count = selectedIds.size;
     await Promise.all(
-      Array.from(selectedIds).map(id => updateTask({ id, important: false, urgent: false, updatedAt: now })),
+      Array.from(selectedIds).map(id =>
+        updateTask({ id, important: false, urgent: false, updatedAt: now }),
+      ),
     );
     setUpdatedCount(count);
     setSnackbarOpen(true);
@@ -121,9 +123,7 @@ export default function EisenhowerMatrixPage() {
   };
 
   const handleSelectAll = () => {
-    const visible = activeTasks
-      .filter(t => showBlockedTasks || !t.blocked)
-      .map(t => t.id);
+    const visible = activeTasks.filter(t => showBlockedTasks || !t.blocked).map(t => t.id);
     selectAll(visible);
   };
 

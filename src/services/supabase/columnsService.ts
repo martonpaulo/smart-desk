@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { fetchUserId } from '@/services/supabase/userService';
+import { fetchUserId } from '@/shared/services/supabaseUserService';
 import { Column } from '@/types/column';
 import { mapColumnToDB, mapDBToColumn } from '@/utils/databaseUtils';
 

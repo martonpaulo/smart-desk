@@ -2,28 +2,23 @@
 
 import { DragEvent, useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  AddCircleOutline as AddIcon,
-  Check as CheckIcon,
-  DescriptionOutlined as NotesIcon,
-  SkipNext as SkipNextIcon,
-  Undo as UndoIcon,
-} from '@mui/icons-material';
+import { DescriptionOutlined as NotesIcon } from '@mui/icons-material';
 import { BoxProps, Checkbox, Stack, Tooltip, useTheme } from '@mui/material';
 
-import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { PriorityFlag } from '@/components/PriorityFlag';
 import { SyncedSyncIcon } from '@/components/SyncedSyncIcon';
 import * as S from '@/components/task/TaskCard.styles';
 import { TaskModal } from '@/components/task/TaskModal';
-import { defaultColumns } from '@/config/defaultColumns';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { useBoardStore } from '@/store/board/store';
 import { useSyncStatusStore } from '@/store/syncStatus';
 import { customColors } from '@/styles/colors';
-import { InterfaceSound } from '@/types/interfaceSound';
+import { IncrementButton } from '@/task/components/IncrementButton';
+import { MarkAsDoneButton } from '@/task/components/MarkAsDoneButton';
+import { ResetButton } from '@/task/components/ResetButton';
+import { SendToNextDayButton } from '@/task/components/SendToNextDayButton';
+import { UnblockButton } from '@/task/components/UnblockButton';
 import type { Task } from '@/types/task';
-import { playInterfaceSound } from '@/utils/soundPlayer';
 import { isTaskEmpty } from '@/utils/taskUtils';
 import { getDateLabel } from '@/utils/timeUtils';
 
@@ -65,9 +60,6 @@ export function TaskCard({
   const cardMinHeight = isMobile ? '3.5rem' : 'auto';
 
   // board actions
-  const columns = useBoardStore(s => s.columns);
-  const addColumn = useBoardStore(s => s.addColumn);
-  const updateColumn = useBoardStore(s => s.updateColumn);
   const updateTask = useBoardStore(s => s.updateTask);
   const syncStatus = useSyncStatusStore(s => s.status);
 
@@ -76,10 +68,8 @@ export function TaskCard({
   const [title, setTitle] = useState(task.title);
   const [initial, setInitial] = useState(task);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const [isToggleConfirmOpen, setToggleConfirmOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setDragging] = useState(false);
-  const [isNextDayConfirmOpen, setNextDayConfirmOpen] = useState(false);
 
   const toggleSelected = useCallback(() => {
     if (selectable) {
@@ -158,118 +148,20 @@ export function TaskCard({
     saveTask({ ...task, title });
   }, [onFinishEditing, saveTask, task, title]);
 
-  //
-  // MARK AS DONE LOGIC
-  //
-
-  // actual toggle logic, extracted from confirm
-  const doToggleDone = useCallback(async () => {
-    const now = new Date();
-    const { quantityTarget } = task;
-    let { quantityDone, columnId } = task;
-    const next = quantityDone + 1;
-    quantityDone = next > quantityTarget ? 0 : next;
-    let soundId: InterfaceSound = 'increment';
-
-    // move to Done column on target
-    if (quantityDone === quantityTarget) {
-      soundId = 'done';
-      const doneCol = columns.find(c => c.title === defaultColumns.done.title);
-      if (doneCol) {
-        columnId = doneCol.id;
-        if (doneCol.trashed) {
-          await updateColumn({ id: doneCol.id, trashed: false, updatedAt: now });
-        }
-      } else {
-        columnId = await addColumn({
-          title: defaultColumns.done.title,
-          color: defaultColumns.done.color,
-          updatedAt: now,
-        });
-      }
-    }
-
-    // reset to Todo when back to zero
-    if (quantityDone === 0) {
-      soundId = 'reset';
-      const todoCol = columns.find(c => c.title === defaultColumns.todo.title);
-      if (todoCol) {
-        columnId = todoCol.id;
-        if (todoCol.trashed) {
-          await updateColumn({ id: todoCol.id, trashed: false, updatedAt: now });
-        }
-      } else {
-        columnId = await addColumn({
-          title: defaultColumns.todo.title,
-          color: defaultColumns.todo.color,
-          updatedAt: now,
-        });
-      }
-    }
-
-    playInterfaceSound(soundId);
-    await updateTask({ id: task.id, quantityDone, columnId, updatedAt: now });
-    setInitial(prev => ({ ...prev, quantityDone, columnId, updatedAt: now }));
-  }, [addColumn, columns, task, updateColumn, updateTask]);
-
-  // open confirmation dialog instead of window.confirm
-  const handleToggleClick = useCallback(() => {
-    setToggleConfirmOpen(true);
-  }, []);
-
-  // user confirmed toggle
-  const confirmToggle = useCallback(async () => {
-    try {
-      await doToggleDone();
-    } catch (err) {
-      console.error('Failed to toggle done', err);
-    } finally {
-      setToggleConfirmOpen(false);
-    }
-  }, [doToggleDone]);
-
   // choose icon based on count vs done
   const done = task.quantityDone === task.quantityTarget;
   const isCountTask = task.quantityTarget > 1;
-
-  let SecondaryActionIcon = CheckIcon;
-  let secondaryActionTooltip = 'Mark as done';
-  let toggleConfirmTitle = 'Confirm completion';
-  let toggleConfirmText = 'Are you sure you want to mark this task as <strong>done</strong>?';
-
-  if (done) {
-    SecondaryActionIcon = UndoIcon;
-    secondaryActionTooltip = 'Undo completion';
-    toggleConfirmTitle = 'Confirm undo';
-    toggleConfirmText = 'Are you sure you want to <strong>undo</strong> this task completion?';
-  } else if (isCountTask) {
-    SecondaryActionIcon = AddIcon;
-    secondaryActionTooltip = 'Increment count';
-    toggleConfirmTitle = 'Confirm increment';
-    toggleConfirmText = 'Are you sure you want to <strong>increment</strong> this task?';
-  }
+  const oneToComplete = task.quantityDone + 1 === task.quantityTarget;
 
   const itemsGap = isMobile ? 0.75 : 0.5;
   const opacity = task.blocked ? 0.5 : 1;
 
-  const handleNextDayClick = useCallback(() => setNextDayConfirmOpen(true), []);
-  const doSendToNextDay = useCallback(async () => {
-    const base = task.plannedDate ? new Date(task.plannedDate) : new Date();
-    const next = new Date(base);
-    next.setDate(base.getDate() + 1);
-    const now = new Date();
-    playInterfaceSound('send');
-    await updateTask({ ...task, plannedDate: next, updatedAt: now });
-  }, [task, updateTask]);
-  const confirmSendToNextDay = useCallback(async () => {
-    try {
-      await doSendToNextDay();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setNextDayConfirmOpen(false);
-    }
-  }, [doSendToNextDay]);
+  const displayIncrementButton =
+    !isEditing && !task.blocked && isCountTask && !done && !oneToComplete;
+  const displayMarkAsDoneButton = !isEditing && !task.blocked && !done && oneToComplete;
+  const displayUnblockButton = !isEditing && task.blocked && !done;
+  const displaySendToNextDayButton = !isEditing && !done;
+  const displayResetButton = !isEditing && !task.blocked && done;
 
   return (
     <>
@@ -294,7 +186,6 @@ export function TaskCard({
             checked={selected}
             onClick={e => e.stopPropagation()}
             onChange={e => onSelectChange?.(task.id, e.target.checked)}
-            inputProps={{ 'aria-label': 'Select task' }}
             sx={{ p: 0 }}
           />
         )}
@@ -376,19 +267,11 @@ export function TaskCard({
         {!isEditing && showActions && (
           <S.ActionGroup className="action-group">
             <S.ActionWrapper>
-              {!isMobile && (
-                <Tooltip title="Send to next day">
-                  <S.ActionIcon onClick={handleNextDayClick}>
-                    <SkipNextIcon fontSize={isMobile ? 'medium' : 'inherit'} />
-                  </S.ActionIcon>
-                </Tooltip>
-              )}
-
-              <Tooltip title={secondaryActionTooltip}>
-                <S.ActionIcon onClick={handleToggleClick}>
-                  <SecondaryActionIcon fontSize={isMobile ? 'medium' : 'inherit'} />
-                </S.ActionIcon>
-              </Tooltip>
+              {displaySendToNextDayButton && <SendToNextDayButton task={task} />}
+              {displayUnblockButton && <UnblockButton task={task} />}
+              {displayIncrementButton && <IncrementButton task={task} />}
+              {displayResetButton && <ResetButton task={task} />}
+              {displayMarkAsDoneButton && <MarkAsDoneButton task={task} />}
             </S.ActionWrapper>
           </S.ActionGroup>
         )}
@@ -396,22 +279,6 @@ export function TaskCard({
 
       {/* edit & delete modal */}
       <TaskModal open={isEditModalOpen} task={task} onClose={() => setEditModalOpen(false)} />
-
-      <ConfirmDialog
-        open={isToggleConfirmOpen}
-        title={toggleConfirmTitle}
-        onCancel={() => setToggleConfirmOpen(false)}
-        onConfirm={confirmToggle}
-        content={toggleConfirmText}
-      />
-
-      <ConfirmDialog
-        open={isNextDayConfirmOpen}
-        title="Confirm send to next day"
-        content="Are you sure you want to send this task to the <strong>next day</strong>?"
-        onCancel={() => setNextDayConfirmOpen(false)}
-        onConfirm={confirmSendToNextDay}
-      />
     </>
   );
 }

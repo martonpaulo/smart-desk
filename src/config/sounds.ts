@@ -9,6 +9,9 @@ export const sounds = {
     id: 'notification/info',
   },
   reset: {
+    id: 'ui/item_deselect',
+  },
+  error: {
     id: 'notification/error',
   },
   snap: {
@@ -22,5 +25,8 @@ export const sounds = {
   },
   send: {
     id: 'ui/send',
+  },
+  unblock: {
+    id: 'ui/window_open',
   },
 };

@@ -15,8 +15,8 @@ import {
   Typography,
 } from '@mui/material';
 
-import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { QuantitySelector } from '@/components/QuantitySelector';
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 import { useBoardStore } from '@/store/board/store';
 import { Task } from '@/types/task';
 import { playInterfaceSound } from '@/utils/soundPlayer';

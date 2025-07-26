@@ -2,14 +2,15 @@
 
 import { Box, Paper, Typography, useTheme } from '@mui/material';
 
+import { CalendarView } from '@/calendar/types/CalendarView';
 import { useResponsiveness } from '@/hooks/useResponsiveness';
 import { daysOfWeek } from '@/utils/calendarUtils';
 
 interface YearViewProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
-  onViewChange: (view: 'day' | 'week' | 'month' | 'year' | 'schedule') => void;
-  onNavigate: (date: Date, view: 'day' | 'week' | 'month' | 'year' | 'schedule') => void;
+  onViewChange: (view: CalendarView) => void;
+  onNavigate: (date: Date, view: CalendarView) => void;
 }
 
 export function YearView({ currentDate, onNavigate }: YearViewProps) {

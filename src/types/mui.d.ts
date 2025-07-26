@@ -14,4 +14,15 @@ declare module '@mui/material/styles' {
     laptopSm: true;
     laptopLg: true;
   }
+  interface Shape {
+    borderRadiusSmall: number;
+    borderRadius: number;
+    borderRadiusCircle: string;
+  }
+  interface Theme {
+    shape: Shape;
+  }
+  interface ThemeOptions {
+    shape?: Partial<Shape>;
+  }
 }

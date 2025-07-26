@@ -1,8 +1,8 @@
 'use client';
 
-import { Box } from '@mui/material';
+import { Stack } from '@mui/material';
 
-import type { CalendarView } from '@/app/calendar/[[...date]]/page';
+import { CalendarView } from '@/calendar/types/CalendarView';
 import { useEvents } from '@/hooks/useEvents';
 import { DayView } from '@/views/DayView';
 import { MonthView } from '@/views/MonthView';
@@ -35,12 +35,12 @@ export function CalendarViewContainer({
   };
 
   return (
-    <Box sx={{ height: '100%', overflow: 'auto' }}>
+    <Stack>
       {currentView === 'day' && <DayView {...commonProps} />}
       {currentView === 'week' && <WeekView {...commonProps} />}
       {currentView === 'month' && <MonthView {...commonProps} />}
       {currentView === 'year' && <YearView {...commonProps} />}
       {currentView === 'schedule' && <ScheduleView {...commonProps} />}
-    </Box>
+    </Stack>
   );
 }
