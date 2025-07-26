@@ -17,6 +17,7 @@ import {
 
 import { QuantitySelector } from '@/components/QuantitySelector';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
 import { useBoardStore } from '@/store/board/store';
 import { Task } from '@/types/task';
 import { playInterfaceSound } from '@/utils/soundPlayer';
@@ -350,20 +351,11 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
           </Stack>
 
           {/* Notes */}
-          <TextField
+          <MarkdownEditableBox
             label="Notes"
             placeholder="Enter a description"
-            fullWidth
-            multiline
-            minRows={6}
             value={form.notes}
-            onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-            onKeyDown={e => {
-              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault();
-                saveAndClose();
-              }
-            }}
+            onChange={e => setForm(f => ({ ...f, notes: e }))}
           />
         </Stack>
       </DialogContent>
