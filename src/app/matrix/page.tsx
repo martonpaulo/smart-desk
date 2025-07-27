@@ -13,15 +13,15 @@ import {
   useTheme,
 } from '@mui/material';
 
-import { EisenhowerQuadrant } from '@/components/EisenhowerQuadrant';
-import { PageContentLayout } from '@/components/PageContentLayout';
-import { TaskSelectionToolbar } from '@/components/TaskSelectionToolbar';
-import { eisenhowerQuadrants } from '@/config/eisenhowerQuadrants';
-import { useTasks } from '@/hooks/useTasks';
-import { useTaskSelection } from '@/hooks/useTaskSelection';
-import { useBoardStore } from '@/store/board/store';
-import type { Task } from '@/types/task';
-import { playInterfaceSound } from '@/utils/soundPlayer';
+import { PageSection } from '@/core/components/PageSection';
+import { eisenhowerQuadrants } from '@/features/eisenhower/config/eisenhowerQuadrants';
+import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
+import { EisenhowerQuadrant } from '@/legacy/components/EisenhowerQuadrant';
+import { TaskSelectionToolbar } from '@/legacy/components/TaskSelectionToolbar';
+import { useTasks } from '@/legacy/hooks/useTasks';
+import { useTaskSelection } from '@/legacy/hooks/useTaskSelection';
+import { useBoardStore } from '@/legacy/store/board/store';
+import type { Task } from '@/legacy/types/task';
 
 export default function EisenhowerMatrixPage() {
   const updateTask = useBoardStore(s => s.updateTask);
@@ -128,7 +128,7 @@ export default function EisenhowerMatrixPage() {
   };
 
   return (
-    <PageContentLayout
+    <PageSection
       title="Eisenhower Matrix"
       description="Decide what matters, not just what screams for attention"
     >
@@ -210,6 +210,6 @@ export default function EisenhowerMatrixPage() {
           {`Updated ${updatedCount} task${updatedCount !== 1 ? 's' : ''}`}
         </Alert>
       </Snackbar>
-    </PageContentLayout>
+    </PageSection>
   );
 }

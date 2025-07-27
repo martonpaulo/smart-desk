@@ -5,24 +5,24 @@ import { useState } from 'react';
 import { Box, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
 
-import { PageContentLayout } from '@/components/PageContentLayout';
+import { PageSection } from '@/core/components/PageSection';
 
 // Lazy loaded components reduce the initial bundle size
 const AddTaskFloatButton = dynamic(
-  () => import('@/components/task/AddTaskFloatButton').then(m => m.AddTaskFloatButton),
+  () => import('@/legacy/components/task/AddTaskFloatButton').then(m => m.AddTaskFloatButton),
   { ssr: false },
 );
 const AddTaskInput = dynamic(
-  () => import('@/components/task/AddTaskInput').then(m => m.AddTaskInput),
+  () => import('@/legacy/components/task/AddTaskInput').then(m => m.AddTaskInput),
   { ssr: false },
 );
-const TaskCard = dynamic(() => import('@/components/task/TaskCard').then(m => m.TaskCard), {
+const TaskCard = dynamic(() => import('@/legacy/components/task/TaskCard').then(m => m.TaskCard), {
   ssr: false,
 });
-import { useResponsiveness } from '@/hooks/useResponsiveness';
-import { useTasks } from '@/hooks/useTasks';
-import { customColors } from '@/styles/colors';
-import { theme } from '@/styles/theme';
+import { useTasks } from '@/legacy/hooks/useTasks';
+import { customColors } from '@/legacy/styles/colors';
+import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { theme } from '@/theme';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -99,7 +99,7 @@ export default function TasksPage() {
   };
 
   return (
-    <PageContentLayout title={pageTitles[activeTab]} description={pageSubtitles[activeTab]}>
+    <PageSection title={pageTitles[activeTab]} description={pageSubtitles[activeTab]}>
       {/* filter input */}
       <Stack direction="row" gap={2} alignItems="center">
         <TextField
@@ -222,6 +222,6 @@ export default function TasksPage() {
           <Typography>{emptyListMessage[3]}</Typography>
         )}
       </TabPanel>
-    </PageContentLayout>
+    </PageSection>
   );
 }

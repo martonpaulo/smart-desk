@@ -11,8 +11,8 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import { IconButton, InputLabel, Stack, TextField, Typography, useTheme } from '@mui/material';
 
-import { renderMarkdown } from '@/shared/utils/markdownUtils';
-import { transitions } from '@/styles/transitions';
+import { transitions } from '@/legacy/styles/transitions';
+import { renderMarkdown } from '@/legacy/utils/markdownUtils';
 
 interface MarkdownEditableBoxProps {
   value: string;

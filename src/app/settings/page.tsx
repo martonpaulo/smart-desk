@@ -5,15 +5,15 @@ import { useSoundEnabled } from 'react-sounds';
 import { Button, Checkbox, Stack, TextField, Typography } from '@mui/material';
 import { DateTime } from 'luxon';
 
-import { PageContentLayout } from '@/components/PageContentLayout';
-import { ResetZoomButton } from '@/components/ResetZoomButton';
-import { SoundAlert } from '@/components/sound/SoundAlert';
-import { ZoomSelector } from '@/components/ZoomSelector';
-import { useAudioStore } from '@/store/audioStore';
-import { useEventStore } from '@/store/eventStore';
-import { useTodoPrefsStore } from '@/store/todoPrefsStore';
-import { RESET_TIME } from '@/utils/resetTime';
-import { playInterfaceSound } from '@/utils/soundPlayer';
+import { PageSection } from '@/core/components/PageSection';
+import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
+import { ResetZoomButton } from '@/legacy/components/ResetZoomButton';
+import { SoundAlert } from '@/legacy/components/sound/SoundAlert';
+import { ZoomSelector } from '@/legacy/components/ZoomSelector';
+import { useAudioStore } from '@/legacy/store/audioStore';
+import { useEventStore } from '@/legacy/store/eventStore';
+import { useTodoPrefsStore } from '@/legacy/store/todoPrefsStore';
+import { RESET_TIME } from '@/legacy/utils/resetTime';
 
 export default function SettingsPage() {
   const [enabled, setEnabled] = useSoundEnabled();
@@ -40,7 +40,7 @@ export default function SettingsPage() {
   const now = new Date();
 
   return (
-    <PageContentLayout title="Settings" description="Configure your app preferences">
+    <PageSection title="Settings" description="Configure your app preferences">
       <SoundAlert
         currentTime={now}
         events={events}
@@ -104,6 +104,6 @@ export default function SettingsPage() {
           <Typography variant="body2">{formattedBuildDate}</Typography>
         </Stack>
       </Stack>
-    </PageContentLayout>
+    </PageSection>
   );
 }

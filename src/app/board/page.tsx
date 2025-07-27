@@ -5,30 +5,32 @@ import { useEffect, useState } from 'react';
 import { Stack } from '@mui/material';
 import dynamic from 'next/dynamic';
 
-import { EventAlert } from '@/components/alert/EventAlert';
-import { Clock } from '@/components/Clock';
-import { TodoList } from '@/components/column/TodoList';
-import { ChangeSnackbar } from '@/components/event/ChangeSnackbar';
-
 // Lazily load heavy components to speed up initial render
 const EventTimeline = dynamic(
-  () => import('@/components/timeline/EventTimeline').then(m => m.EventTimeline),
+  () => import('@/legacy/components/timeline/EventTimeline').then(m => m.EventTimeline),
   { ssr: false },
 );
-const EventList = dynamic(() => import('@/components/event/EventList').then(m => m.EventList), {
-  ssr: false,
-});
-import { DailyTimeLoadIndicator } from '@/components/DailyTimeLoadIndicator';
-import { HiddenColumnsList } from '@/components/HiddenColumnsList';
-import { TodoProgress } from '@/components/Progress';
-import { UndoSnackbar } from '@/components/UndoSnackbar';
-import { useEvents } from '@/hooks/useEvents';
-import { useLocation } from '@/hooks/useLocation';
-import { useResponsiveness } from '@/hooks/useResponsiveness';
-import { useWeather } from '@/hooks/useWeather';
-import { processEventsColumn } from '@/services/eventsColumnService';
-import { useAudioStore } from '@/store/audioStore';
-import { useEventStore } from '@/store/eventStore';
+const EventList = dynamic(
+  () => import('@/legacy/components/event/EventList').then(m => m.EventList),
+  {
+    ssr: false,
+  },
+);
+import { EventAlert } from '@/legacy/components/alert/EventAlert';
+import { Clock } from '@/legacy/components/Clock';
+import { TodoList } from '@/legacy/components/column/TodoList';
+import { DailyTimeLoadIndicator } from '@/legacy/components/DailyTimeLoadIndicator';
+import { ChangeSnackbar } from '@/legacy/components/event/ChangeSnackbar';
+import { HiddenColumnsList } from '@/legacy/components/HiddenColumnsList';
+import { TodoProgress } from '@/legacy/components/Progress';
+import { UndoSnackbar } from '@/legacy/components/UndoSnackbar';
+import { useEvents } from '@/legacy/hooks/useEvents';
+import { useLocation } from '@/legacy/hooks/useLocation';
+import { useWeather } from '@/legacy/hooks/useWeather';
+import { processEventsColumn } from '@/legacy/services/eventsColumnService';
+import { useAudioStore } from '@/legacy/store/audioStore';
+import { useEventStore } from '@/legacy/store/eventStore';
+import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 export default function BoardPage() {
   const { latitude, longitude } = useLocation();

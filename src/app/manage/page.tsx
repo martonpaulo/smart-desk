@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 
-import { CalendarForm } from '@/components/manager/CalendarForm';
-import { CalendarList } from '@/components/manager/CalendarList';
-import { PageContentLayout } from '@/components/PageContentLayout';
-import { useSettingsStorage } from '@/store/settings/store';
+import { PageSection } from '@/core/components/PageSection';
+import { CalendarForm } from '@/legacy/components/manager/CalendarForm';
+import { CalendarList } from '@/legacy/components/manager/CalendarList';
+import { useSettingsStorage } from '@/legacy/store/settings/store';
 
 export default function CalendarManager() {
   const calendars = useSettingsStorage(state => state.icsCalendars);
@@ -49,7 +49,7 @@ export default function CalendarManager() {
   };
 
   return (
-    <PageContentLayout title="Calendar Manager" description="Manage your ICS calendars">
+    <PageSection title="Calendar Manager" description="Manage your ICS calendars">
       <CalendarList calendars={calendars} onEdit={startEdit} onDelete={handleDelete} />
       <CalendarForm
         initial={editingIndex != null ? calendars[editingIndex] : undefined}
@@ -57,6 +57,6 @@ export default function CalendarManager() {
         onSubmit={handleSubmit}
         onCancel={cancelEdit}
       />
-    </PageContentLayout>
+    </PageSection>
   );
 }

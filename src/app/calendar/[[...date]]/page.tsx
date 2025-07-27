@@ -5,12 +5,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { CalendarView } from '@/calendar/types/CalendarView';
-import { CalendarNavigation } from '@/components/calendar/CalendarNavigation';
-import { CalendarViewContainer } from '@/components/calendar/CalendarViewContainer';
-import { PageContentLayout } from '@/components/PageContentLayout';
-import { useResponsiveness } from '@/hooks/useResponsiveness';
-import { parseDateFromSlug } from '@/utils/dateSlug';
+import { PageSection } from '@/core/components/PageSection';
+import { CalendarView } from '@/features/calendar/types/CalendarView';
+import { CalendarNavigation } from '@/legacy/components/calendar/CalendarNavigation';
+import { CalendarViewContainer } from '@/legacy/components/calendar/CalendarViewContainer';
+import { parseDateFromSlug } from '@/legacy/utils/dateSlug';
+import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 export default function CalendarPage() {
   const pathname = usePathname();
@@ -129,7 +129,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <PageContentLayout title={getPageTitle()} hideTitleLabel>
+    <PageSection title={getPageTitle()} hideTitle>
       {currentView && (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           <CalendarNavigation
@@ -151,6 +151,6 @@ export default function CalendarPage() {
           </Box>
         </Box>
       )}
-    </PageContentLayout>
+    </PageSection>
   );
 }

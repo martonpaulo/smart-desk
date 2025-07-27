@@ -2,16 +2,16 @@
 
 import { Alert, Button, CircularProgress, Stack, Typography } from '@mui/material';
 
-import { PageContentLayout } from '@/components/PageContentLayout';
-import { ServiceStatusIcon } from '@/components/ServiceStatusIcon';
-import { useDashboardViewState } from '@/hooks/useDashboardViewState';
+import { PageSection } from '@/core/components/PageSection';
+import { ServiceStatusIcon } from '@/legacy/components/ServiceStatusIcon';
+import { useDashboardViewState } from '@/legacy/hooks/useDashboardViewState';
 
 export default function AccountPage() {
   const { severity, message, isLoading, canSignIn, canSignOut, handleSignIn, handleSignOut } =
     useDashboardViewState();
 
   return (
-    <PageContentLayout title="Account" description="Manage your account settings">
+    <PageSection title="Account" description="Manage your account settings">
       {isLoading && <CircularProgress />}
 
       <Alert severity={severity}>{message}</Alert>
@@ -47,6 +47,6 @@ export default function AccountPage() {
           </Stack>
         </Stack>
       </Stack>
-    </PageContentLayout>
+    </PageSection>
   );
 }

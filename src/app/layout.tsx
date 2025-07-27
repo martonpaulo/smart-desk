@@ -5,17 +5,17 @@ import { ReactNode } from 'react';
 import { SessionProvider } from 'next-auth/react';
 import { SnackbarProvider } from 'notistack';
 
-import { NavigationLayout } from '@/navigation/NavigationLayout';
-import { AppThemeProvider } from '@/providers/AppThemeProvider';
-import { DateAdapterProvider } from '@/providers/DateAdapterProvider';
-import { InterfaceSoundProvider } from '@/providers/InterfaceSoundProvider';
-import { LocationProvider } from '@/providers/LocationProvider';
-import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
-import { SupabaseSyncProvider } from '@/providers/SupabaseSyncProvider';
-import { ZoomProvider } from '@/providers/ZoomProvider';
-import { poppins } from '@/shared/theme/fonts';
+import { AppThemeProvider } from '@/core/providers/AppThemeProvider';
+import { SupabaseSyncProvider } from '@/core/providers/SupabaseSyncProvider';
+import { InterfaceSoundProvider } from '@/features/sound/providers/InterfaceSoundProvider';
+import { NavigationLayout } from '@/legacy/navigation/NavigationLayout';
+import { DateAdapterProvider } from '@/legacy/providers/DateAdapterProvider';
+import { LocationProvider } from '@/legacy/providers/LocationProvider';
+import { ReactQueryProvider } from '@/legacy/providers/ReactQueryProvider';
+import { ZoomProvider } from '@/legacy/providers/ZoomProvider';
+import { poppins } from '@/theme/fonts';
 
-import '@/lib/dragDropTouch';
+import '@/legacy/lib/dragDropTouch';
 
 interface RootLayoutProps {
   readonly children: ReactNode;

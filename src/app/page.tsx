@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { useResponsiveness } from '@/hooks/useResponsiveness';
+import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 export default function RootRedirect() {
   const { isMobile } = useResponsiveness();
