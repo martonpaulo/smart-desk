@@ -33,7 +33,7 @@ export function EventList({ events }: { events: Event[] | null }) {
   const { isMobile } = useResponsiveness();
   const storedWidth = useEventListPrefsStore(state => state.width);
   const setStoredWidth = useEventListPrefsStore(state => state.setWidth);
-  const [width, setWidth] = useState(storedWidth);
+  const [width, setWidth] = useState(350);
   const startX = useRef(0);
   const startWidth = useRef(0);
 
