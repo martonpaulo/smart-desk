@@ -69,7 +69,18 @@ export const theme = createTheme({
     },
     MuiCssBaseline: {
       styleOverrides: {
-        '*': {
+        html: {
+          overscrollBehavior: 'none',
+        },
+        body: {
+          overscrollBehavior: 'none',
+        },
+        '#__next': {
+          height: '100%',
+          overflowY: 'auto',
+          overscrollBehavior: 'none',
+        },
+        '*, *::before, *::after': {
           touchAction: 'manipulation',
         },
       },

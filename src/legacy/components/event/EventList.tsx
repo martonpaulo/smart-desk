@@ -89,7 +89,7 @@ export function EventList({ events }: { events: Event[] | null }) {
   return (
     <Box sx={{ display: 'flex' }}>
       <Stack
-        width={isMobile ? '100%' : width}
+        width={isMobile ? '100%' : 350}
         borderRadius={1}
         p={1.5}
         sx={{
