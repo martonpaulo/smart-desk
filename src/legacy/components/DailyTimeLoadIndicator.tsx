@@ -1,11 +1,12 @@
 import { Box, Stack, Tooltip, Typography, useTheme } from '@mui/material';
-import { formatDuration, isSameDay } from 'date-fns';
+import { isSameDay } from 'date-fns';
 
 import { useBoardStore } from '@/legacy/store/board/store';
 import { useEventStore } from '@/legacy/store/eventStore';
 import { filterNonFullDayEvents, filterTodayEvents } from '@/legacy/utils/eventUtils';
 import { parseSafeHtml } from '@/legacy/utils/textUtils';
 import { getTimeLoadState } from '@/legacy/utils/timeLoadUtils';
+import { formatFullDuration } from '@/shared/utils/timeUtils';
 
 export function DailyTimeLoadIndicator() {
   const tasks = useBoardStore(state => state.tasks);
@@ -30,7 +31,7 @@ export function DailyTimeLoadIndicator() {
   }, 0);
 
   const totalMinutes = taskMinutes + eventMinutes;
-  const formatted = formatDuration({ minutes: totalMinutes });
+  const formatted = formatFullDuration(totalMinutes * 60_000);
 
   const { label, color, tooltip } = getTimeLoadState(totalMinutes);
 
