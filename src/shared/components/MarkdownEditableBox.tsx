@@ -59,14 +59,16 @@ export function MarkdownEditableBox({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [finishEditing, isEditing, markdown, onChange]);
 
-  const handleToggle = (line: number) => {
+  const handleToggle = (lineIndex: number) => {
     const lines = markdown.split(/\r?\n/);
-    const target = lines[line];
-    if (target.startsWith('- [ ] ')) {
-      lines[line] = target.replace('- [ ] ', '- [x] ');
-    } else if (target.startsWith('- [x] ')) {
-      lines[line] = target.replace('- [x] ', '- [ ] ');
-    }
+    const regex = /^([*-]?\s*\[\s*)(x?)(\s*\])(\s*)(.*)$/i;
+    const m = regex.exec(lines[lineIndex]);
+    if (!m) return;
+
+    const [, prefix, mark, closingBracket, spaceAfter, rest] = m;
+    const newMark = mark.toLowerCase() === 'x' ? ' ' : 'x';
+    lines[lineIndex] = `${prefix}${newMark}${closingBracket}${spaceAfter}${rest}`;
+
     const updated = lines.join('\n');
     setMarkdown(updated);
     onChange?.(updated);
@@ -142,7 +144,7 @@ export function MarkdownEditableBox({
           onKeyDown={handleKeyDown}
         />
       ) : (
-        <Stack spacing={0.5}>
+        <Stack spacing={0.25}>
           {hasContent ? (
             renderMarkdown(markdown, handleToggle)
           ) : (

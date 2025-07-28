@@ -8,7 +8,7 @@ export const syncStores: SyncStoreConfig[] = [
   {
     syncFromServer: useBoardStore.getState().syncFromServer,
     syncPending: useBoardStore.getState().syncPending,
-    intervalMs: 30_000,
+    intervalMs: 20_000,
   },
   {
     syncFromServer: useSettingsStorage.getState().syncFromServer,
