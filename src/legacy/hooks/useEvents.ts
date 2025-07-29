@@ -29,6 +29,7 @@ export function useEvents(start?: Date, end?: Date) {
   const isLoading = loadingGoogle || loadingIcs;
   const bothFailed = Boolean(errorGoogle && errorIcs);
   const firstError = googleError ?? icsError;
+  const canonical = canonicalEvents.length > 0 ? canonicalEvents : null;
 
   useEffect(() => {
     if (isLoading) return;
@@ -37,7 +38,7 @@ export function useEvents(start?: Date, end?: Date) {
     const combined = [
       ...(errorGoogle ? [] : googleEvents),
       ...(errorIcs ? [] : icsEvents),
-      ...canonicalEvents.map(mapToLegacyEvent),
+      ...(canonical ? canonical.map(mapToLegacyEvent) : []),
     ];
 
     if (combined.length > 0) setRemoteEvents(combined);
@@ -50,6 +51,7 @@ export function useEvents(start?: Date, end?: Date) {
     setRemoteEvents,
     bothFailed,
     canonicalEvents,
+    canonical,
   ]);
 
   function refetchAll() {

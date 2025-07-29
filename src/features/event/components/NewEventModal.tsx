@@ -16,81 +16,128 @@ import { DateTime } from 'luxon';
 import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
 
+// helper to build a JS Date from separate date and time strings
+function combineDateTime(date: string, time: string): Date {
+  return new Date(`${date}T${time}`);
+}
+
 interface NewEventModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function NewEventModal({ isOpen, onClose }: NewEventModalProps) {
-  // store actions
   const addLocalEvent = useLocalEventsStore(s => s.add);
 
-  // form state
+  // form fields
   const [title, setTitle] = useState('');
-  const [details, setDetails] = useState('');
-  const [startIso, setStartIso] = useState('');
-  const [endIso, setEndIso] = useState('');
-  const [isEndModified, setIsEndModified] = useState(false);
+  const [description, setDescription] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [isAllDay, setIsAllDay] = useState(false);
   const [manualAllDay, setManualAllDay] = useState(false);
+  const [isEndModified, setIsEndModified] = useState(false);
 
-  // reset form on open
+  // reset defaults when opening
   useEffect(() => {
     if (!isOpen) return;
-    const now = DateTime.now().startOf('minute');
-    const defaultStart = now.toISO({ suppressMilliseconds: true })!;
-    const defaultEnd = now.plus({ hours: 1 }).toISO({ suppressMilliseconds: true })!;
+    const now = DateTime.now();
+    const d = now.toISODate(); // YYYY-MM-DD
+
+    const roundTime = now.plus({ minutes: 60 - now.minute });
+
+    const t = roundTime.startOf('minute').toFormat('HH:mm');
+    const next = roundTime.plus({ hours: 1 });
+
     setTitle('');
-    setDetails('');
-    setStartIso(defaultStart);
-    setEndIso(defaultEnd);
-    setIsEndModified(false);
+    setDescription('');
+    setStartDate(d);
+    setStartTime(t);
+    setEndDate(d);
+    setEndTime(next.toFormat('HH:mm'));
     setIsAllDay(false);
     setManualAllDay(false);
+    setIsEndModified(false);
   }, [isOpen]);
 
-  // auto-sync end time to start +1h, unless user modified it
+  // if end never touched, keep it = start +1h
   useEffect(() => {
     if (isEndModified) return;
-    const startDt = DateTime.fromISO(startIso);
-    setEndIso(startDt.plus({ hours: 1 }).toISO({ suppressMilliseconds: true })!);
-  }, [startIso, isEndModified]);
+    if (!startDate || !startTime) return;
+    const s = DateTime.fromISO(`${startDate}T${startTime}`);
+    const e = s.plus({ hours: 1 });
+    setEndDate(e.toISODate() ?? '');
+    setEndTime(e.toFormat('HH:mm'));
+  }, [startDate, startTime, isEndModified]);
 
-  // auto-toggle all-day status based on duration, unless manually changed
+  // auto toggle all-day if span ≥ 24h unless user chose
   useEffect(() => {
     if (manualAllDay) return;
-    const startDt = DateTime.fromISO(startIso);
-    const endDt = DateTime.fromISO(endIso);
-    const hours = endDt.diff(startDt, 'hours').hours;
-    setIsAllDay(hours >= 24);
-  }, [startIso, endIso, manualAllDay]);
+    if (!startDate || !startTime || !endDate || !endTime) return;
+    const s = DateTime.fromISO(`${startDate}T${startTime}`);
+    const e = DateTime.fromISO(`${endDate}T${endTime}`);
+    setIsAllDay(e.diff(s, 'hours').hours >= 24);
+  }, [startDate, startTime, endDate, endTime, manualAllDay]);
 
-  // submit handler defined before useModalInputActions to avoid TS2448 error
-  const submit = useCallback(async () => {
-    if (!title.trim() || !startIso) return;
+  // build event and save
+  const handleSave = useCallback(async () => {
+    if (!title.trim() || !startDate || !startTime) return;
 
-    const startTime = new Date(startIso);
-    let endTime = endIso ? new Date(endIso) : new Date(startTime.getTime() + 60 * 60 * 1000);
+    let s = combineDateTime(startDate, startTime);
+    let e =
+      endDate && endTime
+        ? combineDateTime(endDate, endTime)
+        : new Date(s.getTime() + 60 * 60 * 1000);
 
     // ensure end > start
-    if (endTime <= startTime) {
-      endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+    if (e <= s) {
+      e = new Date(s.getTime() + 60 * 60 * 1000);
     }
 
-    // add to local store
+    // full‐day span
+    if (isAllDay) {
+      s = new Date(s.setHours(0, 0, 0, 0));
+      e = new Date(e.setHours(23, 59, 59, 999));
+    }
+
     await addLocalEvent({
-      startTime: isAllDay ? new Date(startTime.setHours(0, 0, 0, 0)) : startTime,
-      endTime: isAllDay ? new Date(endTime.setHours(23, 59, 59, 999)) : endTime,
-      description: details.trim() || undefined,
+      summary: title.trim(),
+      description: description.trim() || undefined,
+      startTime: s,
+      endTime: e,
       allDay: isAllDay,
       createdAt: new Date(),
     });
 
     onClose();
-  }, [title, details, startIso, endIso, isAllDay, addLocalEvent, onClose]);
+  }, [
+    title,
+    description,
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    isAllDay,
+    addLocalEvent,
+    onClose,
+  ]);
+
+  // clicking outside saves, escape just closes
+  const handleDialogClose = useCallback(
+    (_: unknown, reason: string) => {
+      if (reason === 'backdropClick') {
+        handleSave();
+      } else if (reason === 'escapeKeyDown') {
+        onClose();
+      }
+    },
+    [handleSave, onClose],
+  );
 
   return (
-    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="mobileLg">
+    <Dialog open={isOpen} onClose={handleDialogClose} fullWidth maxWidth="mobileLg">
       <DialogTitle>Create New Event</DialogTitle>
       <DialogContent>
         <Stack spacing={2} pt={1}>
@@ -101,28 +148,7 @@ export function NewEventModal({ isOpen, onClose }: NewEventModalProps) {
             fullWidth
             required
           />
-          <TextField
-            label="Start"
-            type="datetime-local"
-            value={startIso}
-            onChange={e => setStartIso(e.target.value)}
-            fullWidth
-            slotProps={{ inputLabel: { shrink: true } }}
-            disabled={isAllDay}
-            required
-          />
-          <TextField
-            label="End"
-            type="datetime-local"
-            value={endIso}
-            onChange={e => {
-              setEndIso(e.target.value);
-              setIsEndModified(true);
-            }}
-            fullWidth
-            slotProps={{ inputLabel: { shrink: true } }}
-            disabled={isAllDay}
-          />
+
           <FormControlLabel
             control={
               <Checkbox
@@ -133,20 +159,72 @@ export function NewEventModal({ isOpen, onClose }: NewEventModalProps) {
                 }}
               />
             }
-            label="All day"
+            label="This is an all-day event"
           />
+
+          <Stack direction="row" spacing={2}>
+            <TextField
+              label="Start date"
+              type="date"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+              fullWidth
+              required
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+            <TextField
+              label="Start time"
+              type="time"
+              value={startTime}
+              onChange={e => setStartTime(e.target.value)}
+              fullWidth
+              required
+              disabled={isAllDay}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          </Stack>
+
+          <Stack direction="row" spacing={2}>
+            <TextField
+              label="End date"
+              type="date"
+              value={endDate}
+              onChange={e => {
+                setEndDate(e.target.value);
+                setIsEndModified(true);
+              }}
+              fullWidth
+              required
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+            <TextField
+              label="End time"
+              type="time"
+              value={endTime}
+              onChange={e => {
+                setEndTime(e.target.value);
+                setIsEndModified(true);
+              }}
+              fullWidth
+              required
+              disabled={isAllDay}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          </Stack>
+
           <MarkdownEditableBox
             label="Description"
             placeholder="Enter details"
-            value={details}
-            onChange={setDetails}
+            value={description}
+            onChange={setDescription}
           />
         </Stack>
       </DialogContent>
+
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={submit} variant="contained" disabled={!title.trim()}>
-          Add Event
+        <Button onClick={handleSave} variant="contained" disabled={!title.trim()}>
+          Save
         </Button>
       </DialogActions>
     </Dialog>

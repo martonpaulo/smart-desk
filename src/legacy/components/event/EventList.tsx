@@ -124,7 +124,6 @@ export function EventList({ events }: { events: Event[] | null }) {
             fullWidth
             size="small"
             placeholder="New event"
-            onFocus={() => setNewModalOpen(true)}
             onClick={() => setNewModalOpen(true)}
             sx={{
               borderColor: columnColor,
@@ -150,6 +149,7 @@ export function EventList({ events }: { events: Event[] | null }) {
             }}
             slotProps={{
               input: {
+                readOnly: true,
                 sx: theme => ({
                   fontSize: theme.typography.body2.fontSize,
                   lineHeight: theme.typography.body2.lineHeight,
