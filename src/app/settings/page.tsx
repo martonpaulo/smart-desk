@@ -12,14 +12,10 @@ import { SoundAlert } from '@/legacy/components/sound/SoundAlert';
 import { ZoomSelector } from '@/legacy/components/ZoomSelector';
 import { useAudioStore } from '@/legacy/store/audioStore';
 import { useEventStore } from '@/legacy/store/eventStore';
-import { useTodoPrefsStore } from '@/legacy/store/todoPrefsStore';
 import { RESET_TIME } from '@/legacy/utils/resetTime';
 
 export default function SettingsPage() {
   const [enabled, setEnabled] = useSoundEnabled();
-
-  const hideDoneColumn = useTodoPrefsStore(state => state.hideDoneColumn);
-  const setHideDoneColumn = useTodoPrefsStore(state => state.setHideDoneColumn);
 
   const events = useEventStore(state => state.events);
   const audioEnabled = useAudioStore(state => state.audioEnabled);
@@ -62,18 +58,6 @@ export default function SettingsPage() {
         <Button variant="outlined" onClick={() => playInterfaceSound('info')}>
           Test Sound
         </Button>
-      </Stack>
-
-      <Stack spacing={1}>
-        <Typography variant="h3">Board Preferences</Typography>
-        <Stack direction="row" alignItems="center">
-          <Checkbox
-            checked={!hideDoneColumn}
-            onChange={e => setHideDoneColumn(!e.target.checked)}
-            size="small"
-          />
-          <Typography variant="body2">Display Done Column</Typography>
-        </Stack>
       </Stack>
 
       <Stack spacing={1}>

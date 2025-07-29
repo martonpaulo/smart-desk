@@ -26,8 +26,8 @@ import { TodoProgress } from '@/legacy/components/Progress';
 import { UndoSnackbar } from '@/legacy/components/UndoSnackbar';
 import { useEvents } from '@/legacy/hooks/useEvents';
 import { useLocation } from '@/legacy/hooks/useLocation';
+import { useProcessEventsColumn } from '@/legacy/hooks/useProcessEventsColumn';
 import { useWeather } from '@/legacy/hooks/useWeather';
-import { processEventsColumn } from '@/legacy/services/eventsColumnService';
 import { useAudioStore } from '@/legacy/store/audioStore';
 import { useEventStore } from '@/legacy/store/eventStore';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
@@ -40,9 +40,7 @@ export default function BoardPage() {
   useEvents();
 
   // create tasks from all-day events once per day
-  useEffect(() => {
-    void processEventsColumn();
-  }, [events]);
+  useProcessEventsColumn();
 
   const setAlertAcknowledged = useEventStore(state => state.setAlertAcknowledged);
   const isMeetingAlertEnabled = useAudioStore(state => state.meetingAlertEnabled);

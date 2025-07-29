@@ -1,7 +1,8 @@
-import { defaultColumns } from '@/features/column/config/defaultColumns';
+import { useEffect } from 'react';
+
+import { useDefaultColumns } from '@/legacy/hooks/useDefaultColumns';
 import { useBoardStore } from '@/legacy/store/board/store';
 import { useEventStore } from '@/legacy/store/eventStore';
-import type { Column } from '@/legacy/types/column';
 import type { Event } from '@/legacy/types/Event';
 import { buildStorageKey } from '@/legacy/utils/localStorageUtils';
 import { RESET_TIME } from '@/legacy/utils/resetTime';
@@ -39,53 +40,36 @@ function filterTodaysAllDayEvents(events: Event[], today: Date): Event[] {
   });
 }
 
-export async function processEventsColumn(now: Date = new Date()): Promise<void> {
+export function useProcessEventsColumn(now: Date = new Date()): void {
   const lastRun = loadLastRun();
-  if (lastRun && isSameDay(lastRun, now)) return;
-  if (!afterResetTime(now)) return;
-
+  const colPromise = useDefaultColumns('events');
   const events = useEventStore.getState().events;
-  if (!Array.isArray(events) || events.length === 0) return;
-
-  const col = await ensureEventsColumn();
-  if (!col) return;
-
-  const todaysEvents = filterTodaysAllDayEvents(events, now);
   const addTask = useBoardStore.getState().addTask;
 
-  for (const event of todaysEvents) {
-    await addTask({
-      title: event.title,
-      notes: event.description ?? '',
-      plannedDate: now,
-      columnId: col.id,
-      updatedAt: now,
-    });
-  }
+  useEffect(() => {
+    async function processEvents() {
+      const col = await colPromise;
+      if (lastRun && isSameDay(lastRun, now)) return;
+      if (!afterResetTime(now)) return;
+      if (!Array.isArray(events) || events.length === 0) return;
+      if (!col) return;
 
-  saveLastRun(now);
-}
+      const todaysEvents = filterTodaysAllDayEvents(events, now);
 
-async function ensureEventsColumn(): Promise<Column | null> {
-  const columns = useBoardStore.getState().columns;
-  const existing = columns.find(c => c.title === defaultColumns.events.title);
-  const addColumn = useBoardStore.getState().addColumn;
-  const updateColumn = useBoardStore.getState().updateColumn;
+      for (const event of todaysEvents) {
+        await addTask({
+          title: event.title,
+          notes: event.description ?? '',
+          plannedDate: now,
+          columnId: col.id,
+          updatedAt: now,
+        });
+      }
 
-  if (existing) {
-    if (existing.trashed) {
-      await updateColumn({ id: existing.id, trashed: false, updatedAt: new Date() });
+      saveLastRun(now);
     }
-    return existing;
-  }
 
-  await addColumn({
-    title: defaultColumns.events.title,
-    color: defaultColumns.events.color,
-    updatedAt: new Date(),
-  });
-
-  return (
-    useBoardStore.getState().columns.find(c => c.title === defaultColumns.events.title) ?? null
-  );
+    processEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [now, colPromise, events, addTask]);
 }

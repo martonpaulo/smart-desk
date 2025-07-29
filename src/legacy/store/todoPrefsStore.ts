@@ -7,16 +7,11 @@ interface TodoPrefsState {
   setView: (view: 'board' | 'list') => void;
   trashOpen: boolean;
   setTrashOpen: (open: boolean) => void;
-  hideDoneColumn: boolean;
-  setHideDoneColumn: (hide: boolean) => void;
   hiddenColumnIds: string[];
   toggleHiddenColumn: (id: string) => void;
 }
 
-type TodoPrefsData = Pick<
-  TodoPrefsState,
-  'view' | 'trashOpen' | 'hideDoneColumn' | 'hiddenColumnIds'
->;
+type TodoPrefsData = Pick<TodoPrefsState, 'view' | 'trashOpen' | 'hiddenColumnIds'>;
 
 const STORAGE_KEY = 'todo-prefs';
 
@@ -25,7 +20,6 @@ function loadPrefs(): TodoPrefsData {
     const prefs = getStoredFilters<TodoPrefsData>(STORAGE_KEY) ?? {
       view: 'board',
       trashOpen: false,
-      hideDoneColumn: true,
       hiddenColumnIds: [],
     };
     // Ensure hiddenColumnIds is always an array
@@ -37,8 +31,6 @@ function loadPrefs(): TodoPrefsData {
       setView: () => {},
       trashOpen: false,
       setTrashOpen: () => {},
-      hideDoneColumn: false,
-      setHideDoneColumn: () => {},
       hiddenColumnIds: [],
       toggleHiddenColumn: () => {},
     } as TodoPrefsState;
@@ -49,7 +41,6 @@ function persistPrefs(state: TodoPrefsState) {
   const dataToStore: TodoPrefsData = {
     view: state.view,
     trashOpen: state.trashOpen,
-    hideDoneColumn: state.hideDoneColumn,
     hiddenColumnIds: state.hiddenColumnIds,
   };
   setStoredFilters(STORAGE_KEY, dataToStore);
@@ -66,12 +57,6 @@ export const useTodoPrefsStore = create<TodoPrefsState>(set => ({
   setTrashOpen: open =>
     set(state => {
       const next = { ...state, trashOpen: open };
-      return next;
-    }),
-  setHideDoneColumn: hide =>
-    set(state => {
-      const next = { ...state, hideDoneColumn: hide };
-      persistPrefs(next);
       return next;
     }),
   toggleHiddenColumn: id =>

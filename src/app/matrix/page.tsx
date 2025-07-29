@@ -26,7 +26,7 @@ import type { Task } from '@/legacy/types/task';
 export default function EisenhowerMatrixPage() {
   const updateTask = useBoardStore(s => s.updateTask);
   const tasks = useBoardStore(s => s.tasks);
-  const { activeTasks } = useTasks();
+  const { undoneActiveTasks } = useTasks();
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [showBlockedTasks, setShowBlockedTasks] = useState(false);
@@ -123,7 +123,7 @@ export default function EisenhowerMatrixPage() {
   };
 
   const handleSelectAll = () => {
-    const visible = activeTasks.filter(t => showBlockedTasks || !t.blocked).map(t => t.id);
+    const visible = undoneActiveTasks.filter(t => showBlockedTasks || !t.blocked).map(t => t.id);
     selectAll(visible);
   };
 
@@ -158,7 +158,7 @@ export default function EisenhowerMatrixPage() {
       <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
         {eisenhowerQuadrants.map(
           ({ title, color, important, urgent, questions, examples, action }) => {
-            const tasks = activeTasks.filter(
+            const tasks = undoneActiveTasks.filter(
               t =>
                 t.important === important &&
                 t.urgent === urgent &&

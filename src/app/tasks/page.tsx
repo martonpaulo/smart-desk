@@ -58,13 +58,13 @@ export default function TasksPage() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   // fetch tasks (filtered by title)
-  const { activeTasks, doneTasks, trashedTasks, noDateTasks } = useTasks({ title: filter });
+  const { undoneActiveTasks, doneTasks, trashedTasks, noDateTasks } = useTasks({ title: filter });
 
   // counts & dynamic titles/subtitles
   const counts = {
-    all: activeTasks.length,
+    all: undoneActiveTasks.length,
     done: doneTasks.length,
-    total: activeTasks.length + doneTasks.length,
+    total: undoneActiveTasks.length + doneTasks.length,
     trashed: trashedTasks.length,
     noDate: noDateTasks.length,
   };
@@ -149,9 +149,9 @@ export default function TasksPage() {
 
       {/* Active Tasks panel */}
       <TabPanel value={activeTab} index={0}>
-        {activeTasks.length > 0 ? (
+        {undoneActiveTasks.length > 0 ? (
           <Stack direction="row" gap={1} flexWrap="wrap">
-            {activeTasks.map(task => (
+            {undoneActiveTasks.map(task => (
               <TaskCard
                 key={task.id}
                 task={task}

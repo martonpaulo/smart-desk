@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import { Button, Stack } from '@mui/material';
 
-import { defaultColumns } from '@/features/column/config/defaultColumns';
 import { ColumnModal } from '@/legacy/components/column/ColumnModal';
 import { TodoColumn } from '@/legacy/components/column/TodoColumn';
 import { AddTaskFloatButton } from '@/legacy/components/task/AddTaskFloatButton';
@@ -50,13 +49,11 @@ export function TodoList({ showDate }: TodoListProps) {
 
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const hideDoneColumn = useTodoPrefsStore(state => state.hideDoneColumn);
   const hiddenColumnIds = useTodoPrefsStore(state => state.hiddenColumnIds);
   const toggleHiddenColumn = useTodoPrefsStore(state => state.toggleHiddenColumn);
 
   const columnsToRender = columns.filter(c => {
     if (c.trashed) return false;
-    if (hideDoneColumn && c.title === defaultColumns.done.title) return false;
     if (hiddenColumnIds && hiddenColumnIds.includes(c.id)) return false;
     return true;
   });
@@ -141,54 +138,6 @@ export function TodoList({ showDate }: TodoListProps) {
     } catch (err) {
       console.error('Task rename failed', err);
     }
-  };
-
-  const handleToggleDone = async (id: string) => {
-    const task = tasks.find(t => t.id === id);
-    if (!task) return;
-
-    const now = new Date();
-    const next = task.quantityDone + 1;
-    const value = next > task.quantityTarget ? 0 : next;
-    let taskColumnId = task.columnId;
-
-    if (value === task.quantityTarget) {
-      const doneColumn = columns.find(c => c.title === defaultColumns.done.title);
-
-      if (doneColumn) {
-        taskColumnId = doneColumn.id;
-        if (doneColumn.trashed) {
-          await updateColumn({ id: doneColumn.id, trashed: false, updatedAt: now });
-        }
-      } else {
-        taskColumnId = await addColumn({
-          title: defaultColumns.done.title,
-          color: defaultColumns.done.color,
-          updatedAt: now,
-        });
-      }
-    }
-
-    if (value === 0) {
-      const todoColumn = columns.find(c => c.title === defaultColumns.todo.title);
-
-      if (todoColumn) {
-        taskColumnId = todoColumn.id;
-        if (todoColumn.trashed) {
-          await updateColumn({ id: todoColumn.id, trashed: false, updatedAt: now });
-        }
-      } else {
-        taskColumnId = await addColumn({
-          title: defaultColumns.todo.title,
-          color: defaultColumns.todo.color,
-          updatedAt: now,
-        });
-      }
-    }
-
-    // just update done count
-    await updateTask({ id, columnId: taskColumnId, quantityDone: value, updatedAt: now });
-    return;
   };
 
   // ── Task drag & drop ────────────────────────────────────────────────────
@@ -279,7 +228,6 @@ export function TodoList({ showDate }: TodoListProps) {
         onAddTask={handleAddTask}
         onEditTask={handleEditTask}
         onRenameTask={handleRenameTask}
-        onToggleDone={handleToggleDone}
         onDragStart={handleTaskDragStart}
         onDragOverTask={handleTaskDragOver}
         onTaskColumnDragOver={handleTaskColumnDragOver}

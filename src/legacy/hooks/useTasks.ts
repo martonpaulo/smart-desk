@@ -48,8 +48,14 @@ export function useTasks(filters: TaskFilters = {}) {
   const activeTasks = useMemo(() => {
     if (!doneColumn) return [];
 
+    return allTasks.filter(t => t.trashed === false && matchesFilters(t)).sort(sortActive);
+  }, [doneColumn, allTasks, matchesFilters]);
+
+  const undoneActiveTasks = useMemo(() => {
+    if (!doneColumn) return [];
+
     return allTasks
-      .filter(t => !t.trashed && t.columnId !== doneColumn.id && matchesFilters(t))
+      .filter(t => t.trashed === false && t.columnId !== doneColumn.id && matchesFilters(t))
       .sort(sortActive);
   }, [doneColumn, allTasks, matchesFilters]);
 
@@ -63,14 +69,14 @@ export function useTasks(filters: TaskFilters = {}) {
     if (!doneColumn) return [];
 
     return allTasks
-      .filter(t => !t.trashed && t.columnId === doneColumn.id && matchesFilters(t))
+      .filter(t => t.trashed === false && t.columnId === doneColumn.id && matchesFilters(t))
       .sort(sortByUpdatedDesc);
   }, [doneColumn, allTasks, matchesFilters]);
 
   // trashed tasks, newest first
   const trashedTasks = useMemo(() => {
-    return allTasks.filter(t => t.trashed && matchesFilters(t)).sort(sortByUpdatedDesc);
+    return allTasks.filter(t => t.trashed === true && matchesFilters(t)).sort(sortByUpdatedDesc);
   }, [allTasks, matchesFilters]);
 
-  return { allTasks, activeTasks, doneTasks, trashedTasks, noDateTasks };
+  return { allTasks, activeTasks, undoneActiveTasks, doneTasks, trashedTasks, noDateTasks };
 }

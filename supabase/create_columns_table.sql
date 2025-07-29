@@ -3,7 +3,7 @@ create extension if not exists "uuid-ossp";
 create table if not exists public.columns (
   id uuid primary key,
   user_id uuid references auth.users not null,
-  title text not null,
+  title text not null is unique,
   color text not null,
   position float not null default 0,
   trashed boolean not null default false,
