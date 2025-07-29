@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  IconButton,
   Stack,
   TextField,
 } from '@mui/material';
@@ -15,6 +13,7 @@ import {
 import { useNotesStore } from '@/features/note/store/NotesStore';
 import { Note } from '@/features/note/types/Note';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
+import { ModalDeleteButton } from '@/shared/components/ModalDeleteButton';
 
 interface NoteModalProps {
   open: boolean;
@@ -51,21 +50,13 @@ export function NoteModal({ open, initial, onSave, onClose }: NoteModalProps) {
     onClose();
   };
 
-  const handleDelete = async () => {
-    if (!initial?.id) return;
-    await softDeleteNote(initial.id);
-    onClose();
-  };
-
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="mobileLg">
       <DialogTitle>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           {initial ? 'Edit Note' : 'New Note'}
-          {initial?.id && (
-            <IconButton aria-label="delete note" color="error" onClick={handleDelete}>
-              <DeleteIcon />
-            </IconButton>
+          {initial?.id && softDeleteNote && (
+            <ModalDeleteButton onDelete={() => softDeleteNote(initial.id)} onClose={onClose} />
           )}
         </Stack>
       </DialogTitle>

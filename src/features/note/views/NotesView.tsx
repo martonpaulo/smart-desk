@@ -15,9 +15,12 @@ import { Note } from '@/features/note/types/Note';
 const NOTES_PER_PAGE = 9;
 
 export function NotesView() {
-  const notes = useNotesStore(s => s.items);
+  const allNotes = useNotesStore(s => s.items);
   const addNote = useNotesStore(s => s.add);
   const updateNote = useNotesStore(s => s.update);
+
+  // Filter out deleted notes
+  const notes = allNotes.filter(note => !note.trashed);
 
   const router = useRouter();
   const searchParams = useSearchParams();

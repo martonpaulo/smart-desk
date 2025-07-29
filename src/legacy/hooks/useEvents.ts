@@ -29,7 +29,8 @@ export function useEvents(start?: Date, end?: Date) {
   const isLoading = loadingGoogle || loadingIcs;
   const bothFailed = Boolean(errorGoogle && errorIcs);
   const firstError = googleError ?? icsError;
-  const canonical = canonicalEvents.length > 0 ? canonicalEvents : null;
+  const canonical =
+    canonicalEvents.length > 0 ? canonicalEvents.filter(item => !item.trashed) : null;
 
   useEffect(() => {
     if (isLoading) return;

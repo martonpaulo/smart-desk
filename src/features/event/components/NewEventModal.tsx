@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Button,
   Checkbox,
@@ -9,7 +8,6 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
-  IconButton,
   Stack,
   TextField,
 } from '@mui/material';
@@ -18,6 +16,7 @@ import { DateTime } from 'luxon';
 import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
 import { Event } from '@/features/event/types/Event';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
+import { ModalDeleteButton } from '@/shared/components/ModalDeleteButton';
 
 // helper to build a JS Date from separate date and time strings
 function combineDateTime(date: string, time: string): Date {
@@ -170,21 +169,13 @@ export function NewEventModal({ isOpen, onClose, event }: NewEventModalProps) {
     [handleSave, onClose],
   );
 
-  const handleDelete = async () => {
-    if (!event) return;
-    await deleteEvent(event.id);
-    onClose();
-  };
-
   return (
     <Dialog open={isOpen} onClose={handleDialogClose} fullWidth maxWidth="mobileLg">
       <DialogTitle>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           {event ? 'Edit Event' : 'Create New Event'}
-          {event?.id && (
-            <IconButton aria-label="delete event" color="error" onClick={handleDelete}>
-              <DeleteIcon />
-            </IconButton>
+          {event?.id && deleteEvent && (
+            <ModalDeleteButton onDelete={() => deleteEvent(event.id)} onClose={onClose} />
           )}
         </Stack>
       </DialogTitle>
