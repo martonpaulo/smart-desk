@@ -4,9 +4,9 @@ export interface Event extends BaseType {
   startTime: Date;
   endTime: Date;
   summary: string;
-  description: string;
+  description?: string;
   allDay: boolean;
-  calendarId: string;
+  // calendarId: string;
   acknowledged: boolean;
-  recurrence: string[];
+  // recurrence: string[];
 }

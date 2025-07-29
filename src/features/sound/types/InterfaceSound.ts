@@ -1,3 +1,3 @@
-import { interfaceSounds } from '@/features/sound/config/interfaceSounds';
+import { interfaceSounds } from '@/features/sound/constants/interfaceSounds';
 
 export type InterfaceSound = keyof typeof interfaceSounds;
