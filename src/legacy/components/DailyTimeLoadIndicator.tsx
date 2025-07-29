@@ -15,14 +15,27 @@ export function DailyTimeLoadIndicator() {
   const theme = useTheme();
 
   const today = new Date();
+  const now = new Date();
 
-  // Sum estimated time of tasks planned for today
-  const taskMinutes = tasks
-    .filter(t => !t.trashed && t.plannedDate && isSameDay(t.plannedDate, today))
-    .reduce((total, task) => total + (task.estimatedTime ?? 0) * (task.quantityTarget ?? 1), 0);
+  // ---- Calculate total planned minutes for tasks ----
+  const todaysTasks = tasks
+    .filter(task => !task.trashed && task.plannedDate && isSameDay(task.plannedDate, today));
 
-  // Filter and sum durations of non all-day events happening today
+  const taskMinutes = todaysTasks.reduce((total, task) => {
+    const minutes = (task.estimatedTime ?? 0) * (task.quantityTarget ?? 1);
+    return total + minutes;
+  }, 0);
+
+  const remainingTaskMinutes = todaysTasks
+    .filter(task => task.quantityDone !== task.quantityTarget)
+    .reduce((total, task) => {
+      const minutes = (task.estimatedTime ?? 0) * (task.quantityTarget ?? 1);
+      return total + minutes;
+    }, 0);
+
+  // ---- Calculate total and remaining minutes for events ----
   const todaysEvents = filterTodayEvents(filterNonFullDayEvents(events ?? []), today);
+
   const eventMinutes = todaysEvents.reduce((total, event) => {
     const start = new Date(event.start).getTime();
     const end = new Date(event.end).getTime();
@@ -30,24 +43,36 @@ export function DailyTimeLoadIndicator() {
     return total + minutes;
   }, 0);
 
-  const totalMinutes = taskMinutes + eventMinutes;
-  const formatted = formatFullDuration(totalMinutes * 60_000);
+  const remainingEventMinutes = todaysEvents
+    .filter(event => new Date(event.end).getTime() >= now.getTime())
+    .reduce((total, event) => {
+      const start = new Date(event.start).getTime();
+      const end = new Date(event.end).getTime();
+      const minutes = Math.max(0, Math.round((end - start) / 60000));
+      return total + minutes;
+    }, 0);
 
-  const { label, color, tooltip } = getTimeLoadState(totalMinutes);
+  // ---- Final aggregations ----
+  const totalMinutes = taskMinutes + eventMinutes;
+  const remainingMinutes = remainingTaskMinutes + remainingEventMinutes;
+
+  const totalFormatted = formatFullDuration(totalMinutes * 60_000);
+  const remainingFormatted = formatFullDuration(remainingMinutes * 60_000);
+
+  const { label, color, tooltip } = getTimeLoadState(remainingMinutes);
 
   return (
     <Stack direction="column" spacing={0.5}>
       <Tooltip title={parseSafeHtml(tooltip)}>
         <Stack direction="row" gap={0.5} alignItems="center" sx={{ cursor: 'help' }}>
           <Box
-            style={{
+            sx={{
               width: theme.spacing(1.5),
               height: theme.spacing(1.5),
               borderRadius: '50%',
-              backgroundColor: color,
+              bgcolor: color,
             }}
           />
-
           <Typography variant="body2" color={color} fontWeight="bold">
             {label}
           </Typography>
@@ -55,7 +80,7 @@ export function DailyTimeLoadIndicator() {
       </Tooltip>
 
       <Typography variant="body2" color={color}>
-        {formatted}
+        {remainingFormatted} / {totalFormatted}
       </Typography>
     </Stack>
   );
