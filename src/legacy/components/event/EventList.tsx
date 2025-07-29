@@ -12,13 +12,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useSnackbar } from 'notistack';
 
 import { NewEventModal } from '@/features/event/components/NewEventModal';
-import { EditEventModal } from '@/legacy/components/event/EditEventModal';
+import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
+import { Event as LocalEvent } from '@/features/event/types/Event';
 import { EventListItem } from '@/legacy/components/event/EventListItem';
 import { useEventListPrefsStore } from '@/legacy/store/eventListPrefsStore';
-import { useEventStore } from '@/legacy/store/eventStore';
-import { showUndo } from '@/legacy/store/undoStore';
 import { Event } from '@/legacy/types/Event';
 import {
   filterCurrentOrFutureEvents,
@@ -37,10 +37,10 @@ export function EventList({ events }: { events: Event[] | null }) {
   const startX = useRef(0);
   const startWidth = useRef(0);
 
-  const deleteEvent = useEventStore(s => s.deleteEvent);
-  const updateLocalEvent = useEventStore(s => s.updateLocalEvent);
+  const localEvents = useLocalEventsStore(s => s.items);
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [editingEvent, setEditingEvent] = useState<LocalEvent | null>(null);
   const [newModalOpen, setNewModalOpen] = useState(false);
 
   const upcomingEvents = filterCurrentOrFutureEvents(
@@ -113,7 +113,14 @@ export function EventList({ events }: { events: Event[] | null }) {
             <EventListItem
               key={ev.id}
               event={ev}
-              onClick={() => setSelectedEvent(ev)}
+              onClick={() => {
+                const local = localEvents.find(le => le.id === ev.id);
+                if (local) {
+                  setEditingEvent(local);
+                } else {
+                  enqueueSnackbar("This event can't be edited", { variant: 'info' });
+                }
+              }}
               color={columnColor}
             />
           ))}
@@ -165,17 +172,15 @@ export function EventList({ events }: { events: Event[] | null }) {
           />
         </Stack>
 
-        <EditEventModal
-          open={!!selectedEvent}
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          onDelete={id => {
-            deleteEvent(id);
-            showUndo('Event deleted', () => useEventStore.getState().restoreEvent(id));
-          }}
-          onSave={updateLocalEvent}
+        <NewEventModal
+          isOpen={newModalOpen}
+          onClose={() => setNewModalOpen(false)}
         />
-        <NewEventModal isOpen={newModalOpen} onClose={() => setNewModalOpen(false)} />
+        <NewEventModal
+          isOpen={!!editingEvent}
+          onClose={() => setEditingEvent(null)}
+          event={editingEvent ?? undefined}
+        />
       </Stack>
       {!isMobile && (
         <Box

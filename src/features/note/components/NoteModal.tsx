@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
+  Stack,
   TextField,
 } from '@mui/material';
 
+import { useNotesStore } from '@/features/note/store/NotesStore';
 import { Note } from '@/features/note/types/Note';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
 
@@ -22,6 +26,7 @@ interface NoteModalProps {
 export function NoteModal({ open, initial, onSave, onClose }: NoteModalProps) {
   const [title, setTitle] = useState(initial?.title || '');
   const [content, setContent] = useState(initial?.content || '');
+  const softDeleteNote = useNotesStore(s => s.softDelete);
 
   // reset form when modal opens/closes
   useEffect(() => {
@@ -46,9 +51,24 @@ export function NoteModal({ open, initial, onSave, onClose }: NoteModalProps) {
     onClose();
   };
 
+  const handleDelete = async () => {
+    if (!initial?.id) return;
+    await softDeleteNote(initial.id);
+    onClose();
+  };
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="mobileLg">
-      <DialogTitle>{initial ? 'Edit Note' : 'New Note'}</DialogTitle>
+      <DialogTitle>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          {initial ? 'Edit Note' : 'New Note'}
+          {initial?.id && (
+            <IconButton aria-label="delete note" color="error" onClick={handleDelete}>
+              <DeleteIcon />
+            </IconButton>
+          )}
+        </Stack>
+      </DialogTitle>
       <DialogContent>
         <TextField
           label="Title"

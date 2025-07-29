@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Button,
   Checkbox,
@@ -8,12 +9,14 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
+  IconButton,
   Stack,
   TextField,
 } from '@mui/material';
 import { DateTime } from 'luxon';
 
 import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
+import { Event } from '@/features/event/types/Event';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
 
 // helper to build a JS Date from separate date and time strings
@@ -24,10 +27,13 @@ function combineDateTime(date: string, time: string): Date {
 interface NewEventModalProps {
   isOpen: boolean;
   onClose: () => void;
+  event?: Event;
 }
 
-export function NewEventModal({ isOpen, onClose }: NewEventModalProps) {
+export function NewEventModal({ isOpen, onClose, event }: NewEventModalProps) {
   const addLocalEvent = useLocalEventsStore(s => s.add);
+  const updateEvent = useLocalEventsStore(s => s.update);
+  const deleteEvent = useLocalEventsStore(s => s.softDelete);
 
   // form fields
   const [title, setTitle] = useState('');
@@ -40,27 +46,41 @@ export function NewEventModal({ isOpen, onClose }: NewEventModalProps) {
   const [manualAllDay, setManualAllDay] = useState(false);
   const [isEndModified, setIsEndModified] = useState(false);
 
-  // reset defaults when opening
+  // reset defaults when opening or event changes
   useEffect(() => {
     if (!isOpen) return;
-    const now = DateTime.now();
-    const d = now.toISODate(); // YYYY-MM-DD
 
-    const roundTime = now.plus({ minutes: 60 - now.minute });
+    if (event) {
+      const s = DateTime.fromJSDate(new Date(event.startTime));
+      const e = DateTime.fromJSDate(new Date(event.endTime));
 
-    const t = roundTime.startOf('minute').toFormat('HH:mm');
-    const next = roundTime.plus({ hours: 1 });
+      setTitle(event.summary);
+      setDescription(event.description || '');
+      setStartDate(s.toISODate() ?? '');
+      setStartTime(s.toFormat('HH:mm'));
+      setEndDate(e.toISODate() ?? '');
+      setEndTime(e.toFormat('HH:mm'));
+      setIsAllDay(event.allDay);
+      setManualAllDay(true);
+      setIsEndModified(true);
+    } else {
+      const now = DateTime.now();
+      const d = now.toISODate();
+      const roundTime = now.plus({ minutes: 60 - now.minute });
+      const t = roundTime.startOf('minute').toFormat('HH:mm');
+      const next = roundTime.plus({ hours: 1 });
 
-    setTitle('');
-    setDescription('');
-    setStartDate(d);
-    setStartTime(t);
-    setEndDate(d);
-    setEndTime(next.toFormat('HH:mm'));
-    setIsAllDay(false);
-    setManualAllDay(false);
-    setIsEndModified(false);
-  }, [isOpen]);
+      setTitle('');
+      setDescription('');
+      setStartDate(d);
+      setStartTime(t);
+      setEndDate(d);
+      setEndTime(next.toFormat('HH:mm'));
+      setIsAllDay(false);
+      setManualAllDay(false);
+      setIsEndModified(false);
+    }
+  }, [isOpen, event]);
 
   // if end never touched, keep it = start +1h
   useEffect(() => {
@@ -102,14 +122,26 @@ export function NewEventModal({ isOpen, onClose }: NewEventModalProps) {
       e = new Date(e.setHours(23, 59, 59, 999));
     }
 
-    await addLocalEvent({
-      summary: title.trim(),
-      description: description.trim() || undefined,
-      startTime: s,
-      endTime: e,
-      allDay: isAllDay,
-      createdAt: new Date(),
-    });
+    if (event) {
+      await updateEvent({
+        id: event.id,
+        summary: title.trim(),
+        description: description.trim() || undefined,
+        startTime: s,
+        endTime: e,
+        allDay: isAllDay,
+        updatedAt: new Date(),
+      });
+    } else {
+      await addLocalEvent({
+        summary: title.trim(),
+        description: description.trim() || undefined,
+        startTime: s,
+        endTime: e,
+        allDay: isAllDay,
+        createdAt: new Date(),
+      });
+    }
 
     onClose();
   }, [
@@ -121,6 +153,8 @@ export function NewEventModal({ isOpen, onClose }: NewEventModalProps) {
     endTime,
     isAllDay,
     addLocalEvent,
+    updateEvent,
+    event,
     onClose,
   ]);
 
@@ -136,9 +170,24 @@ export function NewEventModal({ isOpen, onClose }: NewEventModalProps) {
     [handleSave, onClose],
   );
 
+  const handleDelete = async () => {
+    if (!event) return;
+    await deleteEvent(event.id);
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onClose={handleDialogClose} fullWidth maxWidth="mobileLg">
-      <DialogTitle>Create New Event</DialogTitle>
+      <DialogTitle>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          {event ? 'Edit Event' : 'Create New Event'}
+          {event?.id && (
+            <IconButton aria-label="delete event" color="error" onClick={handleDelete}>
+              <DeleteIcon />
+            </IconButton>
+          )}
+        </Stack>
+      </DialogTitle>
       <DialogContent>
         <Stack spacing={2} pt={1}>
           <TextField
