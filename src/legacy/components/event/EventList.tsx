@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 
+import { NewEventModal } from '@/features/event/components/NewEventModal';
 import { EditEventModal } from '@/legacy/components/event/EditEventModal';
 import { EventListItem } from '@/legacy/components/event/EventListItem';
 import { useEventListPrefsStore } from '@/legacy/store/eventListPrefsStore';
@@ -25,7 +26,6 @@ import {
   filterTodayEvents,
   sortEventsByStart,
 } from '@/legacy/utils/eventUtils';
-import { generateId } from '@/legacy/utils/idUtils';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 import { theme } from '@/theme';
 
@@ -38,24 +38,15 @@ export function EventList({ events }: { events: Event[] | null }) {
   const startWidth = useRef(0);
 
   const deleteEvent = useEventStore(s => s.deleteEvent);
-  const addLocalEvent = useEventStore(s => s.addLocalEvent);
   const updateLocalEvent = useEventStore(s => s.updateLocalEvent);
 
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [title, setTitle] = useState('');
+  const [newModalOpen, setNewModalOpen] = useState(false);
 
   const upcomingEvents = filterCurrentOrFutureEvents(
     filterTodayEvents(filterNonFullDayEvents(sortEventsByStart(events || []))),
   );
 
-  const handleAdd = () => {
-    const text = title.trim();
-    if (!text) return;
-    const start = new Date();
-    const end = new Date(start.getTime() + 60 * 60 * 1000);
-    addLocalEvent({ id: generateId(), title: text, start, end });
-    setTitle('');
-  };
 
   const columnColor = alpha(theme.palette.primary.light, 0.2);
   const darkenColor = alpha(theme.palette.primary.light, 0.4);
@@ -134,11 +125,8 @@ export function EventList({ events }: { events: Event[] | null }) {
             fullWidth
             size="small"
             placeholder="New event"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') handleAdd();
-            }}
+            onFocus={() => setNewModalOpen(true)}
+            onClick={() => setNewModalOpen(true)}
             sx={{
               borderColor: columnColor,
               '& input': {
@@ -188,6 +176,7 @@ export function EventList({ events }: { events: Event[] | null }) {
           }}
           onSave={updateLocalEvent}
         />
+        <NewEventModal open={newModalOpen} onClose={() => setNewModalOpen(false)} />
       </Stack>
       {!isMobile && (
         <Box
