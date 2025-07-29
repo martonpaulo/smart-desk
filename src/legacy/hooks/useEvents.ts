@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 
+import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
 import { useGoogleEvents } from '@/legacy/hooks/useGoogleEvents';
 import { useIcsEvents } from '@/legacy/hooks/useIcsEvents';
 import { useEventStore } from '@/legacy/store/eventStore';
+import { mapToLegacyEvent } from '@/legacy/utils/eventLegacyMapper';
 
 export function useEvents(start?: Date, end?: Date) {
   const setRemoteEvents = useEventStore(s => s.setRemoteEvents);
+  const canonicalEvents = useLocalEventsStore(s => s.items);
 
   const {
     data: googleEvents = [],
@@ -31,10 +34,23 @@ export function useEvents(start?: Date, end?: Date) {
     if (isLoading) return;
     if (bothFailed) return;
 
-    const combined = [...(errorGoogle ? [] : googleEvents), ...(errorIcs ? [] : icsEvents)];
+    const combined = [
+      ...(errorGoogle ? [] : googleEvents),
+      ...(errorIcs ? [] : icsEvents),
+      ...canonicalEvents.map(mapToLegacyEvent),
+    ];
 
     if (combined.length > 0) setRemoteEvents(combined);
-  }, [googleEvents, icsEvents, isLoading, errorGoogle, errorIcs, setRemoteEvents, bothFailed]);
+  }, [
+    googleEvents,
+    icsEvents,
+    isLoading,
+    errorGoogle,
+    errorIcs,
+    setRemoteEvents,
+    bothFailed,
+    canonicalEvents,
+  ]);
 
   function refetchAll() {
     refetchGoogle();

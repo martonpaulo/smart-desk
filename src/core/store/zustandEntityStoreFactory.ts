@@ -4,6 +4,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { getSupabaseClient } from '@/legacy/lib/supabaseClient';
 import { mergeById } from '@/legacy/utils/boardHelpers';
+import { buildStorageKey } from '@/legacy/utils/localStorageUtils';
 
 export interface EntityState<E extends { id: string; updatedAt: Date; isSynced?: boolean }> {
   items: E[];
@@ -128,7 +129,7 @@ export function createZustandEntityStore<
         };
       },
       {
-        name: cfg.key,
+        name: buildStorageKey(cfg.key),
         storage: createJSONStorage(() => localStorage),
       },
     ),

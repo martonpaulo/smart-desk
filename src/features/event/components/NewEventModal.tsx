@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   Button,
@@ -14,146 +14,121 @@ import {
 import { DateTime } from 'luxon';
 
 import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
-import { Event } from '@/features/event/types/Event';
-import { useEventStore } from '@/legacy/store/eventStore';
-import { mapToLegacyEvent } from '@/legacy/utils/eventLegacyMapper';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
-import { useModalInputActions } from '@/shared/hooks/useModalInputActions';
 
 interface NewEventModalProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export function NewEventModal({ open, onClose }: NewEventModalProps) {
-  const add = useLocalEventsStore(s => s.add);
-  const addLegacy = useEventStore(s => s.addLocalEvent);
+export function NewEventModal({ isOpen, onClose }: NewEventModalProps) {
+  // store actions
+  const addLocalEvent = useLocalEventsStore(s => s.add);
 
-  const [summary, setSummary] = useState('');
-  const [description, setDescription] = useState('');
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
-  const [endChanged, setEndChanged] = useState(false);
-  const [allDay, setAllDay] = useState(false);
+  // form state
+  const [title, setTitle] = useState('');
+  const [details, setDetails] = useState('');
+  const [startIso, setStartIso] = useState('');
+  const [endIso, setEndIso] = useState('');
+  const [isEndModified, setIsEndModified] = useState(false);
+  const [isAllDay, setIsAllDay] = useState(false);
   const [manualAllDay, setManualAllDay] = useState(false);
 
-  // initialize form each time modal opens
+  // reset form on open
   useEffect(() => {
-    if (!open) return;
+    if (!isOpen) return;
     const now = DateTime.now().startOf('minute');
-    const startIso = now.toISO({ suppressMilliseconds: true }) ?? '';
-    const endIso = now.plus({ hours: 1 }).toISO({ suppressMilliseconds: true }) ?? '';
-    setSummary('');
-    setDescription('');
-    setStart(startIso);
-    setEnd(endIso);
-    setEndChanged(false);
-    setAllDay(false);
+    const defaultStart = now.toISO({ suppressMilliseconds: true })!;
+    const defaultEnd = now.plus({ hours: 1 }).toISO({ suppressMilliseconds: true })!;
+    setTitle('');
+    setDetails('');
+    setStartIso(defaultStart);
+    setEndIso(defaultEnd);
+    setIsEndModified(false);
+    setIsAllDay(false);
     setManualAllDay(false);
-  }, [open]);
+  }, [isOpen]);
 
-  // update end time when start changes if user hasn't modified it
+  // auto-sync end time to start +1h, unless user modified it
   useEffect(() => {
-    if (!endChanged) {
-      const startDt = DateTime.fromISO(start);
-      setEnd(startDt.plus({ hours: 1 }).toISO({ suppressMilliseconds: true }) ?? '');
-    }
-  }, [start, endChanged]);
+    if (isEndModified) return;
+    const startDt = DateTime.fromISO(startIso);
+    setEndIso(startDt.plus({ hours: 1 }).toISO({ suppressMilliseconds: true })!);
+  }, [startIso, isEndModified]);
 
-  // auto update allDay unless manually toggled
+  // auto-toggle all-day status based on duration, unless manually changed
   useEffect(() => {
     if (manualAllDay) return;
-    const startDt = DateTime.fromISO(start);
-    const endDt = DateTime.fromISO(end);
+    const startDt = DateTime.fromISO(startIso);
+    const endDt = DateTime.fromISO(endIso);
     const hours = endDt.diff(startDt, 'hours').hours;
-    setAllDay(hours >= 24);
-  }, [start, end, manualAllDay]);
+    setIsAllDay(hours >= 24);
+  }, [startIso, endIso, manualAllDay]);
 
-  const handleSubmit = async () => {
-    if (!summary.trim() || !start) return;
+  // submit handler defined before useModalInputActions to avoid TS2448 error
+  const submit = useCallback(async () => {
+    if (!title.trim() || !startIso) return;
 
-    const startTime = new Date(start);
-    const endTime = end ? new Date(end) : new Date(startTime.getTime() + 60 * 60 * 1000);
-    const createdAt = new Date();
+    const startTime = new Date(startIso);
+    let endTime = endIso ? new Date(endIso) : new Date(startTime.getTime() + 60 * 60 * 1000);
 
-    const id = await add({
-      startTime,
-      endTime,
-      summary: summary.trim(),
-      description: description.trim() || undefined,
-      allDay,
-      acknowledged: false,
-      createdAt,
+    // ensure end > start
+    if (endTime <= startTime) {
+      endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+    }
+
+    // add to local store
+    await addLocalEvent({
+      startTime: isAllDay ? new Date(startTime.setHours(0, 0, 0, 0)) : startTime,
+      endTime: isAllDay ? new Date(endTime.setHours(23, 59, 59, 999)) : endTime,
+      description: details.trim() || undefined,
+      allDay: isAllDay,
+      createdAt: new Date(),
     });
 
-    const event: Event = {
-      id,
-      startTime,
-      endTime,
-      summary: summary.trim(),
-      description: description.trim() || undefined,
-      allDay,
-      acknowledged: false,
-      trashed: false,
-      createdAt,
-      updatedAt: createdAt,
-      isSynced: false,
-    };
-
-    addLegacy(mapToLegacyEvent(event));
     onClose();
-  };
-
-  const { handleKeyDown, handleBlur } = useModalInputActions({
-    onSave: handleSubmit,
-    onClose,
-    mapping: { enter: 'none' },
-  });
+  }, [title, details, startIso, endIso, isAllDay, addLocalEvent, onClose]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="mobileLg">
-      <DialogTitle>New Event</DialogTitle>
+    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="mobileLg">
+      <DialogTitle>Create New Event</DialogTitle>
       <DialogContent>
         <Stack spacing={2} pt={1}>
           <TextField
-            label="Summary"
-            value={summary}
-            onChange={e => setSummary(e.target.value)}
+            label="Title"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
             fullWidth
-            onKeyDown={handleKeyDown}
-            onBlur={handleBlur}
             required
           />
           <TextField
-            label="Start Time"
+            label="Start"
             type="datetime-local"
-            value={start}
-            onChange={e => setStart(e.target.value)}
+            value={startIso}
+            onChange={e => setStartIso(e.target.value)}
             fullWidth
             slotProps={{ inputLabel: { shrink: true } }}
-            onKeyDown={handleKeyDown}
-            onBlur={handleBlur}
+            disabled={isAllDay}
             required
           />
           <TextField
-            label="End Time"
+            label="End"
             type="datetime-local"
-            value={end}
+            value={endIso}
             onChange={e => {
-              setEnd(e.target.value);
-              setEndChanged(true);
+              setEndIso(e.target.value);
+              setIsEndModified(true);
             }}
             fullWidth
             slotProps={{ inputLabel: { shrink: true } }}
-            onKeyDown={handleKeyDown}
-            onBlur={handleBlur}
+            disabled={isAllDay}
           />
           <FormControlLabel
             control={
               <Checkbox
-                checked={allDay}
+                checked={isAllDay}
                 onChange={(_, checked) => {
-                  setAllDay(checked);
+                  setIsAllDay(checked);
                   setManualAllDay(true);
                 }}
               />
@@ -162,19 +137,18 @@ export function NewEventModal({ open, onClose }: NewEventModalProps) {
           />
           <MarkdownEditableBox
             label="Description"
-            placeholder="Enter a description"
-            value={description}
-            onChange={setDescription}
+            placeholder="Enter details"
+            value={details}
+            onChange={setDetails}
           />
         </Stack>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained">
+        <Button onClick={submit} variant="contained" disabled={!title.trim()}>
           Add Event
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
-

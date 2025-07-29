@@ -47,7 +47,6 @@ export function EventList({ events }: { events: Event[] | null }) {
     filterTodayEvents(filterNonFullDayEvents(sortEventsByStart(events || []))),
   );
 
-
   const columnColor = alpha(theme.palette.primary.light, 0.2);
   const darkenColor = alpha(theme.palette.primary.light, 0.4);
 
@@ -176,7 +175,7 @@ export function EventList({ events }: { events: Event[] | null }) {
           }}
           onSave={updateLocalEvent}
         />
-        <NewEventModal open={newModalOpen} onClose={() => setNewModalOpen(false)} />
+        <NewEventModal isOpen={newModalOpen} onClose={() => setNewModalOpen(false)} />
       </Stack>
       {!isMobile && (
         <Box
