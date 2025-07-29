@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { KeyboardEvent,useCallback, useMemo } from 'react';
 
 type EventType = 'ctrlEnter' | 'enter' | 'escape' | 'blur';
 type ActionName = 'save' | 'close' | 'none';
@@ -9,19 +9,24 @@ type ActionName = 'save' | 'close' | 'none';
 
 interface Config {
   onSave: () => void;
-  onClose: () => void;
+  onClose?: () => void;
   onNone?: () => void;
   mapping?: Partial<Record<EventType, ActionName>>;
 }
 
 const defaultMapping: Record<EventType, ActionName> = {
   ctrlEnter: 'save',
-  escape: 'close',
+  escape: 'save',
   enter: 'none',
   blur: 'save',
 };
 
-export function useModalInputActions({ onSave, onClose, onNone = () => {}, mapping = {} }: Config) {
+export function useModalInputActions({
+  onSave,
+  onClose = () => {},
+  onNone = () => {},
+  mapping = {},
+}: Config) {
   const merged = useMemo(() => ({ ...defaultMapping, ...mapping }), [mapping]);
   const callbacks = useMemo<Record<ActionName, () => void>>(
     () => ({
@@ -33,7 +38,7 @@ export function useModalInputActions({ onSave, onClose, onNone = () => {}, mappi
   );
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       let type: EventType | null = null;
 
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) type = 'ctrlEnter';

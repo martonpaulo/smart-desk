@@ -13,6 +13,7 @@ export function mapDBToColumn(rawColumn: RawColumn): Column {
     position: rawColumn.position,
     trashed: rawColumn.trashed,
     updatedAt: new Date(rawColumn.updated_at),
+    createdAt: new Date(rawColumn.created_at),
     isSynced: true,
   };
 }
@@ -26,6 +27,7 @@ export function mapColumnToDB(column: Column, userId: string): RawColumn {
     position: column.position,
     trashed: column.trashed ?? false,
     updated_at: column.updatedAt.toISOString(),
+    created_at: column.createdAt.toISOString(),
   };
 }
 
@@ -47,6 +49,7 @@ export function mapDBToTask(rawTask: RawTask): Task {
     trashed: rawTask.trashed,
     updatedAt: new Date(rawTask.updated_at),
     isSynced: true,
+    createdAt: new Date(rawTask.created_at),
   };
 }
 
@@ -68,6 +71,7 @@ export function mapTaskToDB(task: Task, userId: string): RawTask {
     column_id: task.columnId,
     trashed: task.trashed ?? false,
     updated_at: task.updatedAt.toISOString(),
+    created_at: task.createdAt.toISOString(),
   };
 }
 
@@ -78,6 +82,9 @@ export function mapDBToIcsCalendar(raw: RawIcsCalendar): IcsCalendar {
     source: raw.source,
     color: raw.color,
     updatedAt: new Date(raw.updated_at),
+    createdAt: new Date(raw.created_at),
+    trashed: raw.trashed,
+    isSynced: true,
   };
 }
 
@@ -89,5 +96,7 @@ export function mapIcsCalendarToDB(calendar: IcsCalendar, userId: string): RawIc
     source: calendar.source,
     color: calendar.color,
     updated_at: new Date().toISOString(),
+    created_at: calendar.createdAt.toISOString(),
+    trashed: calendar.trashed ?? false,
   };
 }

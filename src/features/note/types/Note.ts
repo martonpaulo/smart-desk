@@ -1,8 +1,6 @@
-export interface Note {
-  id: string;
-  title?: string;
+import { BaseType } from '@/core/types/BaseType';
+
+export interface Note extends BaseType {
+  title: string;
   content: string;
-  updatedAt: Date;
-  createdAt: Date;
-  isSynced?: boolean;
 }

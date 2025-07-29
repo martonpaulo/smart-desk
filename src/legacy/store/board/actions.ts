@@ -43,6 +43,7 @@ export async function addColumnAction(set: Set, get: Get, data: AddColumnData): 
     position,
     trashed: false,
     updatedAt: data.updatedAt,
+    createdAt: data.updatedAt,
     isSynced: shouldSyncColumn ? false : true,
   };
 
@@ -85,6 +86,7 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
         position: getNewColumnPosition(columns),
         trashed: false,
         updatedAt: data.updatedAt,
+        createdAt: data.updatedAt,
         isSynced: shouldSyncTask ? false : true,
       };
 
@@ -118,6 +120,7 @@ export async function addTaskAction(set: Set, get: Get, data: AddTaskData): Prom
     columnId,
     trashed: false,
     updatedAt: data.updatedAt,
+    createdAt: data.updatedAt,
     isSynced: shouldSyncTask ? false : true,
   };
 
@@ -242,6 +245,7 @@ export async function syncFromServerAction(set: Set, get: Get) {
           position: getNewColumnPosition(finalCols),
           trashed: false,
           updatedAt: now,
+          createdAt: now,
           isSynced: false,
         };
         finalCols.push(draftCol);

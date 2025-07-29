@@ -49,7 +49,7 @@ export function NoteModal({ open, initial, onSave, onClose }: NoteModalProps) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="mobileLg">
       <DialogTitle>{initial ? 'Edit Note' : 'New Note'}</DialogTitle>
-      <DialogContent dividers>
+      <DialogContent>
         <TextField
           label="Title"
           fullWidth

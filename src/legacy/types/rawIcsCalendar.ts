@@ -1,8 +1,7 @@
-export interface RawIcsCalendar {
-  id: string;
-  user_id: string;
+import { RawBaseType } from '@/core/types/RawBaseType';
+
+export interface RawIcsCalendar extends RawBaseType {
   title: string;
   source: string;
   color: string;
-  updated_at: string;
 }

@@ -1,6 +1,6 @@
-export interface RawTask {
-  id: string;
-  user_id: string;
+import { RawBaseType } from '@/core/types/RawBaseType';
+
+export interface RawTask extends RawBaseType {
   title: string;
   notes: string | null;
   important: boolean;
@@ -13,6 +13,4 @@ export interface RawTask {
   daily: boolean;
   position: number;
   column_id: string;
-  trashed: boolean;
-  updated_at: string;
 }

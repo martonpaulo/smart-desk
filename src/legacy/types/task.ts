@@ -1,5 +1,6 @@
-export interface Task {
-  id: string;
+import { BaseType } from '@/core/types/BaseType';
+
+export interface Task extends BaseType {
   title: string;
   notes?: string;
   important: boolean;
@@ -12,7 +13,4 @@ export interface Task {
   daily: boolean;
   position: number;
   columnId: string;
-  trashed?: boolean;
-  updatedAt: Date;
-  isSynced?: boolean;
 }

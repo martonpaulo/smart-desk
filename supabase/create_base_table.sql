@@ -1,19 +1,18 @@
 create extension if not exists "uuid-ossp";
 
-create table if not exists public.notes (
+create table if not exists public.base (
   id uuid primary key,
   user_id uuid references auth.users not null,
-  title text,
-  content text,
+  <!-- BASE metadata -->
   trashed boolean not null default false,
   updated_at timestamptz not null,
   created_at timestamptz not null
 );
 
-alter table public.notes enable row level security;
+alter table public.base enable row level security;
 
-create policy "Users can read notes" on public.notes
+create policy "Users can read base" on public.base
   for select using (auth.uid() = user_id);
 
-create policy "Users can modify notes" on public.notes
+create policy "Users can modify base" on public.base
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

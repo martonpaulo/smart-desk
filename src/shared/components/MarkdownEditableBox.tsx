@@ -1,18 +1,21 @@
-import {
-  ChangeEvent,
-  ClipboardEvent,
-  KeyboardEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 import EditIcon from '@mui/icons-material/Edit';
-import { IconButton, InputLabel, Stack, TextField, Typography, useTheme } from '@mui/material';
+import CopyIcon from '@mui/icons-material/FileCopy';
+import {
+  IconButton,
+  InputLabel,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
+import { useSnackbar } from 'notistack';
 
 import { transitions } from '@/legacy/styles/transitions';
 import { renderMarkdown } from '@/legacy/utils/markdownUtils';
+import { useModalInputActions } from '@/shared/hooks/useModalInputActions';
 
 interface MarkdownEditableBoxProps {
   value: string;
@@ -27,10 +30,11 @@ export function MarkdownEditableBox({
   label,
   placeholder,
 }: MarkdownEditableBoxProps) {
+  const { enqueueSnackbar } = useSnackbar();
+
   const [markdown, setMarkdown] = useState(value);
   const [isEditing, setIsEditing] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const theme = useTheme();
 
@@ -43,21 +47,6 @@ export function MarkdownEditableBox({
     setMarkdown(value.trim());
     setIsEditing(false);
   }, [value]);
-
-  // Save on outside click
-  useEffect(() => {
-    if (!isEditing) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node)) {
-        finishEditing();
-        onChange?.(markdown);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [finishEditing, isEditing, markdown, onChange]);
 
   const handleToggle = (lineIndex: number) => {
     const lines = markdown.split(/\r?\n/);
@@ -74,9 +63,14 @@ export function MarkdownEditableBox({
     onChange?.(updated);
   };
 
-  const handleCopy = (e: ClipboardEvent<HTMLDivElement | HTMLTextAreaElement>) => {
-    e.preventDefault();
-    e.clipboardData.setData('text/plain', markdown);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(markdown);
+      enqueueSnackbar('Copied to clipboard', { variant: 'success' });
+    } catch (err) {
+      console.error('Copy failed:', err);
+      enqueueSnackbar('Failed to copy', { variant: 'error' });
+    }
   };
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -84,31 +78,22 @@ export function MarkdownEditableBox({
     onChange?.(e.target.value);
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Escape') {
-      finishEditing();
-    } else if (
-      (e.key === 'Enter' && e.shiftKey) ||
-      (e.key === 'Enter' && (e.metaKey || e.ctrlKey))
-    ) {
-      e.preventDefault();
-      finishEditing();
-    }
-  };
+  const { handleKeyDown, handleBlur } = useModalInputActions({
+    onSave: () => finishEditing(),
+  });
 
   const hasContent = markdown.length > 0;
   const inputBackground = theme.palette.grey[100];
 
   return (
     <Stack
-      ref={containerRef}
-      onCopy={handleCopy}
       position="relative"
       onClick={hasContent ? undefined : () => setIsEditing(true)}
       padding={isEditing ? 0 : theme.spacing(2)}
       borderRadius={theme.shape.borderRadiusSmall}
       minHeight={isEditing ? 'unset' : theme.spacing(16)}
       sx={{
+        wordBreak: 'break-word',
         backgroundColor: isEditing ? 'unset' : inputBackground,
         border: isEditing || hasContent ? 'unset' : `1px solid ${inputBackground}`,
         transition: transitions.input,
@@ -120,13 +105,29 @@ export function MarkdownEditableBox({
       }}
     >
       {!isEditing && (
-        <IconButton
-          size="small"
-          onClick={() => setIsEditing(true)}
-          sx={{ position: 'absolute', top: theme.spacing(1), right: theme.spacing(1) }}
-        >
-          <EditIcon />
-        </IconButton>
+        <Stack>
+          <Tooltip title="Edit content">
+            <IconButton
+              size="small"
+              onClick={() => setIsEditing(true)}
+              sx={{ position: 'absolute', top: theme.spacing(1), right: theme.spacing(1) }}
+            >
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+
+          {hasContent && (
+            <Tooltip title="Copy raw content">
+              <IconButton
+                size="small"
+                onClick={handleCopy}
+                sx={{ position: 'absolute', top: theme.spacing(1), right: theme.spacing(5) }}
+              >
+                <CopyIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Stack>
       )}
 
       {!isEditing && label && hasContent && <InputLabel shrink>{label}</InputLabel>}
@@ -142,6 +143,7 @@ export function MarkdownEditableBox({
           value={markdown}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
         />
       ) : (
         <Stack spacing={0.25}>

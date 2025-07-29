@@ -1,9 +1,7 @@
-export interface Column {
-  id: string;
+import { BaseType } from '@/core/types/BaseType';
+
+export interface Column extends BaseType {
   title: string;
   color: string;
   position: number;
-  trashed?: boolean;
-  updatedAt: Date;
-  isSynced?: boolean;
 }

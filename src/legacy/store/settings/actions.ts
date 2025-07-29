@@ -33,6 +33,8 @@ export async function addIcsCalendarAction(
     source: data.source.trim(),
     updatedAt: data.updatedAt,
     isSynced: false,
+    trashed: false,
+    createdAt: data.updatedAt,
   };
 
   set(state => ({

@@ -6,8 +6,9 @@ create table if not exists public.ics_calendars (
   title text not null,
   source text not null unique,
   color text not null,
-  updated_at timestamptz not null default now(),
-  created_at timestamptz default now()
+  trashed boolean not null default false,
+  updated_at timestamptz not null,
+  created_at timestamptz not null
 );
 
 alter table public.ics_calendars enable row level security;

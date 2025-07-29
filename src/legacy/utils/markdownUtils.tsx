@@ -39,7 +39,7 @@ function inlineToHtml(text: string): string {
 }
 
 // Parse markdown blocks into React elements
-export function renderMarkdown(markdown: string, onToggle: (line: number) => void) {
+export function renderMarkdown(markdown: string, onToggle?: (line: number) => void) {
   const lines = markdown.split(/\r?\n/); // split on CRLF or LF
   const elements: ReactElement[] = [];
 
@@ -102,7 +102,12 @@ export function renderMarkdown(markdown: string, onToggle: (line: number) => voi
 
       elements.push(
         <li key={idx} style={{ listStyle: 'none' }}>
-          <Checkbox size="small" checked={checked} onChange={() => onToggle(idx)} sx={{ p: 0.5 }} />
+          <Checkbox
+            size="small"
+            checked={checked}
+            onChange={() => onToggle?.(idx)}
+            sx={{ p: 0.5 }}
+          />
           <span>{parseSafeHtml(inlineToHtml(content))}</span>
         </li>,
       );

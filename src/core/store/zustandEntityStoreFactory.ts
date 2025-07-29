@@ -26,9 +26,9 @@ interface Config<E extends { id: string; updatedAt: Date; isSynced?: boolean }> 
   buildUpdateEntity(old: E, data: Partial<E>): E;
 }
 
-export function createEntityStore<E extends { id: string; updatedAt: Date; isSynced?: boolean }>(
-  cfg: Config<E>,
-) {
+export function createZustandEntityStore<
+  E extends { id: string; updatedAt: Date; isSynced?: boolean },
+>(cfg: Config<E>) {
   return create<EntityState<E>>()(
     persist(
       (set, get) => {

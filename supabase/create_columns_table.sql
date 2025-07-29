@@ -7,8 +7,8 @@ create table if not exists public.columns (
   color text not null,
   position float not null default 0,
   trashed boolean not null default false,
-  updated_at timestamptz not null default now(),
-  created_at timestamptz default now()
+  updated_at timestamptz not null,
+  created_at timestamptz not null
 );
 
 alter table public.columns enable row level security;

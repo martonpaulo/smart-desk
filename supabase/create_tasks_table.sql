@@ -16,8 +16,8 @@ create table if not exists public.tasks (
   position float not null default 0,
   column_id uuid references columns(id) not null,
   trashed boolean not null default false,
-  updated_at timestamptz not null default now(),
-  created_at timestamptz default now()
+  updated_at timestamptz not null,
+  created_at timestamptz not null
 );
 
 alter table public.tasks enable row level security;
