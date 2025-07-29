@@ -24,7 +24,7 @@ interface TodoListProps {
 
 export function TodoList({ showDate }: TodoListProps) {
   const syncStatus = useSyncStatusStore(s => s.status);
-  const { activeTasks: tasks } = useTasks({ date: new Date() });
+  const tasks = useTasks();
 
   // store selectors
   const columns = useBoardStore(s => s.columns);

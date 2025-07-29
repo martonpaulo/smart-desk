@@ -17,4 +17,8 @@ export const defaultColumns = {
     title: 'Events',
     color: customColors.violet.value,
   },
+  backlog: {
+    title: 'Backlog',
+    color: customColors.pink.value,
+  },
 };

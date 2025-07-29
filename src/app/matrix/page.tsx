@@ -2,20 +2,15 @@
 
 import { useState } from 'react';
 
-import {
-  Alert,
-  Button,
-  FormControlLabel,
-  FormGroup,
-  Snackbar,
-  Stack,
-  Switch,
-  useTheme,
-} from '@mui/material';
+import { Button, Stack } from '@mui/material';
+import { useSnackbar } from 'notistack';
 
 import { PageSection } from '@/core/components/PageSection';
 import { eisenhowerQuadrants } from '@/features/eisenhower/config/eisenhowerQuadrants';
 import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
+import { TaskFilterPanel } from '@/features/task/components/TaskFilterPanel';
+import { clearedFilters } from '@/features/task/constants/clearedFilters';
+import { TaskFilters } from '@/features/task/types/TaskFilters';
 import { EisenhowerQuadrant } from '@/legacy/components/EisenhowerQuadrant';
 import { TaskSelectionToolbar } from '@/legacy/components/TaskSelectionToolbar';
 import { useTasks } from '@/legacy/hooks/useTasks';
@@ -24,15 +19,13 @@ import { useBoardStore } from '@/legacy/store/board/store';
 import type { Task } from '@/legacy/types/task';
 
 export default function EisenhowerMatrixPage() {
+  const { enqueueSnackbar } = useSnackbar();
   const updateTask = useBoardStore(s => s.updateTask);
-  const tasks = useBoardStore(s => s.tasks);
-  const { undoneActiveTasks } = useTasks();
+
+  const [filters, setFilters] = useState<TaskFilters>(clearedFilters);
+  const allTasks = useTasks(filters);
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [showBlockedTasks, setShowBlockedTasks] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [updatedCount, setUpdatedCount] = useState(0);
-  const theme = useTheme();
 
   const {
     isSelecting,
@@ -62,7 +55,7 @@ export default function EisenhowerMatrixPage() {
       e.preventDefault();
       if (!draggingId) return;
 
-      const task = tasks.find(t => t.id === draggingId);
+      const task = allTasks.find(t => t.id === draggingId);
       if (!task) {
         setDraggingId(null);
         return;
@@ -90,40 +83,67 @@ export default function EisenhowerMatrixPage() {
   const handleSetToToday = async () => {
     const today = new Date();
     const count = selectedIds.size;
-    await Promise.all(
-      Array.from(selectedIds).map(id => updateTask({ id, plannedDate: today, updatedAt: today })),
-    );
-    setUpdatedCount(count);
-    setSnackbarOpen(true);
+
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map(id => updateTask({ id, plannedDate: today, updatedAt: today })),
+      );
+      enqueueSnackbar(`Set ${count} task${count !== 1 ? 's' : ''} to today`, {
+        variant: 'success',
+      });
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar(`Failed to set tasks to today`, {
+        variant: 'error',
+      });
+    }
     clearSelection();
   };
 
   const handleClearDate = async () => {
     const now = new Date();
     const count = selectedIds.size;
-    await Promise.all(
-      Array.from(selectedIds).map(id => updateTask({ id, plannedDate: undefined, updatedAt: now })),
-    );
-    setUpdatedCount(count);
-    setSnackbarOpen(true);
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map(id =>
+          updateTask({ id, plannedDate: undefined, updatedAt: now }),
+        ),
+      );
+      enqueueSnackbar(`Cleared date for ${count} task${count !== 1 ? 's' : ''}`, {
+        variant: 'success',
+      });
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar(`Failed to clear date for tasks`, {
+        variant: 'error',
+      });
+    }
     clearSelection();
   };
 
   const handleMarkNone = async () => {
     const now = new Date();
     const count = selectedIds.size;
-    await Promise.all(
-      Array.from(selectedIds).map(id =>
-        updateTask({ id, important: false, urgent: false, updatedAt: now }),
-      ),
-    );
-    setUpdatedCount(count);
-    setSnackbarOpen(true);
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map(id =>
+          updateTask({ id, important: false, urgent: false, updatedAt: now }),
+        ),
+      );
+      enqueueSnackbar(`Marked ${count} task${count !== 1 ? 's' : ''} as not important`, {
+        variant: 'success',
+      });
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar(`Failed to mark tasks as not important`, {
+        variant: 'error',
+      });
+    }
     clearSelection();
   };
 
   const handleSelectAll = () => {
-    const visible = undoneActiveTasks.filter(t => showBlockedTasks || !t.blocked).map(t => t.id);
+    const visible = allTasks.map(t => t.id);
     selectAll(visible);
   };
 
@@ -132,22 +152,7 @@ export default function EisenhowerMatrixPage() {
       title="Eisenhower Matrix"
       description="Decide what matters, not just what screams for attention"
     >
-      <FormGroup>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showBlockedTasks}
-              onChange={e => setShowBlockedTasks(e.target.checked)}
-            />
-          }
-          label="Show Blocked Tasks"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              ...theme.typography.body2,
-            },
-          }}
-        />
-      </FormGroup>
+      <TaskFilterPanel filters={filters} onFilterChange={setFilters} />
 
       <Stack direction="row" gap={2} mb={2}>
         <Button variant={isSelecting ? 'contained' : 'outlined'} onClick={toggleSelecting}>
@@ -158,12 +163,7 @@ export default function EisenhowerMatrixPage() {
       <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
         {eisenhowerQuadrants.map(
           ({ title, color, important, urgent, questions, examples, action }) => {
-            const tasks = undoneActiveTasks.filter(
-              t =>
-                t.important === important &&
-                t.urgent === urgent &&
-                (showBlockedTasks || !t.blocked),
-            );
+            const tasks = allTasks.filter(t => t.important === important && t.urgent === urgent);
 
             return (
               <EisenhowerQuadrant
@@ -200,16 +200,6 @@ export default function EisenhowerMatrixPage() {
           onCancel={toggleSelecting}
         />
       )}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="success" onClose={() => setSnackbarOpen(false)}>
-          {`Updated ${updatedCount} task${updatedCount !== 1 ? 's' : ''}`}
-        </Alert>
-      </Snackbar>
     </PageSection>
   );
 }

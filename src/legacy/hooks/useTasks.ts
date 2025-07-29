@@ -1,82 +1,66 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { useDefaultColumns } from '@/legacy/hooks/useDefaultColumns';
+import { isSameDay } from 'date-fns';
+
+import { TaskFilters } from '@/features/task/types/TaskFilters';
 import { useBoardStore } from '@/legacy/store/board/store';
-import type { Column } from '@/legacy/types/column';
 import type { Task } from '@/legacy/types/task';
-import { sortActive, sortByUpdatedDesc } from '@/legacy/utils/taskUtils';
-import { isSameDay } from '@/legacy/utils/timeUtils';
-
-interface TaskFilters {
-  title?: string;
-  date?: Date;
-}
+import { sortActive } from '@/legacy/utils/taskUtils';
 
 export function useTasks(filters: TaskFilters = {}) {
-  const { title = '', date } = filters;
+  const {
+    title = null,
+    important = null,
+    urgent = null,
+    blocked = null,
+    plannedDate = null,
+    done = null,
+    daily = null,
+    trashed = null,
+  } = filters;
+
   const allTasks = useBoardStore(s => s.tasks);
 
-  // fetch done‑column info once
-  const doneColumnPromise = useDefaultColumns('done');
-  const [doneColumn, setDoneColumn] = useState<Column | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    doneColumnPromise
-      .then(col => {
-        if (mounted) setDoneColumn(col ?? null);
-      })
-      .catch(() => {
-        if (mounted) setDoneColumn(null);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [doneColumnPromise]);
-
-  // common filter by title & optional date
   const matchesFilters = useCallback(
     (task: Task): boolean => {
-      const matchesTitle = task.title.toLowerCase().includes(title.toLowerCase());
-      const matchesDate = !date ? true : isSameDay(task.plannedDate, date);
-      return matchesTitle && matchesDate;
+      const matchesTitle = !title ? true : task.title.toLowerCase().includes(title.toLowerCase());
+
+      const matchesImportant = important == null ? true : task.important === important;
+
+      const matchesUrgent = urgent == null ? true : task.urgent === urgent;
+
+      const matchesBlocked = blocked == null ? true : task.blocked === blocked;
+
+      const matchesPlannedDate = !plannedDate
+        ? true
+        : task.plannedDate
+          ? isSameDay(task.plannedDate, plannedDate)
+          : false;
+
+      const isDone = task.quantityDone >= task.quantityTarget;
+      const matchesDone = done == null ? true : isDone === done;
+
+      const matchesDaily = daily == null ? true : task.daily === daily;
+
+      const matchesTrashed = trashed == null ? true : task.trashed === trashed;
+
+      return (
+        matchesTitle &&
+        matchesImportant &&
+        matchesUrgent &&
+        matchesBlocked &&
+        matchesPlannedDate &&
+        matchesDone &&
+        matchesDaily &&
+        matchesTrashed
+      );
     },
-    [title, date],
+    [title, important, urgent, blocked, plannedDate, done, daily, trashed],
   );
 
-  // tasks not done, not trashed, sorted by priority & date
-  const activeTasks = useMemo(() => {
-    if (!doneColumn) return [];
-
-    return allTasks.filter(t => t.trashed === false && matchesFilters(t)).sort(sortActive);
-  }, [doneColumn, allTasks, matchesFilters]);
-
-  const undoneActiveTasks = useMemo(() => {
-    if (!doneColumn) return [];
-
-    return allTasks
-      .filter(t => t.trashed === false && t.columnId !== doneColumn.id && matchesFilters(t))
-      .sort(sortActive);
-  }, [doneColumn, allTasks, matchesFilters]);
-
-  const noDateTasks = useMemo(() => {
-    return activeTasks.filter((t: Task) => !t.plannedDate);
-  }, [activeTasks]);
-
-  // tasks in done column, newest first
-  const doneTasks = useMemo(() => {
-    // prevents errors if done column is not yet loaded
-    if (!doneColumn) return [];
-
-    return allTasks
-      .filter(t => t.trashed === false && t.columnId === doneColumn.id && matchesFilters(t))
-      .sort(sortByUpdatedDesc);
-  }, [doneColumn, allTasks, matchesFilters]);
-
-  // trashed tasks, newest first
-  const trashedTasks = useMemo(() => {
-    return allTasks.filter(t => t.trashed === true && matchesFilters(t)).sort(sortByUpdatedDesc);
+  const tasks = useMemo(() => {
+    return allTasks.filter(task => matchesFilters(task)).sort(sortActive);
   }, [allTasks, matchesFilters]);
 
-  return { allTasks, activeTasks, undoneActiveTasks, doneTasks, trashedTasks, noDateTasks };
+  return tasks;
 }

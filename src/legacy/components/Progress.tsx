@@ -3,10 +3,21 @@ import { LinearProgress, Stack, StackProps, Typography } from '@mui/material';
 import { useTasks } from '@/legacy/hooks/useTasks';
 
 export function TodoProgress(props: StackProps) {
-  const { activeTasks, doneTasks } = useTasks({ date: new Date() });
+  const today = new Date();
 
-  const totalCount = activeTasks.length + doneTasks.length;
-  const doneCount = doneTasks.length;
+  const tasksForToday = useTasks({
+    plannedDate: today,
+    trashed: false,
+  });
+
+  const completedTasks = useTasks({
+    plannedDate: today,
+    done: true,
+    trashed: false,
+  });
+
+  const totalCount = tasksForToday.length;
+  const doneCount = completedTasks.length;
 
   const percentage = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
 

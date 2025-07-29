@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 
+import { isSameDay } from 'date-fns';
+
 import { useDefaultColumns } from '@/legacy/hooks/useDefaultColumns';
 import { useBoardStore } from '@/legacy/store/board/store';
 import { useEventStore } from '@/legacy/store/eventStore';
 import type { Event } from '@/legacy/types/Event';
 import { buildStorageKey } from '@/legacy/utils/localStorageUtils';
 import { RESET_TIME } from '@/legacy/utils/resetTime';
-import { isSameDay } from '@/legacy/utils/timeUtils';
 
 const STORAGE_KEY = buildStorageKey('events-column-last-run');
 

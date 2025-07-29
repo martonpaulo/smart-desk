@@ -32,13 +32,6 @@ export function parseDuration(input: string): number {
   return hours * 60 + minutes;
 }
 
-// helper to compare two dates by day (ignores time)
-export function isSameDay(date: string | Date | undefined, target?: Date): boolean {
-  if (!date || !target) return false;
-  const d1 = typeof date === 'string' ? new Date(date) : date;
-  return d1.toDateString() === target.toDateString();
-}
-
 /**
  * Returns a human‑friendly label for a given date
  * @param date the date to format
