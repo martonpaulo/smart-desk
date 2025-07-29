@@ -172,10 +172,7 @@ export function EventList({ events }: { events: Event[] | null }) {
           />
         </Stack>
 
-        <NewEventModal
-          isOpen={newModalOpen}
-          onClose={() => setNewModalOpen(false)}
-        />
+        <NewEventModal isOpen={newModalOpen} onClose={() => setNewModalOpen(false)} />
         <NewEventModal
           isOpen={!!editingEvent}
           onClose={() => setEditingEvent(null)}

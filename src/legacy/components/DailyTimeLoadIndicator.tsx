@@ -18,8 +18,9 @@ export function DailyTimeLoadIndicator() {
   const now = new Date();
 
   // ---- Calculate total planned minutes for tasks ----
-  const todaysTasks = tasks
-    .filter(task => !task.trashed && task.plannedDate && isSameDay(task.plannedDate, today));
+  const todaysTasks = tasks.filter(
+    task => !task.trashed && task.plannedDate && isSameDay(task.plannedDate, today),
+  );
 
   const taskMinutes = todaysTasks.reduce((total, task) => {
     const minutes = (task.estimatedTime ?? 0) * (task.quantityTarget ?? 1);

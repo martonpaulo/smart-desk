@@ -1,4 +1,4 @@
-import { KeyboardEvent,useCallback, useMemo } from 'react';
+import { KeyboardEvent, useCallback, useMemo } from 'react';
 
 type EventType = 'ctrlEnter' | 'enter' | 'escape' | 'blur';
 type ActionName = 'save' | 'close' | 'none';
