@@ -13,4 +13,5 @@ export interface RawTask extends RawBaseType {
   daily: boolean;
   position: number;
   column_id: string;
+  tag_id: string | null;
 }

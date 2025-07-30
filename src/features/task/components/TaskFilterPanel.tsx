@@ -11,6 +11,8 @@ import {
   TextField,
 } from '@mui/material';
 
+import { TagLabel } from '@/features/tag/components/TagLabel';
+import { useTagsStore } from '@/features/tag/store/TagsStore';
 import { clearedFilters } from '@/features/task/constants/clearedFilters';
 import { TaskFilters } from '@/features/task/types/TaskFilters';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
@@ -22,6 +24,7 @@ interface TaskFilterPanelProps {
 
 export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProps) {
   const { isMobile } = useResponsiveness();
+  const tags = useTagsStore(s => s.items.filter(t => !t.trashed));
 
   // state to show or hide the filter controls
   const [showFilters, setShowFilters] = useState(true);
@@ -51,6 +54,14 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
     setLocalFilters({
       ...localFilters,
       plannedDate: value ? parseDateAtNoon(value) : null,
+    });
+  };
+
+  const handleTagChange = (e: SelectChangeEvent<string>) => {
+    const id = e.target.value;
+    setLocalFilters({
+      ...localFilters,
+      tagId: id || undefined,
     });
   };
 
@@ -140,6 +151,21 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
           {renderTriStateSelect('Done', 'done')}
           {renderTriStateSelect('Daily', 'daily')}
           {renderTriStateSelect('Trashed', 'trashed')}
+          <FormControl size="small" sx={{ width: isMobile ? '100%' : 150 }}>
+            <InputLabel>Tag</InputLabel>
+            <Select
+              value={localFilters.tagId ?? ''}
+              label="Tag"
+              onChange={handleTagChange}
+            >
+              <MenuItem value="">All</MenuItem>
+              {tags.map(t => (
+                <MenuItem key={t.id} value={t.id}>
+                  <TagLabel tag={t} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Stack>
       </Stack>
 

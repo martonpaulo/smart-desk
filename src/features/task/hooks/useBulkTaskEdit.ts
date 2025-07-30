@@ -11,6 +11,8 @@ export interface BulkTaskActions {
   done: TaskSelectAction;
   plannedDate: Date | null;
   estimatedTime: number | null;
+  tagAction: TaskSelectAction;
+  tagId: string | null;
 }
 
 /**
@@ -24,6 +26,8 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
   const [daily, setDaily] = useState<TaskSelectAction>('none');
   const [trashed, setTrashed] = useState<TaskSelectAction>('none');
   const [done, setDone] = useState<TaskSelectAction>('none');
+  const [tagAction, setTagAction] = useState<TaskSelectAction>('none');
+  const [tagId, setTagId] = useState<string>('');
   const [dateValue, setDateValue] = useState<string>('');
   const [timeValue, setTimeValue] = useState<number | null>(null);
 
@@ -34,6 +38,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
     daily !== 'none' ||
     trashed !== 'none' ||
     done !== 'none' ||
+    tagAction === 'set-tag' ||
     dateValue !== '' ||
     timeValue !== null;
 
@@ -44,6 +49,8 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
     setDaily('none');
     setTrashed('none');
     setDone('none');
+    setTagAction('none');
+    setTagId('');
     setDateValue('');
     setTimeValue(null);
   }
@@ -68,6 +75,8 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
       done,
       plannedDate: dateValue ? new Date(dateValue) : null,
       estimatedTime: timeValue,
+      tagAction,
+      tagId: tagId || null,
     });
     closeModal();
   }
@@ -85,6 +94,10 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
   return {
     modalOpen,
     controls,
+    tagAction,
+    setTagAction,
+    tagId,
+    setTagId,
     dateValue,
     setDateValue,
     timeValue,

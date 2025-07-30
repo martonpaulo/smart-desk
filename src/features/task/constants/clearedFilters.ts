@@ -9,4 +9,5 @@ export const clearedFilters: TaskFilters = {
   done: null,
   daily: null,
   trashed: null,
+  tagId: undefined,
 };

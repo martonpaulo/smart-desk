@@ -1,20 +1,22 @@
 import { alpha, Chip, useTheme } from '@mui/material';
 
 import { useTagsStore } from '@/features/tag/store/TagsStore';
+import { Tag } from '@/features/tag/types/Tag';
 
 interface TagLabelProps {
-  tagId: string;
+  tagId?: string;
+  tag?: Tag;
   prefixId?: string;
 }
 
-export function TagLabel({ tagId, prefixId }: TagLabelProps) {
+export function TagLabel({ tagId, tag, prefixId }: TagLabelProps) {
   const theme = useTheme();
   const tags = useTagsStore(state => state.items);
 
-  const tag = tags.find(tag => tag.id === tagId);
-  if (!tag) return null;
+  const finalTag = tag ?? tags.find(t => t.id === tagId);
+  if (!finalTag) return null;
 
-  const { color, name } = tag;
+  const { color, name } = finalTag;
 
   const backgroundColor = alpha(color, 0.5);
   const fontColor = theme.palette.getContrastText(backgroundColor);

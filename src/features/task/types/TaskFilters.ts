@@ -7,4 +7,5 @@ export interface TaskFilters {
   done?: boolean | null;
   daily?: boolean | null;
   trashed?: boolean | null;
+  tagId?: string;
 }

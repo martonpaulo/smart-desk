@@ -17,6 +17,7 @@ export function useTasks(filters: TaskFilters = {}) {
     done = null,
     daily = null,
     trashed = null,
+    tagId = undefined,
   } = filters;
 
   const allTasks = useBoardStore(s => s.tasks);
@@ -43,6 +44,7 @@ export function useTasks(filters: TaskFilters = {}) {
       const matchesDaily = daily == null ? true : task.daily === daily;
 
       const matchesTrashed = trashed == null ? true : task.trashed === trashed;
+      const matchesTag = tagId ? task.tagId === tagId : true;
 
       return (
         matchesTitle &&
@@ -52,10 +54,11 @@ export function useTasks(filters: TaskFilters = {}) {
         matchesPlannedDate &&
         matchesDone &&
         matchesDaily &&
-        matchesTrashed
+        matchesTrashed &&
+        matchesTag
       );
     },
-    [title, important, urgent, blocked, plannedDate, done, daily, trashed],
+    [title, important, urgent, blocked, plannedDate, done, daily, trashed, tagId],
   );
 
   const tasks = useMemo(() => {

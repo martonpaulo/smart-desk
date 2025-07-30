@@ -1,1 +1,1 @@
-export type TaskSelectAction = 'none' | 'set' | 'clear';
+export type TaskSelectAction = 'none' | 'set' | 'clear' | 'set-tag';

@@ -4,7 +4,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   TextField,
   ToggleButton,
@@ -12,6 +16,8 @@ import {
   useTheme,
 } from '@mui/material';
 
+import { TagLabel } from '@/features/tag/components/TagLabel';
+import { useTagsStore } from '@/features/tag/store/TagsStore';
 import type { BulkTaskActions } from '@/features/task/hooks/useBulkTaskEdit';
 import { useBulkTaskEdit } from '@/features/task/hooks/useBulkTaskEdit';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
@@ -45,6 +51,10 @@ export function TaskSelectionToolbar({
   const {
     modalOpen,
     controls,
+    tagAction,
+    setTagAction,
+    tagId,
+    setTagId,
     dateValue,
     setDateValue,
     timeValue,
@@ -54,6 +64,7 @@ export function TaskSelectionToolbar({
     closeModal,
     applyChanges,
   } = useBulkTaskEdit(onApply);
+  const tags = useTagsStore(s => s.items.filter(t => !t.trashed));
 
   return (
     <>
@@ -118,6 +129,43 @@ export function TaskSelectionToolbar({
                 </ToggleButtonGroup>
               </Stack>
             ))}
+
+            <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+              <span>Tag</span>
+              <Stack direction="row" gap={1} alignItems="center">
+                <ToggleButtonGroup
+                  exclusive
+                  size="small"
+                  value={tagAction}
+                  onChange={(_, v) => setTagAction(v || 'none')}
+                  aria-label="Tag action"
+                >
+                  <ToggleButton value="set-tag" color="primary">
+                    Set
+                  </ToggleButton>
+                  <ToggleButton value="clear" color="error">
+                    Clear
+                  </ToggleButton>
+                  <ToggleButton value="none">None</ToggleButton>
+                </ToggleButtonGroup>
+                {tagAction === 'set-tag' && (
+                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                    <InputLabel>Tag</InputLabel>
+                    <Select
+                      label="Tag"
+                      value={tagId}
+                      onChange={e => setTagId(e.target.value)}
+                    >
+                      {tags.map(t => (
+                        <MenuItem key={t.id} value={t.id}>
+                          <TagLabel tag={t} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Stack>
+            </Stack>
 
             <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
               <span>Date</span>

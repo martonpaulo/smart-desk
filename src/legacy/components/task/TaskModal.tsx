@@ -9,6 +9,7 @@ import {
   DialogProps,
   DialogTitle,
   IconButton,
+  MenuItem,
   Stack,
   TextField,
   Tooltip,
@@ -16,6 +17,8 @@ import {
 } from '@mui/material';
 
 import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
+import { TagLabel } from '@/features/tag/components/TagLabel';
+import { useTagsStore } from '@/features/tag/store/TagsStore';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { useBoardStore } from '@/legacy/store/board/store';
 import { Task } from '@/legacy/types/task';
@@ -35,6 +38,7 @@ interface TaskForm {
   blocked: boolean;
   plannedDate?: Date;
   estimatedTime?: number;
+  tagId?: string;
 }
 
 interface TaskModalProps {
@@ -48,6 +52,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
   // grab both actions in one subscription
   const addTask = useBoardStore(s => s.addTask);
   const updateTask = useBoardStore(s => s.updateTask);
+  const tags = useTagsStore(s => s.items.filter(t => !t.trashed));
 
   const [isTrashConfirmOpen, setTrashConfirmOpen] = useState(false);
 
@@ -66,6 +71,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       blocked: task?.blocked ?? false,
       plannedDate: task?.plannedDate ?? undefined,
       estimatedTime: task?.estimatedTime ?? undefined,
+      tagId: task?.tagId ?? newProperties?.tagId,
       ...newProperties, // spread any additional properties for new tasks
     }),
     [task, newProperties],
@@ -104,7 +110,8 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       form.urgent !== init.urgent ||
       form.blocked !== init.blocked ||
       (form.plannedDate?.getTime() ?? 0) !== (init.plannedDate?.getTime() ?? 0) ||
-      form.estimatedTime !== init.estimatedTime
+      form.estimatedTime !== init.estimatedTime ||
+      form.tagId !== init.tagId
     );
   };
 
@@ -128,6 +135,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       blocked: form.blocked,
       plannedDate: form.plannedDate ? new Date(form.plannedDate) : undefined,
       estimatedTime: form.estimatedTime,
+      tagId: form.tagId,
     };
 
     try {
@@ -306,6 +314,27 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
               Clear
             </Button>
           </Stack>
+
+          <TextField
+            select
+            label="Tag"
+            fullWidth
+            size="small"
+            value={form.tagId ?? ''}
+            onChange={e =>
+              setForm(prev => ({
+                ...prev,
+                tagId: e.target.value === '' ? undefined : e.target.value,
+              }))
+            }
+          >
+            <MenuItem value="">No tag</MenuItem>
+            {tags.map(t => (
+              <MenuItem key={t.id} value={t.id}>
+                <TagLabel tag={t} />
+              </MenuItem>
+            ))}
+          </TextField>
 
           {/* Quantifiable option */}
           <Stack>

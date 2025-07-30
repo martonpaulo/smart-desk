@@ -35,6 +35,7 @@ export interface AddTaskData {
   quantityTarget?: number;
   daily?: boolean;
   columnId?: string;
+  tagId?: string;
   updatedAt: Date;
 }
 
@@ -61,6 +62,7 @@ export interface UpdateTaskData {
   daily?: boolean;
   position?: number;
   columnId?: string;
+  tagId?: string;
   trashed?: boolean;
   updatedAt: Date;
 }
