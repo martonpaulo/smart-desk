@@ -25,6 +25,10 @@ export function useTaskSelection() {
     setSelectedIds(new Set(ids));
   };
 
+  const selectNone = () => {
+    setSelectedIds(new Set());
+  };
+
   const clearSelection = () => setSelectedIds(new Set());
 
   const selectedCount = selectedIds.size;
@@ -36,6 +40,7 @@ export function useTaskSelection() {
     toggleSelecting,
     selectTask,
     selectAll,
+    selectNone,
     clearSelection,
   };
 }

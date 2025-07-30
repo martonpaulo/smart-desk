@@ -11,6 +11,7 @@ import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
 import { TaskFilterPanel } from '@/features/task/components/TaskFilterPanel';
 import { clearedFilters } from '@/features/task/constants/clearedFilters';
 import { TaskFilters } from '@/features/task/types/TaskFilters';
+import { TaskSelectAction } from '@/features/task/types/TaskSelectAction';
 import { EisenhowerQuadrant } from '@/legacy/components/EisenhowerQuadrant';
 import { TaskSelectionToolbar } from '@/legacy/components/TaskSelectionToolbar';
 import { useTasks } from '@/legacy/hooks/useTasks';
@@ -25,127 +26,127 @@ export default function EisenhowerMatrixPage() {
   const [filters, setFilters] = useState<TaskFilters>(clearedFilters);
   const allTasks = useTasks(filters);
 
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-
   const {
     isSelecting,
     selectedIds,
+    selectTask,
     selectedCount,
     toggleSelecting,
-    selectTask,
     selectAll,
+    selectNone,
     clearSelection,
   } = useTaskSelection();
 
-  const handleDragStart = (task: Task, e: React.DragEvent<HTMLDivElement>) => {
+  const totalCount = allTasks.length;
+  const now = () => new Date();
+
+  const handleSelectAll = () => {
+    if (selectedCount !== totalCount) selectAll(allTasks.map(t => t.id));
+  };
+  const handleDeselectAll = () => {
+    if (selectedCount > 0) selectNone();
+  };
+  const handleCancel = () => {
+    toggleSelecting();
+    clearSelection();
+  };
+
+  type BatchActions = {
+    important: TaskSelectAction;
+    urgent: TaskSelectAction;
+    blocked: TaskSelectAction;
+    daily: TaskSelectAction;
+    trashed: TaskSelectAction;
+    done: TaskSelectAction;
+    plannedDate: Date | null;
+    estimatedTime: number | null;
+  };
+
+  const handleApply = async (actions: BatchActions) => {
+    const nowDate = now();
+    const updates = Array.from(selectedIds).map(id => {
+      const t = allTasks.find(x => x.id === id)!;
+      const change: Partial<Task> & { id: string; updatedAt: Date } = {
+        id,
+        updatedAt: nowDate,
+      };
+
+      if (actions.important === 'set') change.important = true;
+      if (actions.important === 'clear') change.important = false;
+
+      if (actions.urgent === 'set') change.urgent = true;
+      if (actions.urgent === 'clear') change.urgent = false;
+
+      if (actions.blocked === 'set') change.blocked = true;
+      if (actions.blocked === 'clear') change.blocked = false;
+
+      if (actions.daily === 'set') change.daily = true;
+      if (actions.daily === 'clear') change.daily = false;
+
+      if (actions.trashed === 'set') change.trashed = true;
+      if (actions.trashed === 'clear') change.trashed = false;
+
+      if (actions.done === 'set') change.quantityDone = t.quantityTarget;
+      if (actions.done === 'clear') change.quantityDone = 0;
+
+      // use the date value or clear it
+      if (actions.plannedDate !== null) {
+        change.plannedDate = actions.plannedDate;
+      } else {
+        change.plannedDate = undefined;
+      }
+
+      // use the time value or clear it
+      if (actions.estimatedTime != null) {
+        change.estimatedTime = actions.estimatedTime;
+      } else {
+        change.estimatedTime = undefined;
+      }
+
+      return change;
+    });
+
+    try {
+      await Promise.all(updates.map(u => updateTask(u)));
+      enqueueSnackbar(`Updated ${selectedCount} task${selectedCount !== 1 ? 's' : ''}`, {
+        variant: 'success',
+      });
+    } catch {
+      enqueueSnackbar('Failed to update tasks', { variant: 'error' });
+    } finally {
+      clearSelection();
+    }
+  };
+
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
+  const handleDragStart = (t: Task, e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = 'move';
-    setDraggingId(task.id);
+    setDraggingId(t.id);
   };
 
-  const handleDragEnd = () => {
-    setDraggingId(null);
-  };
+  const handleDragEnd = () => setDraggingId(null);
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
 
   const handleDrop =
     (important: boolean, urgent: boolean) => async (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       if (!draggingId) return;
-
-      const task = allTasks.find(t => t.id === draggingId);
-      if (!task) {
+      const t = allTasks.find(x => x.id === draggingId);
+      if (!t) {
         setDraggingId(null);
         return;
       }
-
-      // early exit for same quadrant
-      if (task.important === important && task.urgent === urgent) {
+      if (t.important === important && t.urgent === urgent) {
         setDraggingId(null);
         playInterfaceSound('snap');
         return;
       }
-
-      // immediate feedback
       setDraggingId(null);
       playInterfaceSound('shift');
-
-      await updateTask({
-        id: draggingId,
-        important,
-        urgent,
-        updatedAt: new Date(),
-      });
+      await updateTask({ id: draggingId, important, urgent, updatedAt: new Date() });
     };
-
-  const handleSetToToday = async () => {
-    const today = new Date();
-    const count = selectedIds.size;
-
-    try {
-      await Promise.all(
-        Array.from(selectedIds).map(id => updateTask({ id, plannedDate: today, updatedAt: today })),
-      );
-      enqueueSnackbar(`Set ${count} task${count !== 1 ? 's' : ''} to today`, {
-        variant: 'success',
-      });
-    } catch (error) {
-      console.error(error);
-      enqueueSnackbar(`Failed to set tasks to today`, {
-        variant: 'error',
-      });
-    }
-    clearSelection();
-  };
-
-  const handleClearDate = async () => {
-    const now = new Date();
-    const count = selectedIds.size;
-    try {
-      await Promise.all(
-        Array.from(selectedIds).map(id =>
-          updateTask({ id, plannedDate: undefined, updatedAt: now }),
-        ),
-      );
-      enqueueSnackbar(`Cleared date for ${count} task${count !== 1 ? 's' : ''}`, {
-        variant: 'success',
-      });
-    } catch (error) {
-      console.error(error);
-      enqueueSnackbar(`Failed to clear date for tasks`, {
-        variant: 'error',
-      });
-    }
-    clearSelection();
-  };
-
-  const handleMarkNone = async () => {
-    const now = new Date();
-    const count = selectedIds.size;
-    try {
-      await Promise.all(
-        Array.from(selectedIds).map(id =>
-          updateTask({ id, important: false, urgent: false, updatedAt: now }),
-        ),
-      );
-      enqueueSnackbar(`Marked ${count} task${count !== 1 ? 's' : ''} as not important`, {
-        variant: 'success',
-      });
-    } catch (error) {
-      console.error(error);
-      enqueueSnackbar(`Failed to mark tasks as not important`, {
-        variant: 'error',
-      });
-    }
-    clearSelection();
-  };
-
-  const handleSelectAll = () => {
-    const visible = allTasks.map(t => t.id);
-    selectAll(visible);
-  };
 
   return (
     <PageSection
@@ -154,7 +155,7 @@ export default function EisenhowerMatrixPage() {
     >
       <TaskFilterPanel filters={filters} onFilterChange={setFilters} />
 
-      <Stack direction="row" gap={2} mb={2}>
+      <Stack direction="row" mb={2}>
         <Button variant={isSelecting ? 'contained' : 'outlined'} onClick={toggleSelecting}>
           {isSelecting ? 'Cancel Selection' : 'Select Tasks'}
         </Button>
@@ -192,12 +193,12 @@ export default function EisenhowerMatrixPage() {
 
       {isSelecting && (
         <TaskSelectionToolbar
+          totalCount={totalCount}
           selectedCount={selectedCount}
           onSelectAll={handleSelectAll}
-          onSetToday={handleSetToToday}
-          onClearDate={handleClearDate}
-          onMarkNone={handleMarkNone}
-          onCancel={toggleSelecting}
+          onDeselectAll={handleDeselectAll}
+          onApply={handleApply}
+          onCancel={handleCancel}
         />
       )}
     </PageSection>

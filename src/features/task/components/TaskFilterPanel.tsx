@@ -77,7 +77,7 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
     const value = current == null ? '' : current ? 'true' : 'false';
 
     return (
-      <FormControl size="small" fullWidth sx={{ maxWidth: isMobile ? '100%' : 150 }}>
+      <FormControl size="small" sx={{ width: isMobile ? '100%' : 150 }}>
         <InputLabel>{label}</InputLabel>
         <Select value={value} label={label} onChange={handleTriStateChange(key)}>
           <MenuItem value="">All</MenuItem>
@@ -88,29 +88,34 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
     );
   };
 
-  return (
-    <Stack direction="column" spacing={1}>
-      <Button variant="outlined" size="small" onClick={() => setShowFilters(prev => !prev)}>
-        {showFilters ? 'Hide Filters' : 'Show Filters'}
-      </Button>
+  if (!showFilters) {
+    return (
+      <Stack direction="row">
+        <Button variant="contained" onClick={() => setShowFilters(true)}>
+          Show Filters
+        </Button>
+      </Stack>
+    );
+  }
 
-      {showFilters && (
-        <Stack
-          direction="row"
-          flexWrap="wrap"
-          padding={2}
-          gap={1.5}
-          sx={{
-            border: '1px solid',
-            borderColor: 'divider',
-            backgroundColor: 'background.paper',
-          }}
-        >
+  return (
+    <Stack>
+      <Stack
+        flexWrap="wrap"
+        padding={2}
+        marginBottom={2}
+        gap={1}
+        sx={{
+          border: '1px solid',
+          borderColor: 'divider',
+          backgroundColor: 'background.paper',
+        }}
+      >
+        <Stack direction="row" gap={1} flexWrap="wrap">
           <TextField
             label="Title"
             size="small"
-            fullWidth
-            sx={{ maxWidth: 300 }}
+            sx={{ width: isMobile ? '100%' : 300 }}
             value={localFilters.title ?? ''}
             onChange={handleTitleChange}
           />
@@ -119,32 +124,38 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
             label="Planned Date"
             type="date"
             size="small"
-            fullWidth
-            sx={{ maxWidth: 200 }}
+            sx={{ width: isMobile ? '100%' : 200 }}
             slotProps={{ inputLabel: { shrink: true } }}
             value={
               localFilters.plannedDate ? localFilters.plannedDate.toISOString().slice(0, 10) : ''
             }
             onChange={handleDateChange}
           />
+        </Stack>
 
+        <Stack direction="row" gap={1} flexWrap="wrap">
           {renderTriStateSelect('Important', 'important')}
           {renderTriStateSelect('Urgent', 'urgent')}
           {renderTriStateSelect('Blocked', 'blocked')}
           {renderTriStateSelect('Done', 'done')}
           {renderTriStateSelect('Daily', 'daily')}
           {renderTriStateSelect('Trashed', 'trashed')}
-
-          <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
-            <Button variant="outlined" size="medium" onClick={clearLocal}>
-              Clear
-            </Button>
-            <Button variant="contained" size="medium" onClick={() => onFilterChange(localFilters)}>
-              Apply Filters
-            </Button>
-          </Stack>
         </Stack>
-      )}
+      </Stack>
+
+      <Stack direction="row" justifyContent="space-between">
+        <Button variant="outlined" onClick={() => setShowFilters(false)}>
+          Hide Filters
+        </Button>
+        <Stack direction="row" gap={1}>
+          <Button variant="outlined" onClick={clearLocal}>
+            Clear
+          </Button>
+          <Button variant="contained" onClick={() => onFilterChange(localFilters)}>
+            Apply Filters
+          </Button>
+        </Stack>
+      </Stack>
     </Stack>
   );
 }
