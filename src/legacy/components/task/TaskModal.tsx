@@ -52,7 +52,8 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
   // grab both actions in one subscription
   const addTask = useBoardStore(s => s.addTask);
   const updateTask = useBoardStore(s => s.updateTask);
-  const tags = useTagsStore(s => s.items.filter(t => !t.trashed));
+  const allTags = useTagsStore(s => s.items);
+  const tags = allTags.filter(t => !t.trashed);
 
   const [isTrashConfirmOpen, setTrashConfirmOpen] = useState(false);
 

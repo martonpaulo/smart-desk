@@ -95,12 +95,8 @@ export function useBulkTaskSelection(tasks: Task[]) {
       change.plannedDate = actions.plannedDate ?? undefined;
       change.estimatedTime = actions.estimatedTime ?? undefined;
 
-      if (actions.tagAction === 'set-tag') {
-        change.tagId = actions.tagId || undefined;
-      }
-      if (actions.tagAction === 'clear') {
-        change.tagId = undefined;
-      }
+      if (actions.tagAction === 'select') change.tagId = actions.tagId || undefined;
+      if (actions.tagAction === 'clear') change.tagId = undefined;
 
       return change;
     });

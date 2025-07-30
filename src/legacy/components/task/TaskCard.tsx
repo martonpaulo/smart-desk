@@ -6,6 +6,7 @@ import { DescriptionOutlined as NotesIcon } from '@mui/icons-material';
 import { BoxProps, Checkbox, Stack, Tooltip, useTheme } from '@mui/material';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
+import { useTagsStore } from '@/features/tag/store/TagsStore';
 import { IncrementButton } from '@/features/task/components/IncrementButton';
 import { MarkAsDoneButton } from '@/features/task/components/MarkAsDoneButton';
 import { ResetButton } from '@/features/task/components/ResetButton';
@@ -58,6 +59,8 @@ export function TaskCard({
 }: TaskCardProps) {
   const { isMobile } = useResponsiveness();
   const theme = useTheme();
+  const allTags = useTagsStore(s => s.items);
+  const tags = allTags.filter(t => !t.trashed);
 
   const cardMinHeight = isMobile ? '3.5rem' : 'auto';
 
@@ -165,6 +168,10 @@ export function TaskCard({
   const displaySendToNextDayButton = !isEditing && !done;
   const displayResetButton = !isEditing && !task.blocked && done;
 
+  const getTag = (tagId: string) => {
+    return tags.find(t => t.id === tagId);
+  };
+
   return (
     <>
       <S.Container
@@ -252,7 +259,7 @@ export function TaskCard({
               </S.FirstRow>
 
               <Stack direction="row" alignItems="center" gap={0.5} sx={{ opacity }}>
-                {task.tagId && <TagLabel tagId={task.tagId} prefixId={task.id} />}
+                {task.tagId && <TagLabel tag={getTag(task.tagId)} />}
 
                 {task.estimatedTime && (
                   <S.EstimatedTimeText sx={{ opacity }}>

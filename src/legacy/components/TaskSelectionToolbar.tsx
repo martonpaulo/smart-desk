@@ -64,7 +64,8 @@ export function TaskSelectionToolbar({
     closeModal,
     applyChanges,
   } = useBulkTaskEdit(onApply);
-  const tags = useTagsStore(s => s.items.filter(t => !t.trashed));
+  const allTags = useTagsStore(s => s.items);
+  const tags = allTags.filter(t => !t.trashed);
 
   return (
     <>
@@ -140,7 +141,7 @@ export function TaskSelectionToolbar({
                   onChange={(_, v) => setTagAction(v || 'none')}
                   aria-label="Tag action"
                 >
-                  <ToggleButton value="set-tag" color="primary">
+                  <ToggleButton value="select" color="primary">
                     Set
                   </ToggleButton>
                   <ToggleButton value="clear" color="error">
@@ -148,14 +149,10 @@ export function TaskSelectionToolbar({
                   </ToggleButton>
                   <ToggleButton value="none">None</ToggleButton>
                 </ToggleButtonGroup>
-                {tagAction === 'set-tag' && (
+                {tagAction === 'select' && (
                   <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel>Tag</InputLabel>
-                    <Select
-                      label="Tag"
-                      value={tagId}
-                      onChange={e => setTagId(e.target.value)}
-                    >
+                    <Select label="Tag" value={tagId} onChange={e => setTagId(e.target.value)}>
                       {tags.map(t => (
                         <MenuItem key={t.id} value={t.id}>
                           <TagLabel tag={t} />

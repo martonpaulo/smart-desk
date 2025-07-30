@@ -27,14 +27,7 @@ interface TagModalProps {
   onClose: () => void;
 }
 
-export function TagModal({
-  open,
-  tag,
-  prevPosition,
-  onSave,
-  onDelete,
-  onClose,
-}: TagModalProps) {
+export function TagModal({ open, tag, prevPosition, onSave, onDelete, onClose }: TagModalProps) {
   const [name, setName] = useState('');
   const [color, setColor] = useState(customColors.blue.value);
   const [modalTitle, setModalTitle] = useState('');

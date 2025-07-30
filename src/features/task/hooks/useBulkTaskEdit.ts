@@ -38,7 +38,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
     daily !== 'none' ||
     trashed !== 'none' ||
     done !== 'none' ||
-    tagAction === 'set-tag' ||
+    tagAction === 'select' ||
     dateValue !== '' ||
     timeValue !== null;
 

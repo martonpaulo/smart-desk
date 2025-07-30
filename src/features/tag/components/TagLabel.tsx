@@ -1,38 +1,37 @@
 import { alpha, Chip, useTheme } from '@mui/material';
 
-import { useTagsStore } from '@/features/tag/store/TagsStore';
 import { Tag } from '@/features/tag/types/Tag';
 
 interface TagLabelProps {
-  tagId?: string;
-  tag?: Tag;
-  prefixId?: string;
+  tag: Tag;
+  size?: 'small' | 'medium';
+  onClick?: () => void;
 }
 
-export function TagLabel({ tagId, tag, prefixId }: TagLabelProps) {
+export function TagLabel({ tag, size = 'small', onClick }: TagLabelProps) {
   const theme = useTheme();
-  const tags = useTagsStore(state => state.items);
-
-  const finalTag = tag ?? tags.find(t => t.id === tagId);
-  if (!finalTag) return null;
-
-  const { color, name } = finalTag;
-
-  const backgroundColor = alpha(color, 0.5);
+  const { color, name } = tag;
+  const backgroundColor = size === 'small' ? alpha(color, 0.5) : alpha(color, 0.7);
   const fontColor = theme.palette.getContrastText(backgroundColor);
 
   return (
     <Chip
       label={name}
-      key={prefixId ? `${prefixId}-${tagId}` : tagId}
-      size="small"
-      disabled
+      key={tag.id}
+      size={size}
+      disabled={!onClick}
+      onClick={onClick}
+      clickable={!!onClick}
+      variant="filled"
       sx={{
+        fontSize: size === 'small' ? '0.65rem' : '1rem',
+        fontWeight: size === 'small' ? 300 : 500,
         borderRadius: 1,
         backgroundColor,
         px: 0.5,
+        color: onClick ? 'white' : fontColor,
         '& .MuiChip-label': {
-          padding: 0,
+          padding: size === 'small' ? 0 : '0 0.5rem',
         },
         '&.Mui-disabled': {
           color: fontColor,
