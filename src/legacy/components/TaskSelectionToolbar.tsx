@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import {
   Button,
   Dialog,
@@ -14,7 +12,8 @@ import {
   useTheme,
 } from '@mui/material';
 
-import type { TaskSelectAction } from '@/features/task/types/TaskSelectAction';
+import type { BulkTaskActions } from '@/features/task/hooks/useBulkTaskEdit';
+import { useBulkTaskEdit } from '@/features/task/hooks/useBulkTaskEdit';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { formatDuration, parseDuration } from '@/legacy/utils/timeUtils';
 
@@ -23,19 +22,14 @@ export interface TaskSelectionToolbarProps {
   selectedCount: number;
   onSelectAll: () => void;
   onDeselectAll: () => void;
-  onApply: (actions: {
-    important: TaskSelectAction;
-    urgent: TaskSelectAction;
-    blocked: TaskSelectAction;
-    daily: TaskSelectAction;
-    trashed: TaskSelectAction;
-    done: TaskSelectAction;
-    plannedDate: Date | null;
-    estimatedTime: number | null;
-  }) => void;
+  onApply: (actions: BulkTaskActions) => void;
   onCancel: () => void;
 }
 
+/**
+ * Renders the sticky footer + "Bulk Edit" modal
+ * Uses `useBulkTaskEdit` to keep component purely presentational
+ */
 export function TaskSelectionToolbar({
   totalCount,
   selectedCount,
@@ -48,64 +42,18 @@ export function TaskSelectionToolbar({
   const noneSelected = selectedCount === 0;
   const allSelected = selectedCount === totalCount;
 
-  // tri‑state toggles
-  const [important, setImportant] = useState<TaskSelectAction>('none');
-  const [urgent, setUrgent] = useState<TaskSelectAction>('none');
-  const [blocked, setBlocked] = useState<TaskSelectAction>('none');
-  const [daily, setDaily] = useState<TaskSelectAction>('none');
-  const [trashed, setTrashed] = useState<TaskSelectAction>('none');
-  const [done, setDone] = useState<TaskSelectAction>('none');
-
-  // date picker
-  const [dateValue, setDateValue] = useState<string>('');
-
-  // quantity selector
-  const [timeValue, setTimeValue] = useState<number | null>(null);
-
-  const anyAction =
-    important !== 'none' ||
-    urgent !== 'none' ||
-    blocked !== 'none' ||
-    daily !== 'none' ||
-    trashed !== 'none' ||
-    done !== 'none' ||
-    dateValue !== '' ||
-    timeValue !== null;
-
-  const resetForm = () => {
-    setImportant('none');
-    setUrgent('none');
-    setBlocked('none');
-    setDaily('none');
-    setTrashed('none');
-    setDone('none');
-    setDateValue('');
-    setTimeValue(null);
-  };
-
-  const openModal = () => {
-    resetForm();
-    setModalOpen(true);
-  };
-  const closeModal = () => {
-    resetForm();
-    setModalOpen(false);
-  };
-  const handleApply = () => {
-    onApply({
-      important,
-      urgent,
-      blocked,
-      daily,
-      trashed,
-      done,
-      plannedDate: dateValue ? new Date(dateValue) : null,
-      estimatedTime: timeValue,
-    });
-    closeModal();
-  };
-
-  const [modalOpen, setModalOpen] = useState(false);
+  const {
+    modalOpen,
+    controls,
+    dateValue,
+    setDateValue,
+    timeValue,
+    setTimeValue,
+    anyAction,
+    openModal,
+    closeModal,
+    applyChanges,
+  } = useBulkTaskEdit(onApply);
 
   return (
     <>
@@ -144,14 +92,7 @@ export function TaskSelectionToolbar({
         <DialogTitle>Bulk Edit Tasks</DialogTitle>
         <DialogContent>
           <Stack gap={2} sx={{ mt: 1 }}>
-            {[
-              { label: 'Important', state: important, setter: setImportant },
-              { label: 'Urgent', state: urgent, setter: setUrgent },
-              { label: 'Blocked', state: blocked, setter: setBlocked },
-              { label: 'Daily', state: daily, setter: setDaily },
-              { label: 'Trashed', state: trashed, setter: setTrashed },
-              { label: 'Done', state: done, setter: setDone },
-            ].map(({ label, state, setter }) => (
+            {controls.map(({ label, state, setter }) => (
               <Stack
                 key={label}
                 direction="row"
@@ -167,16 +108,13 @@ export function TaskSelectionToolbar({
                   onChange={(_, v) => setter(v || 'none')}
                   aria-label={label}
                 >
-                  <ToggleButton value="set" aria-label={`set-${label}`} color="primary">
+                  <ToggleButton value="set" color="primary">
                     Mark
                   </ToggleButton>
-
-                  <ToggleButton value="clear" aria-label={`clear-${label}`} color="error">
+                  <ToggleButton value="clear" color="error">
                     Clear
                   </ToggleButton>
-                  <ToggleButton value="none" aria-label={`none-${label}`}>
-                    None
-                  </ToggleButton>
+                  <ToggleButton value="none">None</ToggleButton>
                 </ToggleButtonGroup>
               </Stack>
             ))}
@@ -201,7 +139,7 @@ export function TaskSelectionToolbar({
                 <QuantitySelector
                   value={timeValue}
                   placeholder="not set"
-                  onValueChange={v => setTimeValue(v)}
+                  onValueChange={setTimeValue}
                   step={20}
                   minValue={1}
                   maxValue={480}
@@ -215,7 +153,7 @@ export function TaskSelectionToolbar({
 
         <DialogActions>
           <Button onClick={closeModal}>Cancel</Button>
-          <Button variant="contained" disabled={!anyAction} onClick={handleApply}>
+          <Button variant="contained" disabled={!anyAction} onClick={applyChanges}>
             Apply
           </Button>
         </DialogActions>

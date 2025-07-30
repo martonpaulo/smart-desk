@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 
-import { Stack, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
 
 import { PageSection } from '@/core/components/PageSection';
 import { TaskFilterPanel } from '@/features/task/components/TaskFilterPanel';
 import { clearedFilters } from '@/features/task/constants/clearedFilters';
+import { useBulkTaskSelection } from '@/features/task/hooks/useBulkTaskSelection';
 import { TaskFilters } from '@/features/task/types/TaskFilters';
+import { TaskSelectionToolbar } from '@/legacy/components/TaskSelectionToolbar';
 import { useDefaultColumnObj } from '@/legacy/hooks/useDefaultColumnObj';
 import { useTasks } from '@/legacy/hooks/useTasks';
 import { customColors } from '@/legacy/styles/colors';
@@ -34,14 +36,27 @@ export default function TasksPage() {
   const backlogColumn = useDefaultColumnObj('backlog');
   const [filters, setFilters] = useState<TaskFilters>(clearedFilters);
 
+  // fetch tasks (filtered by title)
+  const tasks = useTasks(filters);
+
+  const {
+    isSelecting,
+    selectedIds,
+    toggleSelecting,
+    selectedCount,
+    selectTask,
+    totalCount,
+    handleSelectAll,
+    handleDeselectAll,
+    handleCancel,
+    handleApply,
+  } = useBulkTaskSelection(tasks);
+
   // track screen size
   const { isMobile } = useResponsiveness();
 
   // track newly added task to auto‑open edit view
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-
-  // fetch tasks (filtered by title)
-  const tasks = useTasks(filters);
 
   // counts & dynamic titles/subtitles
   const count = tasks.length;
@@ -58,6 +73,12 @@ export default function TasksPage() {
       </Typography>
 
       <TaskFilterPanel filters={filters} onFilterChange={setFilters} />
+
+      <Stack direction="row" mb={2}>
+        <Button variant={isSelecting ? 'contained' : 'outlined'} onClick={toggleSelecting}>
+          {isSelecting ? 'Cancel Selection' : 'Select Tasks'}
+        </Button>
+      </Stack>
 
       {!isMobile && (
         <AddTaskInput
@@ -78,6 +99,9 @@ export default function TasksPage() {
               width={cardWidth}
               editTask={editingTaskId === task.id}
               onFinishEditing={() => setEditingTaskId(null)}
+              selectable={isSelecting}
+              selected={selectedIds.has(task.id)}
+              onSelectChange={selectTask}
             />
           ))}
         </Stack>
@@ -87,6 +111,17 @@ export default function TasksPage() {
 
       {/* on mobile, floating add button */}
       {isMobile && <AddTaskFloatButton />}
+
+      {isSelecting && (
+        <TaskSelectionToolbar
+          totalCount={totalCount}
+          selectedCount={selectedCount}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
+          onApply={handleApply}
+          onCancel={handleCancel}
+        />
+      )}
     </PageSection>
   );
 }
