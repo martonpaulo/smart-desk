@@ -1,20 +1,20 @@
 create extension if not exists "uuid-ossp";
 
-create table if not exists public.columns (
+create table if not exists public.tags (
   id uuid primary key,
   user_id uuid references auth.users not null,
-  title text not null unique,
+  name text not null unique,
   color text not null,
-  position float not null default 0,
+  position float not null,
   trashed boolean not null default false,
   updated_at timestamptz not null,
   created_at timestamptz not null
 );
 
-alter table public.columns enable row level security;
+alter table public.tags enable row level security;
 
-create policy "Users can read columns" on public.columns
+create policy "Users can read tags" on public.tags
   for select using (auth.uid() = user_id);
 
-create policy "Users can modify columns" on public.columns
+create policy "Users can modify tags" on public.tags
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

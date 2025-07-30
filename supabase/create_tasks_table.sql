@@ -15,6 +15,7 @@ create table if not exists public.tasks (
   daily boolean not null default false,
   position float not null default 0,
   column_id uuid references columns(id) not null,
+  tag_id uuid references tags(id) default null,
   trashed boolean not null default false,
   updated_at timestamptz not null,
   created_at timestamptz not null

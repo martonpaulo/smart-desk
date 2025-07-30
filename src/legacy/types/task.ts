@@ -13,4 +13,5 @@ export interface Task extends BaseType {
   daily: boolean;
   position: number;
   columnId: string;
+  tagId?: string;
 }

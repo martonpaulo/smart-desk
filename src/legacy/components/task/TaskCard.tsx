@@ -5,6 +5,7 @@ import { DragEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { DescriptionOutlined as NotesIcon } from '@mui/icons-material';
 import { BoxProps, Checkbox, Stack, Tooltip, useTheme } from '@mui/material';
 
+import { TagLabel } from '@/features/tag/components/TagLabel';
 import { IncrementButton } from '@/features/task/components/IncrementButton';
 import { MarkAsDoneButton } from '@/features/task/components/MarkAsDoneButton';
 import { ResetButton } from '@/features/task/components/ResetButton';
@@ -21,6 +22,7 @@ import type { Task } from '@/legacy/types/task';
 import { isTaskEmpty } from '@/legacy/utils/taskUtils';
 import { getDateLabel } from '@/legacy/utils/timeUtils';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { formatFullDuration } from '@/shared/utils/timeUtils';
 
 interface TaskCardProps extends BoxProps {
   task: Task;
@@ -250,9 +252,11 @@ export function TaskCard({
               </S.FirstRow>
 
               <Stack direction="row" alignItems="center" gap={0.5} sx={{ opacity }}>
+                {task.tagId && <TagLabel tagId={task.tagId} prefixId={task.id} />}
+
                 {task.estimatedTime && (
                   <S.EstimatedTimeText sx={{ opacity }}>
-                    {task.estimatedTime} min
+                    {formatFullDuration(task.estimatedTime * 60_000)}
                   </S.EstimatedTimeText>
                 )}
 

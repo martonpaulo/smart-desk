@@ -2,6 +2,7 @@ import { createTheme } from '@mui/material';
 
 import { customBreakpoints } from '@/theme/custom/breakpoints';
 import { customShapes } from '@/theme/custom/shapes';
+import { typography } from '@/theme/custom/typography';
 import { shadows } from '@/theme/shadows';
 
 const baseTheme = createTheme();
@@ -28,34 +29,12 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: 'var(--font-poppins)',
-    h1: {
-      fontSize: '3.5rem',
-      fontWeight: 400,
-    },
-    h2: {
-      fontSize: '2.5rem',
-      fontWeight: 400,
-    },
-    h3: {
-      fontSize: '1.125rem',
-      fontWeight: 500,
-    },
-    h4: {
-      fontSize: '0.9125rem',
-      fontWeight: 400,
-    },
-    h5: {
-      fontSize: '0.875rem',
-      fontWeight: 500,
-    },
-    body1: {
-      fontSize: '1rem',
-      fontWeight: 300,
-    },
-    subtitle1: {
-      fontSize: '0.875rem',
-      fontWeight: 400,
-    },
+    fontSize: 14, // base font size in px
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
+    fontWeightMedium: 500,
+    fontWeightBold: 700,
+    ...typography,
   },
   components: {
     MuiAccordion: {
