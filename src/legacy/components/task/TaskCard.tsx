@@ -168,9 +168,7 @@ export function TaskCard({
   const displaySendToNextDayButton = !isEditing && !done;
   const displayResetButton = !isEditing && !task.blocked && done;
 
-  const getTag = (tagId: string) => {
-    return tags.find(t => t.id === tagId);
-  };
+  const taskTag = tags.find(t => t.id === task.tagId);
 
   return (
     <>
@@ -259,7 +257,7 @@ export function TaskCard({
               </S.FirstRow>
 
               <Stack direction="row" alignItems="center" gap={0.5} sx={{ opacity }}>
-                {task.tagId && <TagLabel tag={getTag(task.tagId)} />}
+                {taskTag && <TagLabel tag={taskTag} />}
 
                 {task.estimatedTime && (
                   <S.EstimatedTimeText sx={{ opacity }}>
