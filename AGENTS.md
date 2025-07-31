@@ -19,6 +19,7 @@ Write code with:
 
 - ✅ Best practices in React and TypeScript
 - ✅ Clear and consistent naming conventions
+- ✅ Human-readable code and variable names
 - ✅ Proper separation of concerns
 - ✅ Readable and maintainable structure
 
