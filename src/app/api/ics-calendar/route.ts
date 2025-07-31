@@ -14,7 +14,9 @@ function toDateInZone(time: ICAL.Time | Date, zone: string): Date {
       .startOf('day')
       .toJSDate();
   }
-  return DateTime.fromJSDate(time.toJSDate()).setZone(zone).toJSDate();
+  // use UTC epoch to avoid server-timezone shifts
+  const unixMs = time.toUnixTime() * 1000;
+  return DateTime.fromMillis(unixMs, { zone }).toJSDate();
 }
 
 function extractEvents(
