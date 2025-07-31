@@ -16,7 +16,7 @@ interface WeekViewProps {
 }
 
 export function WeekView({ currentDate, onNavigate }: WeekViewProps) {
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
   const events = useEventStore(state => state.events);
 
   // Get the start of the week (Sunday)

@@ -33,7 +33,7 @@ export function TodoList({ showDate }: TodoListProps) {
   const updateColumn = useBoardStore(s => s.updateColumn);
   const updateTask = useBoardStore(s => s.updateTask);
 
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
 
   // column modal state
   const [isColumnModalOpen, setColumnModalOpen] = useState(false);

@@ -20,7 +20,7 @@ export function PriorityFlag({
   sx,
   ...stackProps
 }: PriorityFlagProps) {
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
   const shouldDisplay = task.blocked || (showEisenhowerIcons && (task.important || task.urgent));
 
   if (!shouldDisplay) return null;

@@ -15,7 +15,7 @@ interface YearViewProps {
 
 export function YearView({ currentDate, onNavigate }: YearViewProps) {
   const theme = useTheme();
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
 
   const months = [
     'January',

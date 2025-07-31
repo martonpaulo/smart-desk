@@ -13,7 +13,7 @@ interface NavigationLayoutProps {
 }
 
 export function NavigationLayout({ children }: NavigationLayoutProps) {
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
 
   return (
     <Box sx={{ display: 'flex', width: '100%' }}>

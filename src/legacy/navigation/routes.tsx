@@ -10,7 +10,7 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt';
 
 export const routes = {
   primary: [
-    { label: 'Board', href: '/board', icon: <HomeIcon />, showOnMobile: true },
+    { label: 'Board', href: '/', icon: <HomeIcon />, showOnMobile: true },
     { label: 'All Tasks', href: '/tasks', icon: <TaskAltIcon />, showOnMobile: true },
     { label: 'Matrix', href: '/matrix', icon: <DashboardIcon />, showOnMobile: false },
     { label: 'Notes', href: '/notes', icon: <NotesIcon />, showOnMobile: true },

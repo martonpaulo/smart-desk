@@ -53,7 +53,7 @@ export default function TasksPage() {
   } = useBulkTaskSelection(tasks);
 
   // track screen size
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
 
   // track newly added task to auto‑open edit view
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);

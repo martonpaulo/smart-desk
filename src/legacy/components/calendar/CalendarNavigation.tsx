@@ -22,7 +22,7 @@ export function CalendarNavigation({
   onDateChange,
   onViewChange,
 }: CalendarNavigationProps) {
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState<null | HTMLElement>(null);
 
   const views: { value: CalendarView; label: string }[] = [

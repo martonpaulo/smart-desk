@@ -47,7 +47,7 @@ export default function BoardPage() {
   const isEventChangesAlertEnabled = useAudioStore(state => state.eventChangesAlertEnabled);
 
   const [now, setNow] = useState(new Date());
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
 
   // tick every minute
   useEffect(() => {

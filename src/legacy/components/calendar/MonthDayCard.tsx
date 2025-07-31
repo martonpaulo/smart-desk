@@ -15,7 +15,7 @@ interface MonthDayCardProps {
 
 export function MonthDayCard({ day, onNavigate }: MonthDayCardProps) {
   const theme = useTheme();
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
   const events = useEventStore(state => state.events);
   const currentDate = new Date();
 

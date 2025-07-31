@@ -16,7 +16,7 @@ export default function CalendarPage() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
   // Parse the current date and view from the URL
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [currentView, setCurrentView] = useState<CalendarView | null>(null);

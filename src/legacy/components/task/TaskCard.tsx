@@ -57,7 +57,7 @@ export function TaskCard({
   onTaskDragEnd,
   ...props
 }: TaskCardProps) {
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
   const theme = useTheme();
   const allTags = useTagsStore(s => s.items);
   const tags = allTags.filter(t => !t.trashed);

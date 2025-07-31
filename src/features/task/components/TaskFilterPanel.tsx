@@ -23,7 +23,7 @@ interface TaskFilterPanelProps {
 }
 
 export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProps) {
-  const { isMobile } = useResponsiveness();
+  const isMobile = useResponsiveness();
   const allTags = useTagsStore(s => s.items);
   const tags = allTags.filter(t => !t.trashed);
 
