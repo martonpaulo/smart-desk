@@ -1,4 +1,5 @@
 import {
+  Delete as TrashIcon,
   DoDisturbOutlined as PauseIcon,
   LocalFireDepartment as FireIcon,
   NotificationsActive as AlertIcon,
@@ -21,18 +22,25 @@ export function PriorityFlag({
   ...stackProps
 }: PriorityFlagProps) {
   const isMobile = useResponsiveness();
-  const shouldDisplay = task.blocked || (showEisenhowerIcons && (task.important || task.urgent));
+  const shouldDisplay =
+    task.trashed || task.blocked || (showEisenhowerIcons && (task.important || task.urgent));
 
   if (!shouldDisplay) return null;
 
-  let Icon = PauseIcon;
+  let Icon = TrashIcon;
   let color: SvgIconOwnProps['color'] = 'action';
-  let tooltipLabel = 'Blocked';
-  let paddingTop = isMobile ? 0 : 0.25;
-  let fontSize = isMobile ? 20 : 16;
+  let tooltipLabel = 'Trashed';
+  let paddingTop = isMobile ? 0 : 0.2;
+  let fontSize = isMobile ? 20 : 18;
 
-  if (!task.blocked) {
-    if (task.important && task.urgent) {
+  if (!task.trashed) {
+    if (task.blocked) {
+      Icon = PauseIcon;
+      color = 'action';
+      tooltipLabel = 'Blocked';
+      paddingTop = isMobile ? 0 : 0.25;
+      fontSize = isMobile ? 20 : 16;
+    } else if (task.important && task.urgent) {
       Icon = FireIcon;
       tooltipLabel = 'Important & urgent';
       color = 'error';

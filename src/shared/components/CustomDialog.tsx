@@ -89,12 +89,16 @@ export function CustomDialog({
     }
   }, [canSave, onSave, onClose, enqueueSnackbar]);
 
+  // build dialog title
+  const capitalItem = item.charAt(0).toUpperCase() + item.slice(1);
+  const dialogTitle = mode === 'edit' ? `Edit ${capitalItem}` : `New ${capitalItem}`;
+
   const handleDelete = useCallback(async () => {
     if (!canDelete) return;
     setLoadingDelete(true);
     try {
       await deleteAction(deleteId);
-      enqueueSnackbar(`${item} deleted`, { variant: 'success' });
+      enqueueSnackbar(`${capitalItem} deleted`, { variant: 'success' });
       playInterfaceSound('trash');
       onClose();
     } catch (error) {
@@ -106,7 +110,7 @@ export function CustomDialog({
       setLoadingDelete(false);
       setConfirmOpen(false);
     }
-  }, [canDelete, deleteAction, deleteId, enqueueSnackbar, item, onClose]);
+  }, [canDelete, capitalItem, deleteAction, deleteId, enqueueSnackbar, item, onClose]);
 
   // keyboard shortcuts for Esc and Ctrl+Enter
   useEffect(() => {
@@ -134,10 +138,6 @@ export function CustomDialog({
     }
   };
 
-  // build dialog title
-  const capitalItem = item.charAt(0).toUpperCase() + item.slice(1);
-  const dialogTitle = mode === 'edit' ? `Edit ${capitalItem}` : `New ${capitalItem}`;
-
   return (
     <>
       <Dialog
@@ -152,7 +152,7 @@ export function CustomDialog({
             {dialogTitle}
 
             {mode === 'edit' && (
-              <Tooltip title={`Delete ${item}`}>
+              <Tooltip title={`Delete ${capitalItem}`}>
                 <IconButton onClick={() => setConfirmOpen(true)} disabled={!canDelete}>
                   <DeleteIcon />
                 </IconButton>
@@ -192,7 +192,7 @@ export function CustomDialog({
       <ConfirmDialog
         open={confirmOpen}
         title={`Confirm Delete ${capitalItem}`}
-        content={`Are you sure you want to send this ${item.toLowerCase()} to the trash? You can restore it later.`}
+        content={`Are you sure you want to send this ${item} to the trash? You can restore it later.`}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
         confirmButtonText="Delete"

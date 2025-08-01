@@ -194,7 +194,7 @@ export function EventModal({ open, onClose, event }: EventModalProps) {
     event,
   ]);
 
-  const isValid = !title.trim() || !startDate || !startTime || (isAllDay && (!endDate || !endTime));
+  const isValid = title.trim() !== '' && startDate !== '' && endDate !== '';
 
   return (
     <CustomDialog

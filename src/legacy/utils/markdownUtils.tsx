@@ -157,7 +157,13 @@ export function renderMarkdown(
             />
           </ListItemIcon>
 
-          <Typography component="span">{parseSafeHtml(inlineToHtml(content))}</Typography>
+          <Typography
+            component="span"
+            color={checked ? 'text.secondary' : undefined}
+            sx={checked ? { textDecoration: 'line-through' } : undefined}
+          >
+            {parseSafeHtml(inlineToHtml(content))}
+          </Typography>
         </ListItem>,
       );
     } else if (ulMatch) {

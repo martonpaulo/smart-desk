@@ -167,21 +167,22 @@ export function TaskCard({
   const oneToComplete = task.quantityDone + 1 === task.quantityTarget;
 
   const itemsGap = isMobile ? 0.75 : 0.5;
-  const opacity = task.blocked ? 0.5 : 1;
+  const opacity = task.blocked || task.trashed ? 0.5 : 1;
 
   const displayIncrementButton =
-    !isEditing && !task.blocked && isCountTask && !done && !oneToComplete;
-  const displayMarkAsDoneButton = !isEditing && !task.blocked && !done && oneToComplete;
-  const displayUnblockButton = !isEditing && task.blocked && !done;
-  const displaySendToNextDayButton = !isEditing && !done;
-  const displayResetButton = !isEditing && !task.blocked && done;
+    !isEditing && !task.blocked && !task.trashed && isCountTask && !done && !oneToComplete;
+  const displayMarkAsDoneButton =
+    !isEditing && !task.blocked && !task.trashed && !done && oneToComplete;
+  const displayUnblockButton = !isEditing && task.blocked && !done && !task.trashed;
+  const displaySendToNextDayButton = !isEditing && !done && !task.trashed;
+  const displayResetButton = !isEditing && !task.blocked && done && !task.trashed;
 
   const taskTag = tags.find(t => t.id === task.tagId);
 
   return (
     <>
       <S.Container
-        color={task.blocked && !isEditing ? customColors.grey.value : color}
+        color={(task.blocked || task.trashed) && !isEditing ? customColors.grey.value : color}
         onDragStart={selectable ? undefined : handleDragStart}
         onDragOver={selectable ? undefined : handleDragOver}
         onDragEnd={selectable ? undefined : handleDragEnd}
@@ -243,12 +244,16 @@ export function TaskCard({
                     untitled={!task.title}
                     textVariantSize={isMobile ? 'body1' : 'body2'}
                     showActions={showActions}
-                    sx={{ opacity }}
+                    sx={{
+                      opacity,
+                      fontStyle: task.trashed ? 'italic' : 'normal',
+                      fontWeight: task.trashed ? 300 : 400,
+                    }}
                   >
                     {task.title || 'Untitled Task'}
                   </S.TitleText>
 
-                  {!task.blocked && task.daily && showDaily && (
+                  {!task.blocked && !task.trashed && task.daily && showDaily && (
                     <Tooltip title="Repeats daily">
                       <S.RepeatIndicator fontSize="inherit" />
                     </Tooltip>
