@@ -1,29 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogProps,
-  DialogTitle,
-  IconButton,
-  MenuItem,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Button, Checkbox, MenuItem, Stack, TextField, Typography } from '@mui/material';
 
-import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
 import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/TagsStore';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { useBoardStore } from '@/legacy/store/board/store';
 import { Task } from '@/legacy/types/task';
 import { formatDuration, parseDuration, toLocalDateString } from '@/legacy/utils/timeUtils';
-import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { CustomDialog } from '@/shared/components/CustomDialog';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
 
 // all form fields in one object for easy compare
@@ -45,7 +30,7 @@ interface TaskModalProps {
   task?: Task | null; // undefined/null = new task
   newProperties?: Partial<Task>; // additional properties for new tasks
   open: boolean;
-  onClose?: () => void;
+  onClose: () => void;
 }
 
 export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps) {
@@ -54,10 +39,6 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
   const updateTask = useBoardStore(s => s.updateTask);
   const allTags = useTagsStore(s => s.items);
   const tags = allTags.filter(t => !t.trashed);
-
-  const [isTrashConfirmOpen, setTrashConfirmOpen] = useState(false);
-
-  const titleRef = useRef<HTMLInputElement>(null);
 
   // initialize form from task or defaults
   const makeInitialForm = useCallback(
@@ -91,13 +72,6 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
     initialRef.current = init;
   }, [task, open, makeInitialForm]);
 
-  // focus title when dialog fully opens
-  const handleTransitionEntered = () => {
-    titleRef.current?.focus();
-    const len = titleRef.current?.value.length ?? 0;
-    titleRef.current?.setSelectionRange(len, len);
-  };
-
   // compare each field to detect modifications
   const isModified = () => {
     const init = initialRef.current;
@@ -110,23 +84,17 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       form.important !== init.important ||
       form.urgent !== init.urgent ||
       form.blocked !== init.blocked ||
-      (form.plannedDate?.getTime() ?? 0) !== (init.plannedDate?.getTime() ?? 0) ||
+      (form.plannedDate instanceof Date ? form.plannedDate.getTime() : 0) !==
+        (init.plannedDate instanceof Date ? init.plannedDate.getTime() : 0) ||
       form.estimatedTime !== init.estimatedTime ||
       form.tagId !== init.tagId
     );
   };
 
   // handle save or create
-  const saveAndClose = () => {
-    const title = form.title.trim();
-    if (!title) return;
-    if (!isModified()) {
-      onClose?.();
-      return;
-    }
-
+  const handleSave = async () => {
     const payload = {
-      title,
+      title: form.title.trim(),
       notes: form.notes.trim(),
       quantityDone: task?.quantityDone ?? 0,
       quantityTarget: form.useQuantity ? form.quantityTarget : 1,
@@ -139,62 +107,27 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       tagId: form.tagId,
     };
 
-    try {
-      if (task?.id) {
-        updateTask({
-          ...payload,
-          id: task.id,
-          updatedAt: new Date(),
-        });
-      } else {
-        addTask({
-          ...payload,
-          updatedAt: new Date(),
-        });
-      }
-    } catch (err) {
-      console.error('Task save failed', err);
+    if (task?.id) {
+      await updateTask({
+        ...payload,
+        id: task.id,
+        updatedAt: new Date(),
+      });
+    } else {
+      await addTask({
+        ...payload,
+        updatedAt: new Date(),
+      });
     }
-
-    onClose?.();
   };
 
   // mark as trashed
-  const deleteAndClose = () => {
-    if (!task) {
-      onClose?.();
-      return;
-    }
-    setTrashConfirmOpen(false);
-    try {
-      playInterfaceSound('trash');
-      // mark as trashed instead of deleting
-      updateTask({
-        id: task.id,
-        trashed: true,
-        updatedAt: new Date(),
-      });
-    } catch (err) {
-      console.error('Task delete failed', err);
-    }
-    onClose?.();
-  };
-
-  // Dialog onClose handler preserves original behavior:
-  // escape only closes, other ways (backdrop click) save+close
-  const handleClose: DialogProps['onClose'] = (_e, reason) => {
-    switch (reason) {
-      case 'escapeKeyDown':
-        onClose?.();
-        break;
-      case 'backdropClick':
-      default:
-        if (form.title.trim()) {
-          saveAndClose();
-        } else {
-          onClose?.();
-        }
-    }
+  const handleDelete = async (id: string) => {
+    await updateTask({
+      id,
+      trashed: true,
+      updatedAt: new Date(),
+    });
   };
 
   const today = new Date();
@@ -206,199 +139,158 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
     form.plannedDate.getFullYear() === today.getFullYear();
 
   return (
-    <Dialog
+    <CustomDialog
+      item="task"
       open={open}
-      fullWidth
-      maxWidth="mobileLg"
-      onClose={handleClose}
-      slotProps={{ transition: { onEntered: handleTransitionEntered } }}
+      mode={task ? 'edit' : 'new'}
+      isDirty={isModified()}
+      isValid={form.title.trim() !== ''}
+      onClose={onClose}
+      onSave={handleSave}
+      deleteAction={handleDelete}
+      deleteId={task?.id}
+      title={form.title}
+      onTitleChange={value => setForm(f => ({ ...f, title: value }))}
+      titlePlaceholder="What would you like to do?"
+      titleLimit={32}
     >
-      <DialogTitle sx={{ position: 'relative' }}>
-        {task ? 'Edit Task' : 'New Task'}
+      <Stack direction="row" alignItems="center">
+        <Typography variant="body2">Estimated Time</Typography>
 
-        {task && (
-          <Tooltip title="Delete task">
-            <IconButton
-              onClick={() => setTrashConfirmOpen(true)}
-              sx={{ position: 'absolute', top: 8, right: 8 }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-      </DialogTitle>
+        <QuantitySelector
+          value={form.estimatedTime ?? null}
+          placeholder="not set"
+          onValueChange={value => value !== null && setForm(f => ({ ...f, estimatedTime: value }))}
+          step={20}
+          minValue={1}
+          maxValue={480}
+          formatFn={formatDuration}
+          parseFn={parseDuration}
+          sx={{ ml: 2 }}
+        />
+      </Stack>
 
-      <DialogContent>
-        <Stack spacing={2} mt={1}>
-          {/* Title input */}
-          <TextField
-            label="Title"
-            placeholder="What would you like to do?"
-            fullWidth
-            value={form.title}
-            inputRef={titleRef}
-            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                saveAndClose();
-              }
-            }}
-          />
+      {/* Planned date input */}
 
-          <Stack direction="row" alignItems="center">
-            <Typography variant="body2">Estimated Time</Typography>
+      <Stack direction="row" spacing={2} alignItems="center">
+        {/* Planned date selector */}
+        <TextField
+          label="Planned Date"
+          type="date"
+          fullWidth
+          value={
+            form.plannedDate instanceof Date
+              ? toLocalDateString(form.plannedDate)
+              : (form.plannedDate ?? '')
+          }
+          onChange={e => {
+            const val = e.target.value;
+            setForm(prev => ({
+              ...prev,
+              // avoid UTC shift by creating date with explicit time
+              plannedDate: val ? new Date(val + 'T00:00:00') : undefined,
+            }));
+          }}
+          slotProps={{
+            inputLabel: { shrink: true },
+            htmlInput: {
+              min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+                .toISOString()
+                .split('T')[0],
+            },
+          }}
+        />
 
-            <QuantitySelector
-              value={form.estimatedTime ?? null}
-              placeholder="not set"
-              onValueChange={value =>
-                value !== null && setForm(f => ({ ...f, estimatedTime: value }))
-              }
-              step={20}
-              minValue={1}
-              maxValue={480}
-              formatFn={formatDuration}
-              parseFn={parseDuration}
-              sx={{ ml: 2 }}
-            />
-          </Stack>
+        <Button
+          variant="contained"
+          disableElevation
+          size="large"
+          disabled={disableTodayButton}
+          onClick={() => setForm(prev => ({ ...prev, plannedDate: new Date() }))}
+          sx={{ ml: 1 }}
+        >
+          Today
+        </Button>
+        <Button
+          variant="outlined"
+          size="large"
+          disabled={!form.plannedDate}
+          onClick={() => setForm(prev => ({ ...prev, plannedDate: undefined }))}
+          sx={{ ml: 1 }}
+        >
+          Clear
+        </Button>
+      </Stack>
 
-          {/* Planned date input */}
+      <TextField
+        select
+        label="Tag"
+        fullWidth
+        size="small"
+        value={form.tagId ?? ''}
+        onChange={e =>
+          setForm(prev => ({
+            ...prev,
+            tagId: e.target.value === '' ? undefined : e.target.value,
+          }))
+        }
+      >
+        <MenuItem value="">No tag</MenuItem>
+        {tags.map(t => (
+          <MenuItem key={t.id} value={t.id}>
+            <TagLabel tag={t} />
+          </MenuItem>
+        ))}
+      </TextField>
 
-          <Stack direction="row" spacing={2} alignItems="center">
-            {/* Planned date selector */}
-            <TextField
-              label="Planned Date"
-              type="date"
-              fullWidth
-              value={
-                form.plannedDate instanceof Date
-                  ? toLocalDateString(form.plannedDate)
-                  : (form.plannedDate ?? '')
-              }
-              onChange={e => {
-                const val = e.target.value;
-                setForm(prev => ({
-                  ...prev,
-                  // avoid UTC shift by creating date with explicit time
-                  plannedDate: val ? new Date(val + 'T00:00:00') : undefined,
-                }));
-              }}
-              slotProps={{
-                inputLabel: { shrink: true },
-                htmlInput: {
-                  min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-                    .toISOString()
-                    .split('T')[0],
-                },
-              }}
-            />
-
-            <Button
-              variant="contained"
-              disableElevation
-              size="large"
-              disabled={disableTodayButton}
-              onClick={() => setForm(prev => ({ ...prev, plannedDate: new Date() }))}
-              sx={{ ml: 1 }}
-            >
-              Today
-            </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              disabled={!form.plannedDate}
-              onClick={() => setForm(prev => ({ ...prev, plannedDate: undefined }))}
-              sx={{ ml: 1 }}
-            >
-              Clear
-            </Button>
-          </Stack>
-
-          <TextField
-            select
-            label="Tag"
-            fullWidth
-            size="small"
-            value={form.tagId ?? ''}
-            onChange={e =>
-              setForm(prev => ({
-                ...prev,
-                tagId: e.target.value === '' ? undefined : e.target.value,
+      {/* Quantifiable option */}
+      <Stack>
+        <Stack direction="row" alignItems="center">
+          <Checkbox
+            checked={form.useQuantity}
+            onChange={(_, checked) =>
+              setForm(f => ({
+                ...f,
+                useQuantity: checked,
+                quantityTarget: checked ? f.quantityTarget : 1,
               }))
             }
-          >
-            <MenuItem value="">No tag</MenuItem>
-            {tags.map(t => (
-              <MenuItem key={t.id} value={t.id}>
-                <TagLabel tag={t} />
-              </MenuItem>
-            ))}
-          </TextField>
-
-          {/* Quantifiable option */}
-          <Stack>
-            <Stack direction="row" alignItems="center">
-              <Checkbox
-                checked={form.useQuantity}
-                onChange={(_, checked) =>
-                  setForm(f => ({
-                    ...f,
-                    useQuantity: checked,
-                    quantityTarget: checked ? f.quantityTarget : 1,
-                  }))
-                }
-              />
-              <Typography variant="body2">Quantifiable</Typography>
-              <QuantitySelector
-                disabled={!form.useQuantity}
-                value={form.quantityTarget}
-                minValue={1}
-                maxValue={999}
-                onValueChange={value => setForm(f => ({ ...f, quantityTarget: value }))}
-                sx={{ ml: 2 }}
-              />
-            </Stack>
-
-            {/* Daily, Important, Urgent, Blocked flags */}
-            {['daily', 'important', 'urgent', 'blocked'].map(flag => (
-              <Stack key={flag} direction="row" alignItems="center">
-                <Checkbox
-                  checked={form[flag as keyof TaskForm] as boolean}
-                  onChange={(_, checked) =>
-                    setForm(f => ({
-                      ...f,
-                      [flag]: checked,
-                    }))
-                  }
-                />
-                <Typography variant="body2">
-                  {flag.charAt(0).toUpperCase() + flag.slice(1)}
-                </Typography>
-              </Stack>
-            ))}
-          </Stack>
-
-          {/* Notes */}
-          <MarkdownEditableBox
-            label="Notes"
-            placeholder="Enter a description"
-            value={form.notes}
-            onChange={e => setForm(f => ({ ...f, notes: e }))}
+          />
+          <Typography variant="body2">Quantifiable</Typography>
+          <QuantitySelector
+            disabled={!form.useQuantity}
+            value={form.quantityTarget}
+            minValue={1}
+            maxValue={999}
+            onValueChange={value => setForm(f => ({ ...f, quantityTarget: value }))}
+            sx={{ ml: 2 }}
           />
         </Stack>
-      </DialogContent>
 
-      <ConfirmDialog
-        open={isTrashConfirmOpen}
-        title="Confirm Delete"
-        content="Are you sure you want to send this task to the <strong>trash</strong>? You can restore it later."
-        onCancel={() => setTrashConfirmOpen(false)}
-        onConfirm={deleteAndClose}
-        confirmButtonText="Delete"
-        cancelButtonText="Cancel"
+        {/* Daily, Important, Urgent, Blocked flags */}
+        {['daily', 'important', 'urgent', 'blocked'].map(flag => (
+          <Stack key={flag} direction="row" alignItems="center">
+            <Checkbox
+              checked={form[flag as keyof TaskForm] as boolean}
+              onChange={(_, checked) =>
+                setForm(f => ({
+                  ...f,
+                  [flag]: checked,
+                }))
+              }
+            />
+            <Typography variant="body2">{flag.charAt(0).toUpperCase() + flag.slice(1)}</Typography>
+          </Stack>
+        ))}
+      </Stack>
+
+      {/* Notes */}
+      <MarkdownEditableBox
+        label="Notes"
+        placeholder="Enter a description"
+        value={form.notes}
+        onChange={e => setForm(f => ({ ...f, notes: e }))}
       />
-    </Dialog>
+    </CustomDialog>
   );
 }

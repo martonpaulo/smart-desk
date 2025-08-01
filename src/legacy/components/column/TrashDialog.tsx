@@ -6,7 +6,6 @@ import {
   IconButton,
   List,
   ListItem,
-  ListItemSecondaryAction,
   ListItemText,
 } from '@mui/material';
 
@@ -36,27 +35,29 @@ export function TrashDialog({
       <DialogContent>
         <List dense>
           {columns.map(col => (
-            <ListItem key={col.id} sx={{ pl: 0 }}>
-              <ListItemText primary={`Column: ${col.title}`} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  aria-label="restore"
-                  onClick={() => col.id && onRestoreColumn(col.id)}
-                >
+            <ListItem
+              key={col.id}
+              sx={{ pl: 0 }}
+              secondaryAction={
+                <IconButton edge="end" onClick={() => col.id && onRestoreColumn(col.id)}>
                   <RestoreIcon fontSize="small" />
                 </IconButton>
-              </ListItemSecondaryAction>
+              }
+            >
+              <ListItemText primary={`Column: ${col.title}`} />
             </ListItem>
           ))}
           {tasks.map(task => (
-            <ListItem key={task.id} sx={{ pl: 0 }}>
-              <ListItemText primary={`Task: ${task.title}`} />
-              <ListItemSecondaryAction>
-                <IconButton edge="end" aria-label="restore" onClick={() => onRestoreTask(task.id)}>
+            <ListItem
+              key={task.id}
+              sx={{ pl: 0 }}
+              secondaryAction={
+                <IconButton edge="end" onClick={() => onRestoreTask(task.id)}>
                   <RestoreIcon fontSize="small" />
                 </IconButton>
-              </ListItemSecondaryAction>
+              }
+            >
+              <ListItemText primary={`Task: ${task.title}`} />
             </ListItem>
           ))}
           {columns.length === 0 && tasks.length === 0 && (

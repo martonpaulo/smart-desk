@@ -15,7 +15,6 @@ import { useSnackbar } from 'notistack';
 
 import { transitions } from '@/legacy/styles/transitions';
 import { normalizeText, renderMarkdown } from '@/legacy/utils/markdownUtils';
-import { useModalInputActions } from '@/shared/hooks/useModalInputActions';
 
 interface MarkdownEditableBoxProps {
   value: string;
@@ -79,10 +78,6 @@ export function MarkdownEditableBox({
     onChange?.(e.target.value);
   };
 
-  const { handleKeyDown, handleBlur } = useModalInputActions({
-    onSave: () => finishEditing(),
-  });
-
   const hasContent = markdown.length > 0;
   const inputBackground = theme.palette.grey[100];
 
@@ -143,8 +138,7 @@ export function MarkdownEditableBox({
           fullWidth
           value={markdown}
           onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
+          onBlur={finishEditing}
         />
       ) : (
         <Stack>

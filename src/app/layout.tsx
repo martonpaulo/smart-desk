@@ -3,7 +3,6 @@
 import { ReactNode } from 'react';
 
 import { SessionProvider } from 'next-auth/react';
-import { SnackbarProvider } from 'notistack';
 
 import { AppThemeProvider } from '@/core/providers/AppThemeProvider';
 import { SupabaseSyncProvider } from '@/core/providers/SupabaseSyncProvider';
@@ -13,6 +12,7 @@ import { DateAdapterProvider } from '@/legacy/providers/DateAdapterProvider';
 import { LocationProvider } from '@/legacy/providers/LocationProvider';
 import { ReactQueryProvider } from '@/legacy/providers/ReactQueryProvider';
 import { ZoomProvider } from '@/legacy/providers/ZoomProvider';
+import { SnackbarWrapperProvider } from '@/shared/providers/SnackbarWrapperProvider';
 import { poppins } from '@/theme/fonts';
 
 import '@/legacy/lib/dragDropTouch';
@@ -22,25 +22,16 @@ interface RootLayoutProps {
 }
 
 const providers = [
-  { Component: SessionProvider },
-  { Component: LocationProvider },
-  { Component: ReactQueryProvider },
-  { Component: SupabaseSyncProvider },
-  { Component: InterfaceSoundProvider },
-  { Component: ZoomProvider },
-  { Component: DateAdapterProvider },
-  { Component: AppThemeProvider },
-  { Component: NavigationLayout },
-  {
-    Component: SnackbarProvider,
-    props: {
-      maxSnack: 3,
-      anchorOrigin: {
-        vertical: 'bottom' as const,
-        horizontal: 'right' as const,
-      },
-    },
-  },
+  SessionProvider,
+  LocationProvider,
+  ReactQueryProvider,
+  SupabaseSyncProvider,
+  InterfaceSoundProvider,
+  ZoomProvider,
+  DateAdapterProvider,
+  AppThemeProvider,
+  NavigationLayout,
+  SnackbarWrapperProvider,
 ];
 
 export default function RootLayout({ children }: RootLayoutProps) {
@@ -53,8 +44,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
 
       <body suppressHydrationWarning className={poppins.variable}>
-        {providers.reduceRight((acc, { Component, props = {} }) => {
-          return <Component {...props}>{acc}</Component>;
+        {providers.reduceRight((acc, Provider) => {
+          return <Provider>{acc}</Provider>;
         }, children)}
       </body>
     </html>

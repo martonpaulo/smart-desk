@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 
-import { NewEventModal } from '@/features/event/components/NewEventModal';
+import { EventModal } from '@/features/event/components/EventModal';
 import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
 import { Event as LocalEvent } from '@/features/event/types/Event';
 import { EventListItem } from '@/legacy/components/event/EventListItem';
@@ -172,9 +172,9 @@ export function EventList({ events }: { events: Event[] | null }) {
           />
         </Stack>
 
-        <NewEventModal isOpen={newModalOpen} onClose={() => setNewModalOpen(false)} />
-        <NewEventModal
-          isOpen={!!editingEvent}
+        <EventModal open={newModalOpen} onClose={() => setNewModalOpen(false)} />
+        <EventModal
+          open={!!editingEvent}
           onClose={() => setEditingEvent(null)}
           event={editingEvent ?? undefined}
         />
