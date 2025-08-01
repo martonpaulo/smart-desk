@@ -14,7 +14,7 @@ import {
 import { useSnackbar } from 'notistack';
 
 import { transitions } from '@/legacy/styles/transitions';
-import { renderMarkdown } from '@/legacy/utils/markdownUtils';
+import { normalizeText, renderMarkdown } from '@/legacy/utils/markdownUtils';
 import { useModalInputActions } from '@/shared/hooks/useModalInputActions';
 
 interface MarkdownEditableBoxProps {
@@ -44,18 +44,19 @@ export function MarkdownEditableBox({
   }, [isEditing]);
 
   const finishEditing = useCallback(() => {
-    setMarkdown(value.trim());
+    setMarkdown(normalizeText(value));
     setIsEditing(false);
   }, [value]);
 
   const handleToggle = (lineIndex: number) => {
     const lines = markdown.split(/\r?\n/);
-    const regex = /^([*-]?\s*\[\s*)(x?)(\s*\])(\s*)(.*)$/i;
+    const regex = /^([*-]?\s*\[)(\s*x?\s*)(\])(\s*)(.*)$/i;
     const m = regex.exec(lines[lineIndex]);
     if (!m) return;
 
     const [, prefix, mark, closingBracket, spaceAfter, rest] = m;
-    const newMark = mark.toLowerCase() === 'x' ? ' ' : 'x';
+    // Always use '[x]' or '[ ]' (no space between [ and x])
+    const newMark = mark.trim().toLowerCase() === 'x' ? ' ' : 'x';
     lines[lineIndex] = `${prefix}${newMark}${closingBracket}${spaceAfter}${rest}`;
 
     const updated = lines.join('\n');
@@ -146,7 +147,7 @@ export function MarkdownEditableBox({
           onBlur={handleBlur}
         />
       ) : (
-        <Stack spacing={0.25}>
+        <Stack>
           {hasContent ? (
             renderMarkdown(markdown, handleToggle)
           ) : (

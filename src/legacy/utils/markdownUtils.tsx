@@ -1,27 +1,101 @@
 import { ReactElement } from 'react';
 
-import { Checkbox, Typography } from '@mui/material';
+import { Box, Checkbox, List, ListItem, ListItemIcon, Typography } from '@mui/material';
 
 import { parseSafeHtml } from '@/legacy/utils/textUtils';
+
+type ListType = 'ul' | 'ol';
+
+const escapeMap: Record<string, string> = {
+  '*': '␟AST␟',
+  _: '␟UND␟',
+  '~': '␟TIL␟',
+  '`': '␟BQT␟',
+  '-': '␟DAS␟',
+  '#': '␟HSH␟',
+  '[': '␟LBR␟',
+  ']': '␟RBR␟',
+  '(': '␟LPR␟',
+  ')': '␟RPR␟',
+  '<': '␟LTH␟',
+  '>': '␟GTH␟',
+  '\\': '␟BSL␟',
+};
+
+function escapeText(text: string): string {
+  let escaped = text;
+
+  for (const [char, token] of Object.entries(escapeMap)) {
+    // Escape special regex characters in char
+    const escapedChar = char.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const pattern = new RegExp(`\\\\${escapedChar}`, 'g');
+    escaped = escaped.replace(pattern, token);
+  }
+
+  return escaped;
+}
+
+function restoreEscapes(text: string): string {
+  let restored = text;
+
+  for (const [char, token] of Object.entries(escapeMap)) {
+    const pattern = new RegExp(token, 'g');
+    restored = restored.replace(pattern, char);
+  }
+  return restored;
+}
+
+export function normalizeText(text: string): string {
+  let normalizedText = text;
+
+  // Step 1: Escape special characters
+  normalizedText = escapeText(normalizedText);
+
+  // Arrows: -> and <-
+  normalizedText = normalizedText.replace(/(?<!\\)(^|[^-])\-\>(?!>)/g, '$1→');
+  normalizedText = normalizedText.replace(/(?<!\\)<\-(?!-)/g, '←');
+
+  // Checkboxes: [ ] and [x]
+  normalizedText = normalizedText.replace(/(?<!\\)\[\s*\]/g, '[ ]');
+  normalizedText = normalizedText.replace(/(?<!\\)\[\s*x\s*\]/g, '[x]');
+
+  // Line endings: \r\n and \r → \n
+  normalizedText = normalizedText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  // Step 2: Restore escapes
+  normalizedText = restoreEscapes(normalizedText);
+
+  return normalizedText.trim();
+}
 
 // Util to convert inline markdown to HTML
 function inlineToHtml(text: string): string {
   let html = text;
 
+  // Step 1: Escape special characters
+  html = escapeText(html);
+
+  // Handle inline code first — permanently escape inner content
+  html = html.replace(/`([^`]+?)`/g, (_, codeContent) => {
+    return `<code>${codeContent}</code>`;
+  });
+
   // Bold italics: /***bold italic***/ or ___bold italic___ → <strong><em>bold italic</em></strong>
-  html = html.replace(/(\*\*\*|___)([^*_]+?)\1/g, '<strong><em>$2</em></strong>');
+  html = html.replace(
+    /(?<!\w)(\*\*\*|___)([^\s][^*_]*?[^\s])\1(?!\w)/g,
+    '<strong><em>$2</em></strong>',
+  );
 
   // Bold: **bold** or __bold__ or <b>bold</b> → <strong>bold</strong>
-  html = html.replace(/(\*\*|__|<b>)([^*]+?)(\*\*|__|<\/b>)/g, '<strong>$2</strong>');
+  html = html.replace(/(?<!\w)(\*\*|__)([^\s][^*_]*?[^\s])\1(?!\w)/g, '<strong>$2</strong>');
+  html = html.replace(/<b>([^\s].*?[^\s])<\/b>/g, '<strong>$1</strong>'); // HTML <b>
 
   // Italic: *italic* or _italic_ or <i>italic</i> → <em>italic</em>
-  html = html.replace(/(\*|_|<i>)([^*_]+?)(\*|_|<\/i>)/g, '<em>$2</em>');
+  html = html.replace(/(?<!\w)(\*|_)([^\s][^*_]*?[^\s])\1(?!\w)/g, '<em>$2</em>');
+  html = html.replace(/<i>([^\s].*?[^\s])<\/i>/g, '<em>$1</em>'); // HTML <i>
 
   // Strikethrough: ~strike~ or -strike- → <del>strike</del>
-  html = html.replace(/(~|-)([^~-]+?)\1/g, '<del>$2</del>');
-
-  // Inline code: `code` → <code>code</code>
-  html = html.replace(/`([^`]+?)`/g, '<code>$1</code>');
+  html = html.replace(/(?<!\w)[~-]([^\s][^~-]*?[^\s])[-~](?!\w)/g, '<del>$1</del>');
 
   // Image: ![alt](url) → <img src="url" alt="alt" />
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />');
@@ -32,125 +106,130 @@ function inlineToHtml(text: string): string {
   // Internal link: #link → <a href="/link">link</a>
   html = html.replace(/#([\w/\-]+)/g, '<a href="/$1">#$1</a>');
 
-  // Escape punctuation: \* \_ \~ \` → literal char
-  html = html.replace(/\\([*_~`])/g, '$1');
+  // Step 2: Restore escapes
+  html = html.replace(/<(code)>[\s\S]*?<\/\1>/g, match => match); // do nothing to <code>
+  html = restoreEscapes(html);
 
   return html;
 }
 
 // Parse markdown blocks into React elements
-export function renderMarkdown(markdown: string, onToggle?: (line: number) => void) {
-  const lines = markdown.split(/\r?\n/); // split on CRLF or LF
+export function renderMarkdown(
+  markdown: string,
+  onToggle?: (line: number) => void,
+): ReactElement[] {
+  const lines = markdown.split(/\r?\n/);
   const elements: ReactElement[] = [];
 
-  let inUl = false;
-  let inOl = false;
+  // accumulate list items until we hit a non-list line
+  let currentList: { type: ListType; items: ReactElement[] } | null = null;
 
-  const closeLists = () => {
-    if (inUl) {
-      elements.push(<ul key={`ul-end-${elements.length}`} />);
-      inUl = false;
-    }
-    if (inOl) {
-      elements.push(<ol key={`ol-end-${elements.length}`} />);
-      inOl = false;
-    }
+  const flushList = () => {
+    if (!currentList) return;
+    elements.push(
+      <List key={`list-${elements.length}`} disablePadding>
+        {currentList.items}
+      </List>,
+    );
+    currentList = null;
   };
 
   lines.forEach((line, idx) => {
-    // Checkbox: "- [ ] item" or "- [x] item"
     const checkboxMatch = /^([*-]?\s*\[\s*(x?)\s*\])\s*(.*)$/i.exec(line);
-
-    // Unordered list: "- item", "* item", "+ item"
     const ulMatch = /^[-*+] (.*)/.exec(line);
-
-    // Ordered list: "1. item", "2. item", etc.
     const olMatch = /^\d+\. (.*)/.exec(line);
 
-    if (/^### /.test(line)) {
-      // Heading level 3: "### Heading"
-      closeLists();
-      elements.push(
-        <Typography key={idx} variant="h6" fontWeight="bold">
-          {parseSafeHtml(inlineToHtml(line.replace(/^### /, '')))}
-        </Typography>,
-      );
-    } else if (/^## /.test(line)) {
-      // Heading level 2: "## Heading"
-      closeLists();
-      elements.push(
-        <Typography key={idx} variant="h5" fontWeight="bold">
-          {parseSafeHtml(inlineToHtml(line.replace(/^## /, '')))}
-        </Typography>,
-      );
-    } else if (/^# /.test(line)) {
-      // Heading level 1: "# Heading"
-      closeLists();
-      elements.push(
-        <Typography key={idx} variant="h4" fontWeight="bold">
-          {parseSafeHtml(inlineToHtml(line.replace(/^# /, '')))}
-        </Typography>,
-      );
-    } else if (checkboxMatch) {
+    if (checkboxMatch) {
       const [, , mark, content] = checkboxMatch;
       const checked = mark.toLowerCase() === 'x';
-
-      if (!inUl) {
-        elements.push(<ul key={`ul-start-${idx}`} />);
-        inUl = true;
+      if (!currentList || currentList.type !== 'ul') {
+        flushList();
+        currentList = { type: 'ul', items: [] };
       }
+      currentList.items.push(
+        <ListItem key={idx} disablePadding>
+          <ListItemIcon sx={{ minWidth: 0, pr: 1 }}>
+            <Checkbox
+              size="small"
+              checked={checked}
+              onChange={() => onToggle?.(idx)}
+              sx={{ p: 0 }}
+            />
+          </ListItemIcon>
 
-      elements.push(
-        <li key={idx} style={{ listStyle: 'none' }}>
-          <Checkbox
-            size="small"
-            checked={checked}
-            onChange={() => onToggle?.(idx)}
-            sx={{ p: 0.5 }}
-          />
-          <span>{parseSafeHtml(inlineToHtml(content))}</span>
-        </li>,
+          <Typography component="span">{parseSafeHtml(inlineToHtml(content))}</Typography>
+        </ListItem>,
       );
     } else if (ulMatch) {
-      // unordered list item
-      if (!inUl) {
-        elements.push(<ul key={`ul-start-${idx}`} />);
-        inUl = true;
+      if (!currentList || currentList.type !== 'ul') {
+        flushList();
+        currentList = { type: 'ul', items: [] };
       }
-      elements.push(<li key={idx}>{parseSafeHtml(inlineToHtml(ulMatch[1]))}</li>);
-    } else if (olMatch) {
-      // ordered list item
-      if (!inOl) {
-        elements.push(<ol key={`ol-start-${idx}`} />);
-        inOl = true;
-      }
-      elements.push(<li key={idx}>{parseSafeHtml(inlineToHtml(olMatch[1]))}</li>);
-    } else if (/^> /.test(line)) {
-      // Blockquote level 1: "> quote"
-      closeLists();
-      elements.push(
-        <blockquote key={idx}>{parseSafeHtml(inlineToHtml(line.replace(/^> /, '')))}</blockquote>,
+      currentList.items.push(
+        <ListItem key={idx} disablePadding>
+          <ListItemIcon sx={{ minWidth: 0, pl: 0.5, pr: 1.5 }}>
+            <Box
+              sx={{
+                width: '0.35rem',
+                height: '0.35rem',
+                borderRadius: '50%',
+                backgroundColor: '#000',
+              }}
+            />
+          </ListItemIcon>
+          <Typography component="span">{parseSafeHtml(inlineToHtml(ulMatch[1]))}</Typography>
+        </ListItem>,
       );
-    } else if (/^>> /.test(line)) {
-      // Nested blockquote: ">> nested quote"
-      closeLists();
-      elements.push(
-        <blockquote key={`${idx}-outer`}>
-          <blockquote>{parseSafeHtml(inlineToHtml(line.replace(/^>> /, '')))}</blockquote>
-        </blockquote>,
+    } else if (olMatch) {
+      if (!currentList || currentList.type !== 'ol') {
+        flushList();
+        currentList = { type: 'ol', items: [] };
+      }
+      currentList.items.push(
+        <ListItem
+          key={idx}
+          disablePadding
+          sx={{
+            display: 'list-item',
+            listStylePosition: 'inside',
+            listStyleType: 'decimal',
+            paddingLeft: 0.5,
+          }}
+        >
+          <Typography component="span">{parseSafeHtml(inlineToHtml(olMatch[1]))}</Typography>
+        </ListItem>,
       );
     } else {
-      closeLists();
-      if (line.trim() === '') {
-        // empty line → line break
+      flushList();
+      // Handle headings and plain text
+      if (/^### /.test(line)) {
+        elements.push(
+          <Typography key={idx} variant="h6" fontWeight="bold">
+            {parseSafeHtml(inlineToHtml(line.slice(4)))}
+          </Typography>,
+        );
+      } else if (/^## /.test(line)) {
+        elements.push(
+          <Typography key={idx} variant="h5" fontWeight="bold">
+            {parseSafeHtml(inlineToHtml(line.slice(3)))}
+          </Typography>,
+        );
+      } else if (/^# /.test(line)) {
+        elements.push(
+          <Typography key={idx} variant="h4" fontWeight="bold">
+            {parseSafeHtml(inlineToHtml(line.slice(2)))}
+          </Typography>,
+        );
+      } else if (line.trim() === '') {
+        // Handle empty lines
         elements.push(<br key={idx} />);
       } else {
-        // plain paragraph
+        // Handle plain text
         elements.push(<Typography key={idx}>{parseSafeHtml(inlineToHtml(line))}</Typography>);
       }
     }
   });
 
-  closeLists();
+  flushList();
   return elements;
 }

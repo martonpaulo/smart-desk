@@ -62,9 +62,6 @@ export const theme = createTheme({
         '*, *::before, *::after': {
           touchAction: 'manipulation',
         },
-        'li::marker': {
-          fontSize: '0.75em',
-        },
       },
     },
     MuiChip: {
