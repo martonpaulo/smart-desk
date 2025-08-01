@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button, Checkbox, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { isSameDay } from 'date-fns';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/TagsStore';
@@ -51,7 +52,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       important: task?.important ?? false,
       urgent: task?.urgent ?? false,
       blocked: task?.blocked ?? false,
-      plannedDate: task?.plannedDate ?? undefined,
+      plannedDate: task?.plannedDate ? new Date(task?.plannedDate) : undefined,
       estimatedTime: task?.estimatedTime ?? undefined,
       tagId: task?.tagId ?? newProperties?.tagId,
       ...newProperties, // spread any additional properties for new tasks
@@ -74,6 +75,9 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
 
   // compare each field to detect modifications
   const isModified = () => {
+    if (!task) return true; // new task is always modified
+    if (!open) return false; // closed modal is not modified
+
     const init = initialRef.current;
     return (
       form.title.trim() !== init.title.trim() ||
@@ -84,8 +88,9 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       form.important !== init.important ||
       form.urgent !== init.urgent ||
       form.blocked !== init.blocked ||
-      (form.plannedDate instanceof Date ? form.plannedDate.getTime() : 0) !==
-        (init.plannedDate instanceof Date ? init.plannedDate.getTime() : 0) ||
+      (form.plannedDate instanceof Date &&
+        init.plannedDate instanceof Date &&
+        !isSameDay(form.plannedDate, init.plannedDate)) ||
       form.estimatedTime !== init.estimatedTime ||
       form.tagId !== init.tagId
     );
