@@ -129,7 +129,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <PageSection title={getPageTitle()} hideTitle>
+    <PageSection title={getPageTitle()} hideTitle hideDescription>
       {currentView && (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           <CalendarNavigation
