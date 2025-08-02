@@ -63,6 +63,18 @@ export function MarkdownEditableBox({
     onChange?.(updated);
   };
 
+  const renderedRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!renderedRef.current) return;
+    const links = renderedRef.current.querySelectorAll('a');
+
+    links.forEach(link => {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+    });
+  }, [markdown, isEditing]);
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(markdown);
@@ -141,7 +153,7 @@ export function MarkdownEditableBox({
           onBlur={finishEditing}
         />
       ) : (
-        <Stack>
+        <Stack ref={renderedRef}>
           {hasContent ? (
             renderMarkdown(markdown, handleToggle)
           ) : (

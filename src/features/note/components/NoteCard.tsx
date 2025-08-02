@@ -1,6 +1,7 @@
-import { alpha, Card, CardContent, Typography, useTheme } from '@mui/material';
+import { alpha, Card, CardContent, Stack, Typography, useTheme } from '@mui/material';
 
 import { Note } from '@/features/note/types/Note';
+import { CustomSyncIcon } from '@/legacy/components/CustomSyncIcon';
 import { customColors } from '@/legacy/styles/colors';
 import { transitions } from '@/legacy/styles/transitions';
 import { parseSafeHtml } from '@/legacy/utils/textUtils';
@@ -34,9 +35,12 @@ export function NoteCard({ note, onEdit }: NoteCardProps) {
       onClick={() => onEdit(note)}
     >
       <CardContent sx={{ overflow: 'hidden' }}>
-        <Typography variant="h6" gutterBottom noWrap>
-          {note.title || 'Untitled Note'}
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+          <CustomSyncIcon isSynced={note.isSynced} />
+          <Typography variant="h6" noWrap>
+            {note.title || 'Untitled Note'}
+          </Typography>
+        </Stack>
 
         {note.content.length === 0 ? (
           <Typography variant="body2" color="text.secondary">

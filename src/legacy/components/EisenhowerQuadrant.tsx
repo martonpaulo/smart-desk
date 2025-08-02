@@ -11,6 +11,7 @@ import { alpha, darken, IconButton, Paper, Stack, Typography, useTheme } from '@
 import { TaskCard } from '@/legacy/components/task/TaskCard';
 import { TaskModal } from '@/legacy/components/task/TaskModal';
 import { Task } from '@/legacy/types/task';
+import { CountChip } from '@/shared/components/CountChip';
 
 interface EisenhowerQuadrantProps {
   title: string;
@@ -51,6 +52,8 @@ export function EisenhowerQuadrant({
 }: EisenhowerQuadrantProps) {
   const theme = useTheme();
   const [openTaskModal, setOpenTaskModal] = useState(false);
+
+  const tasksCount = tasks.length;
 
   // Set default icon
   let Icon: ElementType = AlertIcon;
@@ -93,12 +96,14 @@ export function EisenhowerQuadrant({
           position: 'relative',
         }}
       >
-        <Stack direction="row" alignItems="center" gap={1} mb={1}>
+        <Stack direction="row" alignItems="center" gap={1} mb={2}>
           {hasIcon && <Icon color={iconColor} fontSize={iconSize} />}
 
           <Typography variant="h6" sx={{ color: quadrantColor }}>
             {title}
           </Typography>
+
+          <CountChip count={tasksCount} color={quadrantColor} />
         </Stack>
 
         {!isDragInProgress && (

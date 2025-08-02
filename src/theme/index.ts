@@ -62,6 +62,14 @@ export const theme = createTheme({
         '*, *::before, *::after': {
           touchAction: 'manipulation',
         },
+        code: {
+          fontFamily: 'var(--font-code), monospace',
+          letterSpacing: '-0.06em',
+        },
+        pre: {
+          fontFamily: 'var(--font-code), monospace',
+          letterSpacing: '-0.06em',
+        },
       },
     },
     MuiChip: {

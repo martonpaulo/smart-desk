@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { Add as AddIcon } from '@mui/icons-material';
 import {
@@ -18,7 +18,6 @@ import { EventModal } from '@/features/event/components/EventModal';
 import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
 import { Event as LocalEvent } from '@/features/event/types/Event';
 import { EventListItem } from '@/legacy/components/event/EventListItem';
-import { useEventListPrefsStore } from '@/legacy/store/eventListPrefsStore';
 import { Event } from '@/legacy/types/Event';
 import {
   filterCurrentOrFutureEvents,
@@ -31,11 +30,6 @@ import { theme } from '@/theme';
 
 export function EventList({ events }: { events: Event[] | null }) {
   const isMobile = useResponsiveness();
-  const storedWidth = useEventListPrefsStore(state => state.width);
-  const setStoredWidth = useEventListPrefsStore(state => state.setWidth);
-  const [width, setWidth] = useState(350);
-  const startX = useRef(0);
-  const startWidth = useRef(0);
 
   const localEvents = useLocalEventsStore(s => s.items);
   const { enqueueSnackbar } = useSnackbar();
@@ -49,32 +43,6 @@ export function EventList({ events }: { events: Event[] | null }) {
 
   const columnColor = alpha(theme.palette.primary.light, 0.2);
   const darkenColor = alpha(theme.palette.primary.light, 0.4);
-
-  const onMouseMove = (e: MouseEvent) => {
-    const delta = e.clientX - startX.current;
-    const newWidth = Math.max(200, startWidth.current + delta);
-    setWidth(newWidth);
-  };
-
-  const stopResize = (e: MouseEvent) => {
-    const delta = e.clientX - startX.current;
-    const finalWidth = Math.max(200, startWidth.current + delta);
-    setWidth(finalWidth);
-    setStoredWidth(finalWidth);
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', stopResize);
-  };
-
-  const startResize = (e: React.MouseEvent<HTMLDivElement>) => {
-    startX.current = e.clientX;
-    startWidth.current = width;
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', stopResize);
-  };
-
-  useEffect(() => {
-    setWidth(storedWidth);
-  }, [storedWidth]);
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -179,17 +147,6 @@ export function EventList({ events }: { events: Event[] | null }) {
           event={editingEvent ?? undefined}
         />
       </Stack>
-      {!isMobile && (
-        <Box
-          onMouseDown={startResize}
-          sx={{
-            width: theme => theme.spacing(0.5),
-            cursor: 'col-resize',
-            ml: 0.5,
-            userSelect: 'none',
-          }}
-        />
-      )}
     </Box>
   );
 }

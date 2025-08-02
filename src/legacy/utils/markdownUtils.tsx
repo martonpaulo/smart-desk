@@ -1,10 +1,10 @@
 import { ReactElement } from 'react';
 
-import { Box, Checkbox, List, ListItem, ListItemIcon, Typography } from '@mui/material';
+import { Box, Checkbox, List, ListItem, ListItemIcon, Stack, Typography } from '@mui/material';
 
 import { parseSafeHtml } from '@/legacy/utils/textUtils';
 
-type ListType = 'ul' | 'ol';
+type ListType = 'ul' | 'ol' | 'checkbox';
 
 const escapeMap: Record<string, string> = {
   '*': '␟AST␟',
@@ -56,11 +56,32 @@ export function normalizeText(text: string): string {
   normalizedText = normalizedText.replace(/(?<!\\)<\-(?!-)/g, '←');
 
   // Checkboxes: [ ] and [x]
-  normalizedText = normalizedText.replace(/(?<!\\)\[\s*\]/g, '[ ]');
-  normalizedText = normalizedText.replace(/(?<!\\)\[\s*x\s*\]/g, '[x]');
+  normalizedText = normalizedText.replace(/^\s*-?\s*\[\s*x\s*\]\s*(.*)$/gim, '- [x] $1');
+  normalizedText = normalizedText.replace(/^\s*-?\s*\[\s*\]\s*(.*)$/gm, '- [ ] $1');
+
+  // Unordered list (e.g., + item or - item)
+  normalizedText = normalizedText.replace(/^\s*[+-]\s+(.*)$/gm, '- $1');
 
   // Line endings: \r\n and \r → \n
   normalizedText = normalizedText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  // Normalize ordered lists: e.g., "5. item" → renumbered from 1.
+  const lines = normalizedText.split('\n');
+  let olCount = 1;
+
+  normalizedText = lines
+    .map(line => {
+      if (/^\s*\d+\.\s+/.test(line)) {
+        const textOnly = line.replace(/^\s*\d+\.\s+/, '');
+        const result = `${olCount}. ${textOnly}`;
+        olCount++;
+        return result;
+      } else {
+        olCount = 1;
+        return line;
+      }
+    })
+    .join('\n');
 
   // Step 2: Restore escapes
   normalizedText = restoreEscapes(normalizedText);
@@ -100,11 +121,11 @@ function inlineToHtml(text: string): string {
   // Image: ![alt](url) → <img src="url" alt="alt" />
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />');
 
-  // Link: [text](url) → <a href="url">text</a>
+  // Link: [text](url) → <a href="url" target="_blank" rel="noopener noreferrer">text</a>
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 
-  // Internal link: #link → <a href="/link">link</a>
-  html = html.replace(/#([\w/\-]+)/g, '<a href="/$1">#$1</a>');
+  // Internal link: #link → <a href="/link">#link</a>
+  html = html.replace(/#([\w/=?&\-]+)/g, '<a href="/$1" style="text-decoration: none">#$1</a>');
 
   // Step 2: Restore escapes
   html = html.replace(/<(code)>[\s\S]*?<\/\1>/g, match => match); // do nothing to <code>
@@ -127,7 +148,7 @@ export function renderMarkdown(
   const flushList = () => {
     if (!currentList) return;
     elements.push(
-      <List key={`list-${elements.length}`} disablePadding>
+      <List key={`list-${elements.length}`} sx={{ paddingY: 0.25 }}>
         {currentList.items}
       </List>,
     );
@@ -142,19 +163,21 @@ export function renderMarkdown(
     if (checkboxMatch) {
       const [, , mark, content] = checkboxMatch;
       const checked = mark.toLowerCase() === 'x';
-      if (!currentList || currentList.type !== 'ul') {
+      if (!currentList || currentList.type !== 'checkbox') {
         flushList();
-        currentList = { type: 'ul', items: [] };
+        currentList = { type: 'checkbox', items: [] };
       }
       currentList.items.push(
-        <ListItem key={idx} disablePadding>
-          <ListItemIcon sx={{ minWidth: 0, pr: 1 }}>
-            <Checkbox
-              size="small"
-              checked={checked}
-              onChange={() => onToggle?.(idx)}
-              sx={{ p: 0 }}
-            />
+        <ListItem key={idx} disablePadding sx={{ display: 'flex', alignItems: 'flex-start' }}>
+          <ListItemIcon sx={{ minWidth: 0, pr: 0.5 }}>
+            <Stack width="1.5rem" height="1.5rem" justifyContent="center" alignItems="center">
+              <Checkbox
+                size="small"
+                checked={checked}
+                onChange={() => onToggle?.(idx)}
+                sx={{ p: 0 }}
+              />
+            </Stack>
           </ListItemIcon>
 
           <Typography
@@ -172,16 +195,18 @@ export function renderMarkdown(
         currentList = { type: 'ul', items: [] };
       }
       currentList.items.push(
-        <ListItem key={idx} disablePadding>
-          <ListItemIcon sx={{ minWidth: 0, pl: 0.5, pr: 1.5 }}>
-            <Box
-              sx={{
-                width: '0.35rem',
-                height: '0.35rem',
-                borderRadius: '50%',
-                backgroundColor: '#000',
-              }}
-            />
+        <ListItem key={idx} disablePadding sx={{ display: 'flex', alignItems: 'flex-start' }}>
+          <ListItemIcon sx={{ minWidth: 0, pr: 0.5 }}>
+            <Stack width="1.5rem" height="1.5rem" justifyContent="center" alignItems="center">
+              <Box
+                sx={{
+                  width: '0.3rem',
+                  height: '0.3rem',
+                  borderRadius: '50%',
+                  backgroundColor: 'text.primary',
+                }}
+              />
+            </Stack>
           </ListItemIcon>
           <Typography component="span">{parseSafeHtml(inlineToHtml(ulMatch[1]))}</Typography>
         </ListItem>,
@@ -191,17 +216,20 @@ export function renderMarkdown(
         flushList();
         currentList = { type: 'ol', items: [] };
       }
+
+      const number = currentList.items.length + 1;
+
       currentList.items.push(
-        <ListItem
-          key={idx}
-          disablePadding
-          sx={{
-            display: 'list-item',
-            listStylePosition: 'inside',
-            listStyleType: 'decimal',
-            paddingLeft: 0.5,
-          }}
-        >
+        <ListItem key={idx} disablePadding sx={{ display: 'flex', alignItems: 'flex-start' }}>
+          <ListItemIcon sx={{ minWidth: 0, pr: 0.5 }}>
+            <Typography
+              fontWeight="500"
+              sx={{ width: '1.5rem', textAlign: 'center' }}
+              color="text.primary"
+            >
+              {number}.
+            </Typography>
+          </ListItemIcon>
           <Typography component="span">{parseSafeHtml(inlineToHtml(olMatch[1]))}</Typography>
         </ListItem>,
       );
@@ -210,19 +238,19 @@ export function renderMarkdown(
       // Handle headings and plain text
       if (/^### /.test(line)) {
         elements.push(
-          <Typography key={idx} variant="h6" fontWeight="bold">
+          <Typography key={idx} variant="h6" fontWeight="bold" fontSize={'1.125rem'}>
             {parseSafeHtml(inlineToHtml(line.slice(4)))}
           </Typography>,
         );
       } else if (/^## /.test(line)) {
         elements.push(
-          <Typography key={idx} variant="h5" fontWeight="bold">
+          <Typography key={idx} variant="h5" fontWeight="bold" fontSize={'1.25rem'}>
             {parseSafeHtml(inlineToHtml(line.slice(3)))}
           </Typography>,
         );
       } else if (/^# /.test(line)) {
         elements.push(
-          <Typography key={idx} variant="h4" fontWeight="bold">
+          <Typography key={idx} variant="h4" fontWeight="bold" fontSize={'1.5rem'}>
             {parseSafeHtml(inlineToHtml(line.slice(2)))}
           </Typography>,
         );

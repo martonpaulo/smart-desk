@@ -13,7 +13,7 @@ import { LocationProvider } from '@/legacy/providers/LocationProvider';
 import { ReactQueryProvider } from '@/legacy/providers/ReactQueryProvider';
 import { ZoomProvider } from '@/legacy/providers/ZoomProvider';
 import { SnackbarWrapperProvider } from '@/shared/providers/SnackbarWrapperProvider';
-import { poppins } from '@/theme/fonts';
+import { jetbrainsMono, poppins } from '@/theme/fonts';
 
 import '@/legacy/lib/dragDropTouch';
 
@@ -43,7 +43,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <meta name="apple-mobile-web-app-title" content="Smart Desk" />
       </head>
 
-      <body suppressHydrationWarning className={poppins.variable}>
+      <body suppressHydrationWarning className={`${poppins.variable} ${jetbrainsMono.variable}`}>
         {providers.reduceRight((acc, Provider) => {
           return <Provider>{acc}</Provider>;
         }, children)}
