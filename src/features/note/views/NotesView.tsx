@@ -20,7 +20,9 @@ export function NotesView() {
   const updateNote = useNotesStore(s => s.update);
 
   // Filter out deleted notes
-  const notes = allNotes.filter(note => !note.trashed);
+  const notes = allNotes
+    .filter(note => !note.trashed)
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   const router = useRouter();
   const searchParams = useSearchParams();
