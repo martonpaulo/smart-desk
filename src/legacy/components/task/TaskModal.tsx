@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Button, Checkbox, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { isSameDay } from 'date-fns';
+import { Checkbox, MenuItem, Stack, TextField, Typography } from '@mui/material';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { useBoardStore } from '@/legacy/store/board/store';
 import { Task } from '@/legacy/types/task';
-import { formatDuration, parseDuration, toLocalDateString } from '@/legacy/utils/timeUtils';
+import { formatDuration, parseDuration } from '@/legacy/utils/timeUtils';
 import { CustomDialog } from '@/shared/components/CustomDialog';
+import { DateInput } from '@/shared/components/DateInput';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
 
 // all form fields in one object for easy compare
@@ -88,9 +88,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       form.important !== init.important ||
       form.urgent !== init.urgent ||
       form.blocked !== init.blocked ||
-      (form.plannedDate instanceof Date &&
-        init.plannedDate instanceof Date &&
-        !isSameDay(form.plannedDate, init.plannedDate)) ||
+      form.plannedDate !== init.plannedDate ||
       form.estimatedTime !== init.estimatedTime ||
       form.tagId !== init.tagId
     );
@@ -135,13 +133,10 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
     });
   };
 
-  const today = new Date();
-
-  const disableTodayButton =
-    form.plannedDate instanceof Date &&
-    form.plannedDate.getDate() === today.getDate() &&
-    form.plannedDate.getMonth() === today.getMonth() &&
-    form.plannedDate.getFullYear() === today.getFullYear();
+  const handleDateChange = (value: Date | null) => {
+    console.log('Date changed:', value);
+    setForm(prev => ({ ...prev, plannedDate: value ?? undefined }));
+  };
 
   return (
     <CustomDialog
@@ -176,56 +171,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       </Stack>
 
       {/* Planned date input */}
-
-      <Stack direction="row" spacing={2} alignItems="center">
-        {/* Planned date selector */}
-        <TextField
-          label="Planned Date"
-          type="date"
-          fullWidth
-          value={
-            form.plannedDate instanceof Date
-              ? toLocalDateString(form.plannedDate)
-              : (form.plannedDate ?? '')
-          }
-          onChange={e => {
-            const val = e.target.value;
-            setForm(prev => ({
-              ...prev,
-              // avoid UTC shift by creating date with explicit time
-              plannedDate: val ? new Date(val + 'T00:00:00') : undefined,
-            }));
-          }}
-          slotProps={{
-            inputLabel: { shrink: true },
-            htmlInput: {
-              min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-                .toISOString()
-                .split('T')[0],
-            },
-          }}
-        />
-
-        <Button
-          variant="contained"
-          disableElevation
-          size="large"
-          disabled={disableTodayButton}
-          onClick={() => setForm(prev => ({ ...prev, plannedDate: new Date() }))}
-          sx={{ ml: 1 }}
-        >
-          Today
-        </Button>
-        <Button
-          variant="outlined"
-          size="large"
-          disabled={!form.plannedDate}
-          onClick={() => setForm(prev => ({ ...prev, plannedDate: undefined }))}
-          sx={{ ml: 1 }}
-        >
-          Clear
-        </Button>
-      </Stack>
+      <DateInput label="Planned Date" value={form.plannedDate} onChange={handleDateChange} />
 
       <TextField
         select

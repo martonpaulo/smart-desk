@@ -10,7 +10,6 @@ import {
   Paper,
   Select,
   Stack,
-  TextField,
   ToggleButton,
   ToggleButtonGroup,
   useTheme,
@@ -22,6 +21,7 @@ import type { BulkTaskActions } from '@/features/task/hooks/useBulkTaskEdit';
 import { useBulkTaskEdit } from '@/features/task/hooks/useBulkTaskEdit';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { formatDuration, parseDuration } from '@/legacy/utils/timeUtils';
+import { DateInput } from '@/shared/components/DateInput';
 
 export interface TaskSelectionToolbarProps {
   totalCount: number;
@@ -166,13 +166,7 @@ export function TaskSelectionToolbar({
 
             <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
               <span>Date</span>
-              <TextField
-                type="date"
-                size="small"
-                slotProps={{ inputLabel: { shrink: true } }}
-                value={dateValue}
-                onChange={e => setDateValue(e.target.value)}
-              />
+              <DateInput label="Planned Date" value={dateValue} onChange={setDateValue} />
             </Stack>
 
             <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>

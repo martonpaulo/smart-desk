@@ -15,6 +15,7 @@ import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { clearedFilters } from '@/features/task/constants/clearedFilters';
 import { TaskFilters } from '@/features/task/types/TaskFilters';
+import { DateInput } from '@/shared/components/DateInput';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 interface TaskFilterPanelProps {
@@ -37,11 +38,6 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
     setLocalFilters(filters);
   }, [filters]);
 
-  const parseDateAtNoon = (isoDate: string): Date => {
-    const [year, month, day] = isoDate.split('-').map(Number);
-    return new Date(year, month - 1, day, 12, 0, 0);
-  };
-
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value.trim();
     setLocalFilters({
@@ -50,11 +46,10 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
     });
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleDateChange = (date: Date | null) => {
     setLocalFilters({
       ...localFilters,
-      plannedDate: value ? parseDateAtNoon(value) : null,
+      plannedDate: date,
     });
   };
 
@@ -132,15 +127,9 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
             onChange={handleTitleChange}
           />
 
-          <TextField
+          <DateInput
             label="Planned Date"
-            type="date"
-            size="small"
-            sx={{ width: isMobile ? '100%' : 200 }}
-            slotProps={{ inputLabel: { shrink: true } }}
-            value={
-              localFilters.plannedDate ? localFilters.plannedDate.toISOString().slice(0, 10) : ''
-            }
+            value={localFilters.plannedDate}
             onChange={handleDateChange}
           />
         </Stack>

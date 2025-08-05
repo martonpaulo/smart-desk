@@ -28,7 +28,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
   const [done, setDone] = useState<TaskSelectAction>('none');
   const [tagAction, setTagAction] = useState<TaskSelectAction>('none');
   const [tagId, setTagId] = useState<string>('');
-  const [dateValue, setDateValue] = useState<string>('');
+  const [dateValue, setDateValue] = useState<Date | null>(null);
   const [timeValue, setTimeValue] = useState<number | null>(null);
 
   const anyAction =
@@ -39,7 +39,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
     trashed !== 'none' ||
     done !== 'none' ||
     tagAction === 'select' ||
-    dateValue !== '' ||
+    dateValue !== null ||
     timeValue !== null;
 
   function resetForm(): void {
@@ -51,7 +51,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
     setDone('none');
     setTagAction('none');
     setTagId('');
-    setDateValue('');
+    setDateValue(null);
     setTimeValue(null);
   }
 
