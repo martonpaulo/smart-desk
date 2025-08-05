@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
-import { useTagsStore } from '@/features/tag/store/TagsStore';
+import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import type { BulkTaskActions } from '@/features/task/hooks/useBulkTaskEdit';
 import { useBulkTaskEdit } from '@/features/task/hooks/useBulkTaskEdit';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';

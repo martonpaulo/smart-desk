@@ -4,7 +4,7 @@ import { Button, Checkbox, MenuItem, Stack, TextField, Typography } from '@mui/m
 import { isSameDay } from 'date-fns';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
-import { useTagsStore } from '@/features/tag/store/TagsStore';
+import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { useBoardStore } from '@/legacy/store/board/store';
 import { Task } from '@/legacy/types/task';

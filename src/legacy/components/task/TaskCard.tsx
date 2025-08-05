@@ -6,7 +6,7 @@ import { DescriptionOutlined as NotesIcon } from '@mui/icons-material';
 import { BoxProps, Checkbox, Stack, Tooltip, useTheme } from '@mui/material';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
-import { useTagsStore } from '@/features/tag/store/TagsStore';
+import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { IncrementButton } from '@/features/task/components/IncrementButton';
 import { MarkAsDoneButton } from '@/features/task/components/MarkAsDoneButton';
 import { ResetButton } from '@/features/task/components/ResetButton';

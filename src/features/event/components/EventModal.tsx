@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
 import { DateTime } from 'luxon';
 
-import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
+import { useLocalEventsStore } from '@/features/event/store/useLocalEventsStore';
 import { Event } from '@/features/event/types/Event';
 import { CustomDialog } from '@/shared/components/CustomDialog';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';

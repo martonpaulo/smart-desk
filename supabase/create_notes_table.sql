@@ -1,13 +1,14 @@
 create extension if not exists "uuid-ossp";
 
 create table if not exists public.notes (
-  id uuid primary key,
+  id uuid primary key default uuid_generate_v4(),
   user_id uuid references auth.users not null,
   title text,
   content text,
+  color text,
   trashed boolean not null default false,
-  updated_at timestamptz not null,
-  created_at timestamptz not null
+  updated_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
 );
 
 alter table public.notes enable row level security;

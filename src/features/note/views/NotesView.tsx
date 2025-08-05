@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { PageSection } from '@/core/components/PageSection';
 import { NoteCard } from '@/features/note/components/NoteCard';
 import { NoteModal } from '@/features/note/components/NoteModal';
-import { useNotesStore } from '@/features/note/store/NotesStore';
+import { useNotesStore } from '@/features/note/store/useNotesStore';
 import { Note } from '@/features/note/types/Note';
 
 const NOTES_PER_PAGE = 9;

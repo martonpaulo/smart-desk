@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { useNotesStore } from '@/features/note/store/NotesStore';
+import { useNotesStore } from '@/features/note/store/useNotesStore';
 import { Note } from '@/features/note/types/Note';
 import { ColorPicker } from '@/shared/components/ColorPicker';
 import { CustomDialog } from '@/shared/components/CustomDialog';

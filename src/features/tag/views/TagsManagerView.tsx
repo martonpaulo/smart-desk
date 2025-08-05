@@ -8,7 +8,7 @@ import { Button, IconButton, Stack, Typography } from '@mui/material';
 
 import { PageSection } from '@/core/components/PageSection';
 import { TagLabel } from '@/features/tag/components/TagLabel';
-import { useTagsStore } from '@/features/tag/store/TagsStore';
+import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { Tag } from '@/features/tag/types/Tag';
 import { TagModal } from '@/legacy/components/TagModal';
 import { useBoardStore } from '@/legacy/store/board/store';

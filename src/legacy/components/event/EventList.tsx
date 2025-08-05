@@ -15,7 +15,7 @@ import {
 import { useSnackbar } from 'notistack';
 
 import { EventModal } from '@/features/event/components/EventModal';
-import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
+import { useLocalEventsStore } from '@/features/event/store/useLocalEventsStore';
 import { Event as LocalEvent } from '@/features/event/types/Event';
 import { EventListItem } from '@/legacy/components/event/EventListItem';
 import { Event } from '@/legacy/types/Event';

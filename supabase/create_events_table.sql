@@ -1,7 +1,7 @@
 create extension if not exists "uuid-ossp";
 
 create table if not exists public.events (
-  id uuid primary key,
+  id uuid primary key default uuid_generate_v4(),
   user_id uuid references auth.users not null,
   start_time timestamptz not null,
   end_time timestamptz not null,
@@ -12,8 +12,8 @@ create table if not exists public.events (
   acknowledged boolean not null default false,
   -- recurrence_id uuid references public.events on delete cascade,
   trashed boolean not null default false,
-  updated_at timestamptz not null,
-  created_at timestamptz not null
+  updated_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
 );
 
 alter table public.events enable row level security;

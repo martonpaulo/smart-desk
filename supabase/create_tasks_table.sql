@@ -1,7 +1,7 @@
 create extension if not exists "uuid-ossp";
 
 create table if not exists public.tasks (
-  id uuid primary key,
+  id uuid primary key default uuid_generate_v4(),
   user_id uuid references auth.users not null,
   title text not null,
   notes text default null,
@@ -17,8 +17,8 @@ create table if not exists public.tasks (
   column_id uuid references columns(id) not null,
   tag_id uuid references tags(id) default null,
   trashed boolean not null default false,
-  updated_at timestamptz not null,
-  created_at timestamptz not null
+  updated_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
 );
 
 alter table public.tasks enable row level security;

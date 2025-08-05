@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { useLocalEventsStore } from '@/features/event/store/LocalEventsStore';
+import { useLocalEventsStore } from '@/features/event/store/useLocalEventsStore';
 import { useGoogleEvents } from '@/legacy/hooks/useGoogleEvents';
 import { useIcsEvents } from '@/legacy/hooks/useIcsEvents';
 import { useEventStore } from '@/legacy/store/eventStore';

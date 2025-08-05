@@ -54,6 +54,7 @@
     "luxon": "^3.6.1",
     "next": "15.3.3",
     "next-auth": "^4.24.11",
+    "next-cloudinary": "^6.16.0",
     "node-ical": "^0.20.1",
     "notistack": "^3.0.2",
     "openmeteo": "^1.2.0",

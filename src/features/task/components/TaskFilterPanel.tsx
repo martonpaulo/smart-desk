@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
-import { useTagsStore } from '@/features/tag/store/TagsStore';
+import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { clearedFilters } from '@/features/task/constants/clearedFilters';
 import { TaskFilters } from '@/features/task/types/TaskFilters';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
