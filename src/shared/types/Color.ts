@@ -1,4 +1,4 @@
-export enum Color {
+export enum ColorKey {
   Red = 'red',
   Pink = 'pink',
   Purple = 'purple',
@@ -20,11 +20,11 @@ export enum Color {
   Black = 'black',
 }
 
-export type ColorOption = {
+export type CustomColor = {
   label: string;
   value: string;
 };
 
 export type ColorMap = {
-  [key in Color]: ColorOption;
+  [key in ColorKey]: CustomColor;
 };

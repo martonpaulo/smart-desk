@@ -58,7 +58,7 @@ export function NoteModal({ open, initial, onSave, onClose }: NoteModalProps) {
       titlePlaceholder="What do you want to write about?"
       titleLimit={32}
     >
-      <ColorPicker value={color} onChange={setColor} />
+      <ColorPicker value={color} onChange={e => setColor(e.target.value)} />
 
       <MarkdownEditableBox
         label="Note Content"

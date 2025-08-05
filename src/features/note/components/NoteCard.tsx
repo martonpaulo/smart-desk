@@ -29,10 +29,10 @@ export function NoteCard({ note, onEdit }: NoteCardProps) {
         flexDirection: 'column',
         justifyContent: 'space-between',
         cursor: 'pointer',
-        '&:hover': transitions.grow,
         boxShadow: theme.shadows[1],
         backgroundColor: alpha(color, 0.1),
         borderColor: alpha(color, 0.2),
+        ...transitions.grow.small,
       }}
       onClick={() => onEdit(note)}
     >
