@@ -46,6 +46,7 @@
     "@tanstack/react-query-persist-client": "^5.80.7",
     "axios": "^1.10.0",
     "babel-plugin-react-compiler": "^19.1.0-rc.2",
+    "cloudinary": "^2.7.0",
     "date-fns": "^4.1.0",
     "dompurify": "^3.2.6",
     "howler": "^2.2.4",
