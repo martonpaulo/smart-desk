@@ -29,17 +29,18 @@ export function useEvents(start?: Date, end?: Date) {
   const isLoading = loadingGoogle || loadingIcs;
   const bothFailed = Boolean(errorGoogle && errorIcs);
   const firstError = googleError ?? icsError;
-  const canonical =
-    canonicalEvents.length > 0 ? canonicalEvents.filter(item => !item.trashed) : null;
 
   useEffect(() => {
     if (isLoading) return;
     if (bothFailed) return;
 
+    const filteredCanonical =
+      canonicalEvents.length > 0 ? canonicalEvents.filter(item => !item.trashed) : null;
+
     const combined = [
       ...(errorGoogle ? [] : googleEvents),
       ...(errorIcs ? [] : icsEvents),
-      ...(canonical ? canonical.map(mapToLegacyEvent) : []),
+      ...(filteredCanonical ? filteredCanonical.map(mapToLegacyEvent) : []),
     ];
 
     if (combined.length > 0) setRemoteEvents(combined);
@@ -52,7 +53,6 @@ export function useEvents(start?: Date, end?: Date) {
     setRemoteEvents,
     bothFailed,
     canonicalEvents,
-    canonical,
   ]);
 
   function refetchAll() {

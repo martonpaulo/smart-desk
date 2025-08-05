@@ -4,6 +4,7 @@ import BuildIcon from '@mui/icons-material/Build';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import HomeIcon from '@mui/icons-material/Home';
+import ImageIcon from '@mui/icons-material/Image';
 import TagsIcon from '@mui/icons-material/LocalOffer';
 import MapIcon from '@mui/icons-material/Map';
 import NotesIcon from '@mui/icons-material/Notes';
@@ -17,6 +18,7 @@ export const routes = {
     { label: 'All Tasks', href: '/tasks', icon: <TaskAltIcon />, showOnMobile: true },
     { label: 'Matrix', href: '/matrix', icon: <DashboardIcon />, showOnMobile: false },
     { label: 'Calendar', href: '/calendar', icon: <CalendarTodayIcon />, showOnMobile: true },
+    { label: 'Gallery', href: '/gallery', icon: <ImageIcon />, showOnMobile: false },
     { label: 'Maps', href: '/maps', icon: <MapIcon />, showOnMobile: false },
     { label: 'Notes', href: '/notes', icon: <NotesIcon />, showOnMobile: true },
   ],

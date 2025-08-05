@@ -23,6 +23,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "open": "sleep 5 && open http://localhost:3000 &",
+    "local": "npm run dev && npm run open",
     "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
     "format": "prettier --write \"**/*.{ts,tsx,json}\"",
     "fix": "prettier --write \"**/*.{ts,tsx,json}\" --log-level silent && eslint 'src/**/*.{ts,tsx}' --fix",
