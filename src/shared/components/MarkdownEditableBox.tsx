@@ -43,9 +43,11 @@ export function MarkdownEditableBox({
   }, [isEditing]);
 
   const finishEditing = useCallback(() => {
-    setMarkdown(normalizeText(value));
+    const normalized = normalizeText(markdown);
+    setMarkdown(normalized);
+    onChange?.(normalized);
     setIsEditing(false);
-  }, [value]);
+  }, [markdown, onChange]);
 
   const handleToggle = (lineIndex: number) => {
     const lines = markdown.split(/\r?\n/);
