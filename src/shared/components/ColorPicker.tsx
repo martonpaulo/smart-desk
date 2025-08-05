@@ -1,161 +1,165 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 
 import {
   Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  InputAdornment,
+  Popover,
   Stack,
+  TextField,
+  type TextFieldProps,
+  Tooltip,
   Typography,
 } from '@mui/material';
 
 import { customColors } from '@/legacy/styles/colors';
+import { transitions } from '@/legacy/styles/transitions';
+import type { CustomColor } from '@/shared/types/Color';
 
-interface ColorPickerProps {
-  value: string;
-  onChange: (value: string) => void;
-}
+export function ColorPicker(props: TextFieldProps) {
+  const {
+    label = 'Color',
+    placeholder = 'Select a color',
+    value = '',
+    onChange,
+    onClick,
+    slotProps = {},
+    sx,
+    ...rest
+  } = props;
 
-export function ColorPicker({ value, onChange }: ColorPickerProps) {
-  // currently selected color (from props)
-  const [selectedColor, setSelectedColor] = useState<string>(value);
-  // temporary color inside modal
-  const [tempColor, setTempColor] = useState<string>(value);
-  // modal open state
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedColor, setSelectedColor] = useState(value as string);
 
-  // sync state when parent value changes
   useEffect(() => {
-    setSelectedColor(value);
-    setTempColor(value);
+    setSelectedColor(value as string);
   }, [value]);
 
-  // list of [key, { label, value }]
-  const entries = Object.entries(customColors) as [string, { label: string; value: string }][];
+  const entries = Object.entries(customColors) as [string, CustomColor][];
+  const selectedEntry = entries.find(([, c]) => c.value === selectedColor)?.[1];
 
-  // find display info
-  const selectedEntry = entries.find(([, c]) => c.value === selectedColor);
-  const tempEntry = entries.find(([, c]) => c.value === tempColor);
-
-  // open modal
-  const openModal = () => {
-    setTempColor(selectedColor);
-    setModalOpen(true);
+  const handleOpen = (e: MouseEvent<HTMLElement>) => {
+    setAnchorEl(e.currentTarget);
+    onClick?.(e as MouseEvent<HTMLDivElement>);
   };
+  const handleClose = () => setAnchorEl(null);
 
-  // close without applying
-  const closeModal = () => {
-    setModalOpen(false);
-  };
+  const handleSelect = useCallback(
+    (color: string) => {
+      setSelectedColor(color);
+      handleClose();
+      if (onChange) {
+        const ev = {
+          target: { name: props.name, value: color },
+        } as ChangeEvent<HTMLInputElement>;
+        onChange(ev);
+      }
+    },
+    [onChange, props.name],
+  );
 
-  // apply selection and notify parent
-  const applySelection = () => {
-    setSelectedColor(tempColor);
-    onChange(tempColor);
-    setModalOpen(false);
+  // build input props once
+  const inputSlot = {
+    placeholder: selectedEntry ? undefined : placeholder, // only when nothing selected
+    readOnly: true,
+    startAdornment: selectedEntry ? (
+      <InputAdornment position="start">
+        <Box
+          width={24}
+          height={24}
+          bgcolor={selectedEntry.value}
+          border="1px solid"
+          borderColor="grey.400"
+          borderRadius={1}
+        />
+      </InputAdornment>
+    ) : undefined,
+    endAdornment: selectedEntry ? (
+      <InputAdornment position="end">
+        <Typography variant="caption" color="text.secondary">
+          {selectedEntry.value.toUpperCase()}
+        </Typography>
+      </InputAdornment>
+    ) : undefined,
   };
 
   return (
     <>
-      {/* Button showing current color */}
-      <Button
-        variant="outlined"
-        onClick={openModal}
-        sx={{
-          textTransform: 'none',
-          justifyContent: 'flex-start',
-          px: 1,
-          py: 0.5,
+      <TextField
+        {...rest}
+        fullWidth
+        label={label}
+        value={selectedEntry?.label || ''}
+        onClick={handleOpen}
+        slotProps={{
+          ...slotProps,
+          input: {
+            ...slotProps.input,
+            ...inputSlot,
+          },
         }}
+        sx={{
+          '& .MuiInputAdornment-root': { cursor: 'pointer' },
+          '& .MuiInputBase-root': { cursor: 'pointer' },
+          input: { cursor: 'pointer' },
+          ...sx,
+        }}
+      />
+
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        {selectedEntry && (
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Box
-              sx={{
-                width: 24,
-                height: 24,
-                bgcolor: selectedEntry[1].value,
-                border: '1px solid',
-                borderColor: 'grey.400',
-                borderRadius: 0.5,
+        <Stack display="grid" gridTemplateColumns="repeat(5, 1fr)" gap={1} p={1}>
+          {entries.map(([key, c]) => (
+            <Tooltip
+              key={key}
+              title={c.label}
+              placement="bottom"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    bgcolor: 'grey.900',
+                    color: 'common.white',
+                    '& .MuiTooltip-arrow': { color: 'grey.900' },
+                  },
+                },
+                popper: {
+                  modifiers: [
+                    { name: 'offset', options: { offset: [0, -10] } },
+                    { name: 'preventOverflow', options: { padding: 0 } },
+                  ],
+                },
               }}
-            />
-            <Stack>
-              <Typography variant="body2">{selectedEntry[1].label}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                {selectedEntry[1].value}
-              </Typography>
-            </Stack>
-          </Stack>
-        )}
-      </Button>
-
-      {/* Modal dialog with grid */}
-      <Dialog open={isModalOpen} onClose={closeModal} maxWidth="mobileSm" fullWidth>
-        <DialogTitle>Pick color</DialogTitle>
-        <DialogContent>
-          {/* grid of swatches */}
-          <Stack display="grid" gridTemplateColumns="repeat(5, 1fr)" gap={1}>
-            {entries.map(([key, { value: colorValue }]) => {
-              const isActive = colorValue === tempColor;
-              return (
-                <Box
-                  key={key}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setTempColor(colorValue)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      setTempColor(colorValue);
-                    }
-                  }}
-                  sx={{
-                    width: '100%',
-                    height: 40,
-                    bgcolor: colorValue,
-                    borderRadius: 1,
-                    border: isActive ? '3px solid' : '1px solid',
-                    borderColor: isActive ? 'primary.main' : 'grey.400',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease',
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                    },
-                  }}
-                />
-              );
-            })}
-          </Stack>
-
-          {/* preview of temporary selection */}
-          {tempEntry && (
-            <Stack direction="row" alignItems="center" spacing={1} mt={2}>
+            >
               <Box
+                component="button"
+                type="button"
+                onClick={() => handleSelect(c.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleSelect(c.value);
+                  }
+                }}
+                tabIndex={0}
+                width={40}
+                height={40}
+                borderRadius={1}
+                border={c.value === selectedColor ? '2px solid' : '1px solid'}
+                borderColor={c.value === selectedColor ? 'primary.main' : 'grey.400'}
                 sx={{
-                  width: 24,
-                  height: 24,
-                  bgcolor: tempEntry[1].value,
-                  border: '1px solid',
-                  borderColor: 'grey.400',
-                  borderRadius: 0.5,
+                  bgcolor: c.value,
+                  cursor: 'pointer',
+                  ...transitions.grow.large,
                 }}
               />
-              <Typography>{tempEntry[1].label}</Typography>
-              <Typography color="text.secondary">{tempEntry[1].value}</Typography>
-            </Stack>
-          )}
-        </DialogContent>
-
-        {/* action buttons */}
-        <DialogActions>
-          <Button onClick={closeModal}>Cancel</Button>
-          <Button variant="contained" onClick={applySelection}>
-            Select
-          </Button>
-        </DialogActions>
-      </Dialog>
+            </Tooltip>
+          ))}
+        </Stack>
+      </Popover>
     </>
   );
 }

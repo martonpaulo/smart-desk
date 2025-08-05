@@ -3,6 +3,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { Box, Button, Stack, TextField } from '@mui/material';
 
 import { IcsCalendar } from '@/legacy/types/icsCalendar';
+import { ColorPicker } from '@/shared/components/ColorPicker';
 
 interface CalendarFormProps {
   initial?: IcsCalendar;
@@ -78,14 +79,8 @@ export function CalendarForm({ initial, mode, onSubmit, onCancel }: CalendarForm
           helperText={errors.name}
           fullWidth
         />
-        <TextField
-          label="Color"
-          value={form.color || ''}
-          onChange={handleChange('color')}
-          error={Boolean(errors.color)}
-          helperText={errors.color || 'Hex color, e.g. #FFA836'}
-          fullWidth
-        />
+        <ColorPicker value={form.color || ''} onChange={handleChange('color')} />
+
         <Stack direction="row" justifyContent="flex-end" spacing={2}>
           <Button onClick={onCancel}>Cancel</Button>
           <Button variant="contained" onClick={handleSubmit}>
