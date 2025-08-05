@@ -20,7 +20,7 @@ import { EventAlert } from '@/legacy/components/alert/EventAlert';
 import { Clock } from '@/legacy/components/Clock';
 import { TodoList } from '@/legacy/components/column/TodoList';
 import { DailyTimeLoadIndicator } from '@/legacy/components/DailyTimeLoadIndicator';
-import { ChangeSnackbar } from '@/legacy/components/event/ChangeSnackbar';
+// import { ChangeSnackbar } from '@/legacy/components/event/ChangeSnackbar';
 import { HiddenColumnsList } from '@/legacy/components/HiddenColumnsList';
 import { TodoProgress } from '@/legacy/components/Progress';
 import { UndoSnackbar } from '@/legacy/components/UndoSnackbar';
@@ -44,7 +44,7 @@ export default function BoardPage() {
 
   const setAlertAcknowledged = useEventStore(state => state.setAlertAcknowledged);
   const isMeetingAlertEnabled = useAudioStore(state => state.meetingAlertEnabled);
-  const isEventChangesAlertEnabled = useAudioStore(state => state.eventChangesAlertEnabled);
+  // const isEventChangesAlertEnabled = useAudioStore(state => state.eventChangesAlertEnabled);
 
   const [now, setNow] = useState(new Date());
   const isMobile = useResponsiveness();
@@ -99,13 +99,13 @@ export default function BoardPage() {
         key={`${now.toISOString()}-EventAlert`}
       />
 
-      {events && (
+      {/* {events && (
         <ChangeSnackbar
           events={events}
           eventChangesAlertEnabled={isEventChangesAlertEnabled}
           key={`${now.toISOString()}-ChangeSnackbar`}
         />
-      )}
+      )} */}
       <UndoSnackbar />
     </Stack>
   );
