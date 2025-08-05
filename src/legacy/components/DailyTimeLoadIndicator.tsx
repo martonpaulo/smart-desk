@@ -30,7 +30,7 @@ export function DailyTimeLoadIndicator() {
   const remainingTaskMinutes = todaysTasks
     .filter(task => task.quantityDone !== task.quantityTarget)
     .reduce((total, task) => {
-      const minutes = (task.estimatedTime ?? 0) * (task.quantityTarget ?? 1);
+      const minutes = (task.estimatedTime ?? 0) * (task.quantityTarget - task.quantityDone);
       return total + minutes;
     }, 0);
 
