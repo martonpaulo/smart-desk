@@ -21,8 +21,4 @@ export const defaultColumns = {
     title: 'Backlog',
     color: customColors.pink.value,
   },
-  quick: {
-    title: 'Quick List',
-    color: customColors.mint.value,
-  },
 };

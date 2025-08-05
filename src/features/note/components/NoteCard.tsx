@@ -5,6 +5,7 @@ import { CustomSyncIcon } from '@/legacy/components/CustomSyncIcon';
 import { customColors } from '@/legacy/styles/colors';
 import { transitions } from '@/legacy/styles/transitions';
 import { parseSafeHtml } from '@/legacy/utils/textUtils';
+import { isHexColor } from '@/shared/utils/colorUtils';
 
 interface NoteCardProps {
   note: Note;
@@ -13,6 +14,7 @@ interface NoteCardProps {
 
 export function NoteCard({ note, onEdit }: NoteCardProps) {
   const theme = useTheme();
+  const color = note.color && isHexColor(note.color) ? note.color : customColors.blue.value;
 
   return (
     <Card
@@ -29,8 +31,8 @@ export function NoteCard({ note, onEdit }: NoteCardProps) {
         cursor: 'pointer',
         '&:hover': transitions.grow,
         boxShadow: theme.shadows[1],
-        backgroundColor: alpha(customColors.blue.value, 0.1),
-        borderColor: alpha(customColors.blue.value, 0.2),
+        backgroundColor: alpha(color, 0.1),
+        borderColor: alpha(color, 0.2),
       }}
       onClick={() => onEdit(note)}
     >

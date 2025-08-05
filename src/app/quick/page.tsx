@@ -8,23 +8,18 @@ import { PageSection } from '@/core/components/PageSection';
 import { defaultColumns } from '@/features/column/config/defaultColumns';
 import { AddTaskInput } from '@/legacy/components/task/AddTaskInput';
 import { TaskCard } from '@/legacy/components/task/TaskCard';
-import { useDefaultColumnObj } from '@/legacy/hooks/useDefaultColumnObj';
 import { useTasks } from '@/legacy/hooks/useTasks';
 
 export default function QuickList() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
-  const quickColumn = useDefaultColumnObj('quick');
-  const allTasks = useTasks({ plannedDate: new Date(), trashed: false, done: false });
-
-  const tasks = allTasks.filter(task => task.columnId === quickColumn?.id);
+  const tasks = useTasks({ plannedDate: new Date(), trashed: false, done: false });
 
   return (
     <PageSection title="Quick List" hideDescription>
       <AddTaskInput
         variant="outlined"
         taskProperties={{ plannedDate: new Date() }}
-        columnProperties={quickColumn}
         onFinishAdding={newId => setEditingTaskId(newId)}
       />
 
@@ -38,7 +33,7 @@ export default function QuickList() {
             showDuration={true}
             showTag={false}
             durationPosition="right"
-            color={defaultColumns.quick.color}
+            color={defaultColumns.todo.color}
             editTask={editingTaskId === task.id}
             onFinishEditing={() => setEditingTaskId(null)}
           />
