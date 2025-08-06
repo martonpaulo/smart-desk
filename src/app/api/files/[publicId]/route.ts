@@ -3,21 +3,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import cloudinary from '@/core/lib/cloudinary';
 import type { File as AppFile } from '@/features/file/types/File';
 
-export async function GET(request: NextRequest, { params }: { params: { publicId: string } }) {
-  const { publicId } = params;
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ publicId: string }> },
+): Promise<NextResponse> {
+  const { publicId } = await params;
   const rt = request.nextUrl.searchParams.get('resourceType');
   if (!rt || !['image', 'video', 'raw'].includes(rt)) {
     return NextResponse.json(
-      { error: 'resourceType must be "image", "video" or "raw"' },
+      { error: 'resourceType must be "image","video" or "raw"' },
       { status: 400 },
     );
   }
   const resourceType = rt as AppFile['resourceType'];
-
   try {
-    const info = await cloudinary.api.resource(publicId, {
-      resource_type: resourceType,
-    });
+    const info = await cloudinary.api.resource(publicId, { resource_type: resourceType });
     const createdAt = new Date(info.created_at);
     const file: AppFile = {
       id: info.public_id,
@@ -36,8 +36,11 @@ export async function GET(request: NextRequest, { params }: { params: { publicId
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { publicId: string } }) {
-  const { publicId } = params;
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ publicId: string }> },
+): Promise<NextResponse> {
+  const { publicId } = await params;
   const { newPublicId, resourceType } = (await request.json()) as {
     newPublicId: string;
     resourceType: AppFile['resourceType'];
@@ -48,7 +51,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { public
       { status: 400 },
     );
   }
-
   try {
     const update = await cloudinary.uploader.rename(publicId, newPublicId, {
       resource_type: resourceType,

@@ -2,33 +2,20 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-import { HydrationBoundary, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { QueryClient } from '@tanstack/react-query';
+import { Persister, PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 
 import { buildStorageKey } from '@/legacy/utils/localStorageUtils';
 import { calculateRetryDelay, shouldRetry } from '@/legacy/utils/queryUtils';
 
-// Time during which calendar data is considered fresh and won't be re-fetched
-const dataIsFreshForMs = 1000 * 60 * 1; // 1 minute
-
-// Time after which unused calendar data is removed from in-memory cache (React Query)
-const dataInMemoryExpiresInMs = 1000 * 60 * 5; // 5 minutes
-
-// Time after which persisted calendar data in localStorage becomes invalid
-const dataInLocalStorageExpiresInMs = 1000 * 60 * 10; // 10 minutes
-
-// Maximum number of retry attempts for failed queries
+const dataIsFreshForMs = 1000 * 60 * 1;
+const dataInMemoryExpiresInMs = 1000 * 60 * 5;
+const dataInLocalStorageExpiresInMs = 1000 * 60 * 10;
 const maxRetryAttempts = 3;
+const maxRetryDelayMs = 1000 * 30;
 
-// Maximum delay between retry attempts
-const maxRetryDelayMs = 1000 * 30; // 30 seconds
-
-interface ReactQueryProviderProps {
-  children: ReactNode;
-}
-
-export function ReactQueryProvider({ children }: ReactQueryProviderProps) {
+export function ReactQueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -37,38 +24,37 @@ export function ReactQueryProvider({ children }: ReactQueryProviderProps) {
             staleTime: dataIsFreshForMs,
             refetchOnMount: true,
             refetchOnWindowFocus: false,
-            meta: {
-              gcTime: dataInMemoryExpiresInMs,
-            },
-            retry: (failureCount, error) => shouldRetry(failureCount, error, maxRetryAttempts),
+            meta: { gcTime: dataInMemoryExpiresInMs },
+            retry: (count, err) => shouldRetry(count, err, maxRetryAttempts),
             retryDelay: attempt => calculateRetryDelay(attempt, maxRetryDelayMs),
           },
         },
       }),
   );
 
-  const [isRestored, setIsRestored] = useState(false);
+  const [persister, setPersister] = useState<Persister | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    const persister = createSyncStoragePersister({
+    const asyncPersister = createAsyncStoragePersister({
       storage: window.localStorage,
       key: buildStorageKey('react-query-cache'),
     });
+    setPersister(asyncPersister);
+  }, []);
 
-    persistQueryClient({
-      queryClient,
-      persister,
-      maxAge: dataInLocalStorageExpiresInMs,
-    });
-
-    setIsRestored(true);
-  }, [queryClient]);
-
-  if (!isRestored) return null;
+  if (!persister) return null; // or loading spinner
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <HydrationBoundary state={{}}>{children}</HydrationBoundary>
-    </QueryClientProvider>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        maxAge: dataInLocalStorageExpiresInMs,
+      }}
+      onSuccess={() => setIsHydrated(true)}
+    >
+      {isHydrated && children}
+    </PersistQueryClientProvider>
   );
 }
