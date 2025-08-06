@@ -18,13 +18,20 @@ export function useFiles(resourceType: File['resourceType']) {
   });
 }
 
-export function useFile(publicId: string, resourceType: File['resourceType']) {
-  return useQuery<File, Error, File, [string, string, File['resourceType']]>({
+export function useFile(publicId: string | undefined, resourceType: File['resourceType']) {
+  return useQuery<
+    File | undefined,
+    Error,
+    File | undefined,
+    [string, string | undefined, File['resourceType']]
+  >({
     queryKey: ['file', publicId, resourceType],
     queryFn: async () => {
+      if (!publicId) return undefined;
       const result = await fileService.get(publicId, resourceType);
       return result.file;
     },
+    enabled: !!publicId,
   });
 }
 

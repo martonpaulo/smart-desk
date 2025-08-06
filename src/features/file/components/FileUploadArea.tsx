@@ -43,7 +43,13 @@ export function FileUploadArea({
     if (!file || !preview) return null;
     if (file.type.startsWith('image/')) {
       return (
-        <Image src={preview} alt="Preview" width={200} height={200} style={{ objectFit: 'cover' }} />
+        <Image
+          src={preview}
+          alt="Preview"
+          width={200}
+          height={200}
+          style={{ objectFit: 'cover' }}
+        />
       );
     }
     if (file.type.startsWith('video/')) {

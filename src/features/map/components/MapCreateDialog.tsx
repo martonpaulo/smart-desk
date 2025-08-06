@@ -4,6 +4,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 
 import {
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -36,6 +37,7 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
   const [uploadedFile, setUploadedFile] = useState<AppFile | null>(null);
   const [geoJson, setGeoJson] = useState<GeoJSON.FeatureCollection | null>(null);
   const [error, setError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -45,6 +47,7 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
       setGeoJson(null);
       setUploadedFile(null);
       setError(false);
+      setIsSaving(false);
     }
     return () => {
       if (preview) URL.revokeObjectURL(preview);
@@ -55,12 +58,12 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
     const f = e.target.files?.[0] ?? null;
     if (!f) return;
     setFile(f);
+    // detect geojson vs image/video
     if (f.type.includes('json') || f.name.endsWith('.geojson')) {
       const reader = new FileReader();
       reader.onload = ev => {
         try {
-          const obj = JSON.parse(String(ev.target?.result));
-          setGeoJson(obj);
+          setGeoJson(JSON.parse(String(ev.target?.result)));
         } catch {
           setGeoJson(null);
         }
@@ -70,11 +73,7 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
       setResourceType('raw');
     } else {
       setPreview(URL.createObjectURL(f));
-      if (f.type.startsWith('video/')) {
-        setResourceType('video');
-      } else {
-        setResourceType('image');
-      }
+      setResourceType(f.type.startsWith('video/') ? 'video' : 'image');
     }
   };
 
@@ -96,22 +95,36 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
   };
 
   const handleSave = async () => {
-    if (!uploadedFile || !name) return;
-    const newMap: Omit<MapRecord, 'id' | 'trashed' | 'updatedAt' | 'isSynced'> = {
-      name,
-      filePublicId: uploadedFile.publicId,
-      fileUrl: uploadedFile.url,
-      geoJson: geoJson || undefined,
-      regionColors: {},
-      regionLabels: {},
-      regionTooltips: {},
-      createdAt: new Date(),
-    };
-    addMap(newMap as MapRecord);
-    if (resourceType === 'image' || resourceType === 'video') {
-      await saveFileMutation.mutateAsync({ file: uploadedFile });
+    if (!file || !name) return;
+    setIsSaving(true);
+
+    try {
+      const uploaded = uploadedFile ?? (await handleUpload());
+
+      const newMap: Omit<MapRecord, 'id' | 'trashed' | 'updatedAt' | 'isSynced'> = {
+        name,
+        filePublicId: uploaded.publicId,
+        fileUrl: uploaded.url,
+        geoJson: geoJson || undefined,
+        regionColors: {},
+        regionLabels: {},
+        regionTooltips: {},
+        createdAt: new Date(),
+      };
+
+      addMap(newMap as MapRecord);
+
+      if (resourceType === 'image' || resourceType === 'video') {
+        await saveFileMutation.mutateAsync({ file: uploaded });
+      }
+
+      onClose();
+    } catch (err) {
+      console.error('Map save failed', err);
+      setError(true);
+    } finally {
+      setIsSaving(false);
     }
-    onClose();
   };
 
   const hasPreview = Boolean(preview);
@@ -127,6 +140,7 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
             onChange={e => setName(e.target.value)}
             fullWidth
           />
+
           {hasPreview ? (
             <FileUploadArea
               file={file}
@@ -139,7 +153,11 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
             />
           ) : (
             <Stack>
-              <input type="file" accept=".geojson,application/json" onChange={handleFileChange} />
+              <input
+                type="file"
+                accept=".geojson,application/json,image/*,video/*"
+                onChange={handleFileChange}
+              />
               {file && (
                 <Typography variant="body2" mt={1}>
                   {file.name}
@@ -149,14 +167,19 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
           )}
         </Stack>
       </DialogContent>
+
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose} disabled={isSaving}>
+          Cancel
+        </Button>
+
         <Button
           onClick={handleSave}
-          disabled={!name || !uploadedFile || uploadMutation.isPending}
+          disabled={!name || uploadMutation.isPending || isSaving}
           variant="contained"
+          startIcon={isSaving ? <CircularProgress color="inherit" size={20} /> : undefined}
         >
-          Save
+          {isSaving ? 'Saving...' : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>

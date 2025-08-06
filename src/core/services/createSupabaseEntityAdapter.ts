@@ -9,10 +9,11 @@ import { baseMapFromDB, baseMapToDB } from '@/core/utils/entityMapper';
 export function createSupabaseEntityAdapter<E extends BaseType>(config: {
   table: string;
   dateFields?: Array<Exclude<keyof E, keyof BaseType>>;
+  excludeFields?: Array<Exclude<keyof E, keyof BaseType>>;
   hasUser?: boolean;
   onConflict?: string;
 }) {
-  const { table, dateFields = [], hasUser = true, onConflict = 'id' } = config;
+  const { table, dateFields = [], excludeFields = [], hasUser = true, onConflict = 'id' } = config;
 
   async function fetchAll(client: SupabaseClient): Promise<E[]> {
     const { data, error } = await client.from(table).select('*');
@@ -62,7 +63,10 @@ export function createSupabaseEntityAdapter<E extends BaseType>(config: {
     const rec: Partial<DbRecord<E>> = { ...(base as Partial<DbRecord<E>>) };
 
     for (const key of Object.keys(entity) as Array<keyof E>) {
+      // skip base‐type props
       if (['id', 'trashed', 'createdAt', 'updatedAt', 'isSynced'].includes(key as string)) continue;
+      // skip excluded fields
+      if (excludeFields.includes(key as Exclude<keyof E, keyof BaseType>)) continue;
 
       const val = entity[key];
       const snakeKey = camelToSnake(key as string) as keyof DbRecord<E>;
@@ -94,6 +98,8 @@ export function createSupabaseEntityAdapter<E extends BaseType>(config: {
 
       const camelKey = snakeToCamel(rawKey) as keyof E;
       if (dateFields.includes(camelKey as unknown as Exclude<keyof E, keyof BaseType>)) continue;
+      // skip excluded fields
+      if (excludeFields.includes(camelKey as Exclude<keyof E, keyof BaseType>)) continue;
 
       const v = raw[rawKey as keyof DbRecord<E>];
       result[camelKey] =
