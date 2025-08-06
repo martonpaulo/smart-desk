@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { Button, Drawer, Stack, TextField, Typography } from '@mui/material';
 
 import { PageSection } from '@/core/components/PageSection';
+import { useFilesStore } from '@/features/file/store/useFilesStore';
 import { useMapsStore } from '@/features/map/store/useMapsStore';
 import type { MapRecord } from '@/features/map/types/MapRecord';
 import { ColorPicker } from '@/shared/components/ColorPicker';
@@ -68,6 +70,7 @@ function buildPaths(geo: GeoJSON.FeatureCollection, width: number, height: numbe
 export function MapEditorView({ mapId }: MapEditorViewProps) {
   const map: MapRecord | undefined = useMapsStore(s => s.items.find(m => m.id === mapId));
   const updateMap = useMapsStore(s => s.update);
+  const files = useFilesStore(s => s.items);
 
   const [selected, setSelected] = useState<string | null>(null);
   const [color, setColor] = useState('');
@@ -97,6 +100,8 @@ export function MapEditorView({ mapId }: MapEditorViewProps) {
     setSelected(null);
   };
 
+  const file = files.find(f => f.publicId === map?.filePublicId);
+
   if (!map) {
     return (
       <PageSection title="Map">
@@ -123,8 +128,19 @@ export function MapEditorView({ mapId }: MapEditorViewProps) {
         </Stack>
       ) : (
         <Stack alignItems="center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={map.fileUrl} alt={map.name} style={{ maxWidth: '100%' }} />
+          {file?.resourceType === 'video' && (
+            <video src={map.fileUrl} controls style={{ maxWidth: '100%' }} />
+          )}
+          {file?.resourceType === 'image' && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={map.fileUrl} alt={map.name} style={{ maxWidth: '100%' }} />
+          )}
+          {(!file || file.resourceType === 'raw') && (
+            <Stack alignItems="center" gap={1}>
+              <InsertDriveFileIcon />
+              <Typography variant="body2">{map.filePublicId}</Typography>
+            </Stack>
+          )}
         </Stack>
       )}
       <Drawer anchor="right" open={Boolean(selected)} onClose={() => setSelected(null)}>

@@ -41,3 +41,16 @@ export function useUploadFile() {
     },
   });
 }
+
+type SaveFileVariables = { file: File };
+
+export function useSaveFile() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, SaveFileVariables>({
+    mutationFn: ({ file }) => fileService.add(file),
+    onSuccess: () => {
+      // Update any components relying on the files query
+      queryClient.invalidateQueries({ queryKey: ['files'] });
+    },
+  });
+}

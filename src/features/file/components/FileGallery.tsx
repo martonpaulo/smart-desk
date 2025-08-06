@@ -1,5 +1,6 @@
 'use client';
 
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -8,6 +9,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Pagination from '@mui/material/Pagination';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 
 import type { File } from '@/features/file/types/File';
@@ -64,27 +66,42 @@ export function FileGallery({
         }}
         gap={2}
       >
-        {paged.map(img => (
+        {paged.map(f => (
           <Card
-            key={img.publicId}
-            elevation={selected?.publicId === img.publicId ? 4 : 1}
+            key={f.publicId}
+            elevation={selected?.publicId === f.publicId ? 4 : 1}
             sx={{
-              border: selected?.publicId === img.publicId ? '2px solid' : 'none',
+              border: selected?.publicId === f.publicId ? '2px solid' : 'none',
               borderColor: 'primary.main',
             }}
           >
-            <CardActionArea onClick={() => onSelect(img)}>
+            <CardActionArea onClick={() => onSelect(f)}>
               <CardMedia
-                component={() => (
-                  <Image
-                    src={img.url}
-                    alt={img.publicId}
-                    width={200}
-                    height={200}
-                    style={{ objectFit: 'cover' }}
-                    loading="lazy"
-                  />
-                )}
+                component={() => {
+                  if (f.resourceType === 'image') {
+                    return (
+                      <Image
+                        src={f.url}
+                        alt={f.publicId}
+                        width={200}
+                        height={200}
+                        style={{ objectFit: 'cover' }}
+                        loading="lazy"
+                      />
+                    );
+                  }
+                  if (f.resourceType === 'video') {
+                    return <video src={f.url} controls style={{ width: '100%' }} />;
+                  }
+                  return (
+                    <Stack alignItems="center" p={2}>
+                      <InsertDriveFileIcon />
+                      <Typography variant="body2" mt={1}>
+                        {f.publicId}
+                      </Typography>
+                    </Stack>
+                  );
+                }}
               />
             </CardActionArea>
           </Card>
