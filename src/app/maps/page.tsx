@@ -1,8 +1,5 @@
-export default function Maps() {
-  return (
-    <div>
-      <h1>Maps</h1>
-      <p>This is the page for all maps.</p>
-    </div>
-  );
+import { MapsView } from '@/features/map/views/MapsView';
+
+export default function MapsPage() {
+  return <MapsView />;
 }

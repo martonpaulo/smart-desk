@@ -1,8 +1,9 @@
-export default function MapPage() {
-  return (
-    <div>
-      <h1>Map Page</h1>
-      <p>This is the page for a specific map.</p>
-    </div>
-  );
+import { MapEditorView } from '@/features/map/views/MapEditorView';
+
+interface MapPageProps {
+  params: { mapId: string };
+}
+
+export default function MapPage({ params }: MapPageProps) {
+  return <MapEditorView mapId={params.mapId} />;
 }
