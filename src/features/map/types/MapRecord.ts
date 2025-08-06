@@ -13,4 +13,5 @@ export interface MapRecord extends BaseType, MapMetadata {
   name: string;
   filePublicId: string; // Cloudinary public ID
   fileUrl: string; // secure_url from Cloudinary
+  geoJson?: GeoJSON.FeatureCollection;
 }

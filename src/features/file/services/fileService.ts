@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { useFilesStore } from '@/features/file/store/useFilesStore';
 import type { File } from '@/features/file/types/File';
 
 export interface FileListResponse {
@@ -40,5 +41,15 @@ export const fileService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data;
+  },
+
+  add: async (file: File): Promise<void> => {
+    // Persist file metadata in Supabase via the files store
+    await useFilesStore.getState().add({
+      url: file.url,
+      publicId: file.publicId,
+      resourceType: file.resourceType,
+      createdAt: file.createdAt,
+    });
   },
 };

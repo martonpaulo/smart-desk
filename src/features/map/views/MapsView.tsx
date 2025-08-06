@@ -6,12 +6,14 @@ import AddIcon from '@mui/icons-material/Add';
 import { Button, Stack, Typography } from '@mui/material';
 
 import { PageSection } from '@/core/components/PageSection';
+import { useFilesStore } from '@/features/file/store/useFilesStore';
 import { MapCard } from '@/features/map/components/MapCard';
 import { MapCreateDialog } from '@/features/map/components/MapCreateDialog';
 import { useMapsStore } from '@/features/map/store/useMapsStore';
 
 export function MapsView() {
   const maps = useMapsStore(s => s.items);
+  const files = useFilesStore(s => s.items);
   const [open, setOpen] = useState(false);
 
   return (
@@ -28,9 +30,10 @@ export function MapsView() {
       {maps.length === 0 && <Typography>No maps yet. Click “New Map” to create one.</Typography>}
 
       <Stack direction="row" flexWrap="wrap" gap={2}>
-        {maps.map(m => (
-          <MapCard key={m.id} map={m} />
-        ))}
+        {maps.map(m => {
+          const file = files.find(f => f.publicId === m.filePublicId);
+          return <MapCard key={m.id} map={m} file={file} />;
+        })}
       </Stack>
 
       <MapCreateDialog open={open} onClose={() => setOpen(false)} />

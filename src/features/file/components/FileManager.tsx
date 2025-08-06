@@ -7,7 +7,8 @@ import Button from '@mui/material/Button';
 
 import { FileGallery } from '@/features/file/components/FileGallery';
 import { FileUploadArea } from '@/features/file/components/FileUploadArea';
-import type { File } from '@/features/file/types/File';
+import { useFiles,useSaveFile, useUploadFile } from '@/features/file/hooks/useFile';
+import type { File as AppFile } from '@/features/file/types/File';
 
 interface FileManagerProps {
   onSelect: (url: string) => void;
@@ -16,9 +17,14 @@ interface FileManagerProps {
 export function FileManager({ onSelect }: FileManagerProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [selected, setSelected] = useState<File | null>(null);
+  const [selected, setSelected] = useState<AppFile | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 12;
+
+  const filesQuery = useFiles('image');
+  const uploadMutation = useUploadFile();
+  const saveFileMutation = useSaveFile();
+  const files = filesQuery.data?.pages.flatMap(p => p.files) ?? [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
@@ -37,7 +43,16 @@ export function FileManager({ onSelect }: FileManagerProps) {
     }
   };
 
-  const handleUpload = () => file && uploadMutation.mutate(file);
+  const handleUpload = async (): Promise<AppFile> => {
+    if (!file) throw new Error('No file');
+    const resourceType: AppFile['resourceType'] = file.type.startsWith('video/')
+      ? 'video'
+      : file.type.startsWith('image/')
+        ? 'image'
+        : 'raw';
+    const result = await uploadMutation.mutateAsync({ file, resourceType });
+    return result.file;
+  };
   const handlePageChange = (_: React.ChangeEvent<unknown>, v: number) => setPage(v);
   const confirmSelection = () => selected && onSelect(selected.url);
 
@@ -57,9 +72,10 @@ export function FileManager({ onSelect }: FileManagerProps) {
         onFileChange={handleFileChange}
         onDrop={handleDrop}
         onUpload={handleUpload}
+        onSaveToSupabase={f => saveFileMutation.mutate({ file: f })}
       />
       <FileGallery
-        files={filesQuery.data ?? []}
+        files={files}
         selected={selected}
         onSelect={setSelected}
         page={page}
