@@ -1,8 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Checkbox, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  MenuItem,
+  Stack,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from '@mui/material';
 
-import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { useBoardStore } from '@/legacy/store/board/store';
@@ -39,7 +47,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
   const addTask = useBoardStore(s => s.addTask);
   const updateTask = useBoardStore(s => s.updateTask);
   const allTags = useTagsStore(s => s.items);
-  const tags = allTags.filter(t => !t.trashed);
+  const tags = allTags.filter(t => !t.trashed).sort((a, b) => a.name.localeCompare(b.name));
 
   // initialize form from task or defaults
   const makeInitialForm = useCallback(
@@ -154,8 +162,8 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       titlePlaceholder="What would you like to do?"
       titleLimit={32}
     >
-      <Stack direction="row" alignItems="center">
-        <Typography variant="body2">Estimated Time</Typography>
+      <Stack display="grid" gridTemplateColumns="1fr auto" alignItems="center">
+        <DateInput label="Planned Date" value={form.plannedDate} onChange={handleDateChange} />
 
         <QuantitySelector
           value={form.estimatedTime ?? null}
@@ -170,72 +178,100 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
         />
       </Stack>
 
-      {/* Planned date input */}
-      <DateInput label="Planned Date" value={form.plannedDate} onChange={handleDateChange} />
+      <Stack direction="row" alignItems="center" gap={1} sx={{ mt: 1 }}>
+        <ToggleButtonGroup
+          value={['daily', 'important', 'urgent', 'blocked'].filter(
+            flag => form[flag as keyof TaskForm],
+          )}
+          onChange={(_e, newFlags) =>
+            setForm(f => ({
+              ...f,
+              daily: newFlags.includes('daily'),
+              important: newFlags.includes('important'),
+              urgent: newFlags.includes('urgent'),
+              blocked: newFlags.includes('blocked'),
+            }))
+          }
+          aria-label="task flags"
+          size="small"
+        >
+          <ToggleButton value="daily" aria-label="daily" color="info">
+            Daily
+          </ToggleButton>
+          <ToggleButton value="important" aria-label="important" color="warning">
+            Important
+          </ToggleButton>
+          <ToggleButton value="urgent" aria-label="urgent" color="warning">
+            Urgent
+          </ToggleButton>
+          <ToggleButton value="blocked" aria-label="blocked" color="error">
+            Blocked
+          </ToggleButton>
+        </ToggleButtonGroup>
 
-      <TextField
-        select
-        label="Tag"
-        fullWidth
-        size="small"
-        value={form.tagId ?? ''}
-        onChange={e =>
-          setForm(prev => ({
-            ...prev,
-            tagId: e.target.value === '' ? undefined : e.target.value,
-          }))
-        }
-      >
-        <MenuItem value="">No tag</MenuItem>
-        {tags.map(t => (
-          <MenuItem key={t.id} value={t.id}>
-            <TagLabel tag={t} />
-          </MenuItem>
-        ))}
-      </TextField>
-
-      {/* Quantifiable option */}
-      <Stack>
-        <Stack direction="row" alignItems="center">
-          <Checkbox
-            checked={form.useQuantity}
-            onChange={(_, checked) =>
-              setForm(f => ({
-                ...f,
-                useQuantity: checked,
-                quantityTarget: checked ? f.quantityTarget : 1,
-              }))
-            }
-          />
-          <Typography variant="body2">Quantifiable</Typography>
-          <QuantitySelector
-            disabled={!form.useQuantity}
-            value={form.quantityTarget}
-            minValue={1}
-            maxValue={999}
-            onValueChange={value => setForm(f => ({ ...f, quantityTarget: value }))}
-            sx={{ ml: 2 }}
-          />
-        </Stack>
-
-        {/* Daily, Important, Urgent, Blocked flags */}
-        {['daily', 'important', 'urgent', 'blocked'].map(flag => (
-          <Stack key={flag} direction="row" alignItems="center">
-            <Checkbox
-              checked={form[flag as keyof TaskForm] as boolean}
-              onChange={(_, checked) =>
-                setForm(f => ({
-                  ...f,
-                  [flag]: checked,
-                }))
-              }
-            />
-            <Typography variant="body2">{flag.charAt(0).toUpperCase() + flag.slice(1)}</Typography>
-          </Stack>
-        ))}
+        <TextField
+          select
+          label="Tag"
+          fullWidth
+          size="small"
+          value={form.tagId ?? ''}
+          onChange={e =>
+            setForm(prev => ({
+              ...prev,
+              tagId: e.target.value === '' ? undefined : e.target.value,
+            }))
+          }
+          sx={{
+            '& .MuiSelect-select': {
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            },
+          }}
+        >
+          <MenuItem value="">No tag</MenuItem>
+          {tags.map(t => (
+            <MenuItem
+              key={t.id}
+              value={t.id}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Box
+                sx={{
+                  backgroundColor: t.color,
+                  width: 16,
+                  height: 16,
+                  borderRadius: '50%',
+                }}
+              />
+              {t.name}
+            </MenuItem>
+          ))}
+        </TextField>
       </Stack>
 
-      {/* Notes */}
+      <Stack direction="row" alignItems="center">
+        <Checkbox
+          checked={form.useQuantity}
+          onChange={(_, checked) =>
+            setForm(f => ({
+              ...f,
+              useQuantity: checked,
+              quantityTarget: checked ? f.quantityTarget : 1,
+            }))
+          }
+        />
+        <Typography variant="body2">Quantifiable</Typography>
+        <QuantitySelector
+          disabled={!form.useQuantity}
+          value={form.quantityTarget}
+          minValue={1}
+          maxValue={999}
+          onValueChange={value => setForm(f => ({ ...f, quantityTarget: value }))}
+          sx={{ ml: 2 }}
+        />
+      </Stack>
+
       <MarkdownEditableBox
         label="Notes"
         placeholder="Enter a description"
