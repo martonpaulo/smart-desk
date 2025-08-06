@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 
 import { FileGallery } from '@/features/file/components/FileGallery';
 import { FileUploadArea } from '@/features/file/components/FileUploadArea';
-import { useFiles,useSaveFile, useUploadFile } from '@/features/file/hooks/useFile';
+import { useFiles, useSaveFile, useUploadFile } from '@/features/file/hooks/useFile';
 import type { File as AppFile } from '@/features/file/types/File';
 
 interface FileManagerProps {
@@ -24,7 +24,7 @@ export function FileManager({ onSelect }: FileManagerProps) {
   const filesQuery = useFiles('image');
   const uploadMutation = useUploadFile();
   const saveFileMutation = useSaveFile();
-  const files = filesQuery.data?.pages.flatMap(p => p.files) ?? [];
+  const files = filesQuery.data?.files ?? [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;

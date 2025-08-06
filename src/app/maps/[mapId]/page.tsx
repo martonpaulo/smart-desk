@@ -1,9 +1,13 @@
+import { use } from 'react';
+
 import { MapEditorView } from '@/features/map/views/MapEditorView';
 
 interface MapPageProps {
-  params: { mapId: string };
+  params: Promise<{ mapId: string }>;
 }
 
 export default function MapPage({ params }: MapPageProps) {
-  return <MapEditorView mapId={params.mapId} />;
+  const { mapId } = use(params);
+
+  return <MapEditorView mapId={mapId} />;
 }

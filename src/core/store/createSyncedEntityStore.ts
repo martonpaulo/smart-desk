@@ -7,6 +7,7 @@ interface SyncedEntityStoreConfig<E extends BaseType> {
   requiredFields?: Array<Exclude<keyof E, keyof BaseType>>;
   defaults?: Partial<Omit<E, keyof BaseType>>;
   dateFields?: Array<Exclude<keyof E, keyof BaseType>>;
+  excludeFields?: Array<Exclude<keyof E, keyof BaseType>>;
   hasUser?: boolean;
   onConflict?: string;
 }
@@ -15,6 +16,7 @@ export function createSyncedEntityStore<E extends BaseType>(cfg: SyncedEntitySto
   const service = createSupabaseEntityAdapter<E>({
     table: cfg.table,
     dateFields: cfg.dateFields,
+    excludeFields: cfg.excludeFields,
     hasUser: cfg.hasUser,
     onConflict: cfg.onConflict,
   });
