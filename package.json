@@ -71,6 +71,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/geojson": "^7946.0.16",
     "@types/luxon": "^3.6.2",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -89,5 +90,21 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "overrides": {
+    "react-simple-maps": {
+      "d3-geo": "^3.1.0",
+      "d3-color": "^3.1.0",
+      "d3-selection": "^3.0.0",
+      "d3-zoom": "^3.0.0",
+      "react": "^16.8.0 || 17.x || 18.x || 19.x",
+      "react-dom": "^16.8.0 || 17.x || 18.x || 19.x"
+    },
+    "d3-interpolate": {
+      "d3-color": "^3.1.0"
+    },
+    "d3-transition": {
+      "d3-color": "^3.1.0"
+    }
   }
 }

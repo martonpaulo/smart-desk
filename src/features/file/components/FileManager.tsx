@@ -4,39 +4,21 @@ import { useEffect, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { listImages, uploadImage } from '@/features/image/api/imageApi';
-import { ImageGallery } from '@/features/image/components/ImageGallery';
-import { ImageUploadArea } from '@/features/image/components/ImageUploadArea';
-import type { CloudinaryImage } from '@/features/image/types/CloudinaryImage';
+import { FileGallery } from '@/features/file/components/FileGallery';
+import { FileUploadArea } from '@/features/file/components/FileUploadArea';
+import type { File } from '@/features/file/types/File';
 
-interface CloudinaryImageManagerProps {
+interface FileManagerProps {
   onSelect: (url: string) => void;
 }
 
-export function CloudinaryImageManager({ onSelect }: CloudinaryImageManagerProps) {
+export function FileManager({ onSelect }: FileManagerProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [selected, setSelected] = useState<CloudinaryImage | null>(null);
+  const [selected, setSelected] = useState<File | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 12;
-
-  const queryClient = useQueryClient();
-  const imagesQuery = useQuery({
-    queryKey: ['cloudinary-images'],
-    queryFn: listImages,
-  });
-
-  const uploadMutation = useMutation<CloudinaryImage, Error, File, unknown>({
-    mutationFn: uploadImage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cloudinary-images'] });
-      setFile(null);
-      if (preview) URL.revokeObjectURL(preview);
-      setPreview(null);
-    },
-  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
@@ -67,7 +49,7 @@ export function CloudinaryImageManager({ onSelect }: CloudinaryImageManagerProps
 
   return (
     <Box>
-      <ImageUploadArea
+      <FileUploadArea
         file={file}
         preview={preview}
         loading={uploadMutation.isPending}
@@ -76,19 +58,19 @@ export function CloudinaryImageManager({ onSelect }: CloudinaryImageManagerProps
         onDrop={handleDrop}
         onUpload={handleUpload}
       />
-      <ImageGallery
-        images={imagesQuery.data ?? []}
+      <FileGallery
+        files={filesQuery.data ?? []}
         selected={selected}
         onSelect={setSelected}
         page={page}
         pageSize={pageSize}
         onPageChange={handlePageChange}
-        loading={imagesQuery.isLoading}
-        error={imagesQuery.isError}
+        loading={filesQuery.isLoading}
+        error={filesQuery.isError}
       />
       <Box textAlign="right" mt={2}>
         <Button variant="contained" disabled={!selected} onClick={confirmSelection}>
-          Select image
+          Select file
         </Button>
       </Box>
     </Box>

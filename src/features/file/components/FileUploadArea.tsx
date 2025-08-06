@@ -8,7 +8,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 
-interface ImageUploadAreaProps {
+interface FileUploadAreaProps {
   file: File | null;
   preview: string | null;
   loading: boolean;
@@ -18,7 +18,7 @@ interface ImageUploadAreaProps {
   onUpload: () => void;
 }
 
-export function ImageUploadArea({
+export function FileUploadArea({
   file,
   preview,
   loading,
@@ -26,7 +26,7 @@ export function ImageUploadArea({
   onFileChange,
   onDrop,
   onUpload,
-}: ImageUploadAreaProps) {
+}: FileUploadAreaProps) {
   return (
     <Box
       onDragOver={e => e.preventDefault()}

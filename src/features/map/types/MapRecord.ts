@@ -11,6 +11,6 @@ export interface MapMetadata {
 
 export interface MapRecord extends BaseType, MapMetadata {
   name: string;
-  fileUrl: string; // public URL to SVG or JSON
-  geoJson?: GeoJSON.FeatureCollection;
+  filePublicId: string; // Cloudinary public ID
+  fileUrl: string; // secure_url from Cloudinary
 }
