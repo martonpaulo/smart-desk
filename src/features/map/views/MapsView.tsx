@@ -15,7 +15,10 @@ export function MapsView() {
   const [open, setOpen] = useState(false);
 
   return (
-    <PageSection title="Maps" description="Manage your custom maps">
+    <PageSection
+      title="Maps"
+      description="Upload, create, edit, and color interactive maps. Manage regions visually and customize each map your way."
+    >
       <Stack direction="row" mb={2}>
         <Button startIcon={<AddIcon />} variant="outlined" onClick={() => setOpen(true)}>
           New Map

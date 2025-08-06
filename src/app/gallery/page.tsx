@@ -1,19 +1,19 @@
 'use client';
 
 import { PageSection } from '@/core/components/PageSection';
-import { CloudinaryImageManager } from '@/features/image/components/CloudinaryImageManager';
+import { FileManager } from '@/features/file/components/FileManager';
 
 export default function GalleryPage() {
   const handleSelect = (url: string) => {
-    console.log('Selected image:', url);
+    console.log('Selected file:', url);
   };
 
   return (
     <PageSection
-      title="Image Library"
-      description="Upload new images or browse and manage your existing Cloudinary media"
+      title="File Library"
+      description="Upload new files or browse and manage your existing Cloudinary media"
     >
-      <CloudinaryImageManager onSelect={handleSelect} />
+      <FileManager onSelect={handleSelect} />
     </PageSection>
   );
 }

@@ -2,12 +2,21 @@
 
 import { ChangeEvent, useEffect, useState } from 'react';
 
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 
+import { FileUploadArea } from '@/features/file/components/FileUploadArea';
+import { File } from '@/features/file/types/File';
 import { uploadImage } from '@/features/image/api/imageApi';
-import { ImageUploadArea } from '@/features/image/components/ImageUploadArea';
 import { useCloudinaryImagesStore } from '@/features/image/store/useCloudinaryImagesStore';
-import type { CloudinaryImage } from '@/features/image/types/CloudinaryImage';
 import { uploadMapFile } from '@/features/map/api/mapApi';
 import { useMapsStore } from '@/features/map/store/useMapsStore';
 import type { MapRecord } from '@/features/map/types/MapRecord';
@@ -25,7 +34,7 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [geoJson, setGeoJson] = useState<GeoJSON.FeatureCollection | null>(null);
-  const [cloudImage, setCloudImage] = useState<CloudinaryImage | null>(null);
+  const [cloudImage, setCloudImage] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -80,7 +89,7 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
     try {
       const result = await uploadImage(file);
       setCloudImage(result);
-      addCloudImage({ ...result, createdAt: new Date().toISOString() });
+      addCloudImage({ ...result, createdAt: new Date() });
       setError(false);
     } catch {
       setError(true);
@@ -101,7 +110,7 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
         regionColors: {},
         regionLabels: {},
         regionTooltips: {},
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       };
       addMap(newMap as MapRecord);
       onClose();
@@ -115,13 +124,18 @@ export function MapCreateDialog({ open, onClose }: MapCreateDialogProps) {
   const isImage = !!preview;
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="mobileSm">
       <DialogTitle>New Map</DialogTitle>
       <DialogContent>
         <Stack gap={2} mt={1}>
-          <TextField label="Map name" value={name} onChange={e => setName(e.target.value)} fullWidth />
+          <TextField
+            label="Map name"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            fullWidth
+          />
           {isImage ? (
-            <ImageUploadArea
+            <FileUploadArea
               file={file}
               preview={preview}
               loading={uploading}

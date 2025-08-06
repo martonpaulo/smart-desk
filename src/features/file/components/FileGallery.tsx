@@ -10,12 +10,12 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Image from 'next/image';
 
-import type { CloudinaryImage } from '@/features/image/types/CloudinaryImage';
+import type { File } from '@/features/file/types/File';
 
-interface ImageGalleryProps {
-  images: CloudinaryImage[];
-  selected: CloudinaryImage | null;
-  onSelect: (img: CloudinaryImage) => void;
+interface FileGalleryProps {
+  files: File[];
+  selected: File | null;
+  onSelect: (img: File) => void;
   page: number;
   pageSize: number;
   onPageChange: (_: React.ChangeEvent<unknown>, value: number) => void;
@@ -23,8 +23,8 @@ interface ImageGalleryProps {
   error: boolean;
 }
 
-export function ImageGallery({
-  images,
+export function FileGallery({
+  files,
   selected,
   onSelect,
   page,
@@ -32,11 +32,11 @@ export function ImageGallery({
   onPageChange,
   loading,
   error,
-}: ImageGalleryProps) {
-  const count = Math.ceil(images.length / pageSize);
+}: FileGalleryProps) {
+  const count = Math.ceil(files.length / pageSize);
   const start = (page - 1) * pageSize;
   const end = start + pageSize;
-  const paged = images.slice(start, end);
+  const paged = files.slice(start, end);
 
   if (loading) {
     return (
@@ -50,7 +50,7 @@ export function ImageGallery({
   }
 
   if (error) {
-    return <Alert severity="error">Failed to load images</Alert>;
+    return <Alert severity="error">Failed to load files</Alert>;
   }
 
   return (
