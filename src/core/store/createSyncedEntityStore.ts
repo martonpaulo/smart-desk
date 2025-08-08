@@ -54,26 +54,25 @@ export function createSyncedEntityStore<E extends BaseType>(cfg: SyncedEntitySto
     },
   });
 
-  // queue of mutations performed while offline
   type Mutation = { op: 'add' | 'update' | 'delete'; payload: Partial<E>; ts: number };
 
-  store.setState(state => ({ ...(state as object), pendingMutations: [] }));
+  // Keep the queue outside Zustand state to avoid type conflicts
+  let pendingMutations: Mutation[] = [];
 
   const enqueueMutation = (mutation: Mutation): void => {
-    console.info('enqueue mutation', mutation);
-    store.setState(state => ({
-      ...(state as { pendingMutations: Mutation[] }),
-      pendingMutations: [...(state as { pendingMutations: Mutation[] }).pendingMutations, mutation],
-    }));
+    pendingMutations = [...pendingMutations, mutation];
   };
 
   const flushQueue = async (): Promise<void> => {
     if (!isOnline()) return;
-    const queue = (store.getState() as { pendingMutations: Mutation[] }).pendingMutations;
-    if (queue.length === 0) return;
-    // In this simplified implementation we just clear the queue after attempting syncPending
+    if (pendingMutations.length === 0) return;
+
+    // Try to persist local pending items first
     await store.getState().syncPending();
-    store.setState(state => ({ ...(state as object), pendingMutations: [] }));
+
+    // If you want to actually replay 'pendingMutations' to the server,
+    // do it here using your adapter. For now we clear after sync.
+    pendingMutations = [];
   };
 
   const syncNow = async (): Promise<void> => {
@@ -83,17 +82,20 @@ export function createSyncedEntityStore<E extends BaseType>(cfg: SyncedEntitySto
     await store.getState().syncFromServer();
   };
 
-  store.setState(state => ({
-    ...(state as object),
+  // Attach helpers to the store object itself, not into Zustand state
+  const augmented = Object.assign(store, {
+    get pendingMutations() {
+      return pendingMutations;
+    },
     enqueueMutation,
     flushQueue,
     syncNow,
-  }));
-
-  return store as typeof store & {
-    pendingMutations: Mutation[];
+  }) as typeof store & {
+    readonly pendingMutations: Mutation[];
     enqueueMutation: (mutation: Mutation) => void;
     flushQueue: () => Promise<void>;
     syncNow: () => Promise<void>;
   };
+
+  return augmented;
 }
