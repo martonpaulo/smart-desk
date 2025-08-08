@@ -2,7 +2,19 @@
 
 import { useSoundEnabled } from 'react-sounds';
 
-import { Button, Checkbox, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  FormControlLabel,
+  Grid,
+  Paper,
+  Stack,
+  Switch,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { DateTime } from 'luxon';
 
 import { PageSection } from '@/core/components/PageSection';
@@ -33,61 +45,164 @@ export default function SettingsPage() {
     ? DateTime.fromISO(buildDate).toLocaleString(DateTime.DATETIME_MED)
     : 'Unknown';
 
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? 'Unknown';
   const now = new Date();
+
+  const handleEnableSounds = () => {
+    setEnabled(!enabled);
+    playInterfaceSound(!enabled ? 'toggleOn' : 'toggleOff');
+  };
 
   return (
     <PageSection title="Settings" description="Configure your app preferences">
-      <SoundAlert
-        currentTime={now}
-        events={events}
-        onAudioToggle={toggleAudioEnabled}
-        isAudioOn={audioEnabled}
-        isFirstRender={isFirstRender}
-        isMeetingStartingAlertEnabled={isMeetingAlertEnabled}
-        onMeetingStartingAlertToggle={toggleMeetingAlertEnabled}
-        isEventChangesAlertEnabled={isEventChangesAlertEnabled}
-        onEventChangesAlertToggle={toggleEventChangesAlertEnabled}
-      />
+      {/* Smart alerts preview and global audio store toggles */}
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <SoundAlert
+          currentTime={now}
+          events={events}
+          onAudioToggle={toggleAudioEnabled}
+          isAudioOn={audioEnabled}
+          isFirstRender={isFirstRender}
+          isMeetingStartingAlertEnabled={isMeetingAlertEnabled}
+          onMeetingStartingAlertToggle={toggleMeetingAlertEnabled}
+          isEventChangesAlertEnabled={isEventChangesAlertEnabled}
+          onEventChangesAlertToggle={toggleEventChangesAlertEnabled}
+        />
+      </Paper>
 
-      <Stack spacing={1} alignItems="flex-start">
-        <Typography variant="h3">Sound Settings</Typography>
-        <Stack direction="row" alignItems="center">
-          <Checkbox checked={enabled} onChange={() => setEnabled(!enabled)} size="small" />
-          <Typography variant="body2">Enable Sounds</Typography>
-        </Stack>
-        <Button variant="outlined" onClick={() => playInterfaceSound('info')}>
-          Test Sound
-        </Button>
-      </Stack>
+      <Grid container spacing={2}>
+        {/* Sound settings */}
+        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack spacing={1.5} alignItems="flex-start">
+              <Typography variant="h6" component="div">
+                Sound
+              </Typography>
 
-      <Stack spacing={1}>
-        <Typography variant="h3">Interface zoom</Typography>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography variant="body2">Set zoom level</Typography>
-          <ZoomSelector />
-          <ResetZoomButton>Reset</ResetZoomButton>
-        </Stack>
-      </Stack>
+              <FormControlLabel
+                control={<Switch checked={enabled} onChange={handleEnableSounds} color="primary" />}
+                label={<Typography variant="body2">Enable sounds</Typography>}
+              />
 
-      <Stack spacing={1}>
-        <Typography variant="h3">Reset Time</Typography>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography variant="body2">Daily tasks reset at </Typography>
-          <TextField type="time" size="small" variant="standard" value={RESET_TIME} />
-        </Stack>
-      </Stack>
+              <Tooltip title="Play a short confirmation sound">
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => {
+                    playInterfaceSound('info');
+                  }}
+                >
+                  Test sound
+                </Button>
+              </Tooltip>
 
-      <Stack spacing={1}>
-        <Typography variant="h3">Version</Typography>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography variant="body2">App Build ID</Typography>
-          <Typography variant="body2">{process.env.NEXT_PUBLIC_APP_VERSION}</Typography>
-        </Stack>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography variant="body2">App Build Date</Typography>
-          <Typography variant="body2">{formattedBuildDate}</Typography>
-        </Stack>
-      </Stack>
+              <Divider flexItem />
+
+              <Stack spacing={1}>
+                <Typography variant="subtitle2" color="text.secondary" component="div">
+                  Alerts
+                </Typography>
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isMeetingAlertEnabled}
+                      onChange={() => {
+                        toggleMeetingAlertEnabled();
+                        playInterfaceSound('toggleOn');
+                      }}
+                    />
+                  }
+                  label={<Typography variant="body2">Meeting starting</Typography>}
+                />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isEventChangesAlertEnabled}
+                      onChange={() => {
+                        toggleEventChangesAlertEnabled();
+                        playInterfaceSound('toggleOff');
+                      }}
+                    />
+                  }
+                  label={<Typography variant="body2">Event changes</Typography>}
+                />
+              </Stack>
+            </Stack>
+          </Paper>
+        </Grid>
+
+        {/* Zoom controls */}
+        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack spacing={1.5} alignItems="flex-start">
+              <Typography variant="h6" component="div">
+                Interface zoom
+              </Typography>
+
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="body2" color="text.secondary">
+                  Set zoom level
+                </Typography>
+                <ZoomSelector />
+                <ResetZoomButton>Reset</ResetZoomButton>
+              </Stack>
+            </Stack>
+          </Paper>
+        </Grid>
+
+        {/* Daily reset */}
+        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack spacing={1.5} alignItems="flex-start">
+              <Typography variant="h6" component="div">
+                Daily reset
+              </Typography>
+
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="body2" color="text.secondary">
+                  Tasks reset at
+                </Typography>
+                <TextField
+                  type="time"
+                  size="small"
+                  variant="standard"
+                  value={RESET_TIME}
+                  // If you plan to make it editable later, wire onChange here
+                />
+              </Stack>
+            </Stack>
+          </Paper>
+        </Grid>
+
+        {/* Version info */}
+        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack spacing={1.5}>
+              <Typography variant="h6" component="div">
+                Version
+              </Typography>
+
+              <Box
+                role="group"
+                aria-label="Application build details"
+                sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 1 }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Build ID
+                </Typography>
+                <Typography variant="body2">{appVersion}</Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  Build date
+                </Typography>
+                <Typography variant="body2">{formattedBuildDate}</Typography>
+              </Box>
+            </Stack>
+          </Paper>
+        </Grid>
+      </Grid>
     </PageSection>
   );
 }

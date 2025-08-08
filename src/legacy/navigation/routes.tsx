@@ -14,19 +14,19 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt';
 
 export const routes = {
   primary: [
-    { label: 'Board', href: '/', icon: <HomeIcon />, showOnMobile: false },
+    { label: 'Board', href: '/', icon: <HomeIcon />, showOnMobile: true },
     { label: 'Quick List', href: '/quick', icon: <BoltIcon />, showOnMobile: true },
     { label: 'All Tasks', href: '/tasks', icon: <TaskAltIcon />, showOnMobile: true },
-    { label: 'Matrix', href: '/matrix', icon: <DashboardIcon />, showOnMobile: false },
+    { label: 'Matrix', href: '/matrix', icon: <DashboardIcon />, showOnMobile: true },
     { label: 'Calendar', href: '/calendar', icon: <CalendarTodayIcon />, showOnMobile: true },
-    { label: 'Gallery', href: '/gallery', icon: <ImageIcon />, showOnMobile: false },
-    { label: 'Maps', href: '/maps', icon: <MapIcon />, showOnMobile: false },
+    { label: 'Gallery', href: '/gallery', icon: <ImageIcon />, showOnMobile: true },
+    { label: 'Maps', href: '/maps', icon: <MapIcon />, showOnMobile: true },
     { label: 'Notes', href: '/notes', icon: <NotesIcon />, showOnMobile: true },
   ],
   secondary: [
-    { label: 'Locations', href: '/location', icon: <PlaceIcon />, showOnMobile: false },
-    { label: 'Tags', href: '/tags', icon: <TagsIcon />, showOnMobile: false },
-    { label: 'Manage', href: '/manage', icon: <BuildIcon />, showOnMobile: false },
+    { label: 'Locations', href: '/location', icon: <PlaceIcon />, showOnMobile: true },
+    { label: 'Tags', href: '/tags', icon: <TagsIcon />, showOnMobile: true },
+    { label: 'Manage', href: '/manage', icon: <BuildIcon />, showOnMobile: true },
     { label: 'Settings', href: '/settings', icon: <SettingsIcon />, showOnMobile: true },
     { label: 'Account', href: '/account', icon: <AccountCircleIcon />, showOnMobile: true },
   ],

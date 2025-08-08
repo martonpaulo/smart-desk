@@ -2,60 +2,112 @@
 
 import { useState } from 'react';
 
+import { useSnackbar } from 'notistack';
+
 import { PageSection } from '@/core/components/PageSection';
+import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
 import { CalendarForm } from '@/legacy/components/manager/CalendarForm';
 import { CalendarList } from '@/legacy/components/manager/CalendarList';
 import { useSettingsStorage } from '@/legacy/store/settings/store';
+import { IcsCalendar } from '@/legacy/types/icsCalendar';
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
 
-export default function CalendarManager() {
-  const calendars = useSettingsStorage(state => state.icsCalendars);
-  const addCalendar = useSettingsStorage(state => state.addIcsCalendar);
-  const updateCalendar = useSettingsStorage(state => state.updateIcsCalendar);
-  const deleteCalendar = useSettingsStorage(state => state.deleteIcsCalendar);
+export default function CalendarManagerPage() {
+  const calendars = useSettingsStorage(s => s.icsCalendars);
+  const addCalendar = useSettingsStorage(s => s.addIcsCalendar);
+  const updateCalendar = useSettingsStorage(s => s.updateIcsCalendar);
+  const deleteCalendar = useSettingsStorage(s => s.deleteIcsCalendar);
+
+  const { enqueueSnackbar } = useSnackbar();
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(null);
 
-  const startEdit = (idx: number) => setEditingIndex(idx);
-  const cancelEdit = () => setEditingIndex(null);
+  const editingCalendar: IcsCalendar | undefined =
+    editingIndex != null ? calendars[editingIndex] : undefined;
 
-  const handleDelete = (idx: number) => {
-    const title = calendars[idx].title;
-    if (!window.confirm(`Delete calendar "${title}"?`)) return;
-    deleteCalendar({ id: calendars[idx].id });
-    if (editingIndex === idx) cancelEdit();
-  };
+  function startEdit(idx: number) {
+    setEditingIndex(idx);
+  }
 
-  const handleSubmit = (title: string, source: string, color: string) => {
+  function cancelEdit() {
+    setEditingIndex(null);
+    enqueueSnackbar('Edit canceled', { variant: 'info' });
+    playInterfaceSound('reset');
+  }
+
+  function requestDelete(idx: number) {
+    setPendingDeleteIndex(idx);
+  }
+
+  function closeDeleteDialog() {
+    setPendingDeleteIndex(null);
+    playInterfaceSound('reset');
+  }
+
+  function handleDeleteConfirmed() {
+    if (pendingDeleteIndex == null) return;
+    const cal = calendars[pendingDeleteIndex];
+    deleteCalendar({ id: cal.id });
+
+    if (editingIndex === pendingDeleteIndex) setEditingIndex(null);
+
+    enqueueSnackbar(`Deleted "${cal.title}"`, { variant: 'success' });
+    playInterfaceSound('trash');
+    setPendingDeleteIndex(null);
+  }
+
+  function handleSubmit(payload: { title: string; source: string; color: string }) {
     const now = new Date();
 
     if (editingIndex != null) {
-      if (!window.confirm('Update this calendar configuration?')) return;
+      const cal = calendars[editingIndex];
       updateCalendar({
-        id: calendars[editingIndex].id,
-        title,
-        source,
-        color,
+        id: cal.id,
+        title: payload.title,
+        source: payload.source,
+        color: payload.color,
         updatedAt: now,
       });
+      enqueueSnackbar(`Updated "${payload.title}"`, { variant: 'success' });
+      playInterfaceSound('done');
     } else {
       addCalendar({
-        title,
-        source,
-        color,
+        title: payload.title,
+        source: payload.source,
+        color: payload.color,
         updatedAt: now,
       });
+      enqueueSnackbar(`Added "${payload.title}"`, { variant: 'success' });
+      playInterfaceSound('increment');
     }
-    cancelEdit();
-  };
+
+    setEditingIndex(null);
+  }
 
   return (
     <PageSection title="Calendar Manager" description="Manage your ICS calendars">
-      <CalendarList calendars={calendars} onEdit={startEdit} onDelete={handleDelete} />
+      <CalendarList calendars={calendars} onEdit={startEdit} onDelete={requestDelete} />
+
       <CalendarForm
-        initial={editingIndex != null ? calendars[editingIndex] : undefined}
-        mode={editingIndex != null ? 'edit' : 'add'}
+        key={editingCalendar?.id ?? 'new'}
+        initial={editingCalendar}
+        mode={editingCalendar ? 'edit' : 'add'}
         onSubmit={handleSubmit}
         onCancel={cancelEdit}
+      />
+
+      <ConfirmDialog
+        open={pendingDeleteIndex != null}
+        title="Delete calendar"
+        content={
+          pendingDeleteIndex != null
+            ? `Are you sure you want to delete "${calendars[pendingDeleteIndex].title}"?`
+            : ''
+        }
+        confirmButtonText="Delete"
+        onCancel={closeDeleteDialog}
+        onConfirm={handleDeleteConfirmed}
       />
     </PageSection>
   );
