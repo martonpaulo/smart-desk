@@ -6,6 +6,7 @@ import { Box } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { PageSection } from '@/core/components/PageSection';
+import { useRegisterFeature } from '@/core/store/useActiveFeaturesStore';
 import { CalendarView } from '@/features/calendar/types/CalendarView';
 import { CalendarNavigation } from '@/legacy/components/calendar/CalendarNavigation';
 import { CalendarViewContainer } from '@/legacy/components/calendar/CalendarViewContainer';
@@ -13,6 +14,7 @@ import { parseDateFromSlug } from '@/legacy/utils/dateSlug';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 export default function CalendarPage() {
+  useRegisterFeature('calendar');
   const pathname = usePathname();
   const router = useRouter();
 

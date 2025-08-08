@@ -8,3 +8,8 @@ export enum SyncInterval {
   LOW = 120_000, // Rarely changing data (e.g. locations, static metadata)
   RARE = 300_000, // Almost static data (e.g. onboarding tips, app info)
 }
+
+// Global sync configuration values. Centralize all interval numbers here.
+export const SyncConfig = {
+  BACKGROUND_MINUTES: 10,
+} as const;
