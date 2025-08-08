@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Button, Stack, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
@@ -9,15 +9,14 @@ import { PageSection } from '@/core/components/PageSection';
 import { TaskFilterPanel } from '@/features/task/components/TaskFilterPanel';
 import { clearedFilters } from '@/features/task/constants/clearedFilters';
 import { useBulkTaskSelection } from '@/features/task/hooks/useBulkTaskSelection';
-import { TaskFilters } from '@/features/task/types/TaskFilters';
+import type { TaskFilters } from '@/features/task/types/TaskFilters';
 import { TaskSelectionToolbar } from '@/legacy/components/TaskSelectionToolbar';
 import { useDefaultColumnObj } from '@/legacy/hooks/useDefaultColumnObj';
 import { useTasks } from '@/legacy/hooks/useTasks';
 import { customColors } from '@/legacy/styles/colors';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
-import { theme } from '@/theme';
 
-// Lazy loaded components reduce the initial bundle size
+// Lazy loaded to keep initial bundle lean
 const AddTaskFloatButton = dynamic(
   () => import('@/legacy/components/task/AddTaskFloatButton').then(m => m.AddTaskFloatButton),
   { ssr: false },
@@ -33,12 +32,16 @@ const TaskCard = dynamic(() => import('@/legacy/components/task/TaskCard').then(
 });
 
 export default function TasksPage() {
+  const isMobile = useResponsiveness();
   const backlogColumn = useDefaultColumnObj('backlog');
+
+  // Filters state
   const [filters, setFilters] = useState<TaskFilters>(clearedFilters);
 
-  // fetch tasks (filtered by title)
+  // Fetch filtered tasks
   const tasks = useTasks(filters);
 
+  // Bulk-selection state and actions
   const {
     isSelecting,
     selectedIds,
@@ -52,43 +55,50 @@ export default function TasksPage() {
     handleApply,
   } = useBulkTaskSelection(tasks);
 
-  // track screen size
-  const isMobile = useResponsiveness();
-
-  // track newly added task to auto‑open edit view
+  // Track newly added task to auto‑open edit
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
-  // counts & dynamic titles/subtitles
   const count = tasks.length;
+  const pageSubtitle = useMemo(() => {
+    const base = `You have ${count} task${count !== 1 ? 's' : ''}`;
+    return filters === clearedFilters ? base : `${base} matching the current filters`;
+  }, [count, filters]);
 
-  const pageSubtitle = `You have a total of ${count} task${count !== 1 ? 's' : ''} that match${count !== 1 ? 'es' : ''} the current filters`;
-
-  // width for each card
+  // Responsive card width
   const cardWidth = isMobile ? '100%' : '250px';
 
   return (
-    <PageSection title="List of Tasks" hideDescription>
-      <Typography variant="subtitle1" color={theme.palette.text.secondary}>
+    <PageSection title="Tasks" description="Filter, scan, and act fast">
+      {/* Subtitle */}
+      <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1 }}>
         {pageSubtitle}
       </Typography>
 
+      {/* Filters */}
       <TaskFilterPanel filters={filters} onFilterChange={setFilters} />
 
-      <Stack direction="row" mb={2}>
-        <Button variant={isSelecting ? 'contained' : 'outlined'} onClick={toggleSelecting}>
+      {/* Selection toggle */}
+      <Stack direction="row" justifyContent="flex-end" sx={{ mb: 1 }}>
+        <Button
+          variant={isSelecting ? 'contained' : 'outlined'}
+          onClick={toggleSelecting}
+          size={isMobile ? 'small' : 'medium'}
+        >
           {isSelecting ? 'Cancel Selection' : 'Select Tasks'}
         </Button>
       </Stack>
 
+      {/* Desktop quick-add inline. Mobile uses FAB below */}
       {!isMobile && (
         <AddTaskInput
           variant="outlined"
           columnProperties={backlogColumn}
-          sx={{ width: cardWidth }}
+          sx={{ width: cardWidth, mb: 1.5 }}
           onFinishAdding={newId => setEditingTaskId(newId)}
         />
       )}
 
+      {/* Task list */}
       {tasks.length > 0 ? (
         <Stack direction="row" gap={1} flexWrap="wrap">
           {tasks.map(task => (
@@ -96,9 +106,10 @@ export default function TasksPage() {
               key={task.id}
               task={task}
               color={customColors.blue.value}
-              width={cardWidth}
+              // Inline edit for just-created task
               editTask={editingTaskId === task.id}
               onFinishEditing={() => setEditingTaskId(null)}
+              // Bulk selection
               selectable={isSelecting}
               selected={selectedIds.has(task.id)}
               onSelectChange={selectTask}
@@ -106,12 +117,15 @@ export default function TasksPage() {
           ))}
         </Stack>
       ) : (
-        <Typography>No tasks found</Typography>
+        <Typography variant="body2" color="text.secondary">
+          No tasks found
+        </Typography>
       )}
 
-      {/* on mobile, floating add button */}
+      {/* Mobile floating add */}
       {isMobile && <AddTaskFloatButton />}
 
+      {/* Bulk selection toolbar */}
       {isSelecting && (
         <TaskSelectionToolbar
           totalCount={totalCount}

@@ -195,7 +195,6 @@ export default function QuickList() {
             return (
               <TaskCard
                 key={task.id}
-                width={cardWidth}
                 task={task}
                 showDaily={false}
                 showDate={false}

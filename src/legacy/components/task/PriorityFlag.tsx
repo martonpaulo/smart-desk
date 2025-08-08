@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Delete as TrashIcon,
   DoDisturbOutlined as PauseIcon,
@@ -10,10 +12,10 @@ import { Stack, StackProps, SvgIconOwnProps, Tooltip } from '@mui/material';
 import { Task } from '@/legacy/types/task';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
-interface PriorityFlagProps extends Omit<StackProps, 'children'> {
+type PriorityFlagProps = Omit<StackProps, 'children'> & {
   task: Task;
   showEisenhowerIcons?: boolean;
-}
+};
 
 export function PriorityFlag({
   task,
@@ -22,6 +24,7 @@ export function PriorityFlag({
   ...stackProps
 }: PriorityFlagProps) {
   const isMobile = useResponsiveness();
+
   const shouldDisplay =
     task.trashed || task.blocked || (showEisenhowerIcons && (task.important || task.urgent));
 
@@ -42,7 +45,7 @@ export function PriorityFlag({
       fontSize = isMobile ? 20 : 16;
     } else if (task.important && task.urgent) {
       Icon = FireIcon;
-      tooltipLabel = 'Important & urgent';
+      tooltipLabel = 'Important and urgent';
       color = 'error';
       paddingTop = isMobile ? 0 : 0.1;
       fontSize = isMobile ? 22 : 18;

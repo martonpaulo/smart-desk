@@ -1,173 +1,249 @@
-import { useEffect, useState } from 'react';
+'use client';
 
+import { useEffect, useMemo, useState } from 'react';
+
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import {
   Button,
+  Chip,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
   Stack,
   TextField,
+  Toolbar,
+  Typography,
 } from '@mui/material';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { clearedFilters } from '@/features/task/constants/clearedFilters';
-import { TaskFilters } from '@/features/task/types/TaskFilters';
+import type { TaskFilters } from '@/features/task/types/TaskFilters';
 import { DateInput } from '@/shared/components/DateInput';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
-interface TaskFilterPanelProps {
+type TaskFilterPanelProps = {
   filters: TaskFilters;
   onFilterChange: (newFilters: TaskFilters) => void;
-}
+};
+
+type TriKey = keyof Omit<TaskFilters, 'title' | 'plannedDate' | 'tagId'>;
 
 export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProps) {
   const isMobile = useResponsiveness();
+
+  // Tags
   const allTags = useTagsStore(s => s.items);
-  const tags = allTags.filter(t => !t.trashed);
+  const tags = useMemo(() => allTags.filter(t => !t.trashed), [allTags]);
 
-  // state to show or hide the filter controls
-  const [showFilters, setShowFilters] = useState(true);
-  // local copy of filters
-  const [localFilters, setLocalFilters] = useState<TaskFilters>(filters);
+  // Show/hide panel
+  const [open, setOpen] = useState(true);
 
-  // keep local in sync if parent filters change
-  useEffect(() => {
-    setLocalFilters(filters);
-  }, [filters]);
+  // Local copy of filters
+  const [local, setLocal] = useState<TaskFilters>(filters);
+  useEffect(() => setLocal(filters), [filters]);
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const text = e.target.value.trim();
-    setLocalFilters({
-      ...localFilters,
-      title: text === '' ? null : text,
-    });
+  // Handlers
+  const onTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setLocal(prev => ({ ...prev, title: text.trim() === '' ? null : text }));
   };
-
-  const handleDateChange = (date: Date | null) => {
-    setLocalFilters({
-      ...localFilters,
-      plannedDate: date,
-    });
+  const onDate = (date: Date | null) => {
+    setLocal(prev => ({ ...prev, plannedDate: date }));
   };
-
-  const handleTagChange = (e: SelectChangeEvent<string>) => {
+  const onTag = (e: SelectChangeEvent<string>) => {
     const id = e.target.value;
-    setLocalFilters({
-      ...localFilters,
-      tagId: id || undefined,
-    });
+    setLocal(prev => ({ ...prev, tagId: id || undefined }));
   };
-
-  const handleTriStateChange =
-    (key: keyof Omit<TaskFilters, 'title' | 'plannedDate'>) => (e: SelectChangeEvent<string>) => {
-      const raw = e.target.value;
-      const newValue = raw === '' ? null : raw === 'true';
-      setLocalFilters({
-        ...localFilters,
-        [key]: newValue,
-      });
-    };
+  const onTri = (key: TriKey) => (e: SelectChangeEvent<string>) => {
+    const raw = e.target.value;
+    const newValue = raw === '' ? null : raw === 'true';
+    setLocal(prev => ({ ...prev, [key]: newValue }));
+  };
 
   const clearLocal = () => {
-    setLocalFilters(clearedFilters);
+    setLocal(clearedFilters);
     onFilterChange(clearedFilters);
   };
 
-  const renderTriStateSelect = (
-    label: string,
-    key: keyof Omit<TaskFilters, 'title' | 'plannedDate'>,
-  ) => {
-    const current = localFilters[key];
-    const value = current == null ? '' : current ? 'true' : 'false';
-
-    return (
-      <FormControl size="small" sx={{ width: isMobile ? '100%' : 150 }}>
-        <InputLabel>{label}</InputLabel>
-        <Select value={value} label={label} onChange={handleTriStateChange(key)}>
-          <MenuItem value="">All</MenuItem>
-          <MenuItem value="true">Yes</MenuItem>
-          <MenuItem value="false">No</MenuItem>
-        </Select>
-      </FormControl>
-    );
-  };
-
-  if (!showFilters) {
-    return (
-      <Stack direction="row">
-        <Button variant="contained" onClick={() => setShowFilters(true)}>
-          Show Filters
-        </Button>
-      </Stack>
-    );
-  }
+  // Applied filters summary chips
+  const chips = useMemo(() => {
+    const list: string[] = [];
+    if (local.title) list.push(`Title: "${local.title}"`);
+    if (local.plannedDate) list.push(`Date: ${local.plannedDate.toLocaleDateString()}`);
+    (['important', 'urgent', 'blocked', 'done', 'daily', 'trashed'] as TriKey[]).forEach(k => {
+      const v = local[k];
+      if (v != null) list.push(`${capitalize(k)}: ${v ? 'Yes' : 'No'}`);
+    });
+    if (local.tagId) {
+      const tg = tags.find(t => t.id === local.tagId);
+      if (tg) list.push(`Tag: ${tg.name}`);
+    }
+    return list;
+  }, [local, tags]);
 
   return (
-    <Stack>
-      <Stack
-        flexWrap="wrap"
-        padding={2}
-        marginBottom={2}
-        gap={1}
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          backgroundColor: 'background.paper',
-        }}
-      >
-        <Stack direction="row" gap={1} flexWrap="wrap">
-          <TextField
-            label="Title"
+    <Stack sx={{ mb: 1.5 }}>
+      {/* Toolbar header */}
+      <Toolbar disableGutters sx={{ minHeight: 40, justifyContent: 'space-between' }}>
+        <Stack direction="row" alignItems="center" gap={1}>
+          <IconButton
             size="small"
-            sx={{ width: isMobile ? '100%' : 300 }}
-            value={localFilters.title ?? ''}
-            onChange={handleTitleChange}
-          />
-
-          <DateInput
-            label="Planned Date"
-            value={localFilters.plannedDate}
-            onChange={handleDateChange}
-          />
+            color={open ? 'primary' : 'default'}
+            onClick={() => setOpen(v => !v)}
+            aria-label="Toggle filters"
+          >
+            <FilterAltIcon fontSize="small" />
+          </IconButton>
+          <Typography variant="subtitle2" color="text.secondary">
+            Filters
+          </Typography>
         </Stack>
 
-        <Stack direction="row" gap={1} flexWrap="wrap">
-          {renderTriStateSelect('Important', 'important')}
-          {renderTriStateSelect('Urgent', 'urgent')}
-          {renderTriStateSelect('Blocked', 'blocked')}
-          {renderTriStateSelect('Done', 'done')}
-          {renderTriStateSelect('Daily', 'daily')}
-          {renderTriStateSelect('Trashed', 'trashed')}
-          <FormControl size="small" sx={{ width: isMobile ? '100%' : 150 }}>
-            <InputLabel>Tag</InputLabel>
-            <Select value={localFilters.tagId ?? ''} label="Tag" onChange={handleTagChange}>
-              <MenuItem value="">All</MenuItem>
-              {tags.map(t => (
-                <MenuItem key={t.id} value={t.id}>
-                  <TagLabel tag={t} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Stack>
-      </Stack>
-
-      <Stack direction="row" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => setShowFilters(false)}>
-          Hide Filters
-        </Button>
+        {/* Quick actions */}
         <Stack direction="row" gap={1}>
-          <Button variant="outlined" onClick={clearLocal}>
+          <Button size="medium" onClick={clearLocal}>
             Clear
           </Button>
-          <Button variant="contained" onClick={() => onFilterChange(localFilters)}>
-            Apply Filters
+          <Button size="medium" variant="contained" onClick={() => onFilterChange(local)}>
+            Apply
           </Button>
         </Stack>
-      </Stack>
+      </Toolbar>
+
+      {/* Chips summary for mobile even when closed */}
+      {!open && chips.length > 0 && (
+        <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mb: 1 }}>
+          {chips.map((c, i) => (
+            <Chip key={i} label={c} size="small" />
+          ))}
+        </Stack>
+      )}
+
+      {/* Panel content */}
+      {open && (
+        <Stack
+          flexWrap="wrap"
+          gap={1}
+          sx={{
+            p: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.paper',
+            mb: 1,
+          }}
+        >
+          {/* Row 1: Title + Date */}
+          <Stack direction="row" gap={1} flexWrap="wrap">
+            <TextField
+              label="Title"
+              size="small"
+              sx={{ width: isMobile ? '100%' : 320 }}
+              value={local.title ?? ''}
+              onChange={onTitle}
+              onKeyDown={e => {
+                if (e.key === 'Enter') onFilterChange(local);
+              }}
+            />
+            <DateInput label="Planned date" value={local.plannedDate} onChange={onDate} />
+          </Stack>
+
+          {/* Row 2: Tri-state flags + Tag */}
+          <Stack direction="row" gap={1} flexWrap="wrap">
+            <TriStateSelect
+              label="Important"
+              value={local.important}
+              onChange={onTri('important')}
+              isMobile={isMobile}
+            />
+            <TriStateSelect
+              label="Urgent"
+              value={local.urgent}
+              onChange={onTri('urgent')}
+              isMobile={isMobile}
+            />
+            <TriStateSelect
+              label="Blocked"
+              value={local.blocked}
+              onChange={onTri('blocked')}
+              isMobile={isMobile}
+            />
+            <TriStateSelect
+              label="Done"
+              value={local.done}
+              onChange={onTri('done')}
+              isMobile={isMobile}
+            />
+            <TriStateSelect
+              label="Daily"
+              value={local.daily}
+              onChange={onTri('daily')}
+              isMobile={isMobile}
+            />
+            <TriStateSelect
+              label="Trashed"
+              value={local.trashed}
+              onChange={onTri('trashed')}
+              isMobile={isMobile}
+            />
+
+            <FormControl size="small" sx={{ width: isMobile ? '100%' : 160 }}>
+              <InputLabel>Tag</InputLabel>
+              <Select value={local.tagId ?? ''} label="Tag" onChange={onTag}>
+                <MenuItem value="">All</MenuItem>
+                {tags.map(t => (
+                  <MenuItem key={t.id} value={t.id}>
+                    <TagLabel tag={t} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+
+          {/* Summary chips when open */}
+          {chips.length > 0 && (
+            <Stack direction="row" flexWrap="wrap" gap={0.5}>
+              {chips.map((c, i) => (
+                <Chip key={i} label={c} size="small" />
+              ))}
+            </Stack>
+          )}
+        </Stack>
+      )}
     </Stack>
   );
+}
+
+/** Small, typed tri-state select used across the panel */
+function TriStateSelect({
+  label,
+  value,
+  onChange,
+  isMobile,
+}: {
+  label: string;
+  value: boolean | null | undefined;
+  onChange: (e: SelectChangeEvent<string>) => void;
+  isMobile: boolean;
+}) {
+  const current = value;
+  const val = current == null ? '' : current ? 'true' : 'false';
+
+  return (
+    <FormControl size="small" sx={{ width: isMobile ? '100%' : 150 }}>
+      <InputLabel>{label}</InputLabel>
+      <Select value={val} label={label} onChange={onChange}>
+        <MenuItem value="">All</MenuItem>
+        <MenuItem value="true">Yes</MenuItem>
+        <MenuItem value="false">No</MenuItem>
+      </Select>
+    </FormControl>
+  );
+}
+
+function capitalize(s: string) {
+  return s.length ? s[0].toUpperCase() + s.slice(1) : s;
 }

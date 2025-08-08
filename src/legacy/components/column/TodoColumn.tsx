@@ -4,10 +4,9 @@ import AddIcon from '@mui/icons-material/Add';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { alpha, Box, Chip, IconButton, Stack, Typography } from '@mui/material';
 
-import { SyncedSyncIcon } from '@/legacy/components/SyncedSyncIcon';
 import { AddTaskInput } from '@/legacy/components/task/AddTaskInput';
+import { SyncedSyncIcon, SyncStatus } from '@/legacy/components/task/SyncedSyncIcon';
 import { TaskCard } from '@/legacy/components/task/TaskCard';
-import { SyncStatus } from '@/legacy/store/syncStatus';
 import { Column } from '@/legacy/types/column';
 import { Task } from '@/legacy/types/task';
 
