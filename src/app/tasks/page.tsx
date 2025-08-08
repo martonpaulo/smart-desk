@@ -6,6 +6,7 @@ import { Button, Stack, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
 
 import { PageSection } from '@/core/components/PageSection';
+import { useRegisterFeature } from '@/core/store/useActiveFeaturesStore';
 import { TaskFilterPanel } from '@/features/task/components/TaskFilterPanel';
 import { clearedFilters } from '@/features/task/constants/clearedFilters';
 import { useBulkTaskSelection } from '@/features/task/hooks/useBulkTaskSelection';
@@ -33,6 +34,7 @@ const TaskCard = dynamic(() => import('@/legacy/components/task/TaskCard').then(
 });
 
 export default function TasksPage() {
+  useRegisterFeature('tasks');
   const backlogColumn = useDefaultColumnObj('backlog');
   const [filters, setFilters] = useState<TaskFilters>(clearedFilters);
 
