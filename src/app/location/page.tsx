@@ -40,7 +40,7 @@ export default function LocationsManagerPage() {
 
       {locations.length === 0 && <Typography>No locations created yet.</Typography>}
 
-      <Stack gap={1} mb={2}>
+      <Stack direction="row" flexWrap="wrap" gap={2}>
         {locations.map(location => (
           <Stack key={location.id} direction="row" alignItems="center">
             <LocationCard location={location} onClick={() => openModal(location)} />

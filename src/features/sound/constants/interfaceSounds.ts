@@ -29,4 +29,10 @@ export const interfaceSounds = {
   unblock: {
     id: 'ui/window_open',
   },
+  toggleOn: {
+    id: 'ui/toggle_on',
+  },
+  toggleOff: {
+    id: 'ui/toggle_off',
+  },
 };

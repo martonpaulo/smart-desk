@@ -30,7 +30,6 @@ interface TaskCardProps extends BoxProps {
   color: string;
   eisenhowerIcons?: boolean;
   showDuration?: boolean;
-  durationPosition?: 'bottom' | 'right';
   showDaily?: boolean;
   showTag?: boolean;
   editTask?: boolean;
@@ -51,7 +50,6 @@ export function TaskCard({
   eisenhowerIcons = true,
   showDaily = true,
   showDuration = true,
-  durationPosition = 'bottom',
   showTag = true,
   editTask = false,
   showActions = true,
@@ -258,12 +256,6 @@ export function TaskCard({
                       <S.RepeatIndicator fontSize="inherit" />
                     </Tooltip>
                   )}
-
-                  {task.estimatedTime && showDuration && durationPosition === 'right' && (
-                    <S.EstimatedTimeText sx={{ opacity, marginLeft: 1 }}>
-                      {formatFullDuration(task.estimatedTime * 60_000)}
-                    </S.EstimatedTimeText>
-                  )}
                 </S.TitleGroup>
 
                 <Stack>
@@ -278,7 +270,7 @@ export function TaskCard({
               <Stack direction="row" alignItems="center" gap={0.5} sx={{ opacity }}>
                 {taskTag && showTag && <TagLabel tag={taskTag} />}
 
-                {task.estimatedTime && showDuration && durationPosition === 'bottom' && (
+                {task.estimatedTime && showDuration && (
                   <S.EstimatedTimeText sx={{ opacity }}>
                     {formatFullDuration(task.estimatedTime * 60_000)}
                   </S.EstimatedTimeText>
