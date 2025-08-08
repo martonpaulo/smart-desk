@@ -6,18 +6,29 @@ import {
   NotificationsActive as AlertIcon,
   Security as ShieldIcon,
 } from '@mui/icons-material';
-import { alpha, darken, IconButton, Paper, Stack, Typography, useTheme } from '@mui/material';
+import {
+  alpha,
+  Chip,
+  darken,
+  Fab,
+  IconButton,
+  Paper,
+  Stack,
+  Typography,
+  useTheme,
+} from '@mui/material';
 
 import { TaskCard } from '@/legacy/components/task/TaskCard';
 import { TaskModal } from '@/legacy/components/task/TaskModal';
 import { Task } from '@/legacy/types/task';
 import { CountChip } from '@/shared/components/CountChip';
+import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 interface EisenhowerQuadrantProps {
   title: string;
   action: string;
   tasks: Task[];
-  quadrantColor: string; // CSS color string
+  quadrantColor: string; // CSS color string or theme palette value
   important: boolean;
   urgent: boolean;
   questions: string[];
@@ -51,20 +62,21 @@ export function EisenhowerQuadrant({
   onTaskSelectChange,
 }: EisenhowerQuadrantProps) {
   const theme = useTheme();
+  const isMobile = useResponsiveness();
   const [openTaskModal, setOpenTaskModal] = useState(false);
 
   const tasksCount = tasks.length;
 
-  // Set default icon
+  // Pick icon and tone using theme palette only
   let Icon: ElementType = AlertIcon;
-  let iconColor = 'action';
-  let hasIcon = true;
-  let iconSize = 'medium';
+  let iconColor: 'action' | 'error' | 'info' | 'warning' = 'action';
+  let showIcon = true;
+  let iconSize: 'small' | 'medium' | 'large' = isMobile ? 'small' : 'medium';
 
   if (important && urgent) {
     Icon = FireIcon;
     iconColor = 'error';
-    iconSize = 'large';
+    iconSize = isMobile ? 'medium' : 'large';
   } else if (important && !urgent) {
     Icon = ShieldIcon;
     iconColor = 'info';
@@ -72,60 +84,82 @@ export function EisenhowerQuadrant({
     Icon = AlertIcon;
     iconColor = 'warning';
   } else {
-    hasIcon = false;
+    showIcon = false;
   }
 
   const examplesText = `Examples: ${examples.join(', ')}`;
 
+  const bgSubtle = alpha(quadrantColor, 0.1);
+  const borderActive = `3px dashed ${quadrantColor}`; // old drag border
+  const helperTextColor = alpha(darken(quadrantColor, 0.4), 0.7);
+
   return (
     <>
       <Paper
+        component="section"
+        aria-label={`${title} quadrant`}
         data-important={important}
         data-urgent={urgent}
         onDragOver={onTaskDragOver}
         onDrop={onTaskDrop}
         sx={{
-          bgcolor: alpha(quadrantColor, 0.1),
-          p: 2,
-          pb: 6,
-          minHeight: 320,
+          bgcolor: bgSubtle,
+          p: { mobileSm: 1.5, mobileLg: 2 },
+          pb: { mobileSm: 2.5, mobileLg: 6 },
+          minHeight: { mobileSm: 220, mobileLg: 320 },
           boxShadow: 1,
           borderRadius: theme.shape.borderRadius,
           boxSizing: 'border-box',
-          border: isDragInProgress ? `3px dashed ${quadrantColor}` : undefined,
+          border: isDragInProgress ? borderActive : '1px solid',
+          // keep the solid divider only when not dragging
+          borderColor: isDragInProgress ? undefined : 'divider',
           position: 'relative',
+          '& *': { WebkitTapHighlightColor: 'transparent' },
         }}
       >
-        <Stack direction="row" alignItems="center" gap={1} mb={2}>
-          {hasIcon && <Icon color={iconColor} fontSize={iconSize} />}
+        {/* Header */}
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          gap={1}
+          mb={{ mobileSm: 1, mobileLg: 2 }}
+        >
+          <Stack direction="row" alignItems="center" gap={1} minWidth={0}>
+            {showIcon && <Icon color={iconColor} fontSize={iconSize} />}
+            <Typography
+              variant={isMobile ? 'subtitle1' : 'h6'}
+              sx={{
+                color: quadrantColor,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+              title={title}
+            >
+              {title}
+            </Typography>
+            <CountChip count={tasksCount} color={quadrantColor} />
+          </Stack>
 
-          <Typography variant="h6" sx={{ color: quadrantColor }}>
-            {title}
-          </Typography>
-
-          <CountChip count={tasksCount} color={quadrantColor} />
+          {/* Inline quick-add on phones */}
+          <IconButton
+            aria-label="Add task to this quadrant"
+            size={isMobile ? 'small' : 'medium'}
+            onClick={() => setOpenTaskModal(true)}
+            sx={{ display: { mobileSm: 'inline-flex', mobileLg: 'none' } }}
+          >
+            <AddIcon fontSize={isMobile ? 'small' : 'medium'} />
+          </IconButton>
         </Stack>
 
-        {!isDragInProgress && (
-          <Typography
-            variant="subtitle2"
-            sx={{
-              color: alpha(darken(quadrantColor, 0.4), 0.6),
-              position: 'absolute',
-              bottom: 16,
-              right: 16,
-            }}
-          >
-            {`${action.toLocaleUpperCase()}!`}
-          </Typography>
-        )}
-
+        {/* Drag helper overlay: only visible while dragging */}
         <Stack
-          gap={2.5}
+          gap={2}
           textAlign="center"
           p={2}
           sx={{
-            color: theme.palette.text.secondary,
+            color: helperTextColor,
             position: 'absolute',
             top: 48,
             left: 0,
@@ -136,30 +170,37 @@ export function EisenhowerQuadrant({
         >
           <Stack component="ul" gap={1} sx={{ listStyle: 'none', p: 0, m: 0 }}>
             {questions.map(question => (
-              <Typography component="li" key={question}>
+              <Typography component="li" key={question} variant="caption">
                 {question}
               </Typography>
             ))}
           </Stack>
-          <Typography variant="body2">{examplesText}</Typography>
+          <Typography variant="caption">{examplesText}</Typography>
         </Stack>
 
+        {/* Cards grid. Hide content visually while dragging to emphasize drop zone */}
         <Stack
           direction="row"
           flexWrap="wrap"
-          gap={1}
+          gap={{ mobileSm: 1, mobileLg: 1.5 }}
           sx={{
+            minHeight: { mobileSm: 120, mobileLg: 160 },
+            alignContent: 'flex-start',
             opacity: isDragInProgress ? 0.001 : 1,
           }}
         >
           {tasks.length === 0 ? (
-            <Typography variant="body2" color="textSecondary">
-              No tasks found
-            </Typography>
+            <Chip
+              color="default"
+              variant="outlined"
+              label="No tasks here yet"
+              sx={{ alignSelf: 'flex-start' }}
+            />
           ) : (
             tasks.map(task => (
               <TaskCard
                 key={task.id}
+                hasDefaultWidth={false}
                 task={task}
                 color={quadrantColor}
                 eisenhowerIcons={false}
@@ -173,18 +214,37 @@ export function EisenhowerQuadrant({
               />
             ))
           )}
-
-          <IconButton
-            size="small"
-            onClick={() => setOpenTaskModal(true)}
-            sx={{
-              aspectRatio: '1 / 1',
-              alignSelf: 'center',
-            }}
-          >
-            <AddIcon />
-          </IconButton>
         </Stack>
+
+        {/* Desktop/tablet floating Add */}
+        <Fab
+          color="primary"
+          size="small"
+          aria-label="Add task"
+          onClick={() => setOpenTaskModal(true)}
+          sx={{
+            position: 'absolute',
+            right: 12,
+            bottom: 12,
+            display: { mobileSm: 'none', mobileLg: 'inline-flex' },
+          }}
+        >
+          <AddIcon />
+        </Fab>
+
+        {/* Action word only when not dragging */}
+        <Typography
+          variant="subtitle2"
+          sx={{
+            color: alpha(darken(quadrantColor, 0.4), 0.6),
+            position: 'absolute',
+            bottom: 16,
+            left: 16,
+            display: { mobileSm: 'none', mobileLg: isDragInProgress ? 'none' : 'block' },
+          }}
+        >
+          {action.toUpperCase()}!
+        </Typography>
       </Paper>
 
       <TaskModal

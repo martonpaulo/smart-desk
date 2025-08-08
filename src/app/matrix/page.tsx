@@ -39,6 +39,7 @@ export default function EisenhowerMatrixPage() {
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
   function handleDragStart(task: Task, e: React.DragEvent<HTMLDivElement>) {
+    // Improves perceived performance on mobile too
     e.dataTransfer.effectAllowed = 'move';
     setDraggingId(task.id);
   }
@@ -48,6 +49,7 @@ export default function EisenhowerMatrixPage() {
   }
 
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
+    // Needed to enable drop on HTML5 DnD
     e.preventDefault();
   }
 
@@ -83,7 +85,17 @@ export default function EisenhowerMatrixPage() {
         </Button>
       </Stack>
 
-      <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+      {/* Responsive grid: single column on phones, 2 columns from md up */}
+      <Stack
+        display="grid"
+        gap={2}
+        sx={{
+          gridTemplateColumns: {
+            mobileSm: '1fr',
+            mobileLg: '1fr 1fr',
+          },
+        }}
+      >
         {eisenhowerQuadrants.map(
           ({ title, color, important, urgent, questions, examples, action }) => {
             const tasks = allTasks.filter(t => t.important === important && t.urgent === urgent);

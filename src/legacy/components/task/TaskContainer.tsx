@@ -8,6 +8,7 @@ type TaskContainerProps = StackProps & {
   selected?: boolean;
   isDragging?: boolean;
   dense?: boolean;
+  hasDefaultWidth?: boolean;
 };
 
 export function TaskContainer({
@@ -15,6 +16,7 @@ export function TaskContainer({
   selected,
   isDragging,
   dense = false,
+  hasDefaultWidth = true,
   children,
   sx,
   ...rest
@@ -46,7 +48,7 @@ export function TaskContainer({
         // reveal action bar on hover for pointer users
         '&:hover .task-actions': { visibility: 'visible' },
         minHeight: dense ? '3.5rem' : 'auto',
-        width,
+        width: hasDefaultWidth ? width : undefined,
         ...sx,
       }}
       {...rest}
