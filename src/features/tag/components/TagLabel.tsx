@@ -1,12 +1,14 @@
+'use client';
+
 import { alpha, Chip, useTheme } from '@mui/material';
 
 import { Tag } from '@/features/tag/types/Tag';
 
-interface TagLabelProps {
+type TagLabelProps = {
   tag: Tag;
   size?: 'small' | 'medium';
   onClick?: () => void;
-}
+};
 
 export function TagLabel({ tag, size = 'small', onClick }: TagLabelProps) {
   const theme = useTheme();
@@ -30,13 +32,8 @@ export function TagLabel({ tag, size = 'small', onClick }: TagLabelProps) {
         backgroundColor,
         px: 0.5,
         color: onClick ? 'white' : fontColor,
-        '& .MuiChip-label': {
-          padding: size === 'small' ? 0 : '0 0.5rem',
-        },
-        '&.Mui-disabled': {
-          color: fontColor,
-          opacity: 1,
-        },
+        '& .MuiChip-label': { padding: size === 'small' ? 0 : '0 0.5rem' },
+        '&.Mui-disabled': { color: fontColor, opacity: 1 },
       }}
     />
   );

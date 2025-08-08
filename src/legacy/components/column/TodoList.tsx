@@ -5,10 +5,11 @@ import { Button, Stack } from '@mui/material';
 import { ColumnModal } from '@/legacy/components/column/ColumnModal';
 import { TodoColumn } from '@/legacy/components/column/TodoColumn';
 import { AddTaskFloatButton } from '@/legacy/components/task/AddTaskFloatButton';
+import { SyncStatus } from '@/legacy/components/task/SyncedSyncIcon';
 import { TaskModal } from '@/legacy/components/task/TaskModal';
 import { useTasks } from '@/legacy/hooks/useTasks';
 import { useBoardStore } from '@/legacy/store/board/store';
-import { useSyncStatusStore } from '@/legacy/store/syncStatus';
+import { SyncStatus as SyncStatusFromStore, useSyncStatusStore } from '@/legacy/store/syncStatus';
 import { useTodoPrefsStore } from '@/legacy/store/todoPrefsStore';
 import { Column } from '@/legacy/types/column';
 import { Task } from '@/legacy/types/task';
@@ -22,8 +23,22 @@ interface TodoListProps {
   showDate?: boolean;
 }
 
+const mapSyncStatusFromStore = (status: SyncStatusFromStore): SyncStatus => {
+  switch (status) {
+    case 'disconnected':
+      return 'disconnected';
+    case 'error':
+      return 'error';
+    default:
+      return 'syncing';
+  }
+};
+
 export function TodoList({ showDate }: TodoListProps) {
-  const syncStatus = useSyncStatusStore(s => s.status);
+  const syncStatusFromStore = useSyncStatusStore(s => s.status);
+
+  const syncStatus = mapSyncStatusFromStore(syncStatusFromStore);
+
   const tasks = useTasks({ plannedDate: new Date(), trashed: false });
 
   // store selectors

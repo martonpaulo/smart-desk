@@ -1,16 +1,20 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
-  Box,
-  Checkbox,
+  Chip,
+  FormControl,
+  InputLabel,
   MenuItem,
+  Select,
+  SelectChangeEvent,
   Stack,
-  TextField,
   ToggleButton,
   ToggleButtonGroup,
-  Typography,
 } from '@mui/material';
 
+import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { useBoardStore } from '@/legacy/store/board/store';
@@ -19,9 +23,9 @@ import { formatDuration, parseDuration } from '@/legacy/utils/timeUtils';
 import { CustomDialog } from '@/shared/components/CustomDialog';
 import { DateInput } from '@/shared/components/DateInput';
 import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
+import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
-// all form fields in one object for easy compare
-interface TaskForm {
+type TaskForm = {
   title: string;
   notes: string;
   useQuantity: boolean;
@@ -33,25 +37,26 @@ interface TaskForm {
   plannedDate?: Date;
   estimatedTime?: number;
   tagId?: string;
-}
+};
 
-interface TaskModalProps {
+type TaskModalProps = {
   task?: Task | null; // undefined/null = new task
-  newProperties?: Partial<Task>; // additional properties for new tasks
+  newProperties?: Partial<Task>; // extra props for new tasks
   open: boolean;
   onClose: () => void;
-}
+};
 
 export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps) {
-  // grab both actions in one subscription
+  const isMobile = useResponsiveness();
+
   const addTask = useBoardStore(s => s.addTask);
   const updateTask = useBoardStore(s => s.updateTask);
+
   const allTags = useTagsStore(s => s.items);
   const tags = allTags.filter(t => !t.trashed).sort((a, b) => a.name.localeCompare(b.name));
 
-  // initialize form from task or defaults
-  const makeInitialForm = useCallback(
-    (): TaskForm => ({
+  const makeInitialForm = useCallback((): TaskForm => {
+    const base: TaskForm = {
       title: task?.title ?? '',
       notes: task?.notes ?? '',
       useQuantity: (task?.quantityTarget ?? 0) > 1,
@@ -60,51 +65,49 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       important: task?.important ?? false,
       urgent: task?.urgent ?? false,
       blocked: task?.blocked ?? false,
-      plannedDate: task?.plannedDate ? new Date(task?.plannedDate) : undefined,
+      plannedDate: task?.plannedDate ? new Date(task.plannedDate) : undefined,
       estimatedTime: task?.estimatedTime ?? undefined,
       tagId: task?.tagId ?? newProperties?.tagId,
-      ...newProperties, // spread any additional properties for new tasks
-    }),
-    [task, newProperties],
-  );
+      ...newProperties,
+    };
+    // ensure consistency
+    if (!base.useQuantity) base.quantityTarget = 1;
+    return base;
+  }, [task, newProperties]);
 
   const [form, setForm] = useState<TaskForm>(makeInitialForm());
-
-  // keep a ref of the initial form to compare dirty
   const initialRef = useRef<TaskForm>(makeInitialForm());
 
-  // reset form whenever task or open changes
   useEffect(() => {
     if (!open) return;
     const init = makeInitialForm();
     setForm(init);
     initialRef.current = init;
-  }, [task, open, makeInitialForm]);
+  }, [open, task, makeInitialForm]);
 
-  // compare each field to detect modifications
-  const isModified = () => {
-    if (!task) return true; // new task is always modified
-    if (!open) return false; // closed modal is not modified
-
-    const init = initialRef.current;
+  const isDirty = useMemo(() => {
+    const a = form;
+    const b = initialRef.current;
+    if (!task) return true; // new task considered dirty so Save is enabled when valid
     return (
-      form.title.trim() !== init.title.trim() ||
-      form.notes.trim() !== init.notes.trim() ||
-      form.useQuantity !== init.useQuantity ||
-      form.quantityTarget !== init.quantityTarget ||
-      form.daily !== init.daily ||
-      form.important !== init.important ||
-      form.urgent !== init.urgent ||
-      form.blocked !== init.blocked ||
-      form.plannedDate !== init.plannedDate ||
-      form.estimatedTime !== init.estimatedTime ||
-      form.tagId !== init.tagId
+      a.title.trim() !== b.title.trim() ||
+      a.notes.trim() !== b.notes.trim() ||
+      a.useQuantity !== b.useQuantity ||
+      a.quantityTarget !== b.quantityTarget ||
+      a.daily !== b.daily ||
+      a.important !== b.important ||
+      a.urgent !== b.urgent ||
+      a.blocked !== b.blocked ||
+      (a.plannedDate?.getTime() ?? null) !== (b.plannedDate?.getTime() ?? null) ||
+      a.estimatedTime !== b.estimatedTime ||
+      a.tagId !== b.tagId
     );
-  };
+  }, [form, task]);
 
-  // handle save or create
+  const isValid = form.title.trim().length > 0;
+
   const handleSave = async () => {
-    const payload = {
+    const payload: Partial<Task> = {
       title: form.title.trim(),
       notes: form.notes.trim(),
       quantityDone: task?.quantityDone ?? 0,
@@ -119,40 +122,40 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
     };
 
     if (task?.id) {
-      await updateTask({
-        ...payload,
-        id: task.id,
-        updatedAt: new Date(),
-      });
+      await updateTask({ ...payload, id: task.id, updatedAt: new Date() } as Task);
     } else {
-      await addTask({
-        ...payload,
-        updatedAt: new Date(),
-      });
+      await addTask({ ...payload, updatedAt: new Date() } as Task);
     }
   };
 
-  // mark as trashed
   const handleDelete = async (id: string) => {
-    await updateTask({
-      id,
-      trashed: true,
-      updatedAt: new Date(),
-    });
+    await updateTask({ id, trashed: true, updatedAt: new Date() });
   };
 
-  const handleDateChange = (value: Date | null) => {
-    console.log('Date changed:', value);
-    setForm(prev => ({ ...prev, plannedDate: value ?? undefined }));
+  const handleFlagsChange = (_: unknown, newFlags: string[]) => {
+    setForm(f => ({
+      ...f,
+      daily: newFlags.includes('daily'),
+      important: newFlags.includes('important'),
+      urgent: newFlags.includes('urgent'),
+      blocked: newFlags.includes('blocked'),
+    }));
   };
+
+  const activeFlags = [
+    form.daily && 'daily',
+    form.important && 'important',
+    form.urgent && 'urgent',
+    form.blocked && 'blocked',
+  ].filter(Boolean) as string[];
 
   return (
     <CustomDialog
       item="task"
       open={open}
       mode={task ? 'edit' : 'new'}
-      isDirty={isModified()}
-      isValid={form.title.trim() !== ''}
+      isDirty={isDirty}
+      isValid={isValid}
       onClose={onClose}
       onSave={handleSave}
       deleteAction={handleDelete}
@@ -162,116 +165,107 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       titlePlaceholder="What would you like to do?"
       titleLimit={32}
     >
-      <Stack display="grid" gridTemplateColumns="1fr auto" alignItems="center">
-        <DateInput label="Planned Date" value={form.plannedDate} onChange={handleDateChange} />
+      {/* Row 1: Date + Duration */}
+      <Stack direction={isMobile ? 'column' : 'row'} gap={isMobile ? 1 : 2} alignItems="center">
+        <DateInput
+          label="Planned date"
+          value={form.plannedDate ?? null}
+          onChange={d => setForm(f => ({ ...f, plannedDate: d ?? undefined }))}
+        />
 
         <QuantitySelector
           value={form.estimatedTime ?? null}
           placeholder="not set"
-          onValueChange={value => value !== null && setForm(f => ({ ...f, estimatedTime: value }))}
+          onValueChange={v => v !== null && setForm(f => ({ ...f, estimatedTime: v }))}
           step={20}
           minValue={1}
           maxValue={480}
           formatFn={formatDuration}
           parseFn={parseDuration}
-          sx={{ ml: 2 }}
         />
       </Stack>
 
-      <Stack direction="row" alignItems="center" gap={1} sx={{ mt: 1 }}>
+      {/* Row 2: Flags + Tag */}
+      <Stack
+        direction={isMobile ? 'column' : 'row'}
+        gap={1}
+        alignItems={isMobile ? 'stretch' : 'center'}
+      >
         <ToggleButtonGroup
-          value={['daily', 'important', 'urgent', 'blocked'].filter(
-            flag => form[flag as keyof TaskForm],
-          )}
-          onChange={(_e, newFlags) =>
-            setForm(f => ({
-              ...f,
-              daily: newFlags.includes('daily'),
-              important: newFlags.includes('important'),
-              urgent: newFlags.includes('urgent'),
-              blocked: newFlags.includes('blocked'),
-            }))
-          }
+          value={activeFlags}
+          onChange={handleFlagsChange}
           aria-label="task flags"
           size="small"
         >
-          <ToggleButton value="daily" aria-label="daily" color="info">
+          <ToggleButton value="daily" color="info">
             Daily
           </ToggleButton>
-          <ToggleButton value="important" aria-label="important" color="warning">
+          <ToggleButton value="important" color="warning">
             Important
           </ToggleButton>
-          <ToggleButton value="urgent" aria-label="urgent" color="warning">
+          <ToggleButton value="urgent" color="warning">
             Urgent
           </ToggleButton>
-          <ToggleButton value="blocked" aria-label="blocked" color="error">
+          <ToggleButton value="blocked" color="error">
             Blocked
           </ToggleButton>
         </ToggleButtonGroup>
 
-        <TextField
-          select
-          label="Tag"
-          fullWidth
-          size="small"
-          value={form.tagId ?? ''}
-          onChange={e =>
-            setForm(prev => ({
-              ...prev,
-              tagId: e.target.value === '' ? undefined : e.target.value,
-            }))
-          }
-          sx={{
-            '& .MuiSelect-select': {
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-            },
-          }}
-        >
-          <MenuItem value="">No tag</MenuItem>
-          {tags.map(t => (
-            <MenuItem
-              key={t.id}
-              value={t.id}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-            >
-              <Box
-                sx={{
-                  backgroundColor: t.color,
-                  width: 16,
-                  height: 16,
-                  borderRadius: '50%',
-                }}
-              />
-              {t.name}
-            </MenuItem>
-          ))}
-        </TextField>
+        <FormControl size="small" fullWidth>
+          <InputLabel>Tag</InputLabel>
+          <Select
+            label="Tag"
+            value={form.tagId ?? ''}
+            onChange={(e: SelectChangeEvent<string>) =>
+              setForm(prev => ({ ...prev, tagId: e.target.value || undefined }))
+            }
+            renderValue={val => {
+              if (!val) return 'No tag';
+              const tag = tags.find(t => t.id === val);
+              return tag ? <TagLabel tag={tag} /> : 'No tag';
+            }}
+          >
+            <MenuItem value="">No tag</MenuItem>
+            {tags.map(t => (
+              <MenuItem key={t.id} value={t.id}>
+                <TagLabel tag={t} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Stack>
 
-      <Stack direction="row" alignItems="center">
-        <Checkbox
-          checked={form.useQuantity}
-          onChange={(_, checked) =>
-            setForm(f => ({
-              ...f,
-              useQuantity: checked,
-              quantityTarget: checked ? f.quantityTarget : 1,
-            }))
+      {/* Row 3: Quantity */}
+      <Stack direction="row" alignItems="center" gap={1}>
+        <ToggleButton
+          value="useQuantity"
+          selected={form.useQuantity}
+          onChange={(_, sel) =>
+            setForm(f => ({ ...f, useQuantity: sel, quantityTarget: sel ? f.quantityTarget : 1 }))
           }
-        />
-        <Typography variant="body2">Quantifiable</Typography>
+          size="small"
+        >
+          Quantifiable
+        </ToggleButton>
+
         <QuantitySelector
           disabled={!form.useQuantity}
           value={form.quantityTarget}
           minValue={1}
           maxValue={999}
-          onValueChange={value => setForm(f => ({ ...f, quantityTarget: value }))}
-          sx={{ ml: 2 }}
+          onValueChange={v => setForm(f => ({ ...f, quantityTarget: v ?? 1 }))}
         />
+
+        {/* quick context chips (optional, can remove if unused) */}
+        <Stack direction="row" gap={0.5} sx={{ ml: 'auto' }}>
+          {form.important && <Chip size="small" color="warning" label="Important" />}
+          {form.urgent && <Chip size="small" color="warning" label="Urgent" />}
+          {form.blocked && <Chip size="small" color="error" label="Blocked" />}
+          {form.daily && <Chip size="small" color="info" label="Daily" />}
+        </Stack>
       </Stack>
 
+      {/* Notes */}
       <MarkdownEditableBox
         label="Notes"
         placeholder="Enter a description"

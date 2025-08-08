@@ -1,42 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
-import { Button, Pagination, Stack, Typography } from '@mui/material';
+import { Fab, Pagination, Stack, Typography } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { PageSection } from '@/core/components/PageSection';
-import { NoteCard } from '@/features/note/components/NoteCard';
 import { NoteModal } from '@/features/note/components/NoteModal';
 import { useNotesStore } from '@/features/note/store/useNotesStore';
-import { Note } from '@/features/note/types/Note';
-
-const NOTES_PER_PAGE = 9;
+import type { Note } from '@/features/note/types/Note';
+import { NoteCard } from '@/features/note/views/NoteCard';
+import { NotesGrid } from '@/features/note/views/NotesGrid';
+import { NotesToolbar } from '@/features/note/views/NotesToolbar';
+import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 export function NotesView() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const isMobile = useResponsiveness();
+  const NOTES_PER_PAGE = isMobile ? 6 : 9;
+
   const allNotes = useNotesStore(s => s.items);
   const addNote = useNotesStore(s => s.add);
   const updateNote = useNotesStore(s => s.update);
 
-  // Filter out deleted notes
-  const notes = allNotes
-    .filter(note => !note.trashed)
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  // Filter out deleted, newest first
+  const notes = useMemo(
+    () =>
+      allNotes
+        .filter(n => !n.trashed)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [allNotes],
+  );
 
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const rawPage = Number(searchParams.get('page') || '1');
-
   const pageCount = Math.max(1, Math.ceil(notes.length / NOTES_PER_PAGE));
   const page = rawPage < 1 ? 1 : rawPage > pageCount ? pageCount : rawPage;
 
-  // keep URL in sync if someone enters an out‑of‑bounds page
+  // keep URL in sync if someone enters an out-of-bounds page
   useEffect(() => {
-    if (rawPage !== page) {
-      router.replace(`?page=${page}`);
-    }
-  }, [rawPage, page, router]);
+    if (rawPage !== page) router.replace(`?page=${page}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawPage, page]);
 
   const start = (page - 1) * NOTES_PER_PAGE;
   const paged = notes.slice(start, start + NOTES_PER_PAGE);
@@ -55,42 +62,67 @@ export function NotesView() {
       updateNote(note as Note);
     } else {
       addNote({
-        title: note.title!,
-        content: note.content!,
-        createdAt: note.createdAt!,
+        title: note.title ?? '',
+        content: note.content ?? '',
+        color: note.color ?? '',
+        createdAt: note.createdAt ?? new Date(),
+        updatedAt: new Date(),
       });
     }
   };
 
   return (
-    <PageSection title="Notes" description="Capture your thoughts: one note at a time">
-      <Stack direction="row" mb={2}>
-        <Button startIcon={<AddIcon />} variant="outlined" onClick={() => openModal()}>
-          Add New
-        </Button>
-      </Stack>
+    <PageSection title="Notes" description="Capture your thoughts, on any device">
+      {/* Desktop toolbar */}
+      <NotesToolbar onAdd={() => openModal()} />
 
-      {notes.length === 0 && <Typography>No notes yet. Click “Add New” to start.</Typography>}
+      {/* Empty state */}
+      {notes.length === 0 && (
+        <Stack
+          alignItems="center"
+          justifyContent="center"
+          sx={{ py: 4, color: 'text.secondary', textAlign: 'center' }}
+        >
+          <Typography variant="body2">No notes yet</Typography>
+          <Typography variant="caption">Tap Add to create your first note</Typography>
+        </Stack>
+      )}
 
-      <Stack direction="row" flexWrap="wrap" gap={2} mb={2}>
+      {/* Grid of notes */}
+      <NotesGrid>
         {paged.map(note => (
-          <NoteCard key={note.id} note={note} onEdit={n => openModal(n)} />
+          <NoteCard key={note.id} note={note} onEdit={() => openModal(note)} />
         ))}
-      </Stack>
+      </NotesGrid>
 
+      {/* Pagination */}
       {pageCount > 1 && (
         <Stack alignItems="center" mt={2}>
           <Pagination
             count={pageCount}
             page={page}
             onChange={(_, p) => router.push(`?page=${p}`)}
+            size={isMobile ? 'small' : 'medium'}
           />
         </Stack>
       )}
 
+      {/* Mobile FAB */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          aria-label="Add note"
+          onClick={() => openModal()}
+          sx={{ position: 'fixed', bottom: 88, right: 16 }} // above bottom nav if present
+        >
+          <AddIcon />
+        </Fab>
+      )}
+
+      {/* Unified Note modal */}
       <NoteModal
         open={modalOpen}
-        initial={editing || undefined}
+        initial={editing ?? undefined}
         onSave={handleSave}
         onClose={closeModal}
       />

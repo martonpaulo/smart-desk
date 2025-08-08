@@ -1,9 +1,9 @@
 'use client';
 
-import { DragEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { DragEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import { DescriptionOutlined as NotesIcon } from '@mui/icons-material';
-import { BoxProps, Checkbox, Stack, Tooltip, useTheme } from '@mui/material';
+import { Checkbox, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
@@ -12,20 +12,22 @@ import { MarkAsDoneButton } from '@/features/task/components/MarkAsDoneButton';
 import { ResetButton } from '@/features/task/components/ResetButton';
 import { SendToNextDayButton } from '@/features/task/components/SendToNextDayButton';
 import { UnblockButton } from '@/features/task/components/UnblockButton';
-import { PriorityFlag } from '@/legacy/components/PriorityFlag';
-import { SyncedSyncIcon } from '@/legacy/components/SyncedSyncIcon';
-import * as S from '@/legacy/components/task/TaskCard.styles';
+import { ActionsBar } from '@/legacy/components/task/ActionsBar';
+import { PriorityFlag } from '@/legacy/components/task/PriorityFlag';
+import { SyncedSyncIcon, SyncStatus } from '@/legacy/components/task/SyncedSyncIcon';
+import { TaskContainer } from '@/legacy/components/task/TaskContainer';
 import { TaskModal } from '@/legacy/components/task/TaskModal';
+import { TitleBlock } from '@/legacy/components/task/TitleBlock';
+import { MetaRow } from '@/legacy/components/task/TitleMetaRow';
 import { useBoardStore } from '@/legacy/store/board/store';
 import { useSyncStatusStore } from '@/legacy/store/syncStatus';
-import { customColors } from '@/legacy/styles/colors';
 import type { Task } from '@/legacy/types/task';
 import { isTaskEmpty } from '@/legacy/utils/taskUtils';
 import { getDateLabel } from '@/legacy/utils/timeUtils';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 import { formatFullDuration } from '@/shared/utils/timeUtils';
 
-interface TaskCardProps extends BoxProps {
+type TaskCardBaseProps = {
   task: Task;
   color: string;
   eisenhowerIcons?: boolean;
@@ -42,7 +44,7 @@ interface TaskCardProps extends BoxProps {
   onTaskDragStart?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragOver?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragEnd?: (id: string, e: DragEvent<HTMLDivElement>) => void;
-}
+};
 
 export function TaskCard({
   task,
@@ -61,39 +63,35 @@ export function TaskCard({
   onTaskDragStart,
   onTaskDragOver,
   onTaskDragEnd,
-  ...props
-}: TaskCardProps) {
+}: TaskCardBaseProps) {
   const isMobile = useResponsiveness();
   const theme = useTheme();
-  const allTags = useTagsStore(s => s.items);
-  const tags = allTags.filter(t => !t.trashed);
-
-  const cardMinHeight = isMobile ? '3.5rem' : 'auto';
-
-  // board actions
-  const updateTask = useBoardStore(s => s.updateTask);
   const syncStatus = useSyncStatusStore(s => s.status);
+  const mappedStatus = useMemo<SyncStatus | undefined>(
+    () => syncStatus as SyncStatus,
+    [syncStatus],
+  );
 
-  // local state
+  // tags
+  // Memoize the filtered tags to avoid unnecessary re-renders
+  const allTags = useTagsStore(s => s.items);
+  const tags = useMemo(() => allTags.filter(t => !t.trashed), [allTags]);
+  const taskTag = useMemo(() => tags.find(t => t.id === task.tagId), [tags, task.tagId]);
+
+  // local edit state
   const [isEditing, setIsEditing] = useState(editTask);
   const [title, setTitle] = useState(task.title);
   const [initial, setInitial] = useState(task);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // drag feedback
   const [isDragging, setDragging] = useState(false);
 
-  const toggleSelected = useCallback(() => {
-    if (selectable) {
-      onSelectChange?.(task.id, !selected);
-    }
-  }, [onSelectChange, selectable, selected, task.id]);
+  // sync parent controlled edit flag
+  useEffect(() => setIsEditing(editTask), [editTask]);
 
-  // sync edit mode if parent toggles it
-  useEffect(() => {
-    setIsEditing(editTask);
-  }, [editTask]);
-
-  // focus the input when inline‐editing
+  // focus input when switching to inline edit
   useEffect(() => {
     if (isEditing && inputRef.current) {
       const inp = inputRef.current;
@@ -102,97 +100,83 @@ export function TaskCard({
     }
   }, [isEditing]);
 
-  // drag handlers
-  const handleDragStart = useCallback(
-    (e: DragEvent<HTMLDivElement>) => {
-      e.stopPropagation();
-      setDragging(true);
-      onTaskDragStart?.(task.id, e);
-    },
-    [onTaskDragStart, task.id],
-  );
+  // board ops
+  const updateTask = useBoardStore(s => s.updateTask);
 
-  const handleDragOver = useCallback(
-    (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      onTaskDragOver?.(task.id, e);
-    },
-    [onTaskDragOver, task.id],
-  );
+  const saveTask = (updated: Task) => {
+    if (isTaskEmpty(updated)) return;
 
-  const handleDragEnd = useCallback(
-    (e: DragEvent<HTMLDivElement>) => {
-      setDragging(false);
-      onTaskDragEnd?.(task.id, e);
-    },
-    [onTaskDragEnd, task.id],
-  );
+    const changed =
+      updated.title !== initial.title ||
+      updated.notes !== initial.notes ||
+      updated.important !== initial.important ||
+      updated.urgent !== initial.urgent ||
+      updated.blocked !== initial.blocked ||
+      updated.daily !== initial.daily ||
+      updated.quantityDone !== initial.quantityDone ||
+      updated.quantityTarget !== initial.quantityTarget ||
+      updated.columnId !== initial.columnId;
 
-  // common save logic for edits
-  const saveTask = useCallback(
-    (updated: Task) => {
-      if (isTaskEmpty(updated)) return;
+    if (!changed) return;
 
-      const changed =
-        updated.title !== initial.title ||
-        updated.notes !== initial.notes ||
-        updated.important !== initial.important ||
-        updated.urgent !== initial.urgent ||
-        updated.blocked !== initial.blocked ||
-        updated.daily !== initial.daily ||
-        updated.quantityDone !== initial.quantityDone ||
-        updated.quantityTarget !== initial.quantityTarget ||
-        updated.columnId !== initial.columnId;
-      if (!changed) return;
+    const now = new Date();
+    updateTask({ ...updated, updatedAt: now });
+    setInitial({ ...updated, updatedAt: now });
+  };
 
-      const now = new Date();
-      updateTask({ ...updated, updatedAt: now });
-      setInitial({ ...updated, updatedAt: now });
-    },
-    [initial, updateTask],
-  );
-
-  // finish inline title edit
-  const finishInlineEdit = useCallback(() => {
+  const finishInlineEdit = () => {
     setIsEditing(false);
     onFinishEditing?.();
     saveTask({ ...task, title });
-  }, [onFinishEditing, saveTask, task, title]);
+  };
 
-  // choose icon based on count vs done
+  // derived UI flags
   const done = task.quantityDone === task.quantityTarget;
   const isCountTask = task.quantityTarget > 1;
   const oneToComplete = task.quantityDone + 1 === task.quantityTarget;
 
-  const itemsGap = isMobile ? 0.75 : 0.5;
   const opacity = task.blocked || task.trashed ? 0.5 : 1;
-
-  const displayIncrementButton =
+  const showIncrement =
     !isEditing && !task.blocked && !task.trashed && isCountTask && !done && !oneToComplete;
-  const displayMarkAsDoneButton =
-    !isEditing && !task.blocked && !task.trashed && !done && oneToComplete;
-  const displayUnblockButton = !isEditing && task.blocked && !done && !task.trashed;
-  const displaySendToNextDayButton = !isEditing && !done && !task.trashed;
-  const displayResetButton = !isEditing && !task.blocked && done && !task.trashed;
+  const showMarkDone = !isEditing && !task.blocked && !task.trashed && !done && oneToComplete;
+  const showUnblock = !isEditing && task.blocked && !done && !task.trashed;
+  const showSendNext = !isEditing && !done && !task.trashed;
+  const showReset = !isEditing && !task.blocked && done && !task.trashed;
 
-  const taskTag = tags.find(t => t.id === task.tagId);
+  // drag handlers
+  const handleDragStart = (e: DragEvent<HTMLDivElement>) => {
+    if (selectable) return;
+    e.stopPropagation();
+    setDragging(true);
+    onTaskDragStart?.(task.id, e);
+  };
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    if (selectable) return;
+    e.preventDefault();
+    onTaskDragOver?.(task.id, e);
+  };
+  const handleDragEnd = (e: DragEvent<HTMLDivElement>) => {
+    if (selectable) return;
+    setDragging(false);
+    onTaskDragEnd?.(task.id, e);
+  };
+
+  const toggleSelected = () => {
+    if (selectable) onSelectChange?.(task.id, !selected);
+  };
 
   return (
     <>
-      <S.Container
-        color={(task.blocked || task.trashed) && !isEditing ? customColors.grey.value : color}
-        onDragStart={selectable ? undefined : handleDragStart}
-        onDragOver={selectable ? undefined : handleDragOver}
-        onDragEnd={selectable ? undefined : handleDragEnd}
-        draggable={!isEditing && !isMobile && !selectable}
-        minHeight={cardMinHeight}
-        gap={itemsGap}
-        paddingX={isMobile ? 2 : 1.5}
-        paddingY={1.5}
-        onClick={toggleSelected}
-        sx={{ cursor: isDragging ? 'grabbing' : undefined }}
+      <TaskContainer
+        color={(task.blocked || task.trashed) && !isEditing ? theme.palette.action.disabled : color}
         selected={selected}
-        {...props}
+        draggable={!isEditing && !isMobile && !selectable}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onClick={toggleSelected}
+        isDragging={isDragging}
+        dense={isMobile}
       >
         {selectable && (
           <Checkbox
@@ -203,26 +187,31 @@ export function TaskCard({
             sx={{ p: 0 }}
           />
         )}
-        <PriorityFlag task={task} showEisenhowerIcons={eisenhowerIcons} sx={{ opacity }} />
-        {!task.isSynced && <SyncedSyncIcon status={syncStatus} fontSize="inherit" color="action" />}
 
-        <S.Content>
+        <PriorityFlag task={task} showEisenhowerIcons={eisenhowerIcons} sx={{ opacity }} />
+
+        {!task.isSynced && (
+          <SyncedSyncIcon status={mappedStatus} fontSize="inherit" color="action" />
+        )}
+
+        <Stack direction="column" flexGrow={1} gap={0.5}>
           {isEditing ? (
-            <S.TitleInput
-              value={title}
-              inputRef={inputRef}
-              variant="standard"
-              onChange={e => setTitle(e.target.value)}
-              onBlur={finishInlineEdit}
-              onKeyDown={e =>
-                (e.key === 'Enter' && finishInlineEdit()) ||
-                (e.key === 'Escape' && setIsEditing(false) && onFinishEditing?.())
-              }
+            <TitleBlock
+              mode="edit"
+              title={title}
+              inputRef={inputRef as React.RefObject<HTMLInputElement>}
+              onChangeTitle={setTitle}
+              onBlurSave={finishInlineEdit}
+              onCancel={() => {
+                setIsEditing(false);
+                onFinishEditing?.();
+                setTitle(task.title);
+              }}
             />
           ) : (
             <>
-              <S.FirstRow>
-                <S.TitleGroup>
+              <Stack direction="row" justifyContent="space-between" gap={1}>
+                <Stack direction="row" alignItems="center" flexWrap="wrap" gap={0.5}>
                   {task.notes && (
                     <Tooltip title="Has notes">
                       <NotesIcon
@@ -230,74 +219,86 @@ export function TaskCard({
                         sx={{
                           fontSize: theme.typography.caption.fontSize,
                           alignSelf: 'center',
-                          marginRight: 0.5,
+                          mr: 0.5,
                         }}
                       />
                     </Tooltip>
                   )}
 
-                  <S.TitleText
-                    onClick={selectable ? toggleSelected : () => setEditModalOpen(true)}
+                  <TitleBlock
+                    mode="read"
+                    title={task.title || 'Untitled Task'}
                     done={done}
                     untitled={!task.title}
                     textVariantSize={isMobile ? 'body1' : 'body2'}
-                    showActions={showActions}
+                    onClickTitle={selectable ? toggleSelected : () => setEditModalOpen(true)}
                     sx={{
                       opacity,
                       fontStyle: task.trashed ? 'italic' : 'normal',
                       fontWeight: task.trashed ? 300 : 400,
                     }}
-                  >
-                    {task.title || 'Untitled Task'}
-                  </S.TitleText>
+                  />
 
                   {!task.blocked && !task.trashed && task.daily && showDaily && (
                     <Tooltip title="Repeats daily">
-                      <S.RepeatIndicator fontSize="inherit" />
+                      <Typography
+                        component="span"
+                        sx={{
+                          fontSize: 12,
+                          transform: 'rotate(240deg)',
+                          color: 'text.secondary',
+                        }}
+                      >
+                        ⟳
+                      </Typography>
                     </Tooltip>
                   )}
-                </S.TitleGroup>
-
-                <Stack>
-                  {!task.blocked && isCountTask && (
-                    <S.QuantityText sx={{ opacity }}>
-                      {task.quantityDone}/{task.quantityTarget}
-                    </S.QuantityText>
-                  )}
                 </Stack>
-              </S.FirstRow>
 
-              <Stack direction="row" alignItems="center" gap={0.5} sx={{ opacity }}>
-                {taskTag && showTag && <TagLabel tag={taskTag} />}
-
-                {task.estimatedTime && showDuration && (
-                  <S.EstimatedTimeText sx={{ opacity }}>
-                    {formatFullDuration(task.estimatedTime * 60_000)}
-                  </S.EstimatedTimeText>
-                )}
-
-                {showDate && (
-                  <S.DateText sx={{ opacity }}>{getDateLabel(task.plannedDate)}</S.DateText>
+                {!task.blocked && isCountTask && (
+                  <Typography variant="caption" color="text.secondary" sx={{ opacity }}>
+                    {task.quantityDone}/{task.quantityTarget}
+                  </Typography>
                 )}
               </Stack>
+
+              <MetaRow
+                opacity={opacity}
+                tagComp={taskTag && showTag ? <TagLabel tag={taskTag} /> : null}
+                durationComp={
+                  task.estimatedTime && showDuration ? (
+                    <Typography variant="caption" color="text.secondary">
+                      {formatFullDuration(task.estimatedTime * 60_000)}
+                    </Typography>
+                  ) : null
+                }
+                dateComp={
+                  showDate ? (
+                    <Typography variant="caption" color="text.secondary">
+                      {getDateLabel(task.plannedDate)}
+                    </Typography>
+                  ) : null
+                }
+              />
             </>
           )}
-        </S.Content>
+        </Stack>
 
         {!isEditing && showActions && (
-          <S.ActionGroup className="action-group">
-            <S.ActionWrapper>
-              {displaySendToNextDayButton && <SendToNextDayButton task={task} />}
-              {displayUnblockButton && <UnblockButton task={task} />}
-              {displayIncrementButton && <IncrementButton task={task} />}
-              {displayResetButton && <ResetButton task={task} />}
-              {displayMarkAsDoneButton && <MarkAsDoneButton task={task} />}
-            </S.ActionWrapper>
-          </S.ActionGroup>
+          <ActionsBar
+            showOnHover
+            right
+            items={[
+              showSendNext ? <SendToNextDayButton key="next" task={task} /> : null,
+              showUnblock ? <UnblockButton key="unblock" task={task} /> : null,
+              showIncrement ? <IncrementButton key="inc" task={task} /> : null,
+              showReset ? <ResetButton key="reset" task={task} /> : null,
+              showMarkDone ? <MarkAsDoneButton key="done" task={task} /> : null,
+            ].filter(Boolean)}
+          />
         )}
-      </S.Container>
+      </TaskContainer>
 
-      {/* edit & delete modal */}
       <TaskModal open={isEditModalOpen} task={task} onClose={() => setEditModalOpen(false)} />
     </>
   );
