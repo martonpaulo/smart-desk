@@ -30,6 +30,7 @@ import { formatFullDuration } from '@/shared/utils/timeUtils';
 type TaskCardBaseProps = {
   task: Task;
   color: string;
+  hasDefaultWidth?: boolean;
   eisenhowerIcons?: boolean;
   showDuration?: boolean;
   showDaily?: boolean;
@@ -49,6 +50,7 @@ type TaskCardBaseProps = {
 export function TaskCard({
   task,
   color,
+  hasDefaultWidth,
   eisenhowerIcons = true,
   showDaily = true,
   showDuration = true,
@@ -177,6 +179,7 @@ export function TaskCard({
         onClick={toggleSelected}
         isDragging={isDragging}
         dense={isMobile}
+        hasDefaultWidth={hasDefaultWidth}
       >
         {selectable && (
           <Checkbox

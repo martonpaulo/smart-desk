@@ -60,9 +60,9 @@ export function FileGallery({
       <Box
         display="grid"
         gridTemplateColumns={{
-          xs: 'repeat(2,1fr)',
-          sm: 'repeat(3,1fr)',
-          md: 'repeat(4,1fr)',
+          mobileSm: 'repeat(2,1fr)',
+          mobileMd: 'repeat(3,1fr)',
+          mobileLg: 'repeat(4,1fr)',
         }}
         gap={2}
       >

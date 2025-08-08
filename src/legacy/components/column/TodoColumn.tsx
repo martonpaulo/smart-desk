@@ -149,6 +149,7 @@ export function TodoColumn({
         {tasks &&
           tasks.map(task => (
             <TaskCard
+              hasDefaultWidth={false}
               key={task.id}
               task={task}
               showDate={showDate}
