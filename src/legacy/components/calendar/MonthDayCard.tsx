@@ -1,7 +1,8 @@
-import PlaceIcon from '@mui/icons-material/Place';
 import { Paper, Stack, Typography, useTheme } from '@mui/material';
 
 import { CalendarView } from '@/features/calendar/types/CalendarView';
+import { LocationDayLabel } from '@/features/location/components/LocationDayLabel';
+import { useLocationsByDate } from '@/features/location/hooks/useLocationsByDate';
 import { MonthEventCard } from '@/legacy/components/calendar/MonthEventCard';
 import { useEventStore } from '@/legacy/store/eventStore';
 import { filterTodayEvents } from '@/legacy/utils/eventUtils';
@@ -20,6 +21,8 @@ export function MonthDayCard({ day, onNavigate }: MonthDayCardProps) {
   const currentDate = new Date();
 
   const getEventsForDay = (day: Date) => filterTodayEvents(events, day);
+
+  const { locations: dayLocations } = useLocationsByDate(day);
 
   const isToday = (day: Date) => {
     const today = new Date();
@@ -53,10 +56,6 @@ export function MonthDayCard({ day, onNavigate }: MonthDayCardProps) {
     if (numEvents <= maxEventsToShow) return false;
     return true;
   };
-
-  // find event with calendar name "Place" and return its title
-  const placeEvent = dayEvents.find(event => event.calendar?.name === 'Place');
-  const placeTitle = placeEvent ? placeEvent.title : '';
 
   return (
     <Paper
@@ -95,15 +94,7 @@ export function MonthDayCard({ day, onNavigate }: MonthDayCardProps) {
           {day.getDate().toString().padStart(2, '0')}
         </Typography>
 
-        <Stack direction="row" alignItems="center">
-          <PlaceIcon
-            color="primary"
-            sx={{ fontSize: '0.75rem', marginLeft: 0.5, verticalAlign: 'middle' }}
-          />
-          <Typography variant="caption" color="primary">
-            {placeTitle}
-          </Typography>
-        </Stack>
+        <LocationDayLabel locations={dayLocations} />
       </Stack>
 
       <Stack>

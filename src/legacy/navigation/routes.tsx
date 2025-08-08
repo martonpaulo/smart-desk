@@ -8,6 +8,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import TagsIcon from '@mui/icons-material/LocalOffer';
 import MapIcon from '@mui/icons-material/Map';
 import NotesIcon from '@mui/icons-material/Notes';
+import PlaceIcon from '@mui/icons-material/Place';
 import SettingsIcon from '@mui/icons-material/Settings';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 
@@ -23,7 +24,8 @@ export const routes = {
     { label: 'Notes', href: '/notes', icon: <NotesIcon />, showOnMobile: true },
   ],
   secondary: [
-    { label: 'Tags', href: '/tags', icon: <TagsIcon />, showOnMobile: true },
+    { label: 'Locations', href: '/location', icon: <PlaceIcon />, showOnMobile: false },
+    { label: 'Tags', href: '/tags', icon: <TagsIcon />, showOnMobile: false },
     { label: 'Manage', href: '/manage', icon: <BuildIcon />, showOnMobile: false },
     { label: 'Settings', href: '/settings', icon: <SettingsIcon />, showOnMobile: true },
     { label: 'Account', href: '/account', icon: <AccountCircleIcon />, showOnMobile: true },
