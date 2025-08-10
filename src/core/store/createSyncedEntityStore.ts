@@ -25,9 +25,9 @@ export function createSyncedEntityStore<E extends BaseType>(cfg: SyncedEntitySto
   const store = createZustandEntityStore<E>({
     key: cfg.table,
     fetchAll: service.fetchAll,
-    upsert: service.upsert,
-    softDelete: service.softDelete,
-    hardDelete: service.hardDelete,
+    upsert: (client, item) => service.upsert(item),
+    softDelete: (client, id) => service.softDelete(id),
+    hardDelete: (client, id) => service.hardDelete(id),
     buildAddEntity: (data, id) => {
       if (!data.createdAt) throw new Error('Missing createdAt');
       if (cfg.requiredFields) {

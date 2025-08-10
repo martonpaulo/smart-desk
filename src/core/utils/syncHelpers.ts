@@ -24,13 +24,10 @@ export function isOnline(): boolean {
 }
 
 // Schedule a periodic sync function and return a cleanup callback.
-export function schedulePeriodicSync(
-  storeSyncFn: () => Promise<void>,
-  minutes: number,
-): () => void {
+export function schedulePeriodicSync(storeSyncFn: () => Promise<void>, ms: number): () => void {
   const id = window.setInterval(() => {
     void storeSyncFn();
-  }, minutes * 60_000);
+  }, ms);
   return () => clearInterval(id);
 }
 
