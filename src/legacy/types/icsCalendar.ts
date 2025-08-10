@@ -1,6 +1,6 @@
-import { BaseType } from '@/core/types/BaseType';
+import { Base } from '@/core/types/Base';
 
-export interface IcsCalendar extends BaseType {
+export interface IcsCalendar extends Base {
   title: string;
   source: string;
   color: string;

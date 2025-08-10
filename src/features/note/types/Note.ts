@@ -1,6 +1,6 @@
-import { BaseType } from '@/core/types/BaseType';
+import { Base } from '@/core/types/Base';
 
-export interface Note extends BaseType {
+export interface Note extends Base {
   title: string;
   content: string;
   color?: string;

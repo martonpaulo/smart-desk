@@ -1,6 +1,6 @@
-import { RawBaseType } from '@/core/types/RawBaseType';
+import { RawBase } from '@/core/types/Base';
 
-export interface RawIcsCalendar extends RawBaseType {
+export interface RawIcsCalendar extends RawBase {
   title: string;
   source: string;
   color: string;

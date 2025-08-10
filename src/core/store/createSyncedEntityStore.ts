@@ -1,19 +1,19 @@
 import { createSupabaseEntityAdapter } from '@/core/services/createSupabaseEntityAdapter';
 import { createZustandEntityStore } from '@/core/store/zustandEntityStoreFactory';
-import type { BaseType } from '@/core/types/BaseType';
+import type { Base } from '@/core/types/Base';
 import { isOnline } from '@/core/utils/syncHelpers';
 
-interface SyncedEntityStoreConfig<E extends BaseType> {
+interface SyncedEntityStoreConfig<E extends Base> {
   table: string;
-  requiredFields?: Array<Exclude<keyof E, keyof BaseType>>;
-  defaults?: Partial<Omit<E, keyof BaseType>>;
-  dateFields?: Array<Exclude<keyof E, keyof BaseType>>;
-  excludeFields?: Array<Exclude<keyof E, keyof BaseType>>;
+  requiredFields?: Array<Exclude<keyof E, keyof Base>>;
+  defaults?: Partial<Omit<E, keyof Base>>;
+  dateFields?: Array<Exclude<keyof E, keyof Base>>;
+  excludeFields?: Array<Exclude<keyof E, keyof Base>>;
   hasUser?: boolean;
   onConflict?: string;
 }
 
-export function createSyncedEntityStore<E extends BaseType>(cfg: SyncedEntityStoreConfig<E>) {
+export function createSyncedEntityStore<E extends Base>(cfg: SyncedEntityStoreConfig<E>) {
   const service = createSupabaseEntityAdapter<E>({
     table: cfg.table,
     dateFields: cfg.dateFields,

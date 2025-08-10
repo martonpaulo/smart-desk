@@ -1,6 +1,6 @@
-import { RawBaseType } from '@/core/types/RawBaseType';
+import { RawBase } from '@/core/types/Base';
 
-export interface RawTask extends RawBaseType {
+export interface RawTask extends RawBase {
   title: string;
   notes: string | null;
   important: boolean;

@@ -1,4 +1,4 @@
-import type { BaseType } from '@/core/types/BaseType';
+import type { Base } from '@/core/types/Base';
 import type { SyncStoreConfig } from '@/core/types/SyncStoreConfig';
 
 // Register a store for synchronization with optional configuration.
@@ -48,6 +48,6 @@ export function syncOnVisibilityChange(
 }
 
 // Resolve conflicts by preferring the entity with the latest updatedAt value.
-export function resolveByUpdatedAt<T extends BaseType>(local: T, remote: T): T {
+export function resolveByUpdatedAt<T extends Base>(local: T, remote: T): T {
   return local.updatedAt > remote.updatedAt ? local : remote;
 }

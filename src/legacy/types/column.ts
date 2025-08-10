@@ -1,6 +1,6 @@
-import { BaseType } from '@/core/types/BaseType';
+import { Base } from '@/core/types/Base';
 
-export interface Column extends BaseType {
+export interface Column extends Base {
   title: string;
   color: string;
   position: number;

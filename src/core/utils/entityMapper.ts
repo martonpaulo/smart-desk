@@ -1,8 +1,7 @@
-import { BaseType } from '@/core/types/BaseType';
-import { RawBaseType } from '@/core/types/RawBaseType';
+import { Base, RawBase } from '@/core/types/Base';
 
 // maps id/user_id/trashed/created_at/updated_at
-export function baseMapToDB<T extends BaseType>(entity: T, userId: string): RawBaseType {
+export function baseMapToDB<T extends Base>(entity: T, userId: string): RawBase {
   return {
     id: entity.id,
     user_id: userId,
@@ -13,9 +12,9 @@ export function baseMapToDB<T extends BaseType>(entity: T, userId: string): RawB
 }
 
 // reverses the base fields and marks synced
-export function baseMapFromDB<R extends RawBaseType>(
+export function baseMapFromDB<R extends RawBase>(
   raw: R,
-): Omit<BaseType, 'isSynced'> & { isSynced: true } {
+): Omit<Base, 'isSynced'> & { isSynced: true } {
   return {
     id: raw.id,
     trashed: raw.trashed,

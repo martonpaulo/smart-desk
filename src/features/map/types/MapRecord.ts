@@ -1,4 +1,4 @@
-import { BaseType } from '@/core/types/BaseType';
+import { Base } from '@/core/types/Base';
 
 export interface MapMetadata {
   // hex color per region key
@@ -9,7 +9,7 @@ export interface MapMetadata {
   regionTooltips: Record<string, string>;
 }
 
-export interface MapRecord extends BaseType, MapMetadata {
+export interface MapRecord extends Base, MapMetadata {
   name: string;
   filePublicId: string; // Cloudinary public ID
   fileUrl: string; // secure_url from Cloudinary

@@ -1,8 +1,8 @@
-import { BaseType } from '@/core/types/BaseType';
+import { Base } from '@/core/types/Base';
 
 export type LocationType = 'city' | 'flight' | 'bus' | 'stay' | 'hidden';
 
-export interface Location extends BaseType {
+export interface Location extends Base {
   type: LocationType;
   name: string;
   startDate: Date;

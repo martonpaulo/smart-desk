@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { fetchUserId } from '@/core/services/supabaseUserService';
-import type { BaseType } from '@/core/types/BaseType';
+import type { Base } from '@/core/types/Base';
 import type { DbRecord } from '@/core/types/DbRecord';
 import { camelToSnake, snakeToCamel } from '@/core/utils/caseMapper';
 import { baseMapFromDB, baseMapToDB } from '@/core/utils/entityMapper';
@@ -12,10 +12,10 @@ import { baseMapFromDB, baseMapToDB } from '@/core/utils/entityMapper';
  */
 type ClientProvider = () => Promise<SupabaseClient> | SupabaseClient;
 
-export function createSupabaseEntityAdapter<E extends BaseType>(config: {
+export function createSupabaseEntityAdapter<E extends Base>(config: {
   table: string;
-  dateFields?: Array<Exclude<keyof E, keyof BaseType>>;
-  excludeFields?: Array<Exclude<keyof E, keyof BaseType>>;
+  dateFields?: Array<Exclude<keyof E, keyof Base>>;
+  excludeFields?: Array<Exclude<keyof E, keyof Base>>;
   hasUser?: boolean;
   onConflict?: string;
   clientProvider?: ClientProvider; // optional, enables DI and easy testing
@@ -124,14 +124,14 @@ export function createSupabaseEntityAdapter<E extends BaseType>(config: {
   // ---------- Mapping helpers ----------
 
   function mapToDB(entity: E, userId: string): DbRecord<E> {
-    const base = baseMapToDB(entity, userId); // RawBaseType
+    const base = baseMapToDB(entity, userId); // RawBase
     const rec: Partial<DbRecord<E>> = { ...(base as Partial<DbRecord<E>>) };
 
     for (const key of Object.keys(entity) as Array<keyof E>) {
       // skip base-type props
       if (['id', 'trashed', 'createdAt', 'updatedAt', 'isSynced'].includes(key as string)) continue;
       // skip excluded fields
-      if (excludeFields.includes(key as Exclude<keyof E, keyof BaseType>)) continue;
+      if (excludeFields.includes(key as Exclude<keyof E, keyof Base>)) continue;
 
       const val = entity[key];
       const snakeKey = camelToSnake(key as string) as keyof DbRecord<E>;
@@ -148,7 +148,7 @@ export function createSupabaseEntityAdapter<E extends BaseType>(config: {
   }
 
   function mapFromDB(raw: DbRecord<E>): E {
-    const base = baseMapFromDB(raw); // BaseType & { isSynced: true }
+    const base = baseMapFromDB(raw); // Base & { isSynced: true }
     const result = { ...base } as E;
 
     // handle declared dateFields
@@ -166,9 +166,9 @@ export function createSupabaseEntityAdapter<E extends BaseType>(config: {
       if (['id', 'user_id', 'trashed', 'created_at', 'updated_at'].includes(rawKey)) continue;
 
       const camelKey = snakeToCamel(rawKey) as keyof E;
-      if (dateFields.includes(camelKey as unknown as Exclude<keyof E, keyof BaseType>)) continue;
+      if (dateFields.includes(camelKey as unknown as Exclude<keyof E, keyof Base>)) continue;
       // skip excluded fields
-      if (excludeFields.includes(camelKey as Exclude<keyof E, keyof BaseType>)) continue;
+      if (excludeFields.includes(camelKey as Exclude<keyof E, keyof Base>)) continue;
 
       const v = raw[rawKey as keyof DbRecord<E>];
       const normalized = typeof v === 'string' ? v.trim() : v;

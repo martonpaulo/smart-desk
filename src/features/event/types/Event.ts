@@ -1,6 +1,6 @@
-import { BaseType } from '@/core/types/BaseType';
+import { Base } from '@/core/types/Base';
 
-export interface Event extends BaseType {
+export interface Event extends Base {
   startTime: Date;
   endTime: Date;
   summary: string;

@@ -1,6 +1,6 @@
-import { BaseType } from '@/core/types/BaseType';
+import { Base } from '@/core/types/Base';
 
-export interface Task extends BaseType {
+export interface Task extends Base {
   title: string;
   notes?: string;
   important: boolean;
