@@ -1,6 +1,3 @@
-// Enum to define common sync intervals (in milliseconds) for different data types.
-// Useful for centralizing and managing realistic sync times in a personal-use app.
-
 export enum SyncInterval {
   CRITICAL = 10_000, // Real-time or near real-time updates (e.g. auth status, connectivity)
   HIGH = 20_000, // Frequently changing data (e.g. notes, current events)
@@ -11,5 +8,6 @@ export enum SyncInterval {
 
 // Global sync configuration values. Centralize all interval numbers here.
 export const SyncConfig = {
-  BACKGROUND_MINUTES: 10,
+  BACKGROUND_SYNC: 600_000, // Background sync interval, 10 minutes
+  RESUME_SYNC_DELAY: 60_000, // Delay before resuming sync, 1 minute
 } as const;

@@ -17,6 +17,7 @@ const EventList = dynamic(
   },
 );
 import { SupabaseSyncContext } from '@/core/providers/SupabaseSyncProvider';
+import { useRegisterFeature } from '@/core/store/useActiveFeaturesStore';
 import { useConnectionStore } from '@/core/store/useConnectionStore';
 import { EventAlert } from '@/legacy/components/alert/EventAlert';
 import { Clock } from '@/legacy/components/Clock';
@@ -35,6 +36,7 @@ import { useEventStore } from '@/legacy/store/eventStore';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 export default function BoardPage() {
+  useRegisterFeature('dashboard');
   const { latitude, longitude } = useLocation();
   const { data: weather } = useWeather(latitude, longitude);
   const events = useEventStore(state => state.events);
@@ -79,7 +81,10 @@ export default function BoardPage() {
   return (
     <Stack gap={2}>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Chip label={online ? 'Connected to Supabase' : 'Offline'} color={online ? 'success' : 'default'} />
+        <Chip
+          label={online ? 'Connected to Supabase' : 'Offline'}
+          color={online ? 'success' : 'default'}
+        />
         <Button variant="contained" onClick={handleSync} disabled={syncing}>
           {syncing ? 'Syncing...' : 'Sync now'}
         </Button>

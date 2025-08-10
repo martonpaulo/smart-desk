@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useRegisterFeature } from '@/core/store/useActiveFeaturesStore';
 import { TagsManagerView } from '@/features/tag/views/TagsManagerView';
