@@ -1,70 +1,56 @@
 import { SYNC_FEATURES } from '@/core/config/syncStores';
-import { FeatureDef } from '@/core/types/FeatureDef';
-import type { SyncStoreConfig } from '@/core/types/SyncStoreConfig';
-import { defineSync } from '@/core/utils/syncHelpers';
+import type { FeatureDef } from '@/core/types/FeatureDef';
 
-type FeatureKey = (typeof SYNC_FEATURES)[number]['key'];
-type Loader = () => Promise<SyncStoreConfig>;
+interface SyncStoreConfig {
+  useStore: {
+    getState: () => {
+      syncFromServer?: () => Promise<void>;
+      syncPending?: () => Promise<void>;
+    };
+  };
+  syncFromServer: () => Promise<void>;
+  syncPending: () => Promise<void>;
+  intervalMs: number;
+}
 
+// A feature is "always on" when routes are empty or undefined.
 function isAlways(def: FeatureDef): boolean {
   return !def.routes || def.routes.length === 0;
 }
 
-/**
- * Single dynamic import with webpackInclude so webpack pre-bundles allowed files.
- * You only add entries in SYNC_FEATURES. No registry duplication.
- * The regex is broad on purpose and still safe. It limits to "store" files.
- */
-function createLoader(def: FeatureDef): Loader {
-  return async () => {
-    try {
-      // Important: def.module must match a real source path that webpack can resolve
-      // using your aliases. Example: '@/legacy/store/board/store' or
-      // '@/features/note/store/useNotesStore'. No extension forcing here.
-      const mod = await import(
-        /* webpackInclude: /(?:^|\/)store\/[^/]+\.(ts|tsx|js)$/ */
-        /* webpackMode: "lazy" */
-        `${def.module}`
-      );
+// Match when the current pathname starts with any configured route.
+function matchesRoute(def: FeatureDef, pathname: string): boolean {
+  if (isAlways(def)) return true;
+  return def.routes!.some(route => pathname.startsWith(route));
+}
 
-      const store = (mod as Record<string, unknown>)[def.exportName] as {
-        getState: () => {
-          syncFromServer: () => Promise<void>;
-          syncPending: () => Promise<void>;
-        };
-      };
+// Import the store using the feature-provided static loader.
+async function importStore(def: FeatureDef): Promise<SyncStoreConfig> {
+  const mod = await def.loader();
+  const useStore = mod[def.exportName] as SyncStoreConfig['useStore'];
 
-      return defineSync(store, def.interval, { alwaysSync: isAlways(def) });
-    } catch (err) {
-      throw new Error(`Failed to import module "${def.module}" from SYNC_FEATURES: ${String(err)}`);
-    }
+  if (!useStore || typeof useStore.getState !== 'function') {
+    throw new Error(
+      `Failed to resolve export "${def.exportName}" from loader for feature "${def.key}".`,
+    );
+  }
+
+  return {
+    useStore,
+    intervalMs: def.interval,
+    async syncPending() {
+      const state = useStore.getState();
+      if (state.syncPending) await state.syncPending();
+    },
+    async syncFromServer() {
+      const state = useStore.getState();
+      if (state.syncFromServer) await state.syncFromServer();
+    },
   };
 }
 
-const featureLoaders: Record<FeatureKey, Loader> = Object.fromEntries(
-  SYNC_FEATURES.map(def => [def.key, createLoader(def)]),
-) as Record<FeatureKey, Loader>;
-
-const routeFeatureMap: Record<string, FeatureKey[]> = SYNC_FEATURES.reduce(
-  (acc, def) => {
-    if (!isAlways(def)) {
-      for (const prefix of def.routes!) {
-        if (!acc[prefix]) acc[prefix] = [];
-        acc[prefix].push(def.key);
-      }
-    }
-    return acc;
-  },
-  {} as Record<string, FeatureKey[]>,
-);
-
-const alwaysKeys = new Set<FeatureKey>(SYNC_FEATURES.filter(isAlways).map(def => def.key));
-
-export async function getStoresToSyncForRouteAsync(route: string): Promise<SyncStoreConfig[]> {
-  const active = new Set<FeatureKey>();
-  for (const [prefix, feats] of Object.entries(routeFeatureMap)) {
-    if (route.startsWith(prefix)) feats.forEach(f => active.add(f));
-  }
-  alwaysKeys.forEach(f => active.add(f));
-  return Promise.all(Array.from(active).map(f => featureLoaders[f]()));
+// Resolve all stores that should sync for a given route.
+export async function getStoresToSyncForRouteAsync(pathname: string): Promise<SyncStoreConfig[]> {
+  const defs = SYNC_FEATURES.filter(def => matchesRoute(def, pathname));
+  return Promise.all(defs.map(importStore));
 }

@@ -1,29 +1,16 @@
-import type { Base } from '@/core/types/Base';
-import type { SyncStoreConfig } from '@/core/types/SyncStoreConfig';
-
-// Register a store for synchronization with optional configuration.
-export function defineSync<
-  T extends { syncFromServer: () => Promise<void>; syncPending: () => Promise<void> },
->(
-  store: { getState: () => T },
-  intervalMs: number,
-  options: { alwaysSync?: boolean } = {},
-): SyncStoreConfig {
-  const state = store.getState();
-  return {
-    syncFromServer: state.syncFromServer,
-    syncPending: state.syncPending,
-    intervalMs,
-    alwaysSync: options.alwaysSync ?? false,
-  };
-}
-
 // Determine online status with a safe fallback for server environments.
 export function isOnline(): boolean {
   return typeof navigator === 'undefined' ? true : navigator.onLine;
 }
 
-// Schedule a periodic sync function and return a cleanup callback.
+// Run a callback after the browser is idle or ASAP as a fallback.
+export function runIdle(fn: () => void) {
+  if (typeof window === 'undefined' || !window.requestIdleCallback) return;
+  const asap = () => setTimeout(fn, 0);
+  return window.requestIdleCallback ? window.requestIdleCallback(fn) : asap();
+}
+
+// Schedule a periodic async sync function and return a cleanup callback.
 export function schedulePeriodicSync(storeSyncFn: () => Promise<void>, ms: number): () => void {
   const id = window.setInterval(() => {
     void storeSyncFn();
@@ -31,7 +18,7 @@ export function schedulePeriodicSync(storeSyncFn: () => Promise<void>, ms: numbe
   return () => clearInterval(id);
 }
 
-// Trigger sync whenever the document becomes visible again after a stale period.
+// Trigger sync when the document becomes visible after a stale period.
 export function syncOnVisibilityChange(
   storeSyncFn: () => Promise<void>,
   staleAfterMs: number,
@@ -47,7 +34,23 @@ export function syncOnVisibilityChange(
   return () => document.removeEventListener('visibilitychange', handler);
 }
 
-// Resolve conflicts by preferring the entity with the latest updatedAt value.
-export function resolveByUpdatedAt<T extends Base>(local: T, remote: T): T {
-  return local.updatedAt > remote.updatedAt ? local : remote;
+type StoreSync = {
+  syncPending: () => Promise<void>;
+  syncFromServer: () => Promise<void>;
+};
+
+// Run the standard two-step sync sequence for a single store.
+async function runStoreSync(store: StoreSync): Promise<void> {
+  await store.syncPending();
+  await store.syncFromServer();
+}
+
+// Run the standard sync sequence for a list of stores.
+export async function syncStoresBatch(stores: StoreSync[]): Promise<void> {
+  await Promise.all(stores.map(s => runStoreSync(s)));
+}
+
+// Compose multiple cleanup callbacks into one.
+export function combineCleanups(cleanups: Array<() => void>): () => void {
+  return () => cleanups.forEach(fn => fn());
 }

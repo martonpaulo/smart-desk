@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from 'react';
 
-import { Alert, Button, Chip, Snackbar, Stack } from '@mui/material';
+import { Button, Chip, Stack } from '@mui/material';
 import dynamic from 'next/dynamic';
 
 // Lazily load heavy components to speed up initial render
@@ -16,8 +16,9 @@ const EventList = dynamic(
     ssr: false,
   },
 );
+import { useSnackbar } from 'notistack';
+
 import { SupabaseSyncContext } from '@/core/providers/SupabaseSyncProvider';
-import { useRegisterFeature } from '@/core/store/useActiveFeaturesStore';
 import { useConnectionStore } from '@/core/store/useConnectionStore';
 import { EventAlert } from '@/legacy/components/alert/EventAlert';
 import { Clock } from '@/legacy/components/Clock';
@@ -36,10 +37,11 @@ import { useEventStore } from '@/legacy/store/eventStore';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 export default function BoardPage() {
-  useRegisterFeature('dashboard');
   const { latitude, longitude } = useLocation();
   const { data: weather } = useWeather(latitude, longitude);
   const events = useEventStore(state => state.events);
+  const { enqueueSnackbar } = useSnackbar();
+
   // Fetch events when visiting the board so data is available without opening the account page
   useEvents();
 
@@ -55,16 +57,17 @@ export default function BoardPage() {
 
   const { syncNowForActiveFeatures } = useContext(SupabaseSyncContext);
   const online = useConnectionStore(state => state.online);
-  const [snackbar, setSnackbar] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
-    setSnackbar(
-      online
-        ? 'Back online. Syncing changes...'
-        : "You're offline. Changes will sync when connection is restored.",
-    );
-  }, [online]);
+    if (online) {
+      enqueueSnackbar('Back online. Syncing changes...', { variant: 'info' });
+    } else {
+      enqueueSnackbar("You're offline", {
+        variant: 'warning',
+      });
+    }
+  }, [enqueueSnackbar, online]);
 
   const handleSync = () => {
     if (syncing) return;
@@ -80,29 +83,6 @@ export default function BoardPage() {
 
   return (
     <Stack gap={2}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Chip
-          label={online ? 'Connected to Supabase' : 'Offline'}
-          color={online ? 'success' : 'default'}
-        />
-        <Button variant="contained" onClick={handleSync} disabled={syncing}>
-          {syncing ? 'Syncing...' : 'Sync now'}
-        </Button>
-      </Stack>
-      {!online && (
-        <Alert severity="warning" sx={{ position: 'fixed', bottom: 0, width: '100%' }}>
-          You are offline. Reconnect to sync changes.
-        </Alert>
-      )}
-      <Snackbar open={Boolean(snackbar)} autoHideDuration={4000} onClose={() => setSnackbar(null)}>
-        <Alert
-          onClose={() => setSnackbar(null)}
-          severity={online ? 'info' : 'warning'}
-          sx={{ width: '100%' }}
-        >
-          {snackbar}
-        </Alert>
-      </Snackbar>
       {!isMobile && (
         <Stack direction="row" justifyContent="space-between" gap={2} alignItems="center">
           <Stack flexGrow={1}>
@@ -132,7 +112,19 @@ export default function BoardPage() {
               <TodoProgress />
             </Stack>
             <EventList events={events} key={`${now.toISOString()}-EventList`} />
+
             <HiddenColumnsList />
+
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Chip
+                variant="outlined"
+                label={online ? 'Connected' : 'Offline'}
+                color={online ? 'success' : 'default'}
+              />
+              <Button variant="outlined" onClick={handleSync} disabled={syncing}>
+                {syncing ? 'Syncing...' : 'Sync now'}
+              </Button>
+            </Stack>
           </Stack>
         </Stack>
       </Stack>

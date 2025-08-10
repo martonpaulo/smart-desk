@@ -4,9 +4,16 @@ import { createContext, ReactNode, useCallback, useEffect } from 'react';
 
 import { usePathname } from 'next/navigation';
 
-import { SyncConfig } from '@/core/constants/SyncInterval';
+import { SyncInterval } from '@/core/constants/SyncInterval';
 import { useConnectionStore } from '@/core/store/useConnectionStore';
-import { isOnline, schedulePeriodicSync, syncOnVisibilityChange } from '@/core/utils/syncHelpers';
+import {
+  combineCleanups,
+  isOnline,
+  runIdle,
+  schedulePeriodicSync,
+  syncOnVisibilityChange,
+  syncStoresBatch,
+} from '@/core/utils/syncHelpers';
 import { getStoresToSyncForRouteAsync } from '@/core/utils/syncRegistry';
 
 interface Props {
@@ -21,32 +28,22 @@ export const SupabaseSyncContext = createContext<SyncContextValue>({
   syncNowForActiveFeatures: async () => {},
 });
 
-// simple helper to run after first paint
-function runIdle(fn: () => void) {
-  if (typeof window === 'undefined') return;
-  const asSoonAsPossible = () => setTimeout(fn, 0);
-  // use requestIdleCallback when available
-  return window.requestIdleCallback ? window.requestIdleCallback(fn) : asSoonAsPossible();
-}
-
 export function SupabaseSyncProvider({ children }: Props) {
   const pathname = usePathname();
   const setOnline = useConnectionStore(s => s.setOnline);
 
+  // Resolve stores for the current route and run a full sync pass.
   const syncActive = useCallback(async () => {
     const stores = await getStoresToSyncForRouteAsync(pathname);
-    await Promise.all(
-      stores.map(async s => {
-        await s.syncPending();
-        await s.syncFromServer();
-      }),
-    );
+    await syncStoresBatch(stores);
   }, [pathname]);
 
+  // Keep connection flag in sync with navigator state.
   useEffect(() => {
     setOnline(isOnline());
   }, [setOnline]);
 
+  // React to online/offline changes.
   useEffect(() => {
     function handleOnline() {
       setOnline(true);
@@ -63,7 +60,7 @@ export function SupabaseSyncProvider({ children }: Props) {
     };
   }, [setOnline, syncActive]);
 
-  // first sync after idle, not during hydration
+  // First sync after idle, not during hydration.
   useEffect(() => {
     if (!isOnline()) return;
     runIdle(() => {
@@ -71,44 +68,46 @@ export function SupabaseSyncProvider({ children }: Props) {
     });
   }, [syncActive]);
 
-  // periodic background sync only for route features
+  // Periodic background sync and resume-on-visibility.
   useEffect(() => {
-    let cleanups: Array<() => void> = [];
-    let cancelVisibility: (() => void) | undefined;
-
     let aborted = false;
+
     async function setup() {
       if (!isOnline()) return;
+
       const stores = await getStoresToSyncForRouteAsync(pathname);
 
-      cleanups = stores.map(s =>
+      // Set periodic sync per store with the configured background interval.
+      const periodicCleanups = stores.map(s =>
         schedulePeriodicSync(async () => {
           if (isOnline()) {
             await s.syncPending();
             await s.syncFromServer();
           }
-        }, SyncConfig.BACKGROUND_SYNC),
+        }, SyncInterval.BACKGROUND),
       );
 
-      cancelVisibility = syncOnVisibilityChange(async () => {
+      // Resume sync when tab becomes visible and enough time has passed.
+      const cancelVisibility = syncOnVisibilityChange(async () => {
         if (aborted) return;
-        await Promise.all(
-          stores.map(async s => {
-            await s.syncPending();
-            await s.syncFromServer();
-          }),
-        );
-      }, SyncConfig.RESUME_SYNC_DELAY);
+        await syncStoresBatch(stores);
+      }, SyncInterval.VISIBILITY);
+
+      return combineCleanups([...periodicCleanups, cancelVisibility]);
     }
-    void setup();
+
+    let cleanupAll: (() => void) | undefined;
+    void setup().then(c => {
+      cleanupAll = c;
+    });
 
     return () => {
       aborted = true;
-      cleanups.forEach(fn => fn());
-      if (cancelVisibility) cancelVisibility();
+      if (cleanupAll) cleanupAll();
     };
   }, [pathname]);
 
+  // Try to flush pending changes before unload if online.
   useEffect(() => {
     function handleBeforeUnload() {
       if (isOnline()) void syncActive();

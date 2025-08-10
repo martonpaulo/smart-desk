@@ -1,57 +1,61 @@
 import { SyncInterval } from '@/core/constants/SyncInterval';
-import { FeatureDef } from '@/core/types/FeatureDef';
+import type { FeatureDef } from '@/core/types/FeatureDef';
 
 export const SYNC_FEATURES: readonly FeatureDef[] = [
   {
     key: 'dashboard',
-    module: '@/legacy/store/board/store',
+    routes: [],
     exportName: 'useBoardStore',
     interval: SyncInterval.HIGH,
+    loader: () => import('@/legacy/store/board/store'),
   },
   {
     key: 'notes',
     routes: ['/notes'],
-    module: '@/features/note/store/useNotesStore',
     exportName: 'useNotesStore',
     interval: SyncInterval.HIGH,
+    loader: () => import('@/features/note/store/useNotesStore'),
   },
   {
     key: 'events',
-    routes: ['/calendar'],
-    module: '@/features/event/store/useLocalEventsStore',
+    routes: ['/calendar', '/locations'],
     exportName: 'useLocalEventsStore',
     interval: SyncInterval.HIGH,
-  },
-  {
-    key: 'maps',
-    routes: ['/maps'],
-    module: '@/features/map/store/useMapsStore',
-    exportName: 'useMapsStore',
-    interval: SyncInterval.HIGH,
+    loader: () => import('@/features/event/store/useLocalEventsStore'),
   },
   {
     key: 'files',
-    module: '@/features/file/store/useFilesStore',
+    routes: ['/files', '/maps'],
     exportName: 'useFilesStore',
     interval: SyncInterval.HIGH,
+    loader: () => import('@/features/file/store/useFilesStore'),
   },
   {
     key: 'settings',
-    module: '@/legacy/store/settings/store',
+    routes: ['/settings'],
     exportName: 'useSettingsStorage',
     interval: SyncInterval.MEDIUM,
+    loader: () => import('@/legacy/store/settings/store'),
   },
   {
     key: 'locations',
-    module: '@/features/location/store/useLocationsStore',
+    routes: ['/locations'],
     exportName: 'useLocationsStore',
     interval: SyncInterval.LOW,
+    loader: () => import('@/features/location/store/useLocationsStore'),
   },
   {
     key: 'tags',
     routes: ['/tags'],
-    module: '@/features/tag/store/useTagsStore',
     exportName: 'useTagsStore',
     interval: SyncInterval.LOW,
+    loader: () => import('@/features/tag/store/useTagsStore'),
+  },
+  {
+    key: 'maps',
+    routes: ['/maps'],
+    exportName: 'useMapsStore',
+    interval: SyncInterval.LOW,
+    loader: () => import('@/features/map/store/useMapsStore'),
   },
 ] as const;
