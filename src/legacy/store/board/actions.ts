@@ -143,49 +143,61 @@ export async function syncPendingAction(set: Set, get: Get) {
     pendingColumns.map(col => upsertColumn(client, col)),
   );
 
-  const currentColumns = get().columns;
-  const updatedColumns = [...currentColumns];
-  const stillColumns: Column[] = [];
-
-  columnResults.forEach((result, index) => {
-    const original = pendingColumns[index];
-    if (result.status === 'fulfilled') {
-      const saved = result.value;
-      const idx = updatedColumns.findIndex(c => c.id === saved.id);
-      if (idx !== -1) {
-        updatedColumns[idx] = { ...saved, isSynced: true };
-      }
-    } else {
-      stillColumns.push(original);
-    }
-  });
-
   // Run all task upserts concurrently and track failures
   const taskResults = await Promise.allSettled(pendingTasks.map(task => upsertTask(client, task)));
 
-  const currentTasks = get().tasks;
-  const updatedTasks = [...currentTasks];
-  const stillTasks: Task[] = [];
+  set(state => {
+    // start from the latest state to avoid dropping updates made during sync
+    const updatedColumns = [...state.columns];
+    const stillColumns: Column[] = [];
 
-  taskResults.forEach((result, index) => {
-    const original = pendingTasks[index];
-    if (result.status === 'fulfilled') {
-      const saved = result.value;
-      const idx = updatedTasks.findIndex(t => t.id === saved.id);
-      if (idx !== -1) {
-        updatedTasks[idx] = { ...saved, isSynced: true };
+    columnResults.forEach((result, index) => {
+      const original = pendingColumns[index];
+      if (result.status === 'fulfilled') {
+        const saved = result.value;
+        const idx = updatedColumns.findIndex(c => c.id === saved.id);
+        if (idx !== -1) {
+          updatedColumns[idx] = { ...saved, isSynced: true };
+        } else {
+          updatedColumns.push({ ...saved, isSynced: true });
+        }
+      } else {
+        stillColumns.push(original);
       }
-    } else {
-      stillTasks.push(original);
-    }
-  });
+    });
 
-  // Persist all updates in a single state change
-  set({
-    columns: updatedColumns,
-    tasks: updatedTasks,
-    pendingColumns: stillColumns,
-    pendingTasks: stillTasks,
+    const updatedTasks = [...state.tasks];
+    const stillTasks: Task[] = [];
+
+    taskResults.forEach((result, index) => {
+      const original = pendingTasks[index];
+      if (result.status === 'fulfilled') {
+        const saved = result.value;
+        const idx = updatedTasks.findIndex(t => t.id === saved.id);
+        if (idx !== -1) {
+          updatedTasks[idx] = { ...saved, isSynced: true };
+        } else {
+          updatedTasks.push({ ...saved, isSynced: true });
+        }
+      } else {
+        stillTasks.push(original);
+      }
+    });
+
+    // remove synced items from pending lists, keeping any new pending entries untouched
+    const remainingPendingColumns = state.pendingColumns.filter(
+      c => !pendingColumns.some(p => p.id === c.id),
+    );
+    const remainingPendingTasks = state.pendingTasks.filter(
+      t => !pendingTasks.some(p => p.id === t.id),
+    );
+
+    return {
+      columns: updatedColumns,
+      tasks: updatedTasks,
+      pendingColumns: [...remainingPendingColumns, ...stillColumns],
+      pendingTasks: [...remainingPendingTasks, ...stillTasks],
+    };
   });
 }
 
