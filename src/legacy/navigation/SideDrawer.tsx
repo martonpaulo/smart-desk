@@ -29,6 +29,10 @@ export function SideDrawer() {
   const [collapsed, setCollapsed] = useState(true);
   const width = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
+  const isRouteSelected = (pathname: string, href: string) => {
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   return (
     <Drawer
       variant="permanent"
@@ -63,7 +67,7 @@ export function SideDrawer() {
             key={href}
             component={Link}
             href={href}
-            selected={pathname === href}
+            selected={isRouteSelected(pathname, href)}
             sx={{
               justifyContent: collapsed ? 'center' : 'flex-start',
               px: collapsed ? 2 : 1,
@@ -74,8 +78,9 @@ export function SideDrawer() {
                 minWidth: 0,
                 mr: collapsed ? 0 : 2,
                 justifyContent: 'center',
-                color:
-                  pathname === href ? theme.palette.primary.main : theme.palette.text.secondary,
+                color: isRouteSelected(pathname, href)
+                  ? theme.palette.primary.main
+                  : theme.palette.text.secondary,
               }}
             >
               {icon}
@@ -91,7 +96,7 @@ export function SideDrawer() {
             key={href}
             component={Link}
             href={href}
-            selected={pathname === href}
+            selected={isRouteSelected(pathname, href)}
             sx={{
               justifyContent: collapsed ? 'center' : 'flex-start',
               px: collapsed ? 2 : 1,
@@ -102,8 +107,9 @@ export function SideDrawer() {
                 minWidth: 0,
                 mr: collapsed ? 0 : 2,
                 justifyContent: 'center',
-                color:
-                  pathname === href ? theme.palette.primary.main : theme.palette.text.secondary,
+                color: isRouteSelected(pathname, href)
+                  ? theme.palette.primary.main
+                  : theme.palette.text.secondary,
               }}
             >
               {icon}

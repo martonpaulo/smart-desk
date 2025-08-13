@@ -8,6 +8,12 @@ import { Location, LocationType } from '@/features/location/types/Location';
 import { CustomDialog } from '@/shared/components/CustomDialog';
 import { DateInput } from '@/shared/components/DateInput';
 
+function toDate(v?: Date | string | number | null): Date | undefined {
+  if (!v) return undefined;
+  const d = v instanceof Date ? v : new Date(v);
+  return isNaN(d.getTime()) ? undefined : d;
+}
+
 interface LocationModalProps {
   open: boolean;
   onClose: () => void;
@@ -24,12 +30,16 @@ const LOCATION_TYPE_OPTIONS: Array<{ value: LocationType; label: string }> = [
 
 function buildInitialValues(location?: Partial<Location>) {
   const now = new Date();
+
+  const start = toDate(location?.startDate) ?? now;
+  const end = toDate(location?.endDate) ?? addDays(start, 1);
+
   return {
     name: location?.name?.trim() ?? '',
     type: (location?.type ?? 'city') as LocationType,
-    start: location?.startDate ?? now,
-    end: location?.endDate ?? addDays(now, 1),
-    createdAt: location?.createdAt ?? now,
+    start,
+    end,
+    createdAt: toDate(location?.createdAt) ?? now,
     id: location?.id,
   };
 }
@@ -48,11 +58,11 @@ export function LocationModal({ open, onClose, location }: LocationModalProps) {
 
   useEffect(() => {
     if (!open) return;
-    const freshInitial = buildInitialValues(location);
-    setName(freshInitial.name);
-    setType(freshInitial.type);
-    setStart(freshInitial.start);
-    setEnd(freshInitial.end);
+    const fresh = buildInitialValues(location);
+    setName(fresh.name);
+    setType(fresh.type);
+    setStart(fresh.start);
+    setEnd(fresh.end);
   }, [open, location]);
 
   const handleStartChange = (value: Date | null) => {

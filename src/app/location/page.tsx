@@ -43,7 +43,7 @@ export default function LocationsManagerPage() {
       <Stack direction="row" flexWrap="wrap" gap={2}>
         {locations.map(location => (
           <Stack key={location.id} direction="row" alignItems="center">
-            <LocationCard location={location} onClick={() => openModal(location)} />
+            <LocationCard location={location} onClickAction={() => openModal(location)} />
           </Stack>
         ))}
       </Stack>

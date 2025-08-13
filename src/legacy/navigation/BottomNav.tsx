@@ -128,11 +128,13 @@ export function BottomNav() {
         onOpen={toggleMore(true)}
         onClose={toggleMore(false)}
         disableDiscovery
-        PaperProps={{
-          sx: {
-            borderTopLeftRadius: 12,
-            borderTopRightRadius: 12,
-            pb: 'calc(env(safe-area-inset-bottom, 0px))',
+        slotProps={{
+          paper: {
+            sx: {
+              borderTopLeftRadius: 12,
+              borderTopRightRadius: 12,
+              pb: 'calc(env(safe-area-inset-bottom, 0px))',
+            },
           },
         }}
       >
@@ -150,7 +152,7 @@ export function BottomNav() {
               }}
             >
               <ListItemIcon sx={{ minWidth: 36 }}>{route.icon}</ListItemIcon>
-              <ListItemText primary={route.label} primaryTypographyProps={{ variant: 'body2' }} />
+              <ListItemText primary={route.label} slotProps={{ primary: { variant: 'body2' } }} />
             </ListItemButton>
           ))}
         </List>

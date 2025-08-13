@@ -23,7 +23,7 @@ import { Location, LocationType } from '@/features/location/types/Location';
 
 interface LocationCardProps {
   location: Location;
-  onClick: () => void;
+  onClickAction: () => void;
 }
 
 type TypeMeta = {
@@ -74,7 +74,7 @@ function formatRange(start: Date, end: Date) {
   return `${format(start, 'MMM d, yyyy')} to ${format(end, 'MMM d, yyyy')}`;
 }
 
-export function LocationCard({ location, onClick }: LocationCardProps) {
+export function LocationCard({ location, onClickAction }: LocationCardProps) {
   const meta = useMemo(() => TYPE_META[location.type], [location.type]);
 
   const days = useMemo(() => {
@@ -115,7 +115,7 @@ export function LocationCard({ location, onClick }: LocationCardProps) {
       />
 
       <CardActionArea
-        onClick={onClick}
+        onClick={onClickAction}
         sx={{ pl: 1 }} // space to visually balance the accent bar
         aria-label={`Open ${location.name} ${meta.label.toLowerCase()}`}
       >

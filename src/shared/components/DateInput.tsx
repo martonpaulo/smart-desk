@@ -46,7 +46,7 @@ export function DateInput(props: DatePickerProps) {
           onClear: () => setCleared(true),
         },
         actionBar: {
-          actions: ['today'],
+          actions: ['cancel', 'clear', 'today', 'accept'],
         },
         textField: {
           ...(slotProps?.textField || {}),
