@@ -27,12 +27,12 @@ import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 type TaskFilterPanelProps = {
   filters: TaskFilters;
-  onFilterChange: (newFilters: TaskFilters) => void;
+  onFilterChangeAction: (newFilters: TaskFilters) => void;
 };
 
 type TriKey = keyof Omit<TaskFilters, 'title' | 'plannedDate' | 'tagId'>;
 
-export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProps) {
+export function TaskFilterPanel({ filters, onFilterChangeAction }: TaskFilterPanelProps) {
   const isMobile = useResponsiveness();
 
   // Tags
@@ -66,7 +66,7 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
 
   const clearLocal = () => {
     setLocal(clearedFilters);
-    onFilterChange(clearedFilters);
+    onFilterChangeAction(clearedFilters);
   };
 
   // Applied filters summary chips
@@ -108,7 +108,7 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
           <Button size="medium" onClick={clearLocal}>
             Clear
           </Button>
-          <Button size="medium" variant="contained" onClick={() => onFilterChange(local)}>
+          <Button size="medium" variant="contained" onClick={() => onFilterChangeAction(local)}>
             Apply
           </Button>
         </Stack>
@@ -145,7 +145,7 @@ export function TaskFilterPanel({ filters, onFilterChange }: TaskFilterPanelProp
               value={local.title ?? ''}
               onChange={onTitle}
               onKeyDown={e => {
-                if (e.key === 'Enter') onFilterChange(local);
+                if (e.key === 'Enter') onFilterChangeAction(local);
               }}
             />
             <DateInput label="Planned date" value={local.plannedDate} onChange={onDate} />

@@ -77,7 +77,7 @@ export default function EisenhowerMatrixPage() {
       title="Eisenhower Matrix"
       description="Decide what matters, not just what screams for attention"
     >
-      <TaskFilterPanel filters={filters} onFilterChange={setFilters} />
+      <TaskFilterPanel filters={filters} onFilterChangeAction={setFilters} />
 
       <Stack direction="row" mb={2}>
         <Button variant={isSelecting ? 'contained' : 'outlined'} onClick={toggleSelecting}>

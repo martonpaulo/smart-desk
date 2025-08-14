@@ -8,6 +8,9 @@ export const interfaceSounds = {
   info: {
     id: 'notification/info',
   },
+  recover: {
+    id: 'ui/item_deselect',
+  },
   reset: {
     id: 'ui/item_deselect',
   },

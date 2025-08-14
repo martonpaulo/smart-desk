@@ -9,6 +9,7 @@ import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { IncrementButton } from '@/features/task/components/IncrementButton';
 import { MarkAsDoneButton } from '@/features/task/components/MarkAsDoneButton';
+import { RecoverFromTrashButton } from '@/features/task/components/RecoverFromTrashButton';
 import { ResetButton } from '@/features/task/components/ResetButton';
 import { SendToNextDayButton } from '@/features/task/components/SendToNextDayButton';
 import { UnblockButton } from '@/features/task/components/UnblockButton';
@@ -137,13 +138,13 @@ export function TaskCard({
   const isCountTask = task.quantityTarget > 1;
   const oneToComplete = task.quantityDone + 1 === task.quantityTarget;
 
-  const opacity = task.blocked || task.trashed ? 0.5 : 1;
   const showIncrement =
     !isEditing && !task.blocked && !task.trashed && isCountTask && !done && !oneToComplete;
   const showMarkDone = !isEditing && !task.blocked && !task.trashed && !done && oneToComplete;
   const showUnblock = !isEditing && task.blocked && !done && !task.trashed;
-  const showSendNext = !isEditing && !done && !task.trashed;
+  const showSendNext = !isEditing && !done && !task.trashed && !task.blocked;
   const showReset = !isEditing && !task.blocked && done && !task.trashed;
+  const showRecover = !isEditing && task.trashed;
 
   // drag handlers
   const handleDragStart = (e: DragEvent<HTMLDivElement>) => {
@@ -167,10 +168,23 @@ export function TaskCard({
     if (selectable) onSelectChange?.(task.id, !selected);
   };
 
+  let taskColor = color;
+  let opacity = 1;
+
+  if (!isEditing) {
+    if (task.trashed) {
+      taskColor = theme.palette.grey[500];
+      opacity = 0.3;
+    } else if (task.blocked) {
+      taskColor = theme.palette.action.disabled;
+      opacity = 0.6;
+    }
+  }
+
   return (
     <>
       <TaskContainer
-        color={(task.blocked || task.trashed) && !isEditing ? theme.palette.action.disabled : color}
+        color={taskColor}
         selected={selected}
         draggable={!isEditing && !isMobile && !selectable}
         onDragStart={handleDragStart}
@@ -214,11 +228,11 @@ export function TaskCard({
           ) : (
             <>
               <Stack direction="row" justifyContent="space-between" gap={1}>
-                <Stack direction="row" alignItems="center" flexWrap="wrap" gap={0.5}>
+                <Stack direction="row" alignItems="center" flexWrap="wrap">
                   {task.notes && (
                     <Tooltip title="Has notes">
                       <NotesIcon
-                        color="action"
+                        color={task.trashed || task.blocked ? 'disabled' : 'action'}
                         sx={{
                           fontSize: theme.typography.caption.fontSize,
                           alignSelf: 'center',
@@ -237,7 +251,6 @@ export function TaskCard({
                     onClickTitle={selectable ? toggleSelected : () => setEditModalOpen(true)}
                     sx={{
                       opacity,
-                      fontStyle: task.trashed ? 'italic' : 'normal',
                       fontWeight: task.trashed ? 300 : 400,
                     }}
                   />
@@ -247,9 +260,13 @@ export function TaskCard({
                       <Typography
                         component="span"
                         sx={{
-                          fontSize: 12,
-                          transform: 'rotate(240deg)',
+                          fontSize: 16,
+                          lineHeight: 1,
+                          fontWeight: 400,
+                          transform: 'rotate(240deg) translateX(2px)',
                           color: 'text.secondary',
+                          alignSelf: 'flex-start',
+                          display: 'inline-block',
                         }}
                       >
                         ⟳
@@ -258,7 +275,7 @@ export function TaskCard({
                   )}
                 </Stack>
 
-                {!task.blocked && isCountTask && (
+                {isCountTask && (
                   <Typography variant="caption" color="text.secondary" sx={{ opacity }}>
                     {task.quantityDone}/{task.quantityTarget}
                   </Typography>
@@ -297,6 +314,7 @@ export function TaskCard({
               showIncrement ? <IncrementButton key="inc" task={task} /> : null,
               showReset ? <ResetButton key="reset" task={task} /> : null,
               showMarkDone ? <MarkAsDoneButton key="done" task={task} /> : null,
+              showRecover ? <RecoverFromTrashButton key="recover" task={task} /> : null,
             ].filter(Boolean)}
           />
         )}

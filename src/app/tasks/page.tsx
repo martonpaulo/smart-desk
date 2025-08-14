@@ -75,7 +75,7 @@ export default function TasksPage() {
       </Typography>
 
       {/* Filters */}
-      <TaskFilterPanel filters={filters} onFilterChange={setFilters} />
+      <TaskFilterPanel filters={filters} onFilterChangeAction={setFilters} />
 
       {/* Selection toggle */}
       <Stack direction="row" justifyContent="flex-end" sx={{ mb: 1 }}>
