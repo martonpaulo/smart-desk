@@ -250,7 +250,7 @@ export function EisenhowerQuadrant({
       <TaskModal
         open={openTaskModal}
         newProperties={{ important, urgent }}
-        onClose={() => setOpenTaskModal(false)}
+        onCloseAction={() => setOpenTaskModal(false)}
       />
     </>
   );

@@ -43,10 +43,10 @@ type TaskModalProps = {
   task?: Task | null; // undefined/null = new task
   newProperties?: Partial<Task>; // extra props for new tasks
   open: boolean;
-  onClose: () => void;
+  onCloseAction: () => void;
 };
 
-export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps) {
+export function TaskModal({ task, open, onCloseAction, newProperties }: TaskModalProps) {
   const isMobile = useResponsiveness();
 
   const addTask = useBoardStore(s => s.addTask);
@@ -156,7 +156,7 @@ export function TaskModal({ task, open, onClose, newProperties }: TaskModalProps
       mode={task ? 'edit' : 'new'}
       isDirty={isDirty}
       isValid={isValid}
-      onClose={onClose}
+      onClose={onCloseAction}
       onSave={handleSave}
       deleteAction={handleDelete}
       deleteId={task?.id}

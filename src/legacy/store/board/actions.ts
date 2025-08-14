@@ -270,6 +270,8 @@ export async function syncFromServerAction(set: Set, get: Get) {
           return {
             ...task,
             quantityDone: 0,
+            blocked: false,
+            trashed: false,
             plannedDate: new Date(),
             columnId: draftCol!.id,
             updatedAt: now,

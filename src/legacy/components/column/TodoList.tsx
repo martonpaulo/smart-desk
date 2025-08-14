@@ -294,7 +294,7 @@ export function TodoList({ showDate }: TodoListProps) {
       <TaskModal
         open={Boolean(editingTask)}
         task={editingTask}
-        onClose={() => setEditingTask(null)}
+        onCloseAction={() => setEditingTask(null)}
       />
     </Stack>
   );

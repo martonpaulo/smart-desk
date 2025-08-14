@@ -323,7 +323,7 @@ export function TaskCard({
         )}
       </TaskContainer>
 
-      <TaskModal open={isEditModalOpen} task={task} onClose={() => setEditModalOpen(false)} />
+      <TaskModal open={isEditModalOpen} task={task} onCloseAction={() => setEditModalOpen(false)} />
     </>
   );
 }
