@@ -41,6 +41,8 @@ interface EisenhowerQuadrantProps {
   selectable?: boolean;
   selectedTaskIds?: Set<string>;
   onTaskSelectChange?: (id: string, selected: boolean) => void;
+  onQuickEditDate?: (task: Task, date: Date | null) => void;
+  onQuickEditDuration?: (task: Task, minutes: number) => void;
 }
 
 export function EisenhowerQuadrant({
@@ -60,6 +62,8 @@ export function EisenhowerQuadrant({
   selectable = false,
   selectedTaskIds = new Set<string>(),
   onTaskSelectChange,
+  onQuickEditDate,
+  onQuickEditDuration,
 }: EisenhowerQuadrantProps) {
   const theme = useTheme();
   const isMobile = useResponsiveness();
@@ -211,6 +215,8 @@ export function EisenhowerQuadrant({
                 onTaskDragStart={(_id, e) => onTaskDragStart(task, e)}
                 onTaskDragOver={(_id, e) => onTaskDragOver(e)}
                 onTaskDragEnd={onTaskDragEnd}
+                onQuickEditDate={onQuickEditDate}
+                onQuickEditDuration={onQuickEditDuration}
               />
             ))
           )}

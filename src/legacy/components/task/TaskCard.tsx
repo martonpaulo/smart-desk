@@ -3,7 +3,7 @@
 import { DragEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import { DescriptionOutlined as NotesIcon } from '@mui/icons-material';
-import { Checkbox, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import { Button, Checkbox, Stack, TextField, Tooltip, Typography, useTheme } from '@mui/material';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
@@ -25,6 +25,7 @@ import { useSyncStatusStore } from '@/legacy/store/syncStatus';
 import type { Task } from '@/legacy/types/task';
 import { isTaskEmpty } from '@/legacy/utils/taskUtils';
 import { getDateLabel } from '@/legacy/utils/timeUtils';
+import { DateInput } from '@/shared/components/DateInput';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 import { formatFullDuration } from '@/shared/utils/timeUtils';
 
@@ -46,6 +47,8 @@ type TaskCardBaseProps = {
   onTaskDragStart?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragOver?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragEnd?: (id: string, e: DragEvent<HTMLDivElement>) => void;
+  onQuickEditDate?: (task: Task, date: Date | null) => void;
+  onQuickEditDuration?: (task: Task, minutes: number) => void;
 };
 
 export function TaskCard({
@@ -66,6 +69,8 @@ export function TaskCard({
   onTaskDragStart,
   onTaskDragOver,
   onTaskDragEnd,
+  onQuickEditDate,
+  onQuickEditDuration,
 }: TaskCardBaseProps) {
   const isMobile = useResponsiveness();
   const theme = useTheme();
@@ -306,6 +311,34 @@ export function TaskCard({
             </>
           )}
         </Stack>
+
+        {(onQuickEditDate || onQuickEditDuration) && !isEditing && (
+          <Stack direction="row" gap={1} mt={1} alignItems="center">
+            {onQuickEditDate && (
+              <DateInput
+                label="Planned"
+                value={task.plannedDate}
+                onChange={d => onQuickEditDate(task, d)}
+              />
+            )}
+            {onQuickEditDuration && (
+              <Stack direction="row" gap={0.5} alignItems="center">
+                <TextField
+                  type="number"
+                  size="small"
+                  value={task.estimatedTime ?? ''}
+                  onChange={e => onQuickEditDuration(task, Number(e.target.value))}
+                  inputProps={{ min: 0 }}
+                />
+                {[20, 40, 60].map(min => (
+                  <Button key={min} size="small" onClick={() => onQuickEditDuration(task, min)}>
+                    {min}
+                  </Button>
+                ))}
+              </Stack>
+            )}
+          </Stack>
+        )}
 
         {!isEditing && showActions && (
           <ActionsBar
