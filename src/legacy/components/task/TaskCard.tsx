@@ -294,7 +294,10 @@ export function TaskCard({
                 }
                 dateComp={
                   showDate ? (
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      color={task.plannedDate ? 'text.secondary' : 'text.disabled'}
+                    >
                       {getDateLabel(task.plannedDate)}
                     </Typography>
                   ) : null
