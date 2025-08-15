@@ -3,7 +3,8 @@
 import { DragEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import { DescriptionOutlined as NotesIcon } from '@mui/icons-material';
-import { Button, Checkbox, Stack, TextField, Tooltip, Typography, useTheme } from '@mui/material';
+import { Checkbox, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import { isBefore, startOfDay } from 'date-fns';
 
 import { TagLabel } from '@/features/tag/components/TagLabel';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
@@ -11,7 +12,7 @@ import { IncrementButton } from '@/features/task/components/IncrementButton';
 import { MarkAsDoneButton } from '@/features/task/components/MarkAsDoneButton';
 import { RecoverFromTrashButton } from '@/features/task/components/RecoverFromTrashButton';
 import { ResetButton } from '@/features/task/components/ResetButton';
-import { SendToNextDayButton } from '@/features/task/components/SendToNextDayButton';
+import { SendToInboxButton } from '@/features/task/components/SendToInboxButton';
 import { UnblockButton } from '@/features/task/components/UnblockButton';
 import { ActionsBar } from '@/legacy/components/task/ActionsBar';
 import { PriorityFlag } from '@/legacy/components/task/PriorityFlag';
@@ -25,7 +26,6 @@ import { useSyncStatusStore } from '@/legacy/store/syncStatus';
 import type { Task } from '@/legacy/types/task';
 import { isTaskEmpty } from '@/legacy/utils/taskUtils';
 import { getDateLabel } from '@/legacy/utils/timeUtils';
-import { DateInput } from '@/shared/components/DateInput';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 import { formatFullDuration } from '@/shared/utils/timeUtils';
 
@@ -47,8 +47,6 @@ type TaskCardBaseProps = {
   onTaskDragStart?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragOver?: (id: string, e: DragEvent<HTMLDivElement>) => void;
   onTaskDragEnd?: (id: string, e: DragEvent<HTMLDivElement>) => void;
-  onQuickEditDate?: (task: Task, date: Date | null) => void;
-  onQuickEditDuration?: (task: Task, minutes: number) => void;
 };
 
 export function TaskCard({
@@ -69,8 +67,6 @@ export function TaskCard({
   onTaskDragStart,
   onTaskDragOver,
   onTaskDragEnd,
-  onQuickEditDate,
-  onQuickEditDuration,
 }: TaskCardBaseProps) {
   const isMobile = useResponsiveness();
   const theme = useTheme();
@@ -147,7 +143,11 @@ export function TaskCard({
     !isEditing && !task.blocked && !task.trashed && isCountTask && !done && !oneToComplete;
   const showMarkDone = !isEditing && !task.blocked && !task.trashed && !done && oneToComplete;
   const showUnblock = !isEditing && task.blocked && !done && !task.trashed;
-  const showSendNext = !isEditing && !done && !task.trashed && !task.blocked;
+  const showSendToInbox =
+    !isEditing &&
+    !done &&
+    !task.trashed &&
+    (!task.plannedDate || isBefore(task.plannedDate, startOfDay(new Date(Date.now() + 86400000))));
   const showReset = !isEditing && !task.blocked && done && !task.trashed;
   const showRecover = !isEditing && task.trashed;
 
@@ -291,9 +291,21 @@ export function TaskCard({
                 opacity={opacity}
                 tagComp={taskTag && showTag ? <TagLabel tag={taskTag} /> : null}
                 durationComp={
-                  task.estimatedTime && showDuration ? (
-                    <Typography variant="caption" color="text.secondary">
-                      {formatFullDuration(task.estimatedTime * 60_000)}
+                  showDuration ? (
+                    <Typography
+                      variant="caption"
+                      color={task.estimatedTime ? 'text.secondary' : 'text.disabled'}
+                    >
+                      {task.estimatedTime
+                        ? formatFullDuration(task.estimatedTime * 60_000)
+                        : 'Unset'}
+                    </Typography>
+                  ) : null
+                }
+                separatorComp={
+                  showDuration && showDate ? (
+                    <Typography variant="caption" color="text.disabled">
+                      |
                     </Typography>
                   ) : null
                 }
@@ -312,40 +324,12 @@ export function TaskCard({
           )}
         </Stack>
 
-        {(onQuickEditDate || onQuickEditDuration) && !isEditing && (
-          <Stack direction="row" gap={1} mt={1} alignItems="center">
-            {onQuickEditDate && (
-              <DateInput
-                label="Planned"
-                value={task.plannedDate}
-                onChange={d => onQuickEditDate(task, d)}
-              />
-            )}
-            {onQuickEditDuration && (
-              <Stack direction="row" gap={0.5} alignItems="center">
-                <TextField
-                  type="number"
-                  size="small"
-                  value={task.estimatedTime ?? ''}
-                  onChange={e => onQuickEditDuration(task, Number(e.target.value))}
-                  inputProps={{ min: 0 }}
-                />
-                {[20, 40, 60].map(min => (
-                  <Button key={min} size="small" onClick={() => onQuickEditDuration(task, min)}>
-                    {min}
-                  </Button>
-                ))}
-              </Stack>
-            )}
-          </Stack>
-        )}
-
         {!isEditing && showActions && (
           <ActionsBar
             showOnHover
             right
             items={[
-              showSendNext ? <SendToNextDayButton key="next" task={task} /> : null,
+              showSendToInbox ? <SendToInboxButton key="next" task={task} /> : null,
               showUnblock ? <UnblockButton key="unblock" task={task} /> : null,
               showIncrement ? <IncrementButton key="inc" task={task} /> : null,
               showReset ? <ResetButton key="reset" task={task} /> : null,

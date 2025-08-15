@@ -1,33 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import {
   Button,
-  Drawer,
+  FormControlLabel,
   Paper,
-  Popover,
   Stack,
+  Switch,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material';
+import { endOfToday, startOfToday } from 'date-fns';
 
 import { PageSection } from '@/core/components/PageSection';
 import { eisenhowerQuadrants } from '@/features/eisenhower/config/eisenhowerQuadrants';
+import { ConvertibleEventCard } from '@/features/event/components/ConvertibleEventCard';
 import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
 import { useBulkTaskSelection } from '@/features/task/hooks/useBulkTaskSelection';
-import { usePlannableTasks } from '@/features/task/hooks/usePlannableTasks';
-import {
-  classifyTask,
-  ensureDuration,
-  ensurePlannedDate,
-} from '@/features/task/utils/planning';
+import { DailyTimeLoadIndicator } from '@/legacy/components/DailyTimeLoadIndicator';
 import { EisenhowerQuadrant } from '@/legacy/components/EisenhowerQuadrant';
+import { TodoProgress } from '@/legacy/components/Progress';
 import { TaskCard } from '@/legacy/components/task/TaskCard';
+import { TaskModal } from '@/legacy/components/task/TaskModal';
 import { TaskSelectionToolbar } from '@/legacy/components/TaskSelectionToolbar';
+import { useEvents } from '@/legacy/hooks/useEvents';
+import { useTasks } from '@/legacy/hooks/useTasks';
 import { useBoardStore } from '@/legacy/store/board/store';
 import { useEventStore } from '@/legacy/store/eventStore';
-import type { Event } from '@/legacy/types/Event';
 import type { Task } from '@/legacy/types/task';
 import { filterTodayEvents } from '@/legacy/utils/eventUtils';
 import { CountChip } from '@/shared/components/CountChip';
@@ -35,10 +36,26 @@ import { CountChip } from '@/shared/components/CountChip';
 export default function DayPlannerPage() {
   const theme = useTheme();
   const updateTask = useBoardStore(s => s.updateTask);
-  const addTask = useBoardStore(s => s.addTask);
-  const allTasks = usePlannableTasks();
-  const [inboxIds, setInboxIds] = useState<string[]>([]);
-  useEffect(() => setInboxIds(allTasks.map(t => t.id)), [allTasks]);
+
+  const [showFuture, setShowFuture] = useState<boolean>(false);
+  const [showEvents, setShowEvents] = useState<boolean>(true);
+
+  const plannedToFilter = showFuture ? null : new Date();
+
+  const allTasks = useTasks({ trashed: false, done: false, plannedTo: plannedToFilter });
+
+  const inboxTasks = useTasks({
+    trashed: false,
+    done: false,
+    plannedTo: plannedToFilter,
+    classified: false,
+  });
+  const classifiedTasks = useTasks({
+    trashed: false,
+    done: false,
+    plannedTo: plannedToFilter,
+    classified: true,
+  });
 
   const {
     isSelecting,
@@ -68,151 +85,112 @@ export default function DayPlannerPage() {
     e.preventDefault();
   }
 
-  function handleDropInbox(e: React.DragEvent<HTMLDivElement>) {
+  async function handleDropInbox(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     if (!draggingId) return;
     const task = allTasks.find(t => t.id === draggingId);
     setDraggingId(null);
     if (!task) return;
-    setInboxIds(ids => (ids.includes(task.id) ? ids : [...ids, task.id]));
-    if (task.important || task.urgent) {
-      void updateTask({
-        id: task.id,
-        important: false,
-        urgent: false,
-        updatedAt: new Date(),
-      });
-    }
+
+    await updateTask({
+      ...task,
+      classifiedDate: undefined,
+      updatedAt: new Date(),
+    });
+    playInterfaceSound('shift');
   }
 
+  // state to defer drop until user fills required fields
+  const [pendingDrop, setPendingDrop] = useState<{
+    taskId: string;
+    important: boolean;
+    urgent: boolean;
+  } | null>(null);
+
   const handleDropToQuadrant =
-    (importantVal: boolean, urgentVal: boolean) => async (
-      e: React.DragEvent<HTMLDivElement>,
-    ) => {
+    (importantVal: boolean, urgentVal: boolean) => async (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       if (!draggingId) return;
       const task = allTasks.find(t => t.id === draggingId);
       setDraggingId(null);
       if (!task) return;
-      const classified = classifyTask(task, {
-        important: importantVal,
-        urgent: urgentVal,
-      });
-      const planned = ensurePlannedDate(classified);
-      const duration = ensureDuration(classified);
+
+      // If missing required planning fields, open modal and finish later
+      const needsPlanning = !task.plannedDate || !task.estimatedTime;
+      if (needsPlanning) {
+        setPendingDrop({ taskId: task.id, important: importantVal, urgent: urgentVal });
+        playInterfaceSound('error');
+        return;
+      }
+
+      const today = new Date();
+
       await updateTask({
-        id: task.id,
+        ...task,
+        classifiedDate: today,
         important: importantVal,
         urgent: urgentVal,
-        plannedDate: planned,
-        estimatedTime: duration,
-        updatedAt: new Date(),
+        plannedDate: today,
+        updatedAt: today,
       });
-      setInboxIds(ids => ids.filter(id => id !== task.id));
+
       playInterfaceSound('shift');
     };
 
-  function handleQuickEditDate(task: Task, date: Date | null) {
-    void updateTask({ id: task.id, plannedDate: date ?? undefined, updatedAt: new Date() });
-  }
-
-  function handleQuickEditDuration(task: Task, minutes: number) {
-    void updateTask({ id: task.id, estimatedTime: minutes, updatedAt: new Date() });
-  }
-
-  function planAllForToday() {
-    const today = new Date();
-    allTasks
-      .filter(t => !t.plannedDate)
-      .forEach(t =>
-        updateTask({ id: t.id, plannedDate: today, updatedAt: new Date() }),
-      );
-  }
-
-  const [durationAnchor, setDurationAnchor] = useState<HTMLElement | null>(null);
-  const openDurationPopover = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setDurationAnchor(e.currentTarget);
-  };
-  const closeDurationPopover = () => setDurationAnchor(null);
-  function applyDefaultDuration(minutes: number) {
-    selectedIds.forEach(id =>
-      updateTask({ id, estimatedTime: minutes, updatedAt: new Date() }),
-    );
-    closeDurationPopover();
-  }
-
-  const [eventsOpen, setEventsOpen] = useState(false);
+  useEvents(startOfToday(), endOfToday());
   const events = useEventStore(s => s.events);
   const allDayEvents = filterTodayEvents(events).filter(e => e.allDay);
-  const tasks = useBoardStore(s => s.tasks);
 
-  function isEventConverted(ev: Event): boolean {
-    return tasks.some(t => t.notes?.includes(`event:${ev.id}`));
-  }
-
-  async function convertEvent(ev: Event) {
-    if (isEventConverted(ev)) return;
-    const duration = ensureDuration({ estimatedTime: undefined } as Task);
-    await addTask({
-      title: ev.title,
-      notes: ev.description ? `${ev.description}\n[event:${ev.id}]` : `[event:${ev.id}]`,
-      plannedDate: new Date(),
-      estimatedTime: duration,
-      important: false,
-      urgent: false,
-      updatedAt: new Date(),
-    });
-  }
-
-  function convertAllEvents() {
-    if (!window.confirm('Convert all all-day events?')) return;
-    allDayEvents.forEach(ev => void convertEvent(ev));
-  }
-
-  const inboxTasks = allTasks.filter(t => inboxIds.includes(t.id));
   const quadrantTasks = (important: boolean, urgent: boolean) =>
-    allTasks.filter(
-      t => !inboxIds.includes(t.id) && t.important === important && t.urgent === urgent,
-    );
+    classifiedTasks.filter(t => t.important === important && t.urgent === urgent);
+
+  const inboxCount = inboxTasks.length + (showEvents ? allDayEvents.length : 0);
 
   return (
-    <PageSection title="Daily Planner" description="Prepare your day">
-      <Stack direction="row" gap={2} mb={2} alignItems="center">
-        <Button variant="outlined" onClick={planAllForToday}>
-          Plan all for today
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={openDurationPopover}
-          disabled={!isSelecting || selectedCount === 0}
-        >
-          Set default duration
-        </Button>
-        <Button
-          variant={isSelecting ? 'contained' : 'outlined'}
-          onClick={toggleSelecting}
-        >
-          {isSelecting ? 'Cancel Selection' : 'Select Tasks'}
-        </Button>
-        <Button variant="outlined" onClick={() => setEventsOpen(true)}>
-          All-day events
-        </Button>
+    <PageSection
+      title="Daily Planner"
+      description="Plan your day, decide what matters, not just what screams for attention"
+    >
+      <Stack direction="row" gap={1} justifyContent="space-between" alignItems="center">
+        <DailyTimeLoadIndicator />
+        <TodoProgress />
       </Stack>
 
-      <Popover
-        open={Boolean(durationAnchor)}
-        anchorEl={durationAnchor}
-        onClose={closeDurationPopover}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      >
-        <Stack p={2} gap={1}>
-          {[20, 40, 60].map(min => (
-            <Button key={min} onClick={() => applyDefaultDuration(min)}>
-              {min} min
-            </Button>
-          ))}
-        </Stack>
-      </Popover>
+      <Stack direction="row" gap={2} mb={2} alignItems="center">
+        <Button variant={isSelecting ? 'contained' : 'outlined'} onClick={toggleSelecting}>
+          {isSelecting ? 'Cancel Selection' : 'Select Tasks'}
+        </Button>
+
+        <Tooltip title={showFuture ? 'Showing today and future' : 'Showing only today'}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showFuture}
+                onChange={() => setShowFuture(prev => !prev)}
+                slotProps={{
+                  input: { 'aria-label': 'Toggle future tasks' },
+                }}
+                size="small"
+              />
+            }
+            label={showFuture ? 'Future on' : 'Future off'}
+          />
+        </Tooltip>
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showEvents}
+              onChange={() => setShowEvents(prev => !prev)}
+              slotProps={{
+                input: { 'aria-label': 'Toggle all-day events' },
+              }}
+              size="small"
+            />
+          }
+          label={showEvents ? 'All-day events on' : 'All-day events off'}
+        />
+      </Stack>
 
       <Stack direction={{ mobileSm: 'column', mobileLg: 'row' }} gap={2}>
         <Paper
@@ -227,9 +205,13 @@ export default function DayPlannerPage() {
         >
           <Stack direction="row" alignItems="center" gap={1} mb={2}>
             <Typography variant="h6">Inbox</Typography>
-            <CountChip count={inboxTasks.length} color={theme.palette.primary.main} />
+            <CountChip count={inboxCount} color={theme.palette.primary.main} />
           </Stack>
           <Stack direction="row" flexWrap="wrap" gap={1.5}>
+            {showEvents &&
+              allDayEvents.map(ev => (
+                <ConvertibleEventCard key={ev.id} event={ev} disabled={isSelecting} />
+              ))}
             {inboxTasks.map(task => (
               <TaskCard
                 key={task.id}
@@ -242,8 +224,6 @@ export default function DayPlannerPage() {
                 onTaskDragStart={(_id, e) => handleDragStart(task, e)}
                 onTaskDragOver={(_id, e) => handleDragOver(e)}
                 onTaskDragEnd={handleDragEnd}
-                onQuickEditDate={handleQuickEditDate}
-                onQuickEditDuration={handleQuickEditDuration}
               />
             ))}
           </Stack>
@@ -274,8 +254,6 @@ export default function DayPlannerPage() {
                 selectable={isSelecting}
                 selectedTaskIds={selectedIds}
                 onTaskSelectChange={selectTask}
-                onQuickEditDate={handleQuickEditDate}
-                onQuickEditDuration={handleQuickEditDuration}
               />
             ),
           )}
@@ -293,37 +271,23 @@ export default function DayPlannerPage() {
         />
       )}
 
-      <Drawer anchor="right" open={eventsOpen} onClose={() => setEventsOpen(false)}>
-        <Stack p={2} gap={2} sx={{ width: { mobileSm: 280, mobileLg: 360 } }}>
-          <Typography variant="h6">Today&apos;s all-day events</Typography>
-          {allDayEvents.length === 0 ? (
-            <Typography variant="body2">No all-day events</Typography>
-          ) : (
-            <>
-              {allDayEvents.map(ev => (
-                <Stack key={ev.id} direction="row" justifyContent="space-between" gap={1}>
-                  <Stack>
-                    <Typography variant="subtitle2">{ev.title}</Typography>
-                    {ev.description && (
-                      <Typography variant="caption" color="text.secondary">
-                        {ev.description}
-                      </Typography>
-                    )}
-                  </Stack>
-                  <Button
-                    size="small"
-                    disabled={isEventConverted(ev)}
-                    onClick={() => void convertEvent(ev)}
-                  >
-                    {isEventConverted(ev) ? 'Converted' : 'Convert to Task'}
-                  </Button>
-                </Stack>
-              ))}
-              <Button onClick={convertAllEvents}>Convert all</Button>
-            </>
-          )}
-        </Stack>
-      </Drawer>
+      {/* modal used to complete required planning fields when dropping */}
+      <TaskModal
+        open={!!pendingDrop}
+        task={pendingDrop ? allTasks.find(t => t.id === pendingDrop.taskId) : undefined}
+        newProperties={
+          pendingDrop ? { important: pendingDrop.important, urgent: pendingDrop.urgent } : undefined
+        }
+        requiredFields={['title', 'plannedDate', 'estimatedTime']}
+        onCloseAction={() => setPendingDrop(null)}
+        onSaved={updated => {
+          // set classified date to today
+          const today = new Date();
+          updateTask({ ...updated, classifiedDate: today, plannedDate: today, updatedAt: today });
+          playInterfaceSound('shift');
+          setPendingDrop(null);
+        }}
+      />
     </PageSection>
   );
 }

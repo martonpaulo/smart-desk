@@ -38,4 +38,7 @@ export const interfaceSounds = {
   toggleOff: {
     id: 'ui/toggle_off',
   },
+  select: {
+    id: 'ui/keystroke_medium',
+  },
 };

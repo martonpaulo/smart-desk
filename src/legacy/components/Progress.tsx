@@ -8,12 +8,14 @@ export function TodoProgress(props: StackProps) {
   const tasksForToday = useTasks({
     plannedDate: today,
     trashed: false,
+    classified: true,
   });
 
   const completedTasks = useTasks({
     plannedDate: today,
     done: true,
     trashed: false,
+    classified: true,
   });
 
   const totalCount = tasksForToday.length;

@@ -9,6 +9,7 @@ export interface BulkTaskActions {
   daily: TaskSelectAction;
   trashed: TaskSelectAction;
   done: TaskSelectAction;
+  classified: TaskSelectAction;
   plannedDate: Date | null;
   estimatedTime: number | null;
   tagAction: TaskSelectAction;
@@ -26,6 +27,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
   const [daily, setDaily] = useState<TaskSelectAction>('none');
   const [trashed, setTrashed] = useState<TaskSelectAction>('none');
   const [done, setDone] = useState<TaskSelectAction>('none');
+  const [classified, setClassified] = useState<TaskSelectAction>('none');
   const [tagAction, setTagAction] = useState<TaskSelectAction>('none');
   const [tagId, setTagId] = useState<string>('');
   const [dateValue, setDateValue] = useState<Date | null>(null);
@@ -38,6 +40,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
     daily !== 'none' ||
     trashed !== 'none' ||
     done !== 'none' ||
+    classified !== 'none' ||
     tagAction === 'select' ||
     dateValue !== null ||
     timeValue !== null;
@@ -49,6 +52,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
     setDaily('none');
     setTrashed('none');
     setDone('none');
+    setClassified('none');
     setTagAction('none');
     setTagId('');
     setDateValue(null);
@@ -73,6 +77,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
       daily,
       trashed,
       done,
+      classified,
       plannedDate: dateValue ? new Date(dateValue) : null,
       estimatedTime: timeValue,
       tagAction,
@@ -89,6 +94,7 @@ export function useBulkTaskEdit(onApply: (actions: BulkTaskActions) => void) {
     { label: 'Daily', state: daily, setter: setDaily },
     { label: 'Trashed', state: trashed, setter: setTrashed },
     { label: 'Done', state: done, setter: setDone },
+    { label: 'Classified', state: classified, setter: setClassified },
   ] as const;
 
   return {

@@ -94,7 +94,7 @@ export default function TasksPage() {
           variant="outlined"
           columnProperties={backlogColumn}
           sx={{ width: cardWidth, mb: 1.5 }}
-          onFinishAdding={newId => setEditingTaskId(newId)}
+          onFinishAddingAction={newId => setEditingTaskId(newId)}
         />
       )}
 

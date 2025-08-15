@@ -163,9 +163,9 @@ export function TodoColumn({
 
         {!creatingId && showAddTaskInput && column.id && (
           <AddTaskInput
-            taskProperties={{ plannedDate: new Date() }}
+            taskProperties={{ plannedDate: new Date(), classifiedDate: new Date() }}
             columnProperties={column}
-            onFinishAdding={id => setCreatingId(id)}
+            onFinishAddingAction={id => setCreatingId(id)}
             variant="outlined"
           />
         )}

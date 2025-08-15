@@ -41,8 +41,6 @@ interface EisenhowerQuadrantProps {
   selectable?: boolean;
   selectedTaskIds?: Set<string>;
   onTaskSelectChange?: (id: string, selected: boolean) => void;
-  onQuickEditDate?: (task: Task, date: Date | null) => void;
-  onQuickEditDuration?: (task: Task, minutes: number) => void;
 }
 
 export function EisenhowerQuadrant({
@@ -62,8 +60,6 @@ export function EisenhowerQuadrant({
   selectable = false,
   selectedTaskIds = new Set<string>(),
   onTaskSelectChange,
-  onQuickEditDate,
-  onQuickEditDuration,
 }: EisenhowerQuadrantProps) {
   const theme = useTheme();
   const isMobile = useResponsiveness();
@@ -94,7 +90,6 @@ export function EisenhowerQuadrant({
   const examplesText = `Examples: ${examples.join(', ')}`;
 
   const bgSubtle = alpha(quadrantColor, 0.1);
-  const borderActive = `3px dashed ${quadrantColor}`; // old drag border
   const helperTextColor = alpha(darken(quadrantColor, 0.4), 0.7);
 
   return (
@@ -113,10 +108,10 @@ export function EisenhowerQuadrant({
           minHeight: { mobileSm: 220, mobileLg: 320 },
           boxShadow: 1,
           borderRadius: theme.shape.borderRadius,
-          boxSizing: 'border-box',
-          border: isDragInProgress ? borderActive : '1px solid',
+          outline: isDragInProgress ? `3px dashed ${quadrantColor}` : '1px solid',
+          outlineOffset: isDragInProgress ? '-2px' : '0',
           // keep the solid divider only when not dragging
-          borderColor: isDragInProgress ? undefined : 'divider',
+          outlineColor: isDragInProgress ? undefined : 'divider',
           position: 'relative',
           '& *': { WebkitTapHighlightColor: 'transparent' },
         }}
@@ -207,7 +202,6 @@ export function EisenhowerQuadrant({
                 hasDefaultWidth={false}
                 task={task}
                 color={quadrantColor}
-                eisenhowerIcons={false}
                 showActions={!isDragInProgress && !selectable}
                 selectable={selectable}
                 selected={selectedTaskIds.has(task.id)}
@@ -215,8 +209,6 @@ export function EisenhowerQuadrant({
                 onTaskDragStart={(_id, e) => onTaskDragStart(task, e)}
                 onTaskDragOver={(_id, e) => onTaskDragOver(e)}
                 onTaskDragEnd={onTaskDragEnd}
-                onQuickEditDate={onQuickEditDate}
-                onQuickEditDuration={onQuickEditDuration}
               />
             ))
           )}
@@ -255,7 +247,7 @@ export function EisenhowerQuadrant({
 
       <TaskModal
         open={openTaskModal}
-        newProperties={{ important, urgent }}
+        newProperties={{ important, urgent, plannedDate: new Date() }}
         onCloseAction={() => setOpenTaskModal(false)}
       />
     </>

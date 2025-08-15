@@ -18,7 +18,7 @@ export const SYNC_FEATURES: readonly FeatureDef[] = [
   },
   {
     key: 'events',
-    routes: ['/calendar', '/locations'],
+    routes: ['/calendar', '/locations', '/planner'],
     exportName: 'useLocalEventsStore',
     interval: SyncInterval.HIGH,
     loader: () => import('@/features/event/store/useLocalEventsStore'),
@@ -46,7 +46,7 @@ export const SYNC_FEATURES: readonly FeatureDef[] = [
   },
   {
     key: 'tags',
-    routes: ['/tags'],
+    routes: ['/tags', '/planner'],
     exportName: 'useTagsStore',
     interval: SyncInterval.LOW,
     loader: () => import('@/features/tag/store/useTagsStore'),

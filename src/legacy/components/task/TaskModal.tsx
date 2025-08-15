@@ -2,20 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  Chip,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-} from '@mui/material';
+import { Chip, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
-import { TagLabel } from '@/features/tag/components/TagLabel';
-import { useTagsStore } from '@/features/tag/store/useTagsStore';
+import { SelectTag } from '@/features/tag/components/SelectTag';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { useBoardStore } from '@/legacy/store/board/store';
 import { Task } from '@/legacy/types/task';
@@ -44,16 +33,24 @@ type TaskModalProps = {
   newProperties?: Partial<Task>; // extra props for new tasks
   open: boolean;
   onCloseAction: () => void;
+  //  which fields are required to enable Save. Defaults to ['title']
+  requiredFields?: Array<keyof TaskForm>;
+  /** NEW: called after save succeeds, with the updated task */
+  onSaved?: (updated: Task) => void;
 };
 
-export function TaskModal({ task, open, onCloseAction, newProperties }: TaskModalProps) {
+export function TaskModal({
+  task,
+  open,
+  onCloseAction,
+  newProperties,
+  requiredFields = ['title'],
+  onSaved,
+}: TaskModalProps) {
   const isMobile = useResponsiveness();
 
   const addTask = useBoardStore(s => s.addTask);
   const updateTask = useBoardStore(s => s.updateTask);
-
-  const allTags = useTagsStore(s => s.items);
-  const tags = allTags.filter(t => !t.trashed).sort((a, b) => a.name.localeCompare(b.name));
 
   const makeInitialForm = useCallback((): TaskForm => {
     const base: TaskForm = {
@@ -70,7 +67,6 @@ export function TaskModal({ task, open, onCloseAction, newProperties }: TaskModa
       tagId: task?.tagId ?? newProperties?.tagId,
       ...newProperties,
     };
-    // ensure consistency
     if (!base.useQuantity) base.quantityTarget = 1;
     return base;
   }, [task, newProperties]);
@@ -88,7 +84,7 @@ export function TaskModal({ task, open, onCloseAction, newProperties }: TaskModa
   const isDirty = useMemo(() => {
     const a = form;
     const b = initialRef.current;
-    if (!task) return true; // new task considered dirty so Save is enabled when valid
+    if (!task) return true;
     return (
       a.title.trim() !== b.title.trim() ||
       a.notes.trim() !== b.notes.trim() ||
@@ -104,7 +100,26 @@ export function TaskModal({ task, open, onCloseAction, newProperties }: TaskModa
     );
   }, [form, task]);
 
-  const isValid = form.title.trim().length > 0;
+  const isFieldFilled = useCallback(
+    (key: keyof TaskForm): boolean => {
+      const v = form[key];
+      if (typeof v === 'string') return v.trim().length > 0;
+      if (typeof v === 'number') return Number.isFinite(v);
+      if (typeof v === 'boolean') return true;
+      if (v instanceof Date) return !Number.isNaN(v.getTime());
+      if (key === 'plannedDate') return !!form.plannedDate;
+      if (key === 'estimatedTime') return typeof form.estimatedTime === 'number';
+      if (key === 'tagId') return !!form.tagId;
+      if (key === 'quantityTarget') return form.useQuantity ? form.quantityTarget >= 1 : true;
+      if (key === 'notes') return form.notes.trim().length > 0;
+      return v !== undefined && v !== null;
+    },
+    [form],
+  );
+
+  const isValid = useMemo(() => {
+    return requiredFields.every(isFieldFilled);
+  }, [requiredFields, isFieldFilled]);
 
   const handleSave = async () => {
     const payload: Partial<Task> = {
@@ -121,10 +136,21 @@ export function TaskModal({ task, open, onCloseAction, newProperties }: TaskModa
       tagId: form.tagId,
     };
 
+    const now = new Date();
+
     if (task?.id) {
-      await updateTask({ ...payload, id: task.id, updatedAt: new Date() } as Task);
+      const updatedTask: Task = {
+        ...task,
+        ...payload,
+        updatedAt: now,
+      };
+      await updateTask(updatedTask);
+      onSaved?.(updatedTask);
     } else {
-      await addTask({ ...payload, updatedAt: new Date() } as Task);
+      const taskToCreate = { ...payload, updatedAt: now } as Task;
+      const createdId = await addTask(taskToCreate);
+      const created: Task = { ...taskToCreate, id: createdId };
+      onSaved?.(created);
     }
   };
 
@@ -178,7 +204,7 @@ export function TaskModal({ task, open, onCloseAction, newProperties }: TaskModa
           placeholder="not set"
           onValueChange={v => v !== null && setForm(f => ({ ...f, estimatedTime: v }))}
           step={20}
-          minValue={1}
+          minValue={0}
           maxValue={480}
           formatFn={formatDuration}
           parseFn={parseDuration}
@@ -211,28 +237,7 @@ export function TaskModal({ task, open, onCloseAction, newProperties }: TaskModa
           </ToggleButton>
         </ToggleButtonGroup>
 
-        <FormControl size="small" fullWidth>
-          <InputLabel>Tag</InputLabel>
-          <Select
-            label="Tag"
-            value={form.tagId ?? ''}
-            onChange={(e: SelectChangeEvent<string>) =>
-              setForm(prev => ({ ...prev, tagId: e.target.value || undefined }))
-            }
-            renderValue={val => {
-              if (!val) return 'No tag';
-              const tag = tags.find(t => t.id === val);
-              return tag ? <TagLabel tag={tag} /> : 'No tag';
-            }}
-          >
-            <MenuItem value="">No tag</MenuItem>
-            {tags.map(t => (
-              <MenuItem key={t.id} value={t.id}>
-                <TagLabel tag={t} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <SelectTag tagId={form.tagId} onChange={tagId => setForm(prev => ({ ...prev, tagId }))} />
       </Stack>
 
       {/* Row 3: Quantity */}

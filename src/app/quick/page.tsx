@@ -40,7 +40,12 @@ export default function QuickList() {
   const cardWidth = isMobile ? '100%' : '250px';
 
   // Today’s not-done tasks
-  const tasks = useTasks({ plannedDate: new Date(), trashed: false, done: false }) as Task[];
+  const tasks = useTasks({
+    plannedDate: new Date(),
+    trashed: false,
+    done: false,
+    classified: true,
+  }) as Task[];
 
   // Columns from config, sorted
   const allColumns: Column[] = useMemo(() => {
@@ -96,9 +101,9 @@ export default function QuickList() {
     <PageSection title="Quick List" hideDescription>
       <AddTaskInput
         variant="outlined"
-        taskProperties={{ plannedDate: new Date() }}
+        taskProperties={{ plannedDate: new Date(), classifiedDate: new Date() }}
         sx={{ width: cardWidth }}
-        onFinishAdding={newId => setEditingTaskId(newId)}
+        onFinishAddingAction={newId => setEditingTaskId(newId)}
       />
 
       {/* Toolbar */}

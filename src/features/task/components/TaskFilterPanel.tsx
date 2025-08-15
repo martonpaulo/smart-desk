@@ -74,7 +74,9 @@ export function TaskFilterPanel({ filters, onFilterChangeAction }: TaskFilterPan
     const list: string[] = [];
     if (local.title) list.push(`Title: "${local.title}"`);
     if (local.plannedDate) list.push(`Date: ${local.plannedDate.toLocaleDateString()}`);
-    (['important', 'urgent', 'blocked', 'done', 'daily', 'trashed'] as TriKey[]).forEach(k => {
+    (
+      ['important', 'urgent', 'blocked', 'done', 'daily', 'trashed', 'classified'] as TriKey[]
+    ).forEach(k => {
       const v = local[k];
       if (v != null) list.push(`${capitalize(k)}: ${v ? 'Yes' : 'No'}`);
     });
@@ -187,6 +189,12 @@ export function TaskFilterPanel({ filters, onFilterChangeAction }: TaskFilterPan
               label="Trashed"
               value={local.trashed}
               onChange={onTri('trashed')}
+              isMobile={isMobile}
+            />
+            <TriStateSelect
+              label="Classified"
+              value={local.classified}
+              onChange={onTri('classified')}
               isMobile={isMobile}
             />
 

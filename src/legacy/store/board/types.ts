@@ -34,6 +34,7 @@ export interface AddTaskData {
   urgent?: boolean;
   quantityTarget?: number;
   daily?: boolean;
+  classifiedDate?: Date;
   columnId?: string;
   tagId?: string;
   updatedAt: Date;
@@ -61,6 +62,7 @@ export interface UpdateTaskData {
   estimatedTime?: number;
   daily?: boolean;
   position?: number;
+  classifiedDate?: Date;
   columnId?: string;
   tagId?: string;
   trashed?: boolean;

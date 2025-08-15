@@ -2,7 +2,6 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BoltIcon from '@mui/icons-material/Bolt';
 import BuildIcon from '@mui/icons-material/Build';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import HomeIcon from '@mui/icons-material/Home';
 import ImageIcon from '@mui/icons-material/Image';
 import TagsIcon from '@mui/icons-material/LocalOffer';
@@ -11,13 +10,14 @@ import NotesIcon from '@mui/icons-material/Notes';
 import PlaceIcon from '@mui/icons-material/Place';
 import SettingsIcon from '@mui/icons-material/Settings';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 
 export const routes = {
   primary: [
     { label: 'Board', href: '/', icon: <HomeIcon />, showOnMobile: true },
     { label: 'Quick List', href: '/quick', icon: <BoltIcon />, showOnMobile: true },
     { label: 'All Tasks', href: '/tasks', icon: <TaskAltIcon />, showOnMobile: true },
-    { label: 'Matrix', href: '/matrix', icon: <DashboardIcon />, showOnMobile: true },
+    { label: 'Planner', href: '/planner', icon: <ViewTimelineIcon />, showOnMobile: true },
     { label: 'Calendar', href: '/calendar', icon: <CalendarTodayIcon />, showOnMobile: true },
     { label: 'Gallery', href: '/gallery', icon: <ImageIcon />, showOnMobile: true },
     { label: 'Maps', href: '/maps', icon: <MapIcon />, showOnMobile: true },

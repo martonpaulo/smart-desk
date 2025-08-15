@@ -14,6 +14,7 @@ create table if not exists public.tasks (
   quantity_target integer not null default 1,
   daily boolean not null default false,
   position float not null default 0,
+  classified_date timestamptz default null,
   column_id uuid references columns(id) not null,
   tag_id uuid references tags(id) default null,
   trashed boolean not null default false,

@@ -4,6 +4,10 @@ export interface TaskFilters {
   urgent?: boolean | null;
   blocked?: boolean | null;
   plannedDate?: Date | null;
+  plannedFrom?: Date | null;
+  plannedTo?: Date | null;
+  plannedMode?: 'include' | 'exclude' | 'only' | null;
+  classified?: boolean | null;
   done?: boolean | null;
   daily?: boolean | null;
   trashed?: boolean | null;

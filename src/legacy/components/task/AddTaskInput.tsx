@@ -15,13 +15,13 @@ import { Task } from '@/legacy/types/task';
 interface AddTaskInputProps extends TextFieldProps<'outlined'> {
   taskProperties?: Partial<Task>;
   columnProperties?: Partial<Column>;
-  onFinishAdding: (taskId: string) => void;
+  onFinishAddingAction: (taskId: string) => void;
 }
 
 export function AddTaskInput({
   taskProperties,
   columnProperties,
-  onFinishAdding,
+  onFinishAddingAction,
   variant = 'outlined',
   placeholder = 'Add a task…',
   disabled,
@@ -45,7 +45,7 @@ export function AddTaskInput({
         updatedAt: new Date(),
         ...taskProperties,
       });
-      onFinishAdding(id);
+      onFinishAddingAction(id);
     } finally {
       setCreating(false);
       setTimeout(() => {

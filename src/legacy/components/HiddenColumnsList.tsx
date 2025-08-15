@@ -22,7 +22,7 @@ export function HiddenColumnsList() {
   const columns = useBoardStore(state => state.columns);
   const hiddenIds = useTodoPrefsStore(state => state.hiddenColumnIds);
   const toggleHidden = useTodoPrefsStore(state => state.toggleHiddenColumn);
-  const tasks = useTasks({ plannedDate: new Date(), trashed: false });
+  const tasks = useTasks({ plannedDate: new Date(), trashed: false, classified: true });
 
   const taskCountByColumn = tasks.reduce(
     (acc, task) => {

@@ -12,6 +12,7 @@ export interface Task extends Base {
   quantityTarget: number;
   daily: boolean;
   position: number;
+  classifiedDate?: Date;
   columnId: string;
   tagId?: string;
 }

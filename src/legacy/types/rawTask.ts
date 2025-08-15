@@ -8,6 +8,7 @@ export interface RawTask extends RawBase {
   blocked: boolean;
   estimated_time: number | null;
   planned_date: string | null;
+  classified_date: string | null;
   quantity_done: number;
   quantity_target: number;
   daily: boolean;

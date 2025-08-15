@@ -39,7 +39,7 @@ export function TodoList({ showDate }: TodoListProps) {
 
   const syncStatus = mapSyncStatusFromStore(syncStatusFromStore);
 
-  const tasks = useTasks({ plannedDate: new Date(), trashed: false });
+  const tasks = useTasks({ plannedDate: new Date(), trashed: false, classified: true });
 
   // store selectors
   const columns = useBoardStore(s => s.columns);

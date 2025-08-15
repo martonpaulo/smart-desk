@@ -1,25 +1,9 @@
 import { useSnackbar } from 'notistack';
 
-import type { TaskSelectAction } from '@/features/task/types/TaskSelectAction';
+import { BulkTaskActions } from '@/features/task/hooks/useBulkTaskEdit';
 import { useTaskSelection } from '@/legacy/hooks/useTaskSelection';
 import { useBoardStore } from '@/legacy/store/board/store';
 import type { Task } from '@/legacy/types/task';
-
-/**
- * Describes the actions to apply in bulk
- */
-export interface BulkTaskActions {
-  important: TaskSelectAction;
-  urgent: TaskSelectAction;
-  blocked: TaskSelectAction;
-  daily: TaskSelectAction;
-  trashed: TaskSelectAction;
-  done: TaskSelectAction;
-  plannedDate: Date | null;
-  estimatedTime: number | null;
-  tagAction: TaskSelectAction;
-  tagId: string | null;
-}
 
 /**
  * Encapsulates selection state and batch‑update handler
@@ -91,6 +75,9 @@ export function useBulkTaskSelection(tasks: Task[]) {
 
       if (actions.done === 'set') change.quantityDone = task.quantityTarget;
       if (actions.done === 'clear') change.quantityDone = 0;
+
+      if (actions.classified === 'set') change.classifiedDate = nowDate;
+      if (actions.classified === 'clear') change.classifiedDate = undefined;
 
       change.plannedDate = actions.plannedDate ?? undefined;
       change.estimatedTime = actions.estimatedTime ?? undefined;
