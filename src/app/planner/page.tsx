@@ -1,30 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import {
-  Button,
-  Paper,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Paper, Stack, Typography, useTheme } from '@mui/material';
 import { endOfToday, isToday, startOfToday } from 'date-fns';
 
 import { PageSection } from '@/core/components/PageSection';
+import { InboxSection } from '@/features/eisenhower/components/InboxSection';
+import { PendingDropModal } from '@/features/eisenhower/components/PendingDropModal';
+import { PlannerControls } from '@/features/eisenhower/components/PlannerControl';
+import { QuadrantGrid } from '@/features/eisenhower/components/QuadrantGrid';
 import { eisenhowerQuadrants } from '@/features/eisenhower/config/eisenhowerQuadrants';
-import { ConvertibleEventCard } from '@/features/event/components/ConvertibleEventCard';
+import { useDragState } from '@/features/eisenhower/hooks/useDragState';
+import { EventConversionModal } from '@/features/event/components/EventConversionModal';
 import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
 import { useBulkTaskSelection } from '@/features/task/hooks/useBulkTaskSelection';
 import { DailyTimeLoadIndicator } from '@/legacy/components/DailyTimeLoadIndicator';
-import { EisenhowerQuadrant } from '@/legacy/components/EisenhowerQuadrant';
 import { TodoProgress } from '@/legacy/components/Progress';
-import { TaskCard } from '@/legacy/components/task/TaskCard';
-import { TaskModal } from '@/legacy/components/task/TaskModal';
-import { TaskSelectionToolbar } from '@/legacy/components/TaskSelectionToolbar';
 import { useEvents } from '@/legacy/hooks/useEvents';
 import { useTasks } from '@/legacy/hooks/useTasks';
 import { useBoardStore } from '@/legacy/store/board/store';
@@ -34,7 +26,11 @@ import type { Task } from '@/legacy/types/task';
 import { filterTodayEvents } from '@/legacy/utils/eventUtils';
 import { CountChip } from '@/shared/components/CountChip';
 
-type DragKind = 'task' | 'event' | null;
+type PendingDrop = {
+  taskId: string;
+  important: boolean;
+  urgent: boolean;
+};
 
 export default function DayPlannerPage() {
   const theme = useTheme();
@@ -43,13 +39,15 @@ export default function DayPlannerPage() {
   const [showFuture, setShowFuture] = useState<boolean>(false);
   const [showEvents, setShowEvents] = useState<boolean>(true);
 
+  // computed plannedTo filter for today vs today+future
   const plannedToFilter = showFuture ? null : new Date();
 
+  // core task queries
   const allTasks = useTasks({ trashed: false, done: false, plannedTo: plannedToFilter });
 
   const isClassified = (task: Task) => {
     if (!task.classifiedDate) return false;
-    return !isToday(task.classifiedDate);
+    return isToday(task.classifiedDate);
   };
 
   const inboxTasks = useTasks({
@@ -58,6 +56,7 @@ export default function DayPlannerPage() {
     plannedTo: plannedToFilter,
     classified: false,
   });
+
   const classifiedTasks = useTasks({
     trashed: false,
     done: false,
@@ -65,44 +64,25 @@ export default function DayPlannerPage() {
     classified: true,
   });
 
+  // selection state
+  const { isSelecting, selectedIds, toggleSelecting, selectTask } = useBulkTaskSelection(allTasks);
+
+  // drag state
   const {
-    isSelecting,
-    selectedIds,
-    toggleSelecting,
-    selectedCount,
-    selectTask,
-    totalCount,
-    handleSelectAll,
-    handleDeselectAll,
-    handleCancel,
-    handleApply,
-  } = useBulkTaskSelection(allTasks);
+    draggingId,
+    draggingKind,
+    beginDragTask,
+    beginDragEvent,
+    endDrag,
+    dragOverPreventDefault,
+  } = useDragState();
 
-  // track dragging source
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [draggingKind, setDraggingKind] = useState<DragKind>(null);
-
-  function handleDragStart(task: Task, e: React.DragEvent<HTMLDivElement>) {
-    e.dataTransfer.effectAllowed = 'move';
-    setDraggingId(task.id);
-    setDraggingKind('task');
-  }
-
-  function handleDragEnd() {
-    setDraggingId(null);
-    setDraggingKind(null);
-  }
-
-  function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-  }
-
+  // drop on inbox clears classification if it was classified today
   async function handleDropInbox(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     if (!draggingId || draggingKind !== 'task') return;
     const task = allTasks.find(t => t.id === draggingId);
-    setDraggingId(null);
-    setDraggingKind(null);
+    endDrag();
     if (!task) return;
 
     if (!isClassified(task)) {
@@ -118,30 +98,26 @@ export default function DayPlannerPage() {
     playInterfaceSound('shift');
   }
 
-  // state to defer drop until user fills required fields (for tasks)
-  const [pendingDrop, setPendingDrop] = useState<{
-    taskId: string;
-    important: boolean;
-    urgent: boolean;
-  } | null>(null);
+  // pending drop when task lacks required planning fields
+  const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
 
-  // state to open modal for event → task conversion
+  // event to task modal prefill
   const [eventConversionTask, setEventConversionTask] = useState<Partial<Task> | null>(null);
 
+  // drop handler factory to route task or event drops
   const handleDropToQuadrant =
     (importantVal: boolean, urgentVal: boolean) => async (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       if (!draggingId || !draggingKind) return;
 
-      // Dropping an EVENT → open TaskModal prefilled, keep same id, then classify on save
       if (draggingKind === 'event') {
-        const eventsState = useEventStore.getState().events as Event[];
-        const ev = eventsState.find(x => x.id === draggingId);
-        setDraggingId(null);
-        setDraggingKind(null);
+        const ev = useEventStore.getState().events.find(x => x.id === draggingId) as
+          | Event
+          | undefined;
+        endDrag();
         if (!ev) return;
 
-        // minimal, safe defaults, keep same id
+        // minimal defaults, keep same id flow via eventId
         const draftTask: Partial<Task> = {
           eventId: ev.id,
           title: ev.title || 'Untitled Event',
@@ -156,17 +132,17 @@ export default function DayPlannerPage() {
         return;
       }
 
-      // Dropping a TASK → existing behavior with required checks
       const task = allTasks.find(t => t.id === draggingId);
-      setDraggingId(null);
-      setDraggingKind(null);
+      endDrag();
       if (!task) return;
 
+      // no-op if class stays the same
       if (isClassified(task) && importantVal === task.important && urgentVal === task.urgent) {
         playInterfaceSound('snap');
         return;
       }
 
+      // require plannedDate and estimatedTime before classify
       const needsPlanning = !task.plannedDate || !task.estimatedTime;
       if (needsPlanning) {
         setPendingDrop({ taskId: task.id, important: importantVal, urgent: urgentVal });
@@ -188,12 +164,18 @@ export default function DayPlannerPage() {
       playInterfaceSound('shift');
     };
 
+  // events loading and filtered all day list
   useEvents(startOfToday(), endOfToday());
   const events = useEventStore(s => s.events);
-  const allDayEvents = filterTodayEvents(events)
-    .filter(e => e.allDay)
-    .filter(e => !allTasks.find(t => t.eventId === e.id));
+  const allDayEvents = useMemo(
+    () =>
+      filterTodayEvents(events)
+        .filter(e => e.allDay)
+        .filter(e => !allTasks.find(t => t.eventId === e.id)),
+    [events, allTasks],
+  );
 
+  // quadrant tasks selector
   const quadrantTasks = (important: boolean, urgent: boolean) =>
     classifiedTasks.filter(t => t.important === important && t.urgent === urgent);
 
@@ -202,53 +184,34 @@ export default function DayPlannerPage() {
   return (
     <PageSection
       title="Daily Planner"
-      description="Plan your day, decide what matters, not just what screams for attention"
+      description="Decide what matters, not what screams"
       hideTitle
       hideDescription
     >
-      <Stack direction="row" gap={2} mb={2} alignItems="center" justifyContent="space-between">
-        <Stack gap={2} direction="row" alignItems="center">
-          <Button variant={isSelecting ? 'contained' : 'outlined'} onClick={toggleSelecting}>
-            {isSelecting ? 'Cancel Selection' : 'Select Tasks'}
-          </Button>
-
-          <ToggleButtonGroup
-            size="small"
-            value={[showFuture ? 'future' : null, showEvents ? 'events' : null].filter(Boolean)}
-            onChange={(_, newValues) => {
-              setShowFuture(newValues.includes('future'));
-              setShowEvents(newValues.includes('events'));
-            }}
-            color="secondary"
-          >
-            <Tooltip title={showFuture ? 'Showing today and future' : 'Showing only today'}>
-              <ToggleButton value="future" aria-label="Toggle future tasks">
-                {showFuture ? 'Include Upcoming' : 'Hide Upcoming'}
-              </ToggleButton>
-            </Tooltip>
-
-            <Tooltip title={showEvents ? 'Showing all-day events' : 'Hiding all-day events'}>
-              <ToggleButton value="events" aria-label="Toggle all-day events">
-                {showEvents ? 'Include Events' : 'Hide Events'}
-              </ToggleButton>
-            </Tooltip>
-          </ToggleButtonGroup>
-        </Stack>
-
-        <Stack direction="row" gap={2} justifyContent="space-between" alignItems="center">
-          <DailyTimeLoadIndicator />
-          <TodoProgress />
-        </Stack>
-      </Stack>
+      <PlannerControls
+        isSelecting={isSelecting}
+        toggleSelectingAction={toggleSelecting}
+        showFuture={showFuture}
+        setShowFutureAction={setShowFuture}
+        showEvents={showEvents}
+        setShowEventsAction={setShowEvents}
+        rightSlot={
+          <Stack direction="row" gap={2} alignItems="center">
+            <DailyTimeLoadIndicator />
+            <TodoProgress />
+          </Stack>
+        }
+      />
 
       <Stack
         display="grid"
         gap={2}
         sx={{ gridTemplateColumns: { mobileSm: '1fr', mobileLg: '1fr 4fr' } }}
       >
+        {/* Inbox column */}
         <Paper
           component="section"
-          onDragOver={handleDragOver}
+          onDragOver={dragOverPreventDefault}
           onDrop={handleDropInbox}
           sx={{
             p: { mobileSm: 1.5, mobileLg: 2 },
@@ -256,7 +219,7 @@ export default function DayPlannerPage() {
             boxShadow: 1,
             borderRadius: theme.shape.borderRadius,
             outline: '1px solid',
-            outlineOffset: '0',
+            outlineOffset: 0,
             outlineColor: 'divider',
             position: 'relative',
             '& *': { WebkitTapHighlightColor: 'transparent' },
@@ -267,122 +230,58 @@ export default function DayPlannerPage() {
             <CountChip count={inboxCount} color={theme.palette.primary.main} />
           </Stack>
 
-          <Stack direction="row" flexWrap="wrap" gap={1.5}>
-            {showEvents &&
-              allDayEvents.map(ev => (
-                <ConvertibleEventCard
-                  key={ev.id}
-                  event={ev}
-                  disabled={isSelecting}
-                  // wire event drag into the same DnD pipeline, but mark kind as 'event'
-                  onTaskDragStart={(id, e) => {
-                    e.dataTransfer.effectAllowed = 'move';
-                    setDraggingId(id);
-                    setDraggingKind('event');
-                  }}
-                  onTaskDragOver={(_id, e) => handleDragOver(e)}
-                  onTaskDragEnd={() => {
-                    setDraggingId(null);
-                    setDraggingKind(null);
-                  }}
-                />
-              ))}
-
-            {inboxTasks.map(task => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                hasDefaultWidth={false}
-                color={theme.palette.primary.main}
-                showActions={!isSelecting}
-                selectable={isSelecting}
-                selected={selectedIds.has(task.id)}
-                onSelectChange={selectTask}
-                onTaskDragStart={(_id, e) => handleDragStart(task, e)}
-                onTaskDragOver={(_id, e) => handleDragOver(e)}
-                onTaskDragEnd={handleDragEnd}
-              />
-            ))}
-          </Stack>
+          <InboxSection
+            showEvents={showEvents}
+            events={allDayEvents}
+            tasks={inboxTasks}
+            isSelecting={isSelecting}
+            selectedIds={selectedIds}
+            onSelectChangeAction={selectTask}
+            onEventDragStartAction={beginDragEvent}
+            onEventDragOverAction={dragOverPreventDefault}
+            onEventDragEndAction={endDrag}
+            onTaskDragStartAction={beginDragTask}
+            onTaskDragOverAction={dragOverPreventDefault}
+            onTaskDragEndAction={endDrag}
+          />
         </Paper>
 
-        <Stack
-          display="grid"
-          gap={2}
-          height="85vh"
-          sx={{
-            gridTemplateColumns: { mobileSm: '1fr', mobileLg: '1fr 1fr' },
-            gridTemplateRows: { mobileSm: 'repeat(2, 1fr)', mobileLg: '1fr' },
-          }}
-        >
-          {eisenhowerQuadrants.map(
-            ({ title, color, important, urgent, questions, examples, action }) => (
-              <EisenhowerQuadrant
-                key={`${important}-${urgent}`}
-                title={title}
-                tasks={quadrantTasks(important, urgent)}
-                questions={questions}
-                examples={examples}
-                action={action}
-                quadrantColor={color}
-                important={important}
-                urgent={urgent}
-                isDragInProgress={!!draggingId}
-                onTaskDragStart={handleDragStart}
-                onTaskDragOver={handleDragOver}
-                onTaskDragEnd={handleDragEnd}
-                onTaskDrop={handleDropToQuadrant(important, urgent)}
-                selectable={isSelecting}
-                selectedTaskIds={selectedIds}
-                onTaskSelectChange={selectTask}
-              />
-            ),
-          )}
-        </Stack>
+        {/* Quadrants grid */}
+        <QuadrantGrid
+          quadrants={eisenhowerQuadrants}
+          getTasksAction={quadrantTasks}
+          isDragInProgress={!!draggingId}
+          onTaskDragStartAction={beginDragTask}
+          onTaskDragOverAction={dragOverPreventDefault}
+          onTaskDragEndAction={endDrag}
+          onTaskDropFactoryAction={handleDropToQuadrant}
+          selectedIds={selectedIds}
+          selectable={isSelecting}
+          onTaskSelectChangeAction={selectTask}
+        />
       </Stack>
 
-      {isSelecting && (
-        <TaskSelectionToolbar
-          totalCount={totalCount}
-          selectedCount={selectedCount}
-          onSelectAll={handleSelectAll}
-          onDeselectAll={handleDeselectAll}
-          onApply={handleApply}
-          onCancel={handleCancel}
-        />
-      )}
-
-      {/* existing modal for completing required planning fields when dropping a TASK */}
-      <TaskModal
+      <PendingDropModal
         open={!!pendingDrop}
-        task={pendingDrop ? allTasks.find(t => t.id === pendingDrop.taskId) : undefined}
-        newProperties={
-          pendingDrop ? { important: pendingDrop.important, urgent: pendingDrop.urgent } : undefined
-        }
-        requiredFields={['title', 'plannedDate', 'estimatedTime']}
+        taskId={pendingDrop?.taskId}
+        important={pendingDrop?.important}
+        urgent={pendingDrop?.urgent}
         onCloseAction={() => setPendingDrop(null)}
-        onSaved={updated => {
-          // set classified date to today
+        onSavedAction={updated => {
           const today = new Date();
           updateTask({ ...updated, classifiedDate: today, plannedDate: today, updatedAt: today });
           playInterfaceSound('shift');
           setPendingDrop(null);
         }}
+        tasks={allTasks}
       />
 
-      {/* modal to convert EVENT → TASK with same id */}
-      <TaskModal
+      <EventConversionModal
         open={!!eventConversionTask}
-        requiredFields={['title', 'plannedDate', 'estimatedTime']}
-        newProperties={{
-          ...eventConversionTask,
-          important: eventConversionTask?.important,
-          urgent: eventConversionTask?.urgent,
-        }}
+        draft={eventConversionTask}
         onCloseAction={() => setEventConversionTask(null)}
-        onSaved={saved => {
+        onSavedAction={saved => {
           const today = new Date();
-          // finalize classification on save
           updateTask({
             ...saved,
             important: saved.important,
@@ -390,7 +289,6 @@ export default function DayPlannerPage() {
             classifiedDate: today,
             updatedAt: today,
           });
-          // hide the original event in UI
           setEventConversionTask(null);
           playInterfaceSound('shift');
         }}
