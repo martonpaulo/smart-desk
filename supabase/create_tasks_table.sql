@@ -16,6 +16,7 @@ create table if not exists public.tasks (
   position float not null default 0,
   classified_date timestamptz default null,
   column_id uuid references columns(id) not null,
+  event_id text default null,
   tag_id uuid references tags(id) default null,
   trashed boolean not null default false,
   updated_at timestamptz not null default now(),

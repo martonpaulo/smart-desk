@@ -30,7 +30,6 @@ import { TodoProgress } from '@/legacy/components/Progress';
 import { UndoSnackbar } from '@/legacy/components/UndoSnackbar';
 import { useEvents } from '@/legacy/hooks/useEvents';
 import { useLocation } from '@/legacy/hooks/useLocation';
-import { useProcessEventsColumn } from '@/legacy/hooks/useProcessEventsColumn';
 import { useWeather } from '@/legacy/hooks/useWeather';
 import { useAudioStore } from '@/legacy/store/audioStore';
 import { useEventStore } from '@/legacy/store/eventStore';
@@ -44,9 +43,6 @@ export default function BoardPage() {
 
   // Fetch events when visiting the board so data is available without opening the account page
   useEvents();
-
-  // create tasks from all-day events once per day
-  useProcessEventsColumn();
 
   const setAlertAcknowledged = useEventStore(state => state.setAlertAcknowledged);
   const isMeetingAlertEnabled = useAudioStore(state => state.meetingAlertEnabled);

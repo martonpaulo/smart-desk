@@ -14,5 +14,6 @@ export interface RawTask extends RawBase {
   daily: boolean;
   position: number;
   column_id: string;
+  event_id: string | null;
   tag_id: string | null;
 }

@@ -37,6 +37,7 @@ export interface AddTaskData {
   classifiedDate?: Date;
   columnId?: string;
   tagId?: string;
+  eventId?: string;
   updatedAt: Date;
 }
 
@@ -65,6 +66,7 @@ export interface UpdateTaskData {
   classifiedDate?: Date;
   columnId?: string;
   tagId?: string;
+  eventId?: string;
   trashed?: boolean;
   updatedAt: Date;
 }

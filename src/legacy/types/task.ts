@@ -14,5 +14,6 @@ export interface Task extends Base {
   position: number;
   classifiedDate?: Date;
   columnId: string;
+  eventId?: string;
   tagId?: string;
 }

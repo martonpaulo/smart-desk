@@ -25,6 +25,7 @@ type TaskForm = {
   blocked: boolean;
   plannedDate?: Date;
   estimatedTime?: number;
+  eventId?: string;
   tagId?: string;
 };
 
@@ -65,6 +66,7 @@ export function TaskModal({
       plannedDate: task?.plannedDate ? new Date(task.plannedDate) : undefined,
       estimatedTime: task?.estimatedTime ?? undefined,
       tagId: task?.tagId ?? newProperties?.tagId,
+      eventId: task?.eventId ?? newProperties?.eventId,
       ...newProperties,
     };
     if (!base.useQuantity) base.quantityTarget = 1;
@@ -134,6 +136,7 @@ export function TaskModal({
       plannedDate: form.plannedDate ? new Date(form.plannedDate) : undefined,
       estimatedTime: form.estimatedTime,
       tagId: form.tagId,
+      eventId: form.eventId,
     };
 
     const now = new Date();

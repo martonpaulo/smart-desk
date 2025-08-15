@@ -201,6 +201,7 @@ export function EisenhowerQuadrant({
                 key={task.id}
                 hasDefaultWidth={false}
                 task={task}
+                eisenhowerIcons={false}
                 color={quadrantColor}
                 showActions={!isDragInProgress && !selectable}
                 selectable={selectable}
