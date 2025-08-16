@@ -28,7 +28,7 @@ export function useIcsEvents(start?: Date, end?: Date) {
     refetchInterval: FETCH_INTERVAL_MS,
     placeholderData: keepPreviousData,
     structuralSharing: true,
-    gcTime: GC_TIME_MS, // NEW
+    gcTime: GC_TIME_MS,
   });
 
   useEffect(() => {

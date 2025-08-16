@@ -6,8 +6,8 @@ import type { Task } from '@/legacy/types/task';
 type PendingDropModalProps = {
   open: boolean;
   taskId?: string;
-  important?: boolean;
-  urgent?: boolean;
+  important: boolean;
+  urgent: boolean;
   tasks: Task[];
   onCloseAction: () => void;
   onSavedAction: (updated: Task) => void;
@@ -29,8 +29,8 @@ export function PendingDropModal({
       open={open}
       task={task}
       newProperties={{
-        important: !!important,
-        urgent: !!urgent,
+        important,
+        urgent,
         plannedDate: new Date(),
       }}
       requiredFields={['title', 'estimatedTime', 'plannedDate']}

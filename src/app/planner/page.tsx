@@ -257,8 +257,8 @@ export default function DayPlannerPage() {
       <PendingDropModal
         open={!!pendingDrop}
         taskId={pendingDrop?.taskId}
-        important={pendingDrop?.important}
-        urgent={pendingDrop?.urgent}
+        important={pendingDrop?.important ?? false}
+        urgent={pendingDrop?.urgent ?? false}
         onCloseAction={() => setPendingDrop(null)}
         onSavedAction={updated => {
           const now = new Date();

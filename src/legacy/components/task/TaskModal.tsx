@@ -34,9 +34,8 @@ type TaskModalProps = {
   newProperties?: Partial<Task>; // extra props for new tasks
   open: boolean;
   onCloseAction: () => void;
-  //  which fields are required to enable Save. Defaults to ['title']
+  // which fields are required to enable Save. Defaults to ['title']
   requiredFields?: Array<keyof TaskForm>;
-  /** NEW: called after save succeeds, with the updated task */
   onSaved?: (updated: Task) => void;
 };
 
@@ -54,6 +53,8 @@ export function TaskModal({
   const updateTask = useBoardStore(s => s.updateTask);
 
   const makeInitialForm = useCallback((): TaskForm => {
+    const currentTask = { ...task, ...newProperties };
+
     // Helper respects explicit null from newProperties
     const fromNew = <K extends keyof Partial<Task>>(key: K) =>
       Object.prototype.hasOwnProperty.call(newProperties ?? {}, key)
@@ -61,39 +62,37 @@ export function TaskModal({
         : undefined;
 
     const plannedDate =
-      task?.plannedDate !== undefined
-        ? task.plannedDate
-          ? new Date(task.plannedDate)
+      currentTask?.plannedDate !== undefined
+        ? currentTask.plannedDate
+          ? new Date(currentTask.plannedDate)
           : undefined
         : ((fromNew('plannedDate') as Date | null | undefined) ?? undefined);
 
     const estimatedTime =
-      task?.estimatedTime !== undefined
-        ? task.estimatedTime
+      currentTask?.estimatedTime !== undefined
+        ? currentTask.estimatedTime
         : ((fromNew('estimatedTime') as number | undefined) ?? undefined);
 
     const tagId =
-      task?.tagId !== undefined
-        ? task.tagId
+      currentTask?.tagId !== undefined
+        ? currentTask.tagId
         : ((fromNew('tagId') as string | null | undefined) ?? undefined);
 
     const eventId =
-      task?.eventId !== undefined
-        ? task.eventId
+      currentTask?.eventId !== undefined
+        ? currentTask.eventId
         : ((fromNew('eventId') as string | null | undefined) ?? undefined);
 
-    const quantityTarget = task?.quantityTarget ?? 1;
-    const useQuantity = (task?.quantityTarget ?? 0) > 1;
-
     const base: TaskForm = {
-      title: task?.title ?? '',
-      notes: task?.notes ?? '',
-      useQuantity,
-      quantityTarget: useQuantity ? quantityTarget : 1,
-      daily: task?.daily ?? false,
-      important: task?.important ?? false,
-      urgent: task?.urgent ?? false,
-      blocked: task?.blocked ?? false,
+      ...currentTask,
+      title: currentTask?.title ?? '',
+      notes: currentTask?.notes ?? '',
+      useQuantity: (currentTask?.quantityTarget ?? 0) > 1,
+      quantityTarget: currentTask?.quantityTarget ?? 1,
+      daily: currentTask?.daily ?? false,
+      important: currentTask?.important ?? false,
+      urgent: currentTask?.urgent ?? false,
+      blocked: currentTask?.blocked ?? false,
       plannedDate,
       estimatedTime: estimatedTime ?? undefined,
       tagId: tagId ?? (undefined as unknown as string | undefined),
