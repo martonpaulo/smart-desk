@@ -139,8 +139,9 @@ export default function DayPlannerPage() {
         return;
       }
 
-      // require plannedDate and estimatedTime before classify
+      // require estimatedTime before classify
       const needsPlanning = !task.estimatedTime;
+
       if (needsPlanning) {
         setPendingDrop({ taskId: task.id, important: importantVal, urgent: urgentVal });
         playInterfaceSound('error');

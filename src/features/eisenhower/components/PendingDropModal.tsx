@@ -33,7 +33,7 @@ export function PendingDropModal({
         urgent: !!urgent,
         plannedDate: new Date(),
       }}
-      requiredFields={['title', 'estimatedTime']}
+      requiredFields={['title', 'estimatedTime', 'plannedDate']}
       onCloseAction={onCloseAction}
       onSaved={onSavedAction}
     />
