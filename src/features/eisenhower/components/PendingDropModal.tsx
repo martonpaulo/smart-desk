@@ -28,8 +28,12 @@ export function PendingDropModal({
     <TaskModal
       open={open}
       task={task}
-      newProperties={{ important: !!important, urgent: !!urgent }}
-      requiredFields={['title', 'plannedDate', 'estimatedTime']}
+      newProperties={{
+        important: !!important,
+        urgent: !!urgent,
+        plannedDate: new Date(),
+      }}
+      requiredFields={['title', 'estimatedTime']}
       onCloseAction={onCloseAction}
       onSaved={onSavedAction}
     />

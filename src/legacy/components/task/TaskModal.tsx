@@ -54,22 +54,51 @@ export function TaskModal({
   const updateTask = useBoardStore(s => s.updateTask);
 
   const makeInitialForm = useCallback((): TaskForm => {
+    // Helper respects explicit null from newProperties
+    const fromNew = <K extends keyof Partial<Task>>(key: K) =>
+      Object.prototype.hasOwnProperty.call(newProperties ?? {}, key)
+        ? (newProperties as Partial<Task>)[key]
+        : undefined;
+
+    const plannedDate =
+      task?.plannedDate !== undefined
+        ? task.plannedDate
+          ? new Date(task.plannedDate)
+          : undefined
+        : ((fromNew('plannedDate') as Date | null | undefined) ?? undefined);
+
+    const estimatedTime =
+      task?.estimatedTime !== undefined
+        ? task.estimatedTime
+        : ((fromNew('estimatedTime') as number | undefined) ?? undefined);
+
+    const tagId =
+      task?.tagId !== undefined
+        ? task.tagId
+        : ((fromNew('tagId') as string | null | undefined) ?? undefined);
+
+    const eventId =
+      task?.eventId !== undefined
+        ? task.eventId
+        : ((fromNew('eventId') as string | null | undefined) ?? undefined);
+
+    const quantityTarget = task?.quantityTarget ?? 1;
+    const useQuantity = (task?.quantityTarget ?? 0) > 1;
+
     const base: TaskForm = {
       title: task?.title ?? '',
       notes: task?.notes ?? '',
-      useQuantity: (task?.quantityTarget ?? 0) > 1,
-      quantityTarget: task?.quantityTarget ?? 1,
+      useQuantity,
+      quantityTarget: useQuantity ? quantityTarget : 1,
       daily: task?.daily ?? false,
       important: task?.important ?? false,
       urgent: task?.urgent ?? false,
       blocked: task?.blocked ?? false,
-      plannedDate: task?.plannedDate ? new Date(task.plannedDate) : undefined,
-      estimatedTime: task?.estimatedTime ?? undefined,
-      tagId: task?.tagId ?? newProperties?.tagId,
-      eventId: task?.eventId ?? newProperties?.eventId,
-      ...newProperties,
+      plannedDate,
+      estimatedTime: estimatedTime ?? undefined,
+      tagId: tagId ?? (undefined as unknown as string | undefined),
+      eventId: eventId ?? (undefined as unknown as string | undefined),
     };
-    if (!base.useQuantity) base.quantityTarget = 1;
     return base;
   }, [task, newProperties]);
 

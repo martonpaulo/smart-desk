@@ -25,10 +25,13 @@ export async function upsertTask(client: SupabaseClient, payload: Task): Promise
   }
 
   const row = mapTaskToDB(payload, userId);
+  const rowClean = Object.fromEntries(
+    Object.entries(row).filter(([, v]) => v !== undefined),
+  ) as typeof row;
 
   const { data, error } = await client
     .from('tasks')
-    .upsert(row, { onConflict: 'id' })
+    .upsert(rowClean, { onConflict: 'id' })
     .select()
     .single();
 

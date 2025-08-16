@@ -140,7 +140,7 @@ export default function DayPlannerPage() {
       }
 
       // require plannedDate and estimatedTime before classify
-      const needsPlanning = !task.plannedDate || !task.estimatedTime;
+      const needsPlanning = !task.estimatedTime;
       if (needsPlanning) {
         setPendingDrop({ taskId: task.id, important: importantVal, urgent: urgentVal });
         playInterfaceSound('error');
@@ -260,8 +260,8 @@ export default function DayPlannerPage() {
         urgent={pendingDrop?.urgent}
         onCloseAction={() => setPendingDrop(null)}
         onSavedAction={updated => {
-          const today = new Date();
-          updateTask({ ...updated, classifiedDate: today, plannedDate: today, updatedAt: today });
+          const now = new Date();
+          updateTask({ ...updated, classifiedDate: now, updatedAt: now });
           playInterfaceSound('shift');
           setPendingDrop(null);
         }}
@@ -273,14 +273,8 @@ export default function DayPlannerPage() {
         draft={eventConversionTask}
         onCloseAction={() => setEventConversionTask(null)}
         onSavedAction={saved => {
-          const today = new Date();
-          updateTask({
-            ...saved,
-            important: saved.important,
-            urgent: saved.urgent,
-            classifiedDate: today,
-            updatedAt: today,
-          });
+          const now = new Date();
+          updateTask({ ...saved, classifiedDate: now, updatedAt: now });
           setEventConversionTask(null);
           playInterfaceSound('shift');
         }}

@@ -23,8 +23,6 @@ export function EventConversionModal({
       requiredFields={['title', 'plannedDate', 'estimatedTime']}
       newProperties={{
         ...draft,
-        important: draft?.important,
-        urgent: draft?.urgent,
       }}
       onCloseAction={onCloseAction}
       onSaved={onSavedAction}

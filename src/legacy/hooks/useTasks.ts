@@ -103,7 +103,7 @@ export function useTasks(filters: TaskFilters = {}) {
 
       const matchesDaily = daily == null ? true : task.daily === daily;
 
-      const isTodaySafe = (date?: Date) => date != null && isToday(date);
+      const isTodaySafe = (date?: Date | null) => date != null && isToday(date);
 
       const matchesClassified =
         classified == null

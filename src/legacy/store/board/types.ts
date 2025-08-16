@@ -25,19 +25,40 @@ export interface AddColumnData {
 
 export interface AddTaskData {
   title: string;
-  notes?: string;
+  notes?: string | null;
   important?: boolean;
   blocked?: boolean;
-  plannedDate?: Date;
-  estimatedTime?: number;
+  plannedDate?: Date | null;
+  estimatedTime?: number | null;
   quantityDone?: number;
   urgent?: boolean;
   quantityTarget?: number;
   daily?: boolean;
-  classifiedDate?: Date;
+  classifiedDate?: Date | null;
   columnId?: string;
-  tagId?: string;
-  eventId?: string;
+  tagId?: string | null;
+  eventId?: string | null;
+  updatedAt: Date;
+}
+
+export interface UpdateTaskData {
+  id: string;
+  title?: string;
+  notes?: string | null;
+  important?: boolean;
+  urgent?: boolean;
+  blocked?: boolean;
+  plannedDate?: Date | null;
+  quantityDone?: number;
+  quantityTarget?: number;
+  estimatedTime?: number | null;
+  daily?: boolean;
+  position?: number;
+  classifiedDate?: Date | null;
+  columnId?: string;
+  tagId?: string | null;
+  eventId?: string | null;
+  trashed?: boolean;
   updatedAt: Date;
 }
 
@@ -46,27 +67,6 @@ export interface UpdateColumnData {
   title?: string;
   color?: string;
   position?: number;
-  trashed?: boolean;
-  updatedAt: Date;
-}
-
-export interface UpdateTaskData {
-  id: string;
-  title?: string;
-  notes?: string;
-  important?: boolean;
-  urgent?: boolean;
-  blocked?: boolean;
-  plannedDate?: Date;
-  quantityDone?: number;
-  quantityTarget?: number;
-  estimatedTime?: number;
-  daily?: boolean;
-  position?: number;
-  classifiedDate?: Date;
-  columnId?: string;
-  tagId?: string;
-  eventId?: string;
   trashed?: boolean;
   updatedAt: Date;
 }

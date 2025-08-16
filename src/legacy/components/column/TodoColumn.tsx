@@ -19,7 +19,6 @@ interface TodoColumnProps {
   onAddColumnAfter: (prevPos: number) => void;
   onAddTask: (task: Partial<Task>) => Promise<string>;
   onEditTask: (id: string) => void;
-  onRenameTask: (id: string, title: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   onDragOverTask: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
   onTaskColumnDragOver: (columnId: string) => void;

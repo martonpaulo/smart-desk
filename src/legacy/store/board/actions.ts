@@ -344,17 +344,25 @@ export async function updateTaskAction(set: Set, get: Get, data: UpdateTaskData)
         important: data.important ?? t.important,
         urgent: data.urgent ?? t.urgent,
         blocked: data.blocked ?? t.blocked,
-        estimatedTime: data.estimatedTime,
-        plannedDate: data.plannedDate,
-        classifiedDate: data.classifiedDate,
+        estimatedTime: Object.prototype.hasOwnProperty.call(data, 'estimatedTime')
+          ? (data.estimatedTime ?? null)
+          : t.estimatedTime,
+        plannedDate: Object.prototype.hasOwnProperty.call(data, 'plannedDate')
+          ? (data.plannedDate ?? null)
+          : t.plannedDate,
+        classifiedDate: Object.prototype.hasOwnProperty.call(data, 'classifiedDate')
+          ? (data.classifiedDate ?? null)
+          : t.classifiedDate,
         quantityDone: data.quantityDone ?? t.quantityDone,
         quantityTarget:
           typeof data.quantityTarget === 'number' ? data.quantityTarget : t.quantityTarget,
         daily: data.daily ?? t.daily,
         position: typeof data.position === 'number' ? data.position : t.position,
         columnId: data.columnId ?? t.columnId,
-        tagId: data.tagId,
-        eventId: data.eventId,
+        tagId: Object.prototype.hasOwnProperty.call(data, 'tagId') ? (data.tagId ?? null) : t.tagId,
+        eventId: Object.prototype.hasOwnProperty.call(data, 'eventId')
+          ? (data.eventId ?? null)
+          : t.eventId,
         trashed: data.trashed ?? t.trashed,
         updatedAt: data.updatedAt,
         isSynced: false,

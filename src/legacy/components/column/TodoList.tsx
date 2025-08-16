@@ -145,16 +145,6 @@ export function TodoList({ showDate }: TodoListProps) {
     setEditingTask(task);
   };
 
-  const handleRenameTask = async (id: string, title: string) => {
-    const trimmed = title.trim();
-    if (!trimmed) return;
-    try {
-      await updateTask({ id, title: trimmed, updatedAt: new Date() });
-    } catch (err) {
-      console.error('Task rename failed', err);
-    }
-  };
-
   // ── Task drag & drop ────────────────────────────────────────────────────
   const handleTaskDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     if (isMobile) return; // disable drag on mobile
@@ -242,7 +232,6 @@ export function TodoList({ showDate }: TodoListProps) {
         onAddColumnAfter={openInsertColumnModal}
         onAddTask={handleAddTask}
         onEditTask={handleEditTask}
-        onRenameTask={handleRenameTask}
         onDragStart={handleTaskDragStart}
         onDragOverTask={handleTaskDragOver}
         onTaskColumnDragOver={handleTaskColumnDragOver}

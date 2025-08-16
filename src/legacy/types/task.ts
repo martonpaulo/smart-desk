@@ -2,18 +2,18 @@ import { Base } from '@/core/types/Base';
 
 export interface Task extends Base {
   title: string;
-  notes?: string;
+  notes?: string | null;
   important: boolean;
   urgent: boolean;
   blocked: boolean;
-  plannedDate?: Date;
-  estimatedTime?: number; // in minutes
+  plannedDate?: Date | null;
+  estimatedTime?: number | null; // in minutes
   quantityDone: number;
   quantityTarget: number;
   daily: boolean;
   position: number;
-  classifiedDate?: Date;
+  classifiedDate?: Date | null;
   columnId: string;
-  eventId?: string;
-  tagId?: string;
+  eventId?: string | null;
+  tagId?: string | null;
 }
