@@ -16,14 +16,6 @@ export function computeEventStatus(event: Event, now?: Date): EventStatus {
   return 'current';
 }
 
-export function filterNonFullDayEvents(events: Event[]): Event[] {
-  return events.filter(event => {
-    const startMs = new Date(event.start).getTime();
-    const endMs = new Date(event.end).getTime();
-    return endMs - startMs < FULL_DAY_MS && !event.allDay;
-  });
-}
-
 export function filterFullDayEventsForTodayInUTC(events: Event[], now?: Date): Event[] {
   if (!now) now = new Date();
 
@@ -78,10 +70,6 @@ export function filterTodayEvents(events: Event[], now?: Date): Event[] {
   });
 }
 
-export function sortEventsByStart(events: Event[]): Event[] {
-  return [...events].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-}
-
 export function calculateMinutesUntilEvent(event: Event, now?: Date): number {
   if (!now) now = new Date();
   const startMs = new Date(event.start).getTime();
@@ -129,32 +117,4 @@ export function isTimeAvailable(events: Event[], time: Date): boolean {
     const endMs = new Date(event.end).getTime();
     return timeMs >= startMs && timeMs <= endMs;
   });
-}
-
-function areEventsEqual(firstEvent: Event, secondEvent: Event): boolean {
-  const firstEventStart = new Date(firstEvent.start);
-  const firstEventEnd = new Date(firstEvent.end);
-  const secondEventStart = new Date(secondEvent.start);
-  const secondEventEnd = new Date(secondEvent.end);
-
-  return (
-    firstEvent.id === secondEvent.id &&
-    firstEvent.title === secondEvent.title &&
-    firstEventStart.getTime() === secondEventStart.getTime() &&
-    firstEventEnd.getTime() === secondEventEnd.getTime() &&
-    firstEvent.attendeeCount === secondEvent.attendeeCount &&
-    firstEvent.calendar?.id === secondEvent.calendar?.id
-  );
-}
-
-export function mergeEvents(prevEvents: Event[], nextEvents: Event[]): Event[] {
-  const prevEventsMap = new Map(prevEvents.map(event => [event.id, event]));
-  const mergedEvents: Event[] = [];
-
-  for (const event of nextEvents) {
-    const oldObj = prevEventsMap.get(event.id);
-    mergedEvents.push(oldObj && areEventsEqual(oldObj, event) ? oldObj : event);
-  }
-
-  return mergedEvents;
 }

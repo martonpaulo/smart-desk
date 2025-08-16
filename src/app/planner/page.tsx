@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { Paper, Stack, Typography, useTheme } from '@mui/material';
-import { endOfToday, isToday, startOfToday } from 'date-fns';
+import { isToday } from 'date-fns';
 
 import { PageSection } from '@/core/components/PageSection';
 import { InboxSection } from '@/features/eisenhower/components/InboxSection';
@@ -17,13 +17,11 @@ import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
 import { useBulkTaskSelection } from '@/features/task/hooks/useBulkTaskSelection';
 import { DailyTimeLoadIndicator } from '@/legacy/components/DailyTimeLoadIndicator';
 import { TodoProgress } from '@/legacy/components/Progress';
-import { useEvents } from '@/legacy/hooks/useEvents';
+import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
 import { useTasks } from '@/legacy/hooks/useTasks';
 import { useBoardStore } from '@/legacy/store/board/store';
-import { useEventStore } from '@/legacy/store/eventStore';
 import type { Event } from '@/legacy/types/Event';
 import type { Task } from '@/legacy/types/task';
-import { filterTodayEvents } from '@/legacy/utils/eventUtils';
 import { CountChip } from '@/shared/components/CountChip';
 
 type PendingDrop = {
@@ -35,6 +33,7 @@ type PendingDrop = {
 export default function DayPlannerPage() {
   const theme = useTheme();
   const updateTask = useBoardStore(s => s.updateTask);
+  const { data: events } = useCombinedEvents();
 
   const [showFuture, setShowFuture] = useState<boolean>(false);
   const [showEvents, setShowEvents] = useState<boolean>(true);
@@ -111,9 +110,7 @@ export default function DayPlannerPage() {
       if (!draggingId || !draggingKind) return;
 
       if (draggingKind === 'event') {
-        const ev = useEventStore.getState().events.find(x => x.id === draggingId) as
-          | Event
-          | undefined;
+        const ev = events.find(x => x.id === draggingId) as Event | undefined;
         endDrag();
         if (!ev) return;
 
@@ -165,13 +162,8 @@ export default function DayPlannerPage() {
     };
 
   // events loading and filtered all day list
-  useEvents(startOfToday(), endOfToday());
-  const events = useEventStore(s => s.events);
   const allDayEvents = useMemo(
-    () =>
-      filterTodayEvents(events)
-        .filter(e => e.allDay)
-        .filter(e => !allTasks.find(t => t.eventId === e.id)),
+    () => events.filter(e => e.allDay).filter(e => !allTasks.find(t => t.eventId === e.id)),
     [events, allTasks],
   );
 

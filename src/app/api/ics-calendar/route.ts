@@ -67,6 +67,7 @@ function extractEvents(
           attendeeCount: item.component.getAllProperties('attendee').length,
           description: item.description,
           calendar: calendarMeta,
+          allDay: startDate.isDate && endDate.isDate,
         });
       }
     } else {
@@ -87,6 +88,7 @@ function extractEvents(
         attendeeCount: baseCount,
         description: String(comp.getFirstPropertyValue('description') || ''),
         calendar: calendarMeta,
+        allDay: ev.startDate.isDate && ev.endDate.isDate,
       });
     }
   }

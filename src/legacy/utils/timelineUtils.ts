@@ -1,6 +1,6 @@
 import type { Event } from '@/legacy/types/Event';
 import { ITimelineEvent } from '@/legacy/types/ITimelineEvent';
-import { computeEventStatus, sortEventsByStart } from '@/legacy/utils/eventUtils';
+import { computeEventStatus } from '@/legacy/utils/eventUtils';
 interface Bounds {
   startPercent: number;
   widthPercent: number;
@@ -71,11 +71,10 @@ export function layoutTimelineEvents(
   pastHours: number,
   futureHours: number,
 ): ITimelineEvent[] {
-  const sorted = sortEventsByStart(events);
   const endTimesByLevel: number[] = [];
   const result: ITimelineEvent[] = [];
 
-  for (const event of sorted) {
+  for (const event of events) {
     const startMs = new Date(event.start).getTime();
     let level = 0;
 

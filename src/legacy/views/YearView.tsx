@@ -2,18 +2,11 @@
 
 import { Box, Paper, Typography, useTheme } from '@mui/material';
 
-import { CalendarView } from '@/features/calendar/types/CalendarView';
+import { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
 import { daysOfWeek } from '@/legacy/utils/calendarUtils';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
-interface YearViewProps {
-  currentDate: Date;
-  onDateChange: (date: Date) => void;
-  onViewChange: (view: CalendarView) => void;
-  onNavigate: (date: Date, view: CalendarView) => void;
-}
-
-export function YearView({ currentDate, onNavigate }: YearViewProps) {
+export function YearView({ currentDate, onNavigateAction }: CalendarViewProps) {
   const theme = useTheme();
   const isMobile = useResponsiveness();
 
@@ -34,7 +27,7 @@ export function YearView({ currentDate, onNavigate }: YearViewProps) {
 
   const handleMonthClick = (monthIndex: number) => {
     const newDate = new Date(currentDate.getFullYear(), monthIndex, 1);
-    onNavigate(newDate, 'month');
+    onNavigateAction(newDate, 'month');
   };
 
   const isCurrentMonth = (monthIndex: number) => {

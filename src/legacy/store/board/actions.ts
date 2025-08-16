@@ -229,16 +229,10 @@ export async function syncFromServerAction(set: Set, get: Get) {
       return { ...t, isSynced: !local || t.updatedAt >= local.updatedAt };
     });
 
-    // compute last reset threshold
-    const [H, M] = RESET_TIME.split(':').map(Number);
-    const todayReset = new Date(now.getFullYear(), now.getMonth(), now.getDate(), H, M, 0);
-    const lastReset =
-      now < todayReset
-        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, H, M, 0)
-        : todayReset;
-
     // find tasks that need resetting
-    const tasksToReset = mergedTasks.filter(t => t.daily && new Date(t.updatedAt) < lastReset);
+    const tasksToReset = mergedTasks.filter(
+      t => t.daily && new Date(t.updatedAt) < RESET_TIME.last,
+    );
 
     const finalCols = mergedCols;
     let finalTasks: Task[];
@@ -268,7 +262,7 @@ export async function syncFromServerAction(set: Set, get: Get) {
 
       // apply reset to qualifying tasks
       finalTasks = mergedTasks.map(task => {
-        if (task.daily && new Date(task.updatedAt) < lastReset) {
+        if (task.daily && new Date(task.updatedAt) < RESET_TIME.last) {
           return {
             ...task,
             quantityDone: 0,

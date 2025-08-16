@@ -1,228 +1,235 @@
 'use client';
 
+import { useEffect, useMemo, useRef, useState } from 'react';
+
 import {
-  Box,
   Chip,
   Divider,
   List,
   ListItem,
   ListItemText,
+  Stack,
   Typography,
   useTheme,
 } from '@mui/material';
+import {
+  addDays,
+  compareAsc,
+  format,
+  isAfter,
+  isSameDay,
+  isToday,
+  isTomorrow,
+  startOfDay,
+} from 'date-fns';
 
-import { CalendarView } from '@/features/calendar/types/CalendarView';
-import { useEventStore } from '@/legacy/store/eventStore';
-import { Event } from '@/legacy/types/Event';
+import type { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
+import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
+import type { Event } from '@/legacy/types/Event';
 
-interface ScheduleViewProps {
-  currentDate: Date;
-  onDateChange: (date: Date) => void;
-  onViewChange: (view: CalendarView) => void;
-  onNavigate: (date: Date, view: CalendarView) => void;
-}
-
-export function ScheduleView({ onNavigate }: ScheduleViewProps) {
+export function ScheduleView({ onNavigateAction }: CalendarViewProps) {
   const theme = useTheme();
-  const events = useEventStore(state => state.events);
 
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  const nextWeek = new Date(today);
-  nextWeek.setDate(today.getDate() + 7);
-  const nextMonth = new Date(today);
-  nextMonth.setMonth(today.getMonth() + 1);
+  // Time range window grows as user scrolls. Start = now, End increases by PAGE_DAYS each load.
+  const PAGE_DAYS = 14;
+  const now = useMemo(() => new Date(), []);
+  const [rangeStart] = useState<Date>(now);
+  const [rangeEnd, setRangeEnd] = useState<Date>(addDays(now, PAGE_DAYS));
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const getFilteredEvents = () => {
-    const sortedEvents = [...events].sort(
-      (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
+  // Fetch events within the current time window
+  const { data: rawEvents = [], isLoading } = useCombinedEvents(rangeStart, rangeEnd);
+
+  // Keep only upcoming events, sort by start time
+  const events: Event[] = useMemo(() => {
+    const upcoming = rawEvents.filter(
+      ev => isAfter(new Date(ev.start), now) || isSameDay(new Date(ev.start), now),
+    );
+    return upcoming.sort((a, b) => compareAsc(new Date(a.start), new Date(b.start)));
+  }, [rawEvents, now]);
+
+  // Group events by day key
+  type DayKey = string; // ISO date for startOfDay
+  const grouped: Record<DayKey, Event[]> = useMemo(() => {
+    const map: Record<DayKey, Event[]> = {};
+    for (const ev of events) {
+      const d = startOfDay(new Date(ev.start));
+      const key = d.toISOString();
+      if (!map[key]) map[key] = [];
+      map[key].push(ev);
+    }
+    return map;
+  }, [events]);
+
+  const dayEntries = useMemo(() => {
+    // Keep chronological order of day groups
+    return Object.entries(grouped).sort(([a], [b]) => compareAsc(new Date(a), new Date(b)));
+  }, [grouped]);
+
+  // Relative label using date-fns
+  const relativeLabel = (date: Date): string => {
+    if (isToday(date)) return 'Today';
+    if (isTomorrow(date)) return 'Tomorrow';
+    // Fallback to weekday + month + day. Year only if different from current.
+    const sameYear = date.getFullYear() === now.getFullYear();
+    return format(date, sameYear ? 'EEEE, MMMM d' : 'EEEE, MMMM d, yyyy');
+  };
+
+  // Navigate to day view on item click
+  const handleEventClick = (ev: Event) => {
+    onNavigateAction(new Date(ev.start), 'day');
+  };
+
+  // IntersectionObserver to extend the time window for infinite scroll
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        const first = entries[0];
+        if (first?.isIntersecting && !isLoadingMore) {
+          setIsLoadingMore(true);
+          // Extend window by PAGE_DAYS
+          setRangeEnd(prev => addDays(prev, PAGE_DAYS));
+        }
+      },
+      { root: null, rootMargin: '200px', threshold: 0 },
     );
 
-    return sortedEvents.filter(event => {
-      const eventDate = new Date(event.start);
-      return eventDate >= now;
-    });
-  };
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isLoadingMore]);
 
-  const filteredEvents = getFilteredEvents();
+  // Release "loading more" flag once new data arrives
+  useEffect(() => {
+    if (isLoading) return;
+    setIsLoadingMore(false);
+  }, [isLoading]);
 
-  const groupEventsByDate = (events: typeof filteredEvents) => {
-    const groups: { [key: string]: typeof events } = {};
-
-    events.forEach(event => {
-      const eventDate = new Date(event.start);
-      const dateKey = eventDate.toDateString();
-
-      if (!groups[dateKey]) {
-        groups[dateKey] = [];
-      }
-      groups[dateKey].push(event);
-    });
-
-    return groups;
-  };
-
-  const eventGroups = groupEventsByDate(filteredEvents);
-
-  const formatDateHeader = (dateString: string) => {
-    const date = new Date(dateString);
-    const isToday = date.toDateString() === today.toDateString();
-    const isTomorrow = date.toDateString() === tomorrow.toDateString();
-
-    if (isToday) return 'Today';
-    if (isTomorrow) return 'Tomorrow';
-
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
-    });
-  };
-
-  const getRelativeTime = (date: Date) => {
-    const diffMs = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Tomorrow';
-    if (diffDays < 7) return `In ${diffDays} days`;
-    if (diffDays < 30) return `In ${Math.ceil(diffDays / 7)} weeks`;
-    return `In ${Math.ceil(diffDays / 30)} months`;
-  };
-
-  const handleEventClick = (event: Event) => {
-    const eventDate = new Date(event.start);
-    onNavigate(eventDate, 'day');
-  };
+  // Empty state
+  const isEmpty = !isLoading && dayEntries.length === 0;
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Events list */}
-      <Box sx={{ flex: 1, overflow: 'auto' }}>
-        {Object.keys(eventGroups).length === 0 ? (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              p: 4,
-            }}
-          >
+    <Stack sx={{ height: '100%', display: 'flex' }}>
+      <Stack sx={{ flex: 1, overflow: 'auto' }}>
+        {isEmpty ? (
+          <Stack alignItems="center" justifyContent="center" sx={{ height: '100%', p: 4 }}>
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No events found
             </Typography>
             <Typography variant="body2" color="text.secondary">
               No upcoming events
             </Typography>
-          </Box>
+          </Stack>
         ) : (
           <List sx={{ p: 0 }}>
-            {Object.entries(eventGroups).map(([dateString, dayEvents], index) => (
-              <Box key={dateString}>
-                {/* Date header */}
-                <Box
-                  sx={{
-                    p: 2,
-                    backgroundColor: theme.palette.grey[50],
-                    borderBottom: 1,
-                    borderColor: 'divider',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 1,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {formatDateHeader(dateString)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {getRelativeTime(new Date(dateString))}
-                  </Typography>
-                </Box>
-
-                {/* Events for this date */}
-                {dayEvents.map(event => (
-                  <ListItem
-                    key={event.id}
+            {dayEntries.map(([dayKey, dayEvents], index) => {
+              const date = new Date(dayKey);
+              return (
+                <Stack key={dayKey} component="section">
+                  {/* Sticky date header */}
+                  <Stack
                     sx={{
-                      py: 1,
-                      px: 2,
-                      cursor: 'pointer',
-                      '&:hover': {
-                        backgroundColor: theme.palette.action.hover,
-                      },
+                      p: 2,
+                      backgroundColor: theme.palette.background.paper,
+                      borderBottom: 1,
+                      borderColor: 'divider',
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 1,
                     }}
-                    onClick={() => handleEventClick(event)}
                   >
-                    <ListItemText
-                      primary={
-                        <>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                            {event.title}
-                          </Typography>
-                          {event.allDay && (
-                            <Chip
-                              label="All day"
-                              size="small"
-                              variant="outlined"
-                              sx={{ fontSize: '0.7rem', height: 20 }}
-                            />
-                          )}
-                        </>
-                      }
-                      secondary={
-                        <>
-                          {!event.allDay && (
-                            <Typography variant="body2" color="text.secondary">
-                              {new Date(event.start).toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                hour12: true,
-                              })}
-                              {event.end && (
-                                <>
-                                  {' - '}
-                                  {new Date(event.end).toLocaleTimeString('en-US', {
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                    hour12: true,
-                                  })}
-                                </>
-                              )}
-                            </Typography>
-                          )}
-                          {event.description && (
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                mt: 0.5,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                              }}
-                            >
-                              {event.description}
-                            </Typography>
-                          )}
-                        </>
-                      }
-                    />
-                  </ListItem>
-                ))}
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {relativeLabel(date)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {format(date, 'PPP')}
+                    </Typography>
+                  </Stack>
 
-                {index < Object.keys(eventGroups).length - 1 && <Divider sx={{ my: 1 }} />}
-              </Box>
-            ))}
+                  {/* Events for this day */}
+                  {dayEvents.map(ev => {
+                    const start = new Date(ev.start);
+                    const end = ev.end ? new Date(ev.end) : undefined;
+
+                    return (
+                      <ListItem
+                        key={ev.id}
+                        onClick={() => handleEventClick(ev)}
+                        sx={{
+                          py: 1,
+                          px: 2,
+                          cursor: 'pointer',
+                          '&:hover': { backgroundColor: theme.palette.action.hover },
+                        }}
+                      >
+                        <ListItemText
+                          disableTypography
+                          primary={
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                                {ev.title || 'Untitled Event'}
+                              </Typography>
+                              {ev.allDay && (
+                                <Chip
+                                  label="All day"
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ height: 20 }}
+                                />
+                              )}
+                            </Stack>
+                          }
+                          secondary={
+                            <Stack spacing={0.5}>
+                              {!ev.allDay && (
+                                <Typography variant="body2" color="text.secondary">
+                                  {format(start, 'p')}
+                                  {end ? ` - ${format(end, 'p')}` : ''}
+                                </Typography>
+                              )}
+
+                              {ev.description && (
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                  }}
+                                >
+                                  {ev.description}
+                                </Typography>
+                              )}
+                            </Stack>
+                          }
+                        />
+                      </ListItem>
+                    );
+                  })}
+
+                  {index < dayEntries.length - 1 && <Divider sx={{ my: 1 }} />}
+                </Stack>
+              );
+            })}
+
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} />
+
+            {/* Optional subtle loading row when extending window */}
+            {(isLoading || isLoadingMore) && (
+              <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
+                Loading more…
+              </Typography>
+            )}
           </List>
         )}
-      </Box>
-    </Box>
+      </Stack>
+    </Stack>
   );
 }

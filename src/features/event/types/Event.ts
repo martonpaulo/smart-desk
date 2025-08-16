@@ -6,7 +6,7 @@ export interface Event extends Base {
   summary: string;
   description?: string;
   allDay: boolean;
-  calendarId?: string;
+  // calendarId?: string;
   acknowledged: boolean;
-  recurrence?: string[];
+  // recurrence?: string[];
 }

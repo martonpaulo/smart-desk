@@ -15,31 +15,23 @@ import {
 import { useSnackbar } from 'notistack';
 
 import { EventModal } from '@/features/event/components/EventModal';
-import { useLocalEventsStore } from '@/features/event/store/useLocalEventsStore';
 import { Event as LocalEvent } from '@/features/event/types/Event';
 import { EventListItem } from '@/legacy/components/event/EventListItem';
-import { Event } from '@/legacy/types/Event';
-import {
-  filterCurrentOrFutureEvents,
-  filterNonFullDayEvents,
-  filterTodayEvents,
-  sortEventsByStart,
-} from '@/legacy/utils/eventUtils';
+import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
+import { mapFromLegacyEvent } from '@/legacy/utils/eventLegacyMapper';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 import { theme } from '@/theme';
 
-export function EventList({ events }: { events: Event[] | null }) {
+export function EventList() {
   const isMobile = useResponsiveness();
+  const { data: events } = useCombinedEvents();
 
-  const localEvents = useLocalEventsStore(s => s.items);
   const { enqueueSnackbar } = useSnackbar();
 
   const [editingEvent, setEditingEvent] = useState<LocalEvent | null>(null);
   const [newModalOpen, setNewModalOpen] = useState(false);
 
-  const upcomingEvents = filterCurrentOrFutureEvents(
-    filterTodayEvents(filterNonFullDayEvents(sortEventsByStart(events || []))),
-  );
+  const filteredEvents = events.filter(e => !e.allDay);
 
   const columnColor = alpha(theme.palette.primary.light, 0.2);
   const darkenColor = alpha(theme.palette.primary.light, 0.4);
@@ -62,9 +54,9 @@ export function EventList({ events }: { events: Event[] | null }) {
             Event List
           </Typography>
 
-          {upcomingEvents && upcomingEvents.length > 0 && (
+          {filteredEvents && filteredEvents.length > 0 && (
             <Chip
-              label={upcomingEvents?.length}
+              label={filteredEvents?.length}
               size="small"
               disabled
               sx={{
@@ -77,14 +69,13 @@ export function EventList({ events }: { events: Event[] | null }) {
         </Stack>
 
         <List dense disablePadding>
-          {upcomingEvents.map(ev => (
+          {filteredEvents.map(ev => (
             <EventListItem
               key={ev.id}
               event={ev}
               onClick={() => {
-                const local = localEvents.find(le => le.id === ev.id);
-                if (local) {
-                  setEditingEvent(local);
+                if (ev.source === 'local') {
+                  setEditingEvent(mapFromLegacyEvent(ev));
                 } else {
                   enqueueSnackbar("This event can't be edited", { variant: 'info' });
                 }

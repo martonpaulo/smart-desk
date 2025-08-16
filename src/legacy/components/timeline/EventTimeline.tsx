@@ -3,8 +3,7 @@ import { Box, Typography, useTheme } from '@mui/material';
 import { CurrentIndicator } from '@/legacy/components/timeline/CurrentIndicator';
 import { EventBar } from '@/legacy/components/timeline/EventBar';
 import { TimeIndicator } from '@/legacy/components/timeline/TimeIndicator';
-import type { Event } from '@/legacy/types/Event';
-import { filterNonFullDayEvents } from '@/legacy/utils/eventUtils';
+import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
 import {
   calculateCurrentTimePercentage,
   formatHourLabel,
@@ -13,19 +12,25 @@ import {
 } from '@/legacy/utils/timelineUtils';
 
 interface EventTimelineProps {
-  events: Event[] | null;
   currentTime: Date;
   pastWindowHours: number;
   futureWindowHours: number;
 }
 
 export function EventTimeline({
-  events,
   currentTime,
   pastWindowHours,
   futureWindowHours,
 }: EventTimelineProps) {
   const { palette } = useTheme();
+
+  const startTime = new Date(currentTime);
+  startTime.setHours(startTime.getHours() - pastWindowHours);
+
+  const endTime = new Date(currentTime);
+  endTime.setHours(endTime.getHours() + futureWindowHours);
+
+  const { data: events } = useCombinedEvents(startTime, endTime);
 
   if (!events || events.length === 0) {
     return (
@@ -51,7 +56,7 @@ export function EventTimeline({
   const headerHeightRem = 1.5;
 
   // filter and level events
-  const filteredEvents = filterNonFullDayEvents(events);
+  const filteredEvents = events.filter(e => !e.allDay);
   const leveledEvents = layoutTimelineEvents(
     filteredEvents,
     now,

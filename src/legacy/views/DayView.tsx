@@ -1,37 +1,21 @@
 'use client';
 
 import { Box, Paper, Typography, useTheme } from '@mui/material';
+import { endOfDay, isSameHour, startOfDay } from 'date-fns';
 
-import { CalendarView } from '@/features/calendar/types/CalendarView';
+import { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
 import { EventCard } from '@/legacy/components/calendar/EventCard';
-import { useEventStore } from '@/legacy/store/eventStore';
+import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
 
-interface DayViewProps {
-  currentDate: Date;
-  onDateChange: (date: Date) => void;
-  onViewChange: (view: CalendarView) => void;
-  onNavigate: (date: Date, view: CalendarView) => void;
-}
-
-export function DayView({ currentDate }: DayViewProps) {
+export function DayView({ currentDate }: CalendarViewProps) {
   const theme = useTheme();
-  const events = useEventStore(state => state.events);
-
-  // Filter events for the current day
-  const dayEvents = events.filter(event => {
-    const eventDate = new Date(event.start);
-    return (
-      eventDate.getDate() === currentDate.getDate() &&
-      eventDate.getMonth() === currentDate.getMonth() &&
-      eventDate.getFullYear() === currentDate.getFullYear()
-    );
-  });
+  const { data: events } = useCombinedEvents(startOfDay(currentDate), endOfDay(currentDate));
 
   // Generate time slots (24 hours)
   const timeSlots = Array.from({ length: 24 }, (_, i) => i);
 
   const getEventsForHour = (hour: number) => {
-    return dayEvents.filter(event => {
+    return events.filter(event => {
       const eventStart = new Date(event.start);
       return eventStart.getHours() === hour && event.allDay !== true;
     });
@@ -46,20 +30,12 @@ export function DayView({ currentDate }: DayViewProps) {
     });
   };
 
-  const isCurrentHour = (hour: number) => {
-    const now = new Date();
-    return (
-      now.getDate() === currentDate.getDate() &&
-      now.getMonth() === currentDate.getMonth() &&
-      now.getFullYear() === currentDate.getFullYear() &&
-      now.getHours() === hour
-    );
-  };
+  const isCurrentHour = (hour: number) => isSameHour(hour, new Date());
 
   return (
     <Box sx={{ height: '100%', overflow: 'auto' }}>
       {/* All-day events */}
-      {dayEvents.some(event => event.allDay) && (
+      {events.some(event => event.allDay) && (
         <Paper
           sx={{
             p: 2,
@@ -71,7 +47,7 @@ export function DayView({ currentDate }: DayViewProps) {
             All Day
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {dayEvents
+            {events
               .filter(event => event.allDay)
               .map(event => (
                 <EventCard key={event.id} event={event} compact />

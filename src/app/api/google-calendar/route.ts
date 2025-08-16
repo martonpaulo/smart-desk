@@ -82,7 +82,20 @@ export async function GET(request: NextRequest) {
     const { events, calendars } = await api.getEventsInRange(rangeStart, rangeEnd);
     console.log('Fetched events:', events.length, 'calendars:', calendars.length);
 
-    const eventList = mapGoogleEventsToEvents(events, calendars);
+    const rawList = mapGoogleEventsToEvents(events, calendars);
+    const eventList: Event[] = rawList.map(ev => ({
+      ...ev,
+      allDay:
+        ev.allDay ??
+        (ev.start.getHours() === 0 &&
+          ev.start.getMinutes() === 0 &&
+          ev.start.getSeconds() === 0 &&
+          ev.start.getMilliseconds() === 0 &&
+          ev.end.getHours() === 23 &&
+          ev.end.getMinutes() === 59 &&
+          ev.end.getSeconds() === 59 &&
+          ev.end.getMilliseconds() === 999),
+    }));
     console.log('Mapped events:', eventList.length);
 
     return NextResponse.json<ApiResponse<Event[]>>({

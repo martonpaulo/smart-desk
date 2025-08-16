@@ -20,19 +20,17 @@ import { DateTime } from 'luxon';
 import { PageSection } from '@/core/components/PageSection';
 import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
 import { ResetZoomButton } from '@/legacy/components/ResetZoomButton';
-import { SoundAlert } from '@/legacy/components/sound/SoundAlert';
 import { ZoomSelector } from '@/legacy/components/ZoomSelector';
 import { useAudioStore } from '@/legacy/store/audioStore';
-import { useEventStore } from '@/legacy/store/eventStore';
 import { RESET_TIME } from '@/legacy/utils/resetTime';
 
 export default function SettingsPage() {
   const [enabled, setEnabled] = useSoundEnabled();
 
-  const events = useEventStore(state => state.events);
-  const audioEnabled = useAudioStore(state => state.audioEnabled);
-  const toggleAudioEnabled = useAudioStore(state => state.toggleAudioEnabled);
-  const isFirstRender = useAudioStore(state => state.isFirstRender);
+  // const { data: events } = useCombinedEvents();
+  // const audioEnabled = useAudioStore(state => state.audioEnabled);
+  // const toggleAudioEnabled = useAudioStore(state => state.toggleAudioEnabled);
+  // const isFirstRender = useAudioStore(state => state.isFirstRender);
   const isMeetingAlertEnabled = useAudioStore(state => state.meetingAlertEnabled);
   const isEventChangesAlertEnabled = useAudioStore(state => state.eventChangesAlertEnabled);
   const toggleMeetingAlertEnabled = useAudioStore(state => state.toggleMeetingAlertEnabled);
@@ -46,7 +44,6 @@ export default function SettingsPage() {
     : 'Unknown';
 
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? 'Unknown';
-  const now = new Date();
 
   const handleEnableSounds = () => {
     setEnabled(!enabled);
@@ -55,7 +52,7 @@ export default function SettingsPage() {
 
   return (
     <PageSection title="Settings" description="Configure your app preferences">
-      {/* Smart alerts preview and global audio store toggles */}
+      {/* Smart alerts preview and global audio store toggles
       <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
         <SoundAlert
           currentTime={now}
@@ -68,7 +65,7 @@ export default function SettingsPage() {
           isEventChangesAlertEnabled={isEventChangesAlertEnabled}
           onEventChangesAlertToggle={toggleEventChangesAlertEnabled}
         />
-      </Paper>
+      </Paper> */}
 
       <Grid container spacing={2}>
         {/* Sound settings */}
@@ -168,7 +165,7 @@ export default function SettingsPage() {
                   type="time"
                   size="small"
                   variant="standard"
-                  value={RESET_TIME}
+                  value={RESET_TIME.toString()}
                   // If you plan to make it editable later, wire onChange here
                 />
               </Stack>

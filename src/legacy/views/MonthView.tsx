@@ -3,17 +3,11 @@
 import { Grid, Typography } from '@mui/material';
 import { eachDayOfInterval, endOfWeek, getDaysInMonth, startOfMonth, startOfWeek } from 'date-fns';
 
-import { CalendarView } from '@/features/calendar/types/CalendarView';
+import { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
 import { MonthDayCard } from '@/legacy/components/calendar/MonthDayCard';
-import { useEvents } from '@/legacy/hooks/useEvents';
 import { weekDays } from '@/legacy/utils/timeUtils';
 
-interface MonthViewProps {
-  currentDate: Date;
-  onNavigate: (date: Date, view: CalendarView) => void;
-}
-
-export function MonthView({ currentDate, onNavigate }: MonthViewProps) {
+export function MonthView({ currentDate, onNavigateAction }: CalendarViewProps) {
   // Get first day of the calendar grid
   const firstDayOfGrid = startOfWeek(startOfMonth(currentDate));
 
@@ -21,8 +15,6 @@ export function MonthView({ currentDate, onNavigate }: MonthViewProps) {
   const lastDayOfGrid = endOfWeek(
     new Date(currentDate.getFullYear(), currentDate.getMonth(), getDaysInMonth(currentDate)),
   );
-
-  useEvents(firstDayOfGrid, lastDayOfGrid);
 
   // Generate all days in the calendar grid
   const calendarDays = eachDayOfInterval({
@@ -64,7 +56,7 @@ export function MonthView({ currentDate, onNavigate }: MonthViewProps) {
       {calendarDays.map(day => {
         return (
           <Grid size={1} key={day.toISOString()}>
-            <MonthDayCard day={day} onNavigate={onNavigate} />
+            <MonthDayCard currentDate={day} onNavigateAction={onNavigateAction} />
           </Grid>
         );
       })}

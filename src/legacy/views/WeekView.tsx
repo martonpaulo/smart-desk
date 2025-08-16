@@ -1,93 +1,92 @@
 'use client';
 
-import { Box, Paper, Typography } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
 
-import { CalendarView } from '@/features/calendar/types/CalendarView';
+import { Paper, Stack, Typography, useTheme } from '@mui/material';
+import {
+  addWeeks,
+  eachDayOfInterval,
+  endOfWeek,
+  format,
+  getHours,
+  isSameDay,
+  isSameHour,
+  isToday,
+  startOfDay,
+  startOfHour,
+  startOfWeek,
+} from 'date-fns';
+
+import type { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
 import { EventCard } from '@/legacy/components/calendar/EventCard';
-import { useEventStore } from '@/legacy/store/eventStore';
+import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
-import { theme } from '@/theme';
 
-interface WeekViewProps {
-  currentDate: Date;
-  onDateChange: (date: Date) => void;
-  onViewChange: (view: CalendarView) => void;
-  onNavigate: (date: Date, view: CalendarView) => void;
-}
+const HOURS_IN_DAY = 24;
+const WEEKS_PER_PAGE = 2; // number of extra weeks to fetch per "page" when scrolling
+const GUTTER_WIDTH = 80; // left hour gutter width in px
 
-export function WeekView({ currentDate, onNavigate }: WeekViewProps) {
+export function WeekView({ currentDate, onNavigateAction }: CalendarViewProps) {
+  const theme = useTheme();
   const isMobile = useResponsiveness();
-  const events = useEventStore(state => state.events);
 
-  // Get the start of the week (Sunday)
-  const startOfWeek = new Date(currentDate);
-  startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-  startOfWeek.setHours(0, 0, 0, 0);
+  // Base week window derived from currentDate
+  const rangeStart = startOfDay(startOfWeek(currentDate, { weekStartsOn: 0 }));
+  const [rangeEnd, setRangeEnd] = useState<Date>(endOfWeek(currentDate, { weekStartsOn: 0 }));
 
-  // Generate the 7 days of the week
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const day = new Date(startOfWeek);
-    day.setDate(startOfWeek.getDate() + i);
-    return day;
+  // Fetch events in window
+  const { data: events = [], isLoading } = useCombinedEvents(rangeStart, rangeEnd);
+
+  // Precompute current visible week days
+  const weekDays = eachDayOfInterval({
+    start: startOfWeek(currentDate, { weekStartsOn: 0 }),
+    end: endOfWeek(currentDate, { weekStartsOn: 0 }),
   });
 
-  // Generate time slots (24 hours)
-  const timeSlots = Array.from({ length: 24 }, (_, i) => i);
-
-  const getEventsForDay = (day: Date) => {
-    return events.filter(event => {
-      const eventDate = new Date(event.start);
-      return (
-        eventDate.getDate() === day.getDate() &&
-        eventDate.getMonth() === day.getMonth() &&
-        eventDate.getFullYear() === day.getFullYear()
-      );
-    });
-  };
+  // Helpers
+  const getEventsForDay = (day: Date) => events.filter(ev => isSameDay(new Date(ev.start), day));
 
   const getEventsForDayAndHour = (day: Date, hour: number) => {
-    const dayEvents = getEventsForDay(day);
-    return dayEvents.filter(event => {
-      if (event.allDay) return false;
-      const eventStart = new Date(event.start);
-      return eventStart.getHours() === hour;
-    });
+    const hourStart = startOfHour(new Date(day));
+    hourStart.setHours(hour, 0, 0, 0);
+    const dayEvents = getEventsForDay(day).filter(e => !e.allDay);
+    return dayEvents.filter(e => isSameHour(new Date(e.start), hourStart));
   };
 
-  const formatTime = (hour: number) => {
-    const date = new Date();
-    date.setHours(hour, 0, 0, 0);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      hour12: true,
-    });
-  };
+  const handleDayClick = (day: Date) => onNavigateAction(day, 'day');
 
-  const isToday = (day: Date) => {
-    const today = new Date();
-    return (
-      day.getDate() === today.getDate() &&
-      day.getMonth() === today.getMonth() &&
-      day.getFullYear() === today.getFullYear()
+  // Infinite scroll sentinel to extend rangeEnd by extra weeks
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0]?.isIntersecting && !isLoadingMore) {
+          setIsLoadingMore(true);
+          setRangeEnd(prev => endOfWeek(addWeeks(prev, WEEKS_PER_PAGE), { weekStartsOn: 0 }));
+        }
+      },
+      { root: null, rootMargin: '200px', threshold: 0 },
     );
-  };
 
-  const isCurrentHour = (hour: number) => {
-    const now = new Date();
-    return now.getHours() === hour;
-  };
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isLoadingMore]);
 
-  const handleDayClick = (day: Date) => {
-    onNavigate(day, 'day');
-  };
+  useEffect(() => {
+    if (!isLoading) setIsLoadingMore(false);
+  }, [isLoading]);
 
+  // --------- Mobile layout: days stacked vertically ---------
   if (isMobile) {
-    // Mobile: Show days vertically
     return (
-      <Box sx={{ height: '100%', overflow: 'auto' }}>
+      <Stack sx={{ height: '100%', overflow: 'auto', width: '100%', maxWidth: '100%' }}>
         {weekDays.map(day => {
           const dayEvents = getEventsForDay(day);
-
           return (
             <Paper
               key={day.toISOString()}
@@ -95,11 +94,10 @@ export function WeekView({ currentDate, onNavigate }: WeekViewProps) {
                 m: 1,
                 p: 2,
                 cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: theme.palette.action.hover,
-                },
+                '&:hover': { backgroundColor: theme.palette.action.hover },
                 border: isToday(day) ? 2 : 1,
                 borderColor: isToday(day) ? 'primary.main' : 'divider',
+                boxSizing: 'border-box',
               }}
               onClick={() => handleDayClick(day)}
             >
@@ -111,200 +109,224 @@ export function WeekView({ currentDate, onNavigate }: WeekViewProps) {
                   fontWeight: isToday(day) ? 600 : 500,
                 }}
               >
-                {day.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'short',
-                  day: 'numeric',
-                })}
+                {format(day, 'EEEE, MMM d')}
               </Typography>
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Stack spacing={1}>
                 {dayEvents.length > 0 ? (
-                  dayEvents
-                    .slice(0, 3)
-                    .map(event => <EventCard key={event.id} event={event} compact />)
+                  dayEvents.slice(0, 3).map(ev => <EventCard key={ev.id} event={ev} compact />)
                 ) : (
                   <Typography variant="body2" color="text.secondary">
                     No events
                   </Typography>
                 )}
+
                 {dayEvents.length > 3 && (
                   <Typography variant="caption" color="text.secondary">
                     +{dayEvents.length - 3} more events
                   </Typography>
                 )}
-              </Box>
+              </Stack>
             </Paper>
           );
         })}
-      </Box>
+
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} />
+        {(isLoading || isLoadingMore) && (
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
+            Loading more…
+          </Typography>
+        )}
+      </Stack>
     );
   }
 
-  // Desktop: Show traditional week grid
+  // --------- Desktop layout: CSS Grid to guarantee equal-width day columns ---------
+  const nowHour = getHours(new Date());
+
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Week header */}
-      <Box
+    <Stack sx={{ height: '100%', width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+      {/* Week header as a single 8-column grid to prevent rounding drift */}
+      <Stack
         sx={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: `${GUTTER_WIDTH}px repeat(7, 1fr)`,
+          width: '100%',
+          maxWidth: '100%',
           borderBottom: 1,
           borderColor: 'divider',
           backgroundColor: theme.palette.grey[50],
+          boxSizing: 'border-box',
         }}
       >
-        <Box sx={{ width: 80, borderRight: 1, borderColor: 'divider' }} />
+        {/* Left gutter placeholder */}
+        <Stack sx={{ minWidth: 0, borderRight: 1, borderColor: 'divider' }} />
+
+        {/* Day headers */}
         {weekDays.map(day => (
-          <Box
+          <Stack
             key={day.toISOString()}
             sx={{
-              flex: 1,
+              minWidth: 0,
               p: 1,
-              borderRight: 1,
-              borderColor: 'divider',
               textAlign: 'center',
               cursor: 'pointer',
-              '&:hover': {
-                backgroundColor: theme.palette.action.hover,
-              },
-              backgroundColor: isToday(day) ? theme.palette.primary.main + '08' : 'transparent',
+              '&:hover': { backgroundColor: theme.palette.action.hover },
+              backgroundColor: isToday(day) ? `${theme.palette.primary.main}14` : 'transparent',
+              borderLeft: 1,
+              borderColor: 'divider',
+              boxSizing: 'border-box',
             }}
             onClick={() => handleDayClick(day)}
           >
             <Typography
               variant="caption"
               sx={{
-                display: 'block',
                 color: isToday(day) ? 'primary.main' : 'text.secondary',
                 fontWeight: 500,
+                lineHeight: 1.2,
               }}
             >
-              {day.toLocaleDateString('en-US', { weekday: 'short' })}
+              {format(day, 'EEE')}
             </Typography>
             <Typography
               variant="h6"
               sx={{
                 color: isToday(day) ? 'primary.main' : 'text.primary',
                 fontWeight: isToday(day) ? 600 : 400,
+                lineHeight: 1.2,
               }}
             >
-              {day.getDate()}
+              {format(day, 'd')}
             </Typography>
-          </Box>
+          </Stack>
         ))}
-      </Box>
+      </Stack>
 
-      {/* All-day events row */}
-      <Box
+      {/* All-day events row in the same 8-column grid */}
+      <Stack
         sx={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: `${GUTTER_WIDTH}px repeat(7, 1fr)`,
+          width: '100%',
+          maxWidth: '100%',
           minHeight: 60,
           borderBottom: 1,
           borderColor: 'divider',
           backgroundColor: theme.palette.grey[50],
+          boxSizing: 'border-box',
         }}
       >
-        <Box
+        {/* All-day label cell */}
+        <Stack
           sx={{
-            width: 80,
             p: 1,
-            borderRight: 1,
-            borderColor: 'divider',
-            display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
+            borderRight: 1,
+            borderColor: 'divider',
+            minWidth: 0,
+            boxSizing: 'border-box',
           }}
         >
           <Typography variant="caption" color="text.secondary">
             All day
           </Typography>
-        </Box>
-        {weekDays.map(day => {
-          const allDayEvents = getEventsForDay(day).filter(event => event.allDay);
+        </Stack>
 
+        {/* All-day columns */}
+        {weekDays.map(day => {
+          const allDayEvents = getEventsForDay(day).filter(ev => ev.allDay);
           return (
-            <Box
+            <Stack
               key={day.toISOString()}
               sx={{
-                flex: 1,
                 p: 0.5,
-                borderRight: 1,
-                borderColor: 'divider',
-                display: 'flex',
-                flexDirection: 'column',
                 gap: 0.5,
+                minWidth: 0,
+                borderLeft: 1,
+                borderColor: 'divider',
+                boxSizing: 'border-box',
               }}
             >
-              {allDayEvents.map(event => (
-                <EventCard key={event.id} event={event} compact />
+              {allDayEvents.map(ev => (
+                <EventCard key={ev.id} event={ev} compact />
               ))}
-            </Box>
+            </Stack>
           );
         })}
-      </Box>
+      </Stack>
 
-      {/* Time grid */}
-      <Box sx={{ flex: 1, overflow: 'auto' }}>
-        {timeSlots.map(hour => (
-          <Box
+      {/* Time grid: virtual vertical scroll, fixed 8-column grid per hour row */}
+      <Stack sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', width: '100%' }}>
+        {Array.from({ length: HOURS_IN_DAY }, (_, hour) => (
+          <Stack
             key={hour}
             sx={{
-              display: 'flex',
+              display: 'grid',
+              gridTemplateColumns: `${GUTTER_WIDTH}px repeat(7, 1fr)`,
+              width: '100%',
+              maxWidth: '100%',
               minHeight: 60,
               borderBottom: 1,
               borderColor: 'divider',
-              backgroundColor: isCurrentHour(hour)
-                ? theme.palette.primary.main + '04'
-                : 'transparent',
+              backgroundColor: nowHour === hour ? `${theme.palette.primary.main}0A` : 'transparent',
+              boxSizing: 'border-box',
             }}
           >
-            <Box
+            {/* Hour gutter */}
+            <Stack
               sx={{
-                width: 80,
                 p: 1,
-                borderRight: 1,
-                borderColor: 'divider',
-                display: 'flex',
                 alignItems: 'flex-start',
                 justifyContent: 'flex-end',
+                borderRight: 1,
+                borderColor: 'divider',
+                minWidth: 0,
+                boxSizing: 'border-box',
               }}
             >
               <Typography
                 variant="caption"
-                sx={{
-                  color: 'text.secondary',
-                  fontWeight: isCurrentHour(hour) ? 600 : 400,
-                }}
+                sx={{ color: 'text.secondary', fontWeight: nowHour === hour ? 600 : 400 }}
               >
-                {formatTime(hour)}
+                {format(startOfHour(new Date(2000, 0, 1, hour)), 'p')}
               </Typography>
-            </Box>
+            </Stack>
 
+            {/* 7 equal day columns, guaranteed by grid */}
             {weekDays.map(day => {
               const hourEvents = getEventsForDayAndHour(day, hour);
-
               return (
-                <Box
+                <Stack
                   key={day.toISOString()}
                   sx={{
-                    flex: 1,
                     p: 0.5,
-                    borderRight: 1,
-                    borderColor: 'divider',
-                    display: 'flex',
-                    flexDirection: 'column',
                     gap: 0.5,
+                    minWidth: 0,
+                    borderLeft: 1,
+                    borderColor: 'divider',
+                    boxSizing: 'border-box',
                   }}
                 >
-                  {hourEvents.map(event => (
-                    <EventCard key={event.id} event={event} compact />
+                  {hourEvents.map(ev => (
+                    <EventCard key={ev.id} event={ev} compact />
                   ))}
-                </Box>
+                </Stack>
               );
             })}
-          </Box>
+          </Stack>
         ))}
-      </Box>
-    </Box>
+
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} />
+        {(isLoading || isLoadingMore) && (
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
+            Loading more…
+          </Typography>
+        )}
+      </Stack>
+    </Stack>
   );
 }

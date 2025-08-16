@@ -27,7 +27,7 @@ export const routes = {
     { label: 'Locations', href: '/location', icon: <PlaceIcon />, showOnMobile: true },
     { label: 'Tags', href: '/tags', icon: <TagsIcon />, showOnMobile: true },
     { label: 'Manage', href: '/manage', icon: <BuildIcon />, showOnMobile: true },
-    { label: 'Settings', href: '/settings', icon: <SettingsIcon />, showOnMobile: true },
     { label: 'Account', href: '/account', icon: <AccountCircleIcon />, showOnMobile: true },
+    { label: 'Settings', href: '/settings', icon: <SettingsIcon />, showOnMobile: true },
   ],
 };

@@ -1,44 +1,28 @@
 import { Paper, Stack, Typography, useTheme } from '@mui/material';
+import { endOfDay, isSameMonth, isToday, startOfDay } from 'date-fns';
 
 import { CalendarView } from '@/features/calendar/types/CalendarView';
 import { LocationDayLabel } from '@/features/location/components/LocationDayLabel';
 import { useLocationsByDate } from '@/features/location/hooks/useLocationsByDate';
 import { MonthEventCard } from '@/legacy/components/calendar/MonthEventCard';
-import { useEventStore } from '@/legacy/store/eventStore';
-import { filterTodayEvents } from '@/legacy/utils/eventUtils';
+import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
 import { isWeekday } from '@/legacy/utils/timeUtils';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 interface MonthDayCardProps {
-  day: Date;
-  onNavigate: (date: Date, view: CalendarView) => void;
+  currentDate: Date;
+  onNavigateAction: (date: Date, view: CalendarView) => void;
 }
 
-export function MonthDayCard({ day, onNavigate }: MonthDayCardProps) {
+export function MonthDayCard({ currentDate, onNavigateAction }: MonthDayCardProps) {
   const theme = useTheme();
   const isMobile = useResponsiveness();
-  const events = useEventStore(state => state.events);
-  const currentDate = new Date();
+  const { data: events } = useCombinedEvents(startOfDay(currentDate), endOfDay(currentDate));
 
-  const getEventsForDay = (day: Date) => filterTodayEvents(events, day);
-
-  const { locations: dayLocations } = useLocationsByDate(day);
-
-  const isToday = (day: Date) => {
-    const today = new Date();
-    return (
-      day.getDate() === today.getDate() &&
-      day.getMonth() === today.getMonth() &&
-      day.getFullYear() === today.getFullYear()
-    );
-  };
-
-  const isCurrentMonth = (day: Date) => {
-    return day.getMonth() === currentDate.getMonth();
-  };
+  const { locations: dayLocations } = useLocationsByDate(currentDate);
 
   const handleDayClick = (day: Date) => {
-    onNavigate(day, 'day');
+    onNavigateAction(day, 'day');
   };
 
   const getBackgroundColor = (day: Date) => {
@@ -48,14 +32,8 @@ export function MonthDayCard({ day, onNavigate }: MonthDayCardProps) {
 
   const maxEventsToShow = isMobile ? 2 : 4;
 
-  const dayEvents = getEventsForDay(day);
-
-  const displayShowMore = (day: Date) => {
-    const numEvents = getEventsForDay(day).length;
-    if (numEvents === 0) return false;
-    if (numEvents <= maxEventsToShow) return false;
-    return true;
-  };
+  const currentDateIsToday = isToday(currentDate);
+  const displayShowMore = events.length > maxEventsToShow;
 
   return (
     <Paper
@@ -66,46 +44,46 @@ export function MonthDayCard({ day, onNavigate }: MonthDayCardProps) {
         display: 'flex',
         flexDirection: 'column',
         height: 130,
-        backgroundColor: getBackgroundColor(day),
+        backgroundColor: getBackgroundColor(currentDate),
         '&:hover': {
           backgroundColor: theme.palette.action.hover,
         },
-        ...(isToday(day) && {
+        ...(currentDateIsToday && {
           borderColor: 'primary.main',
           borderWidth: 2,
         }),
       }}
-      onClick={() => handleDayClick(day)}
+      onClick={() => handleDayClick(currentDate)}
     >
       {/* Day number */}
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography
           variant="caption"
           lineHeight={1}
-          fontWeight={isToday(day) ? 'bold' : 'normal'}
+          fontWeight={currentDateIsToday ? 'bold' : 'normal'}
           sx={{
-            color: isCurrentMonth(day)
-              ? isToday(day)
+            color: isSameMonth(currentDate, new Date())
+              ? currentDateIsToday
                 ? 'primary.main'
                 : 'text.primary'
               : 'text.secondary',
           }}
         >
-          {day.getDate().toString().padStart(2, '0')}
+          {currentDate.getDate().toString().padStart(2, '0')}
         </Typography>
 
         <LocationDayLabel locations={dayLocations} />
       </Stack>
 
       <Stack>
-        {dayEvents.slice(0, maxEventsToShow).map(event => (
+        {events.slice(0, maxEventsToShow).map(event => (
           <MonthEventCard key={event.id} event={event} />
         ))}
       </Stack>
 
-      {displayShowMore(day) && (
+      {displayShowMore && (
         <Typography variant="caption" color="text.secondary" textAlign="end">
-          +{dayEvents.length - maxEventsToShow} more
+          +{events.length - maxEventsToShow} more
         </Typography>
       )}
     </Paper>

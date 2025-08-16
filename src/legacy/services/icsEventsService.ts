@@ -48,6 +48,7 @@ export async function fetchIcsEvents(
           attendeeCount: ev.attendeeCount,
           description: ev.description,
           calendar: ev.calendar as ICalendar,
+          allDay: ev.allDay,
         }));
       })
       .catch(err => {

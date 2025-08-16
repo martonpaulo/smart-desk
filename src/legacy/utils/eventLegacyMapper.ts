@@ -13,6 +13,7 @@ export function mapToLegacyEvent(event: Event): LegacyEvent {
     trashed: event.trashed,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
+    source: 'local',
   };
 }
 

@@ -13,4 +13,5 @@ export interface Event {
   trashed?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  source?: 'local' | 'google' | 'ics';
 }

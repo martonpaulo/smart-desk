@@ -8,7 +8,7 @@ import { useAlertSound } from '@/legacy/hooks/useAlertSound';
 import { useEventChanges } from '@/legacy/hooks/useEventChanges';
 import type { Event } from '@/legacy/types/Event';
 import { IAlertType } from '@/legacy/types/IAlertType';
-import { filterNonFullDayEvents, filterTodayEvents } from '@/legacy/utils/eventUtils';
+import { filterTodayEvents } from '@/legacy/utils/eventUtils';
 import { parseBold } from '@/legacy/utils/textUtils';
 
 interface ChangeSnackbarProps {
@@ -19,7 +19,7 @@ interface ChangeSnackbarProps {
 const AUTO_HIDE_DURATION = 1000 * 20; // 20 seconds
 
 export function ChangeSnackbar({ events, eventChangesAlertEnabled }: ChangeSnackbarProps) {
-  const withoutFullDay = filterNonFullDayEvents(events);
+  const withoutFullDay = events.filter(e => !e.allDay);
   const todaysEvents = filterTodayEvents(withoutFullDay);
 
   const changes = useEventChanges(todaysEvents);

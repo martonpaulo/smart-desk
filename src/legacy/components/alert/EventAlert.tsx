@@ -4,8 +4,6 @@ import {
   calculateMinutesUntilEvent,
   computeEventStatus,
   filterCurrentOrFutureEvents,
-  filterNonFullDayEvents,
-  sortEventsByStart,
 } from '@/legacy/utils/eventUtils';
 
 interface EventAlertProps {
@@ -26,8 +24,7 @@ export function EventAlert({
   const shownRef = useRef(new Set<string>());
   if (!events) return null;
 
-  const sortedByStart = sortEventsByStart(events);
-  const withoutFullDay = filterNonFullDayEvents(sortedByStart);
+  const withoutFullDay = events.filter(e => !e.allDay);
   const upcomingEvents = filterCurrentOrFutureEvents(withoutFullDay);
 
   const eventsToShow = upcomingEvents.filter(event => {
