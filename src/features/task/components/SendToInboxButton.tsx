@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
-import { addDays, isBefore, isSameDay, startOfDay } from 'date-fns';
+import { addDays, isBefore, startOfDay } from 'date-fns';
 
 import { TaskActionButton } from '@/features/task/components/TaskActionButton';
 import { useBoardStore } from '@/legacy/store/board/store';
@@ -15,31 +15,22 @@ export function SendToInboxButton({ task }: SendToInboxButtonProps) {
   const updateTask = useBoardStore(s => s.updateTask);
 
   const sendToInbox = useCallback(async () => {
-    const today = startOfDay(new Date());
+    const tomorrow = startOfDay(addDays(new Date(), 1));
 
     let newPlannedDate: Date;
 
-    if (!task.plannedDate) {
-      // No date → set to tomorrow
-      newPlannedDate = addDays(today, 1);
+    if (!task.plannedDate || isBefore(task.plannedDate, tomorrow)) {
+      newPlannedDate = tomorrow;
     } else {
-      const planned = startOfDay(new Date(task.plannedDate));
-
-      if (isSameDay(planned, today) || isBefore(planned, today)) {
-        // Today or in the past → set to tomorrow
-        newPlannedDate = addDays(today, 1);
-      } else {
-        // Future date → keep it
-        newPlannedDate = planned;
-      }
+      newPlannedDate = task.plannedDate;
     }
 
     await updateTask({
       ...task,
       blocked: false,
-      classifiedDate: today,
+      classifiedDate: new Date(),
       plannedDate: newPlannedDate,
-      updatedAt: today,
+      updatedAt: new Date(),
     });
   }, [task, updateTask]);
 
