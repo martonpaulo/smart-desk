@@ -8,7 +8,6 @@ import { Box, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import { TaskContainer } from '@/legacy/components/task/TaskContainer';
 import { customColors } from '@/legacy/styles/colors';
 import type { Event } from '@/legacy/types/Event';
-import { getDateLabel } from '@/legacy/utils/timeUtils';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 type ConvertibleEventCardProps = {
@@ -127,8 +126,11 @@ export function ConvertibleEventCard({
           </Stack>
 
           <Stack direction="row" alignItems="center" gap={0.75}>
-            <Typography variant="caption" color={disabled ? 'text.disabled' : 'text.secondary'}>
-              {getDateLabel(event.start)}
+            <Typography
+              variant="caption"
+              color={disabled || !event.calendar ? 'text.disabled' : 'text.secondary'}
+            >
+              {event.calendar?.name || 'No Calendar'}
             </Typography>
           </Stack>
         </Stack>

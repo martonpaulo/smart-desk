@@ -47,6 +47,7 @@ export function InboxSection({
           <ConvertibleEventCard
             key={ev.id}
             event={ev}
+            hasDefaultWidth={false}
             disabled={isSelecting}
             onTaskDragStart={(id, e) => onEventDragStartAction(id, e)}
             onTaskDragOver={(_id, e) => onEventDragOverAction(e)}
