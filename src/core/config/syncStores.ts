@@ -32,7 +32,7 @@ export const SYNC_FEATURES: readonly FeatureDef[] = [
   },
   {
     key: 'settings',
-    routes: ['/settings'],
+    routes: ['/', '/settings'],
     exportName: 'useSettingsStorage',
     interval: SyncInterval.MEDIUM,
     loader: () => import('@/legacy/store/settings/store'),
@@ -46,7 +46,7 @@ export const SYNC_FEATURES: readonly FeatureDef[] = [
   },
   {
     key: 'tags',
-    routes: ['/tags', '/planner'],
+    routes: ['/', '/tags', '/planner'],
     exportName: 'useTagsStore',
     interval: SyncInterval.LOW,
     loader: () => import('@/features/tag/store/useTagsStore'),

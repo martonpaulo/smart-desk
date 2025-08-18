@@ -18,10 +18,17 @@ function isAlways(def: FeatureDef): boolean {
   return !def.routes || def.routes.length === 0;
 }
 
-// Match when the current pathname starts with any configured route.
+// Match the current pathname against configured routes.
+//
+// The root path '/' is treated specially to avoid matching every route
+// (since every pathname starts with '/'). This allows features to opt-in
+// to a one-time sync on the home screen without syncing again on other
+// pages.
 function matchesRoute(def: FeatureDef, pathname: string): boolean {
   if (isAlways(def)) return true;
-  return def.routes!.some(route => pathname.startsWith(route));
+  return def.routes!.some(route =>
+    route === '/' ? pathname === '/' : pathname.startsWith(route),
+  );
 }
 
 // Import the store using the feature-provided static loader.
