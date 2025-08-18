@@ -1,7 +1,7 @@
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BoltIcon from '@mui/icons-material/Bolt';
-import BuildIcon from '@mui/icons-material/Build';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import HomeIcon from '@mui/icons-material/Home';
 import ImageIcon from '@mui/icons-material/Image';
 import TagsIcon from '@mui/icons-material/LocalOffer';
@@ -26,7 +26,7 @@ export const routes = {
   secondary: [
     { label: 'Locations', href: '/location', icon: <PlaceIcon />, showOnMobile: true },
     { label: 'Tags', href: '/tags', icon: <TagsIcon />, showOnMobile: true },
-    { label: 'Manage', href: '/manage', icon: <BuildIcon />, showOnMobile: true },
+    { label: 'ICS', href: '/ics', icon: <EditCalendarIcon />, showOnMobile: true },
     { label: 'Account', href: '/account', icon: <AccountCircleIcon />, showOnMobile: true },
     { label: 'Settings', href: '/settings', icon: <SettingsIcon />, showOnMobile: true },
   ],
