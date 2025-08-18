@@ -102,7 +102,10 @@ export function mapIcsCalendarToDB(calendar: IcsCalendar, userId: string): RawIc
     source: calendar.source,
     color: calendar.color,
     updated_at: new Date().toISOString(),
-    created_at: calendar.createdAt.toISOString(),
+    created_at:
+      calendar.createdAt instanceof Date
+        ? calendar.createdAt.toISOString()
+        : new Date().toISOString(),
     trashed: calendar.trashed ?? false,
   };
 }

@@ -6,8 +6,10 @@ export function baseMapToDB<T extends Base>(entity: T, userId: string): RawBase 
     id: entity.id,
     user_id: userId,
     trashed: entity.trashed,
-    created_at: entity.createdAt.toISOString(),
-    updated_at: entity.updatedAt.toISOString(),
+    created_at:
+      entity.createdAt instanceof Date ? entity.createdAt.toISOString() : entity.createdAt,
+    updated_at:
+      entity.updatedAt instanceof Date ? entity.updatedAt.toISOString() : entity.updatedAt,
   };
 }
 
