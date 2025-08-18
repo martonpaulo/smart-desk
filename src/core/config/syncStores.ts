@@ -18,7 +18,7 @@ export const SYNC_FEATURES: readonly FeatureDef[] = [
   },
   {
     key: 'events',
-    routes: ['/calendar', '/locations', '/planner'],
+    routes: ['/', '/calendar', '/locations', '/planner'],
     exportName: 'useLocalEventsStore',
     interval: SyncInterval.HIGH,
     loader: () => import('@/features/event/store/useLocalEventsStore'),
