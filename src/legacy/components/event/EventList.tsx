@@ -31,7 +31,7 @@ export function EventList() {
   const [editingEvent, setEditingEvent] = useState<LocalEvent | null>(null);
   const [newModalOpen, setNewModalOpen] = useState(false);
 
-  const filteredEvents = events.filter(e => !e.allDay);
+  const filteredEvents = events.filter(e => !e.allDay && new Date(e.end) >= new Date());
 
   const columnColor = alpha(theme.palette.primary.light, 0.2);
   const darkenColor = alpha(theme.palette.primary.light, 0.4);
