@@ -3,11 +3,18 @@ export function isOnline(): boolean {
   return typeof navigator === 'undefined' ? true : navigator.onLine;
 }
 
-// Run a callback after the browser is idle or ASAP as a fallback.
-export function runIdle(fn: () => void) {
-  if (typeof window === 'undefined' || !window.requestIdleCallback) return;
-  const asap = () => setTimeout(fn, 0);
-  return window.requestIdleCallback ? window.requestIdleCallback(fn) : asap();
+// Run a callback after the browser is idle. Fall back to a timeout when
+// `requestIdleCallback` is unavailable (e.g. Safari). This ensures the sync
+// triggers once the UI is painted without blocking hydration.
+export function runIdle(fn: () => void): void {
+  if (typeof window === 'undefined') return;
+
+  if (typeof window.requestIdleCallback === 'function') {
+    window.requestIdleCallback(fn);
+    return;
+  }
+
+  window.setTimeout(fn, 0);
 }
 
 // Schedule a periodic async sync function and return a cleanup callback.
