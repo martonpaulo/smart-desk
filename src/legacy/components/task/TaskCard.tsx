@@ -253,7 +253,7 @@ export function TaskCard({
 
                   <TitleBlock
                     mode="read"
-                    dense
+                    dense={dense}
                     title={task.title || 'Untitled Task'}
                     done={done}
                     untitled={!task.title}
