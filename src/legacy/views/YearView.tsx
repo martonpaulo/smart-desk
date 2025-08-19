@@ -84,7 +84,7 @@ export function YearView({ currentDate, onNavigateAction }: CalendarViewProps) {
             >
               {/* Month name */}
               <Typography
-                variant="h6"
+                variant="h3"
                 sx={{
                   mb: 2,
                   textAlign: 'center',

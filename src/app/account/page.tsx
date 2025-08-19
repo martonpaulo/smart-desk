@@ -43,7 +43,7 @@ export default function AccountPage() {
         <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Stack spacing={1.5}>
-              <Typography variant="h6" component="div">
+              <Typography variant="h3" component="div">
                 Authentication
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -88,7 +88,7 @@ export default function AccountPage() {
         <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Stack spacing={1.5}>
-              <Typography variant="h6" component="div">
+              <Typography variant="h3" component="div">
                 Connection status
               </Typography>
               <Typography variant="body2" color="text.secondary">

@@ -102,7 +102,7 @@ export function WeekView({ currentDate, onNavigateAction }: CalendarViewProps) {
               onClick={() => handleDayClick(day)}
             >
               <Typography
-                variant="h6"
+                variant="h3"
                 sx={{
                   mb: 1,
                   color: isToday(day) ? 'primary.main' : 'text.primary',
@@ -191,7 +191,7 @@ export function WeekView({ currentDate, onNavigateAction }: CalendarViewProps) {
               {format(day, 'EEE')}
             </Typography>
             <Typography
-              variant="h6"
+              variant="h3"
               sx={{
                 color: isToday(day) ? 'primary.main' : 'text.primary',
                 fontWeight: isToday(day) ? 600 : 400,

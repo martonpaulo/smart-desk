@@ -35,7 +35,7 @@ export function MapCard({ map, file }: MapCardProps) {
         {renderPreview()}
         <CardContent>
           <Stack gap={1}>
-            <Typography variant="h6" noWrap>
+            <Typography variant="h3" noWrap>
               {map.name}
             </Typography>
           </Stack>

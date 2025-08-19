@@ -238,7 +238,7 @@ export function renderMarkdown(
       // Handle headings and plain text
       if (/^### /.test(line)) {
         elements.push(
-          <Typography key={idx} variant="h6" fontWeight="bold" fontSize={'1.125rem'}>
+          <Typography key={idx} variant="h3" fontWeight="bold" fontSize={'1.125rem'}>
             {parseSafeHtml(inlineToHtml(line.slice(4)))}
           </Typography>,
         );

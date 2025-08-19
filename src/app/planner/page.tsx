@@ -219,7 +219,7 @@ export default function DayPlannerPage() {
           }}
         >
           <Stack direction="row" alignItems="center" gap={1} mb={2}>
-            <Typography variant="h6">Inbox</Typography>
+            <Typography variant="h3">Inbox</Typography>
             <CountChip count={inboxCount} color={theme.palette.primary.main} />
           </Stack>
 

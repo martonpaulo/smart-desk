@@ -72,7 +72,7 @@ export default function SettingsPage() {
         <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Stack spacing={1.5} alignItems="flex-start">
-              <Typography variant="h6" component="div">
+              <Typography variant="h3" component="div">
                 Sound
               </Typography>
 
@@ -134,7 +134,7 @@ export default function SettingsPage() {
         <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Stack spacing={1.5} alignItems="flex-start">
-              <Typography variant="h6" component="div">
+              <Typography variant="h3" component="div">
                 Interface zoom
               </Typography>
 
@@ -153,7 +153,7 @@ export default function SettingsPage() {
         <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Stack spacing={1.5} alignItems="flex-start">
-              <Typography variant="h6" component="div">
+              <Typography variant="h3" component="div">
                 Daily reset
               </Typography>
 
@@ -177,7 +177,7 @@ export default function SettingsPage() {
         <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Stack spacing={1.5}>
-              <Typography variant="h6" component="div">
+              <Typography variant="h3" component="div">
                 Version
               </Typography>
 

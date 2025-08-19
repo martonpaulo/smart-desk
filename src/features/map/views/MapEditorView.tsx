@@ -202,7 +202,7 @@ export function MapEditorView({ mapId }: { mapId: string }) {
 
       <Drawer anchor="right" open={Boolean(selected)} onClose={() => setSelected(null)}>
         <Stack width={320} p={2} gap={2}>
-          <Typography variant="h6">Region {selected}</Typography>
+          <Typography variant="h3">Region {selected}</Typography>
           <ColorPicker
             name="color"
             label="Color"

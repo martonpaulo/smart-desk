@@ -71,6 +71,10 @@ export function ConvertibleEventCard({
       tabIndex={disabled ? -1 : 0}
       data-disabled={disabled ? 'true' : 'false'}
       sx={{
+        gap: 0.25,
+        px: 1,
+        py: 1,
+        minHeight: 'auto',
         opacity: disabled ? 0.55 : 1,
         cursor: disabled ? 'not-allowed' : 'grab',
         // keep layout stable while visually indicating disabled state
@@ -101,7 +105,7 @@ export function ConvertibleEventCard({
           />
         </Stack>
 
-        <Stack direction="column" flexGrow={1} gap={0.5}>
+        <Stack direction="column" flexGrow={1} gap={0.25}>
           <Stack direction="row" alignItems="center" flexWrap="wrap">
             {event.description && (
               <Tooltip title="Has description" disableInteractive>
@@ -110,13 +114,13 @@ export function ConvertibleEventCard({
                   sx={{
                     fontSize: theme.typography.caption.fontSize,
                     alignSelf: 'center',
-                    mr: 0.5,
+                    mr: 0.25,
                   }}
                 />
               </Tooltip>
             )}
             <Typography
-              variant={isMobile ? 'body1' : 'body2'}
+              variant={'body2'}
               noWrap
               title={title}
               color={disabled ? 'text.disabled' : 'text.primary'}
@@ -125,14 +129,12 @@ export function ConvertibleEventCard({
             </Typography>
           </Stack>
 
-          <Stack direction="row" alignItems="center" gap={0.75}>
-            <Typography
-              variant="caption"
-              color={disabled || !event.calendar ? 'text.disabled' : 'text.secondary'}
-            >
-              {event.calendar?.name || 'No Calendar'}
-            </Typography>
-          </Stack>
+          <Typography
+            variant="caption"
+            color={disabled || !event.calendar ? 'text.disabled' : 'text.secondary'}
+          >
+            {event.calendar?.name || 'No Calendar'}
+          </Typography>
         </Stack>
       </Stack>
     </TaskContainer>

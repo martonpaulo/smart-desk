@@ -59,6 +59,7 @@ export function InboxSection({
         <TaskCard
           key={task.id}
           task={task}
+          dense
           hasDefaultWidth={false}
           color={theme.palette.primary.main}
           showActions={!isSelecting}

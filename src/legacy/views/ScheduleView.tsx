@@ -116,7 +116,7 @@ export function ScheduleView({ onNavigateAction }: CalendarViewProps) {
       <Stack sx={{ flex: 1, overflow: 'auto' }}>
         {isEmpty ? (
           <Stack alignItems="center" justifyContent="center" sx={{ height: '100%', p: 4 }}>
-            <Typography variant="h6" color="text.secondary" gutterBottom>
+            <Typography variant="h3" color="text.secondary" gutterBottom>
               No events found
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -141,7 +141,7 @@ export function ScheduleView({ onNavigateAction }: CalendarViewProps) {
                       zIndex: 1,
                     }}
                   >
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h3" sx={{ fontWeight: 600 }}>
                       {relativeLabel(date)}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">

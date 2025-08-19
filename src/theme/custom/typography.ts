@@ -30,9 +30,9 @@ export const typography = {
     letterSpacing: '0em',
   },
   h6: {
-    fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-    fontWeight: 500,
-    lineHeight: 1.6,
+    fontSize: 'clamp(0.5rem, 1.5vw, 0.65rem)',
+    fontWeight: 400,
+    lineHeight: 1.2,
     letterSpacing: '0.0075em',
   },
   subtitle1: {

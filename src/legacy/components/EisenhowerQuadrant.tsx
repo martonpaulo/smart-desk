@@ -127,7 +127,7 @@ export function EisenhowerQuadrant({
           <Stack direction="row" alignItems="center" gap={1} minWidth={0}>
             {showIcon && <Icon color={iconColor} fontSize={iconSize} />}
             <Typography
-              variant={isMobile ? 'subtitle1' : 'h6'}
+              variant={isMobile ? 'subtitle1' : 'h3'}
               sx={{
                 color: quadrantColor,
                 whiteSpace: 'nowrap',
@@ -201,6 +201,7 @@ export function EisenhowerQuadrant({
                 key={task.id}
                 hasDefaultWidth={false}
                 task={task}
+                dense
                 eisenhowerIcons={false}
                 color={quadrantColor}
                 showActions={!isDragInProgress && !selectable}

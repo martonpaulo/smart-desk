@@ -11,6 +11,7 @@ type ReadProps = {
   untitled?: boolean;
   textVariantSize?: 'body1' | 'body2';
   onClickTitle?: () => void;
+  dense?: boolean;
   sx?: SxProps;
 };
 
@@ -21,6 +22,7 @@ type EditProps = {
   onChangeTitle: (value: string) => void;
   onBlurSave: () => void;
   onCancel: () => void;
+  dense?: boolean;
   sx?: SxProps;
 };
 
@@ -59,10 +61,10 @@ export function TitleBlock(props: TitleBlockProps) {
 
   return (
     <Typography
-      variant="body2"
+      variant={props.dense ? 'h6' : 'body2'}
       sx={[
         {
-          fontSize: theme.typography[textVariantSize].fontSize,
+          fontSize: props.dense ? 'h6' : theme.typography[textVariantSize].fontSize,
           userSelect: 'none',
           textDecoration: done ? 'line-through' : 'none',
           cursor: 'pointer',

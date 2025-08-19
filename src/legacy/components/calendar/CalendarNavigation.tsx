@@ -11,16 +11,16 @@ import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 interface CalendarNavigationProps {
   currentDate: Date;
   currentView: CalendarView;
-  onDateChange: (date: Date) => void;
-  onViewChange: (view: CalendarView) => void;
+  onDateChangeAction: (date: Date) => void;
+  onViewChangeAction: (view: CalendarView) => void;
   onNavigate: (date: Date, view: CalendarView) => void;
 }
 
 export function CalendarNavigation({
   currentDate,
   currentView,
-  onDateChange,
-  onViewChange,
+  onDateChangeAction,
+  onViewChangeAction,
 }: CalendarNavigationProps) {
   const isMobile = useResponsiveness();
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState<null | HTMLElement>(null);
@@ -60,16 +60,16 @@ export function CalendarNavigation({
 
   const handleNavigation = (direction: 'prev' | 'next') => {
     const newDate = getNavigationDate(direction);
-    onDateChange(newDate);
+    onDateChangeAction(newDate);
   };
 
   const handleToday = () => {
     const today = new Date();
-    onDateChange(today);
+    onDateChangeAction(today);
   };
 
   const handleViewChange = (view: CalendarView) => {
-    onViewChange(view);
+    onViewChangeAction(view);
     setMobileMenuAnchor(null);
   };
 
@@ -135,7 +135,7 @@ export function CalendarNavigation({
 
       {/* Center - Date Range */}
       <Typography
-        variant="h6"
+        variant="h3"
         sx={{
           fontWeight: 500,
           textAlign: 'center',

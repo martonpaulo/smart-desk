@@ -32,6 +32,7 @@ import { formatFullDuration } from '@/shared/utils/timeUtils';
 type TaskCardBaseProps = {
   task: Task;
   color: string;
+  dense?: boolean;
   hasDefaultWidth?: boolean;
   eisenhowerIcons?: boolean;
   showDuration?: boolean;
@@ -52,6 +53,7 @@ type TaskCardBaseProps = {
 export function TaskCard({
   task,
   color,
+  dense = false,
   hasDefaultWidth,
   eisenhowerIcons = true,
   showDaily = true,
@@ -199,6 +201,7 @@ export function TaskCard({
         isDragging={isDragging}
         dense={isMobile}
         hasDefaultWidth={hasDefaultWidth}
+        sx={dense ? { gap: 0.25, px: 1, py: 1, minHeight: 'auto' } : undefined}
       >
         {selectable && (
           <Checkbox
@@ -216,10 +219,11 @@ export function TaskCard({
           <SyncedSyncIcon status={mappedStatus} fontSize="inherit" color="action" />
         )}
 
-        <Stack direction="column" flexGrow={1} gap={0.5}>
+        <Stack direction="column" flexGrow={1} gap={dense ? 0.25 : 0.5}>
           {isEditing ? (
             <TitleBlock
               mode="edit"
+              dense
               title={title}
               inputRef={inputRef as React.RefObject<HTMLInputElement>}
               onChangeTitle={setTitle}
@@ -232,7 +236,7 @@ export function TaskCard({
             />
           ) : (
             <>
-              <Stack direction="row" justifyContent="space-between" gap={1}>
+              <Stack direction="row" justifyContent="space-between" gap={dense ? 0.5 : 1}>
                 <Stack direction="row" alignItems="center" flexWrap="wrap">
                   {task.notes && (
                     <Tooltip title="Has notes">
@@ -241,7 +245,7 @@ export function TaskCard({
                         sx={{
                           fontSize: theme.typography.caption.fontSize,
                           alignSelf: 'center',
-                          mr: 0.5,
+                          mr: dense ? 0.25 : 0.5,
                         }}
                       />
                     </Tooltip>
@@ -249,6 +253,7 @@ export function TaskCard({
 
                   <TitleBlock
                     mode="read"
+                    dense
                     title={task.title || 'Untitled Task'}
                     done={done}
                     untitled={!task.title}
@@ -265,7 +270,7 @@ export function TaskCard({
                       <Typography
                         component="span"
                         sx={{
-                          fontSize: 16,
+                          fontSize: dense ? 10 : 16,
                           lineHeight: 1,
                           fontWeight: 400,
                           transform: 'rotate(240deg) translateX(2px)',
@@ -281,7 +286,11 @@ export function TaskCard({
                 </Stack>
 
                 {isCountTask && (
-                  <Typography variant="caption" color="text.secondary" sx={{ opacity }}>
+                  <Typography
+                    variant={dense ? 'h6' : 'caption'}
+                    color="text.secondary"
+                    sx={{ opacity }}
+                  >
                     {task.quantityDone}/{task.quantityTarget}
                   </Typography>
                 )}
@@ -289,11 +298,16 @@ export function TaskCard({
 
               <MetaRow
                 opacity={opacity}
-                tagComp={taskTag && showTag ? <TagLabel tag={taskTag} /> : null}
+                dense={dense}
+                tagComp={
+                  taskTag && showTag ? (
+                    <TagLabel tag={taskTag} size={dense ? 'x-small' : 'small'} />
+                  ) : null
+                }
                 durationComp={
                   showDuration ? (
                     <Typography
-                      variant="caption"
+                      variant={dense ? 'h6' : 'caption'}
                       color={task.estimatedTime ? 'text.secondary' : 'text.disabled'}
                     >
                       {task.estimatedTime
@@ -304,7 +318,7 @@ export function TaskCard({
                 }
                 separatorComp={
                   showDuration && showDate ? (
-                    <Typography variant="caption" color="text.disabled">
+                    <Typography variant={dense ? 'h6' : 'caption'} color="text.disabled">
                       |
                     </Typography>
                   ) : null
@@ -312,7 +326,7 @@ export function TaskCard({
                 dateComp={
                   showDate ? (
                     <Typography
-                      variant="caption"
+                      variant={dense ? 'h6' : 'caption'}
                       color={task.plannedDate ? 'text.secondary' : 'text.disabled'}
                     >
                       {getDateLabel(task.plannedDate)}

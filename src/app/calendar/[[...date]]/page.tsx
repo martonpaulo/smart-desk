@@ -135,8 +135,8 @@ export default function CalendarPage() {
           <CalendarNavigation
             currentDate={currentDate}
             currentView={currentView}
-            onDateChange={handleDateChange}
-            onViewChange={handleViewChange}
+            onDateChangeAction={handleDateChange}
+            onViewChangeAction={handleViewChange}
             onNavigate={navigateToDate}
           />
 
