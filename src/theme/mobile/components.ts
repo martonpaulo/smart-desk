@@ -80,16 +80,14 @@ export const mobileComponentsOverrides: Components<Omit<Theme, 'components'>> = 
   // Dialog and menus transitions kept but scoped to mobile via slotProps styles
   MuiDialog: {
     defaultProps: {
-      // these are harmless globally, but if you want truly mobile-only, keep them and rely on CSS for sizing
-      slots: { transition: Grow },
-      slotProps: { transition: { timeout: { enter: 160, exit: 120 } } },
+      TransitionComponent: Grow,
+      TransitionProps: { timeout: { enter: 160, exit: 120 } },
       disableScrollLock: true,
       fullWidth: true,
     },
     styleOverrides: {
       paper: ({ theme }) => ({
         [mobileRoot + ' &']: {
-          // approximate maxWidth="mobileLg" without changing prop
           margin: theme.spacing(1),
           width: 'calc(100% - 16px)',
           maxWidth: theme.breakpoints.values.mobileLg,
@@ -100,38 +98,36 @@ export const mobileComponentsOverrides: Components<Omit<Theme, 'components'>> = 
 
   MuiMenu: {
     defaultProps: {
-      slots: { transition: Grow },
-      slotProps: { transition: { timeout: { enter: 140, exit: 100 } } },
+      TransitionComponent: Grow,
+      TransitionProps: { timeout: { enter: 140, exit: 100 } },
       MenuListProps: { disablePadding: false, autoFocusItem: false },
     },
     styleOverrides: {
       paper: {
-        [mobileRoot + ' &']: {
-          // keep anchors visually consistent on mobile via CSS transforms
-          transformOrigin: 'top right',
-        },
+        [mobileRoot + ' &']: { transformOrigin: 'top right' },
       },
     },
   },
 
   MuiSnackbar: {
     defaultProps: {
-      slots: { transition: Slide },
-      slotProps: { transition: { direction: 'up', timeout: { enter: 120, exit: 80 } } },
+      TransitionComponent: Slide,
+      TransitionProps: {
+        timeout: { enter: 120, exit: 80 },
+      },
+      slotProps: {
+        transition: {
+          direction: 'up',
+        },
+      },
     },
     styleOverrides: {
-      root: {
-        [mobileRoot + ' &']: { maxWidth: '100vw' },
-      },
-      anchorOriginBottomCenter: {
-        [mobileRoot + ' &']: { bottom: 8 },
-      },
+      root: { [mobileRoot + ' &']: { maxWidth: '100vw' } },
+      anchorOriginBottomCenter: { [mobileRoot + ' &']: { bottom: 8 } },
     },
   },
 
-  MuiCollapse: {
-    defaultProps: { timeout: { enter: 140, exit: 110 } },
-  },
+  MuiCollapse: { defaultProps: { timeout: { enter: 140, exit: 110 } } },
 
   MuiModal: {
     defaultProps: {
@@ -139,10 +135,14 @@ export const mobileComponentsOverrides: Components<Omit<Theme, 'components'>> = 
     },
   },
 
+  MuiBackdrop: {
+    defaultProps: { transitionDuration: { enter: 120, exit: 100 } },
+  },
+
   MuiPopover: {
     defaultProps: {
-      slots: { transition: Grow },
-      slotProps: { transition: { timeout: { enter: 140, exit: 100 } } },
+      TransitionComponent: Grow,
+      TransitionProps: { timeout: { enter: 140, exit: 100 } },
     },
   },
 

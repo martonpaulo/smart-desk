@@ -1,11 +1,12 @@
 import { alpha } from '@mui/material/styles';
 
+const reducedMotionGate = ':root[data-mobile-motion="reduced"]';
 const mobileRoot = ':root[data-mobile="true"]';
 
 export function buildMobileGlobalStyles() {
   return {
     // Respect OS-level reduced motion for everyone
-    '@media (prefers-reduced-motion: reduce)': {
+    [reducedMotionGate]: {
       '*, *::before, *::after': {
         animationDuration: '0.01ms !important',
         animationIterationCount: '1 !important',
