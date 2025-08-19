@@ -1,7 +1,10 @@
 import { alpha } from '@mui/material/styles';
 
+const mobileRoot = ':root[data-mobile="true"]';
+
 export function buildMobileGlobalStyles() {
   return {
+    // Respect OS-level reduced motion for everyone
     '@media (prefers-reduced-motion: reduce)': {
       '*, *::before, *::after': {
         animationDuration: '0.01ms !important',
@@ -10,35 +13,41 @@ export function buildMobileGlobalStyles() {
         scrollBehavior: 'auto !important',
       },
     },
-    '@media (hover: none), (pointer: coarse)': {
-      '.MuiTooltip-popper': { display: 'none !important' },
-      '.MuiTouchRipple-root': { display: 'none !important' },
-      '.MuiPopover-paper, .MuiMenu-paper, .MuiDialog-paper': {
-        transitionDuration: '120ms !important',
-        willChange: 'opacity, transform',
+
+    // Mobile-only tweaks gated by explicit flag
+    [mobileRoot]: {
+      '@media (hover: none), (pointer: coarse)': {
+        '.MuiTooltip-popper': { display: 'none !important' },
+        '.MuiTouchRipple-root': { display: 'none !important' },
+        '.MuiPopover-paper, .MuiMenu-paper, .MuiDialog-paper': {
+          transitionDuration: '120ms !important',
+          willChange: 'opacity, transform',
+        },
+        '.MuiSkeleton-root.MuiSkeleton-wave::after': {
+          animationDuration: '1.2s !important',
+          opacity: 0.25,
+        },
+        a: { WebkitTapHighlightColor: 'transparent' },
+        button: { WebkitTapHighlightColor: 'transparent' },
+        '*:focus': { outline: 'none' },
       },
-      '.MuiSkeleton-root.MuiSkeleton-wave::after': {
-        animationDuration: '1.2s !important',
-        opacity: 0.25,
+
+      // Safe area, color, and scroll behavior only in mobile mode
+      body: {
+        overscrollBehaviorY: 'none',
+        backgroundColor: 'var(--mui-palette-background-default)',
+        color: 'var(--mui-palette-text-primary)',
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
       },
-      a: { WebkitTapHighlightColor: 'transparent' },
-      button: { WebkitTapHighlightColor: 'transparent' },
-      '*:focus': { outline: 'none' },
+
+      'input, select, textarea': { fontSize: 16 },
+      '.no-overscroll': { overscrollBehavior: 'contain' },
     },
+
+    // Global, not mobile-specific
     html: { WebkitTextSizeAdjust: '100%' },
-    body: {
-      overscrollBehaviorY: 'none',
-      backgroundColor: 'var(--mui-palette-background-default)',
-      color: 'var(--mui-palette-text-primary)',
-      paddingTop: 'env(safe-area-inset-top)',
-      paddingBottom: 'env(safe-area-inset-bottom)',
-    },
     '*::-webkit-scrollbar': { width: 6, height: 6 },
-    '*::-webkit-scrollbar-thumb': {
-      backgroundColor: alpha('#000', 0.2),
-      borderRadius: 999,
-    },
-    'input, select, textarea': { fontSize: 16 },
-    '.no-overscroll': { overscrollBehavior: 'contain' },
+    '*::-webkit-scrollbar-thumb': { backgroundColor: alpha('#000', 0.2), borderRadius: 999 },
   };
 }

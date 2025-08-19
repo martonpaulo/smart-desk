@@ -2,49 +2,99 @@ import type { Components, Theme } from '@mui/material';
 import Grow from '@mui/material/Grow';
 import Slide from '@mui/material/Slide';
 
+const mobileRoot = ':root[data-mobile="true"]';
+
 export const mobileComponentsOverrides: Components<Omit<Theme, 'components'>> = {
-  // Smaller components when screen is small
-  MuiButton: { defaultProps: { size: 'small' } },
+  // Button visual compaction on mobile without leaking to desktop
+  MuiButton: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        [mobileRoot + ' &']: {
+          // emulate size="small" without touching props
+          padding: theme.spacing(0.5, 1.25),
+          minHeight: 32,
+          fontSize: '0.8125rem',
+        },
+      }),
+    },
+  },
 
   MuiIconButton: {
-    defaultProps: { size: 'small', disableRipple: true, disableTouchRipple: true },
     styleOverrides: {
       root: {
-        // Minimum touch target
-        minWidth: 40,
-        minHeight: 40,
+        [mobileRoot + ' &']: {
+          minWidth: 40,
+          minHeight: 40,
+          // visually reduce ripple without props
+          '& .MuiTouchRipple-root': { display: 'none' },
+        },
       },
     },
   },
 
-  MuiTextField: { defaultProps: { size: 'small' } },
+  MuiTextField: {
+    styleOverrides: {
+      root: {
+        [mobileRoot + ' &']: {
+          // emulate size="small" field density
+          '--InputLabel-margin': '0.125rem',
+          '& .MuiInputBase-root': { minHeight: 36 },
+        },
+      },
+    },
+  },
 
-  MuiSelect: { defaultProps: { size: 'small' } },
+  MuiSelect: {
+    styleOverrides: {
+      select: ({ theme }) => ({
+        [mobileRoot + ' &']: { paddingBlock: theme.spacing(0.5) },
+      }),
+    },
+  },
 
-  MuiFormControl: { defaultProps: { margin: 'dense' } },
+  MuiFormControl: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        [mobileRoot + ' &']: { margin: theme.spacing(0.5, 0) }, // emulate margin="dense"
+      }),
+    },
+  },
 
   MuiListItemButton: {
-    styleOverrides: { root: { minHeight: 44, paddingTop: 6, paddingBottom: 6 } },
+    styleOverrides: {
+      root: {
+        [mobileRoot + ' &']: { minHeight: 44, paddingTop: 6, paddingBottom: 6 },
+      },
+    },
   },
 
   // Lower shadows on mobile to reduce paint cost
   MuiPaper: {
     styleOverrides: {
       root: ({ theme }) => ({
-        [theme.breakpoints.down('mobileLg')]: { boxShadow: theme.shadows[1] },
+        [mobileRoot + ' &']: { boxShadow: theme.shadows[1] },
       }),
     },
   },
 
-  // Dialog and menus already set transition via your config
+  // Dialog and menus transitions kept but scoped to mobile via slotProps styles
   MuiDialog: {
     defaultProps: {
+      // these are harmless globally, but if you want truly mobile-only, keep them and rely on CSS for sizing
       slots: { transition: Grow },
       slotProps: { transition: { timeout: { enter: 160, exit: 120 } } },
-      // iOS scroll lock can be annoying in PWA shells
       disableScrollLock: true,
       fullWidth: true,
-      maxWidth: 'mobileLg',
+    },
+    styleOverrides: {
+      paper: ({ theme }) => ({
+        [mobileRoot + ' &']: {
+          // approximate maxWidth="mobileLg" without changing prop
+          margin: theme.spacing(1),
+          width: 'calc(100% - 16px)',
+          maxWidth: theme.breakpoints.values.mobileLg,
+        },
+      }),
     },
   },
 
@@ -53,9 +103,14 @@ export const mobileComponentsOverrides: Components<Omit<Theme, 'components'>> = 
       slots: { transition: Grow },
       slotProps: { transition: { timeout: { enter: 140, exit: 100 } } },
       MenuListProps: { disablePadding: false, autoFocusItem: false },
-      // Keep menus anchored well on small screens
-      transformOrigin: { vertical: 'top', horizontal: 'right' },
-      anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+    },
+    styleOverrides: {
+      paper: {
+        [mobileRoot + ' &']: {
+          // keep anchors visually consistent on mobile via CSS transforms
+          transformOrigin: 'top right',
+        },
+      },
     },
   },
 
@@ -63,37 +118,34 @@ export const mobileComponentsOverrides: Components<Omit<Theme, 'components'>> = 
     defaultProps: {
       slots: { transition: Slide },
       slotProps: { transition: { direction: 'up', timeout: { enter: 120, exit: 80 } } },
-      anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
     },
     styleOverrides: {
-      root: ({ theme }) => ({
-        [theme.breakpoints.down('mobileLg')]: { maxWidth: '100vw' },
-      }),
+      root: {
+        [mobileRoot + ' &']: { maxWidth: '100vw' },
+      },
+      anchorOriginBottomCenter: {
+        [mobileRoot + ' &']: { bottom: 8 },
+      },
     },
   },
 
-  // Keep transitions brisk and predictable where motion exists
   MuiCollapse: {
     defaultProps: { timeout: { enter: 140, exit: 110 } },
   },
 
-  // Backdrop transition of Modal
   MuiModal: {
     defaultProps: {
       slotProps: { backdrop: { transitionDuration: { enter: 120, exit: 100 } } },
     },
   },
 
-  // Popover uses a transition internally
   MuiPopover: {
     defaultProps: {
-      // v7 prefers slots + slotProps over TransitionComponent/TransitionProps
       slots: { transition: Grow },
       slotProps: { transition: { timeout: { enter: 140, exit: 100 } } },
     },
   },
 
-  // Tooltip already sets TransitionProps below, keep as is if you like
   MuiTooltip: {
     defaultProps: {
       arrow: true,
@@ -106,22 +158,25 @@ export const mobileComponentsOverrides: Components<Omit<Theme, 'components'>> = 
       TransitionProps: { timeout: { enter: 120, exit: 80 } },
     },
     styleOverrides: {
-      tooltip: ({ theme }) => ({
+      tooltip: {
         fontSize: '0.75rem',
         lineHeight: 1.25,
         padding: '6px 8px',
         maxWidth: 260,
-        [theme.breakpoints.down('mobileLg')]: { fontSize: '0.8rem' },
-      }),
+        [mobileRoot + ' &']: { fontSize: '0.8rem' },
+      },
       arrow: { transform: 'scale(0.9)' },
     },
   },
 
-  // Buttons and clicks: reduce visual noise on touch devices
   MuiButtonBase: {
-    defaultProps: {
-      disableRipple: true,
-      disableTouchRipple: true,
+    styleOverrides: {
+      root: {
+        [mobileRoot + ' &']: {
+          // emulate disableRipple without props
+          '& .MuiTouchRipple-root': { display: 'none' },
+        },
+      },
     },
   },
 };
