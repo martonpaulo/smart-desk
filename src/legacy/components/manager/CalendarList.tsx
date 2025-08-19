@@ -28,15 +28,15 @@ import { IcsCalendar } from '@/legacy/types/icsCalendar';
 
 interface CalendarListProps {
   calendars: IcsCalendar[];
-  onEdit: (index: number) => void;
-  onDelete: (index: number) => void;
+  onEditAction: (index: number) => void;
+  onDeleteAction: (index: number) => void;
 }
 
 /**
  * Rich list with color swatch, copy URL, edit, and delete actions.
  * Sorted by most recently updated first. No memo hooks required.
  */
-export function CalendarList({ calendars, onEdit, onDelete }: CalendarListProps) {
+export function CalendarList({ calendars, onEditAction, onDeleteAction }: CalendarListProps) {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -108,7 +108,7 @@ export function CalendarList({ calendars, onEdit, onDelete }: CalendarListProps)
                     <IconButton
                       edge="end"
                       size="small"
-                      onClick={() => onEdit(originalIndex)}
+                      onClick={() => onEditAction(originalIndex)}
                       aria-label="Edit calendar"
                     >
                       <EditIcon fontSize="small" />
@@ -119,7 +119,7 @@ export function CalendarList({ calendars, onEdit, onDelete }: CalendarListProps)
                       edge="end"
                       size="small"
                       color="error"
-                      onClick={() => onDelete(originalIndex)}
+                      onClick={() => onDeleteAction(originalIndex)}
                       aria-label="Delete calendar"
                     >
                       <DeleteIcon fontSize="small" />

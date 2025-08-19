@@ -27,6 +27,7 @@ export function createSyncedEntityStore<E extends Base>(cfg: SyncedEntityStoreCo
     fetchAll: service.fetchAll,
     upsert: (client, item) => service.upsert(item),
     softDelete: (client, id) => service.softDelete(id),
+    restore: (client, id) => service.restore(id),
     hardDelete: (client, id) => service.hardDelete(id),
     buildAddEntity: (data, id) => {
       if (!data.createdAt) throw new Error('Missing createdAt');

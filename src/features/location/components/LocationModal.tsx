@@ -55,6 +55,7 @@ export function LocationModal({ open, onClose, location }: LocationModalProps) {
   const addLocation = useLocationsStore(s => s.add);
   const updateLocation = useLocationsStore(s => s.update);
   const softDeleteLocation = useLocationsStore(s => s.softDelete);
+  const restoreLocation = useLocationsStore(s => s.restore);
 
   useEffect(() => {
     if (!open) return;
@@ -119,6 +120,7 @@ export function LocationModal({ open, onClose, location }: LocationModalProps) {
       onClose={onClose}
       onSave={handleSave}
       deleteAction={initial.id ? softDeleteLocation : undefined}
+      restoreAction={initial.id ? restoreLocation : undefined}
       deleteId={initial.id}
       title={name}
       onTitleChange={setName}

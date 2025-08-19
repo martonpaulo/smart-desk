@@ -24,18 +24,20 @@ export function ResetButton({ task }: ResetButtonProps) {
       columnId: todoColumn?.id,
       updatedAt: new Date(),
     });
-  }, [todoColumnPromise, task, updateTask]);
+  }, [task, todoColumnPromise, updateTask]);
 
   return (
     <TaskActionButton
       icon={<UndoIcon />}
+      task={task}
       tooltip="Reset quantity done"
       onAction={resetTask}
-      soundName="reset"
+      successSound="reset"
       confirmTitle="Confirm reset"
       confirmContent={`Are you sure you want to reset the quantity done for <strong>${task.title}</strong>?`}
       successMessage={`${task.title} was reset successfully`}
       errorMessage={`Failed to reset ${task.title}`}
+      feedbackKey="reset-task"
     />
   );
 }

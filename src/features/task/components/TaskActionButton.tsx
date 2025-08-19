@@ -1,65 +1,83 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useRef, useState } from 'react';
 
 import { IconButton, Stack, StackProps, Tooltip, useTheme } from '@mui/material';
-import { useSnackbar } from 'notistack';
 
 import { InterfaceSound } from '@/features/sound/types/InterfaceSound';
-import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
+import { useBoardStore } from '@/legacy/store/board/store';
+import { Task } from '@/legacy/types/task';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { usePromiseFeedback } from '@/shared/context/PromiseFeedbackContext';
 
 interface TaskActionButtonProps extends StackProps {
   icon: ReactNode;
+  task: Task;
   tooltip: string;
   onAction: () => Promise<void> | void;
-  soundName?: InterfaceSound;
+  successSound?: InterfaceSound;
   confirmTitle?: string;
   confirmContent?: string;
   successMessage?: string;
   errorMessage?: string;
+  feedbackKey: string;
 }
 
 export function TaskActionButton({
   icon,
+  task,
   tooltip,
   onAction,
-  soundName,
+  successSound,
   confirmTitle = 'Are you sure?',
   confirmContent,
   successMessage = 'Action completed successfully',
   errorMessage = 'Failed to perform action',
+  feedbackKey,
   ...stackProps
 }: TaskActionButtonProps) {
-  const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
+  const { runWithFeedback, isLoading } = usePromiseFeedback();
+  const updateTask = useBoardStore(s => s.updateTask);
+
+  const preActionSnapshotRef = useRef<Task | null>(null);
 
   const [openConfirm, setOpenConfirm] = useState(false);
-  const [loading, setLoading] = useState(false);
+
+  const handleOpenConfirm = () => {
+    preActionSnapshotRef.current = structuredClone(task);
+    setOpenConfirm(true);
+  };
+
+  const undoFromSnapshot = async () => {
+    const snapshot = preActionSnapshotRef.current;
+    if (!snapshot) return;
+    await updateTask({ ...snapshot });
+  };
 
   const handleConfirm = async () => {
-    setLoading(true);
+    await runWithFeedback<void>({
+      key: feedbackKey,
+      operation: () => Promise.resolve(onAction()),
+      successSound,
+      successMessage,
+      errorMessage,
+      onUndo: undoFromSnapshot,
+    });
 
-    try {
-      await onAction();
-      if (soundName) playInterfaceSound(soundName);
-      enqueueSnackbar(successMessage, { variant: 'success' });
-    } catch (err) {
-      playInterfaceSound('error');
-      console.error('TaskActionButton error', err);
-      enqueueSnackbar(errorMessage, { variant: 'error' });
-    } finally {
-      setLoading(false);
-      setOpenConfirm(false);
-    }
+    setOpenConfirm(false);
   };
+
+  const loading = isLoading(feedbackKey);
 
   return (
     <>
       <Stack {...stackProps}>
         <Tooltip title={tooltip}>
           <IconButton
-            onClick={() => setOpenConfirm(true)}
+            onClick={handleOpenConfirm}
             size="small"
             sx={{ padding: 0.5, borderRadius: theme.shape.borderRadiusSmall }}
+            disabled={loading}
+            aria-label={tooltip}
           >
             {icon}
           </IconButton>

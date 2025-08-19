@@ -18,6 +18,7 @@ export function NoteModal({ open, initial, onSave, onClose }: NoteModalProps) {
   const [content, setContent] = useState(initial?.content || '');
   const [color, setColor] = useState<string>(initial?.color || '');
   const deleteNote = useNotesStore(s => s.softDelete);
+  const restoreNote = useNotesStore(s => s.restore);
 
   // reset form when modal opens/closes
   useEffect(() => {
@@ -52,6 +53,7 @@ export function NoteModal({ open, initial, onSave, onClose }: NoteModalProps) {
       onClose={onClose}
       onSave={handleSave}
       deleteAction={deleteNote}
+      restoreAction={restoreNote}
       deleteId={initial?.id}
       title={title}
       onTitleChange={value => setTitle(value)}

@@ -3,6 +3,7 @@ import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -13,10 +14,9 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material';
-import { useSnackbar } from 'notistack';
 
-import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { usePromiseFeedback } from '@/shared/context/PromiseFeedbackContext';
 import { getErrorMessage } from '@/shared/utils/getErrorMessage';
 
 interface CustomDialogProps {
@@ -29,6 +29,7 @@ interface CustomDialogProps {
   onClose: () => void;
   onSave: () => Promise<void>;
   deleteAction?: (id: string) => Promise<void>;
+  restoreAction?: (id: string) => Promise<void>;
   deleteId?: string;
   title: string;
   onTitleChange: (value: string) => void;
@@ -47,6 +48,7 @@ export function CustomDialog({
   onClose,
   onSave,
   deleteAction,
+  restoreAction,
   deleteId,
   title,
   onTitleChange,
@@ -54,17 +56,21 @@ export function CustomDialog({
   titleLimit,
   children,
 }: CustomDialogProps) {
-  const { enqueueSnackbar } = useSnackbar();
+  const { runWithFeedback, isLoading } = usePromiseFeedback();
 
-  const [loadingSave, setLoadingSave] = useState(false);
-  const [loadingDelete, setLoadingDelete] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const hasError = titleLimit ? title.length > titleLimit : false;
   const canSave = isDirty && isValid && !hasError && !confirmOpen;
-  const canDelete = mode === 'edit' && deleteAction && deleteId;
+  const canDelete = mode === 'edit' && Boolean(deleteAction && deleteId);
 
   const titleRef = useRef<HTMLInputElement>(null);
+
+  // keys for loading state reuse and consistency
+  const capitalItem = item.charAt(0).toUpperCase() + item.slice(1);
+  const dialogTitle = mode === 'edit' ? `Edit ${capitalItem}` : `New ${capitalItem}`;
+  const saveKey = `dialog-${item}-save`;
+  const deleteKey = `dialog-${item}-delete-${deleteId ?? 'na'}`;
 
   // focus title when dialog fully opens
   const handleTransitionEntered = () => {
@@ -73,52 +79,54 @@ export function CustomDialog({
     titleRef.current?.setSelectionRange(len, len);
   };
 
+  // Save wrapped with PromiseFeedback
   const handleSave = useCallback(async () => {
     if (!canSave) return;
-    setLoadingSave(true);
-    try {
-      await onSave();
-      onClose();
-    } catch (error) {
-      const msg = getErrorMessage(error, 'Error saving');
-      console.error(msg);
-      enqueueSnackbar(msg, { variant: 'error' });
-      playInterfaceSound('error');
-    } finally {
-      setLoadingSave(false);
-    }
-  }, [canSave, onSave, onClose, enqueueSnackbar]);
 
-  // build dialog title
-  const capitalItem = item.charAt(0).toUpperCase() + item.slice(1);
-  const dialogTitle = mode === 'edit' ? `Edit ${capitalItem}` : `New ${capitalItem}`;
+    await runWithFeedback<void>({
+      key: saveKey,
+      operation: async () => {
+        await onSave();
+        onClose();
+      },
+      successMessage: `${capitalItem} saved`,
+      errorMessage: getErrorMessage(null, 'Error saving'),
+    });
+  }, [canSave, runWithFeedback, saveKey, onSave, onClose, capitalItem]);
 
   const handleDelete = useCallback(async () => {
-    if (!canDelete) return;
-    setLoadingDelete(true);
-    try {
-      await deleteAction(deleteId);
-      enqueueSnackbar(`${capitalItem} deleted`, { variant: 'success' });
-      playInterfaceSound('trash');
-      onClose();
-    } catch (error) {
-      const msg = getErrorMessage(error, `Error deleting ${item}`);
-      console.error(msg);
-      enqueueSnackbar(msg, { variant: 'error' });
-      playInterfaceSound('error');
-    } finally {
-      setLoadingDelete(false);
-      setConfirmOpen(false);
-    }
-  }, [canDelete, capitalItem, deleteAction, deleteId, enqueueSnackbar, item, onClose]);
+    if (!canDelete || !deleteAction || !deleteId) return;
+
+    await runWithFeedback<void>({
+      key: deleteKey,
+      operation: async () => {
+        await deleteAction(deleteId);
+        onClose();
+      },
+      successSound: 'trash',
+      successMessage: `${capitalItem} deleted`,
+      errorMessage: getErrorMessage(null, `Error deleting ${item}`),
+      onUndo: restoreAction ? () => restoreAction(deleteId) : undefined,
+    });
+
+    setConfirmOpen(false);
+  }, [
+    canDelete,
+    deleteAction,
+    deleteId,
+    runWithFeedback,
+    deleteKey,
+    capitalItem,
+    item,
+    onClose,
+    restoreAction,
+  ]);
 
   // keyboard shortcuts for Esc and Ctrl+Enter
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
+      if (e.key === 'Escape') onClose();
       if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.key === 'NumpadEnter')) {
         e.preventDefault();
         handleSave();
@@ -133,10 +141,12 @@ export function CustomDialog({
       if (canSave) handleSave();
       else onClose();
     }
-    if (reason === 'escapeKeyDown') {
-      onClose(); // always close on Esc
-    }
+    if (reason === 'escapeKeyDown') onClose();
   };
+
+  // visual loading states derived from PromiseFeedback
+  const saving = isLoading(saveKey);
+  const deleting = isLoading(deleteKey);
 
   return (
     <>
@@ -153,9 +163,14 @@ export function CustomDialog({
 
             {mode === 'edit' && (
               <Tooltip title={`Delete ${capitalItem}`}>
-                <IconButton onClick={() => setConfirmOpen(true)} disabled={!canDelete}>
-                  <DeleteIcon />
-                </IconButton>
+                <span>
+                  <IconButton
+                    onClick={() => setConfirmOpen(true)}
+                    disabled={!canDelete || deleting}
+                  >
+                    {deleting ? <CircularProgress size={18} /> : <DeleteIcon />}
+                  </IconButton>
+                </span>
               </Tooltip>
             )}
           </Stack>
@@ -180,11 +195,16 @@ export function CustomDialog({
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose} disabled={loadingSave || loadingDelete}>
+          <Button onClick={onClose} disabled={saving || deleting}>
             Cancel
           </Button>
-          <Button onClick={handleSave} variant="contained" disabled={!canSave}>
-            Save
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            disabled={!canSave || saving}
+            startIcon={saving ? <CircularProgress color="inherit" size={16} /> : undefined}
+          >
+            {saving ? 'Saving…' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -197,7 +217,7 @@ export function CustomDialog({
         onConfirm={handleDelete}
         confirmButtonText="Delete"
         cancelButtonText="Cancel"
-        loading={loadingDelete}
+        loading={deleting}
       />
     </>
   );

@@ -26,9 +26,7 @@ function isAlways(def: FeatureDef): boolean {
 // pages.
 function matchesRoute(def: FeatureDef, pathname: string): boolean {
   if (isAlways(def)) return true;
-  return def.routes!.some(route =>
-    route === '/' ? pathname === '/' : pathname.startsWith(route),
-  );
+  return def.routes!.some(route => (route === '/' ? pathname === '/' : pathname.startsWith(route)));
 }
 
 // Import the store using the feature-provided static loader.

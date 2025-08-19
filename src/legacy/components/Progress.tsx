@@ -18,8 +18,13 @@ export function TodoProgress(props: StackProps) {
     classified: true,
   });
 
-  const totalCount = tasksForToday.length;
-  const doneCount = completedTasks.length;
+  const totalCount = tasksForToday.reduce((acc, task) => {
+    return acc + (task.quantityTarget ?? 1);
+  }, 0);
+
+  const doneCount = completedTasks.reduce((acc, task) => {
+    return acc + (task.quantityTarget ?? 1);
+  }, 0);
 
   const percentage = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
 

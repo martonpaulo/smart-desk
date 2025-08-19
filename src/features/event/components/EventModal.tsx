@@ -150,6 +150,7 @@ export function EventModal({ open, onClose, event }: EventModalProps) {
   const addLocalEvent = useLocalEventsStore(s => s.add);
   const updateEvent = useLocalEventsStore(s => s.update);
   const deleteEvent = useLocalEventsStore(s => s.softDelete);
+  const restoreEvent = useLocalEventsStore(s => s.restore);
 
   // save handler
   const handleSave = useCallback(async () => {
@@ -206,6 +207,7 @@ export function EventModal({ open, onClose, event }: EventModalProps) {
       onClose={onClose}
       onSave={handleSave}
       deleteAction={deleteEvent}
+      restoreAction={restoreEvent}
       deleteId={event?.id}
       title={title}
       onTitleChange={value => setTitle(value)}

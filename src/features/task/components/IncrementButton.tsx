@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { AddCircleOutline as AddIcon } from '@mui/icons-material';
 
@@ -13,30 +13,39 @@ interface IncrementButtonProps {
 export function IncrementButton({ task }: IncrementButtonProps) {
   const updateTask = useBoardStore(s => s.updateTask);
 
-  const newQuantityDone = task.quantityDone + 1;
+  // Freeze the initial quantity for this component instance
+  const initialQuantityRef = useRef<number>(task.quantityDone);
+
+  // If this component might be reused for a different task without unmounting,
+  // reset the frozen value when the identity changes.
+  useEffect(() => {
+    initialQuantityRef.current = task.quantityDone;
+  }, [task.id, task.quantityDone]);
+
+  // Stable value for UI texts
+  const newQuantityDone = initialQuantityRef.current + 1;
 
   const incrementQuantityDone = useCallback(async () => {
+    // Use current store value to avoid stale updates
     await updateTask({
       ...task,
-      quantityDone: newQuantityDone,
+      quantityDone: task.quantityDone + 1,
       updatedAt: new Date(),
     });
-  }, [task, newQuantityDone, updateTask]);
-
-  if (newQuantityDone >= task.quantityTarget) {
-    return null;
-  }
+  }, [task, updateTask]);
 
   return (
     <TaskActionButton
       icon={<AddIcon />}
+      task={task}
       tooltip="Increment quantity done"
       onAction={incrementQuantityDone}
-      soundName="increment"
+      successSound="increment"
       confirmTitle="Confirm increment"
       confirmContent={`Are you sure you want to increment the quantity done for ${task.title} to ${newQuantityDone}?`}
       successMessage={`${task.title} was incremented to ${newQuantityDone}`}
       errorMessage={`Failed to increment ${task.title}`}
+      feedbackKey="increment-task"
     />
   );
 }

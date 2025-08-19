@@ -87,14 +87,14 @@ export default function CalendarManagerPage() {
 
   return (
     <PageSection title="Calendar Manager" description="Manage your ICS calendars">
-      <CalendarList calendars={calendars} onEdit={startEdit} onDelete={requestDelete} />
+      <CalendarList calendars={calendars} onEditAction={startEdit} onDeleteAction={requestDelete} />
 
       <CalendarForm
         key={editingCalendar?.id ?? 'new'}
         initial={editingCalendar}
         mode={editingCalendar ? 'edit' : 'add'}
-        onSubmit={handleSubmit}
-        onCancel={cancelEdit}
+        onSubmitAction={handleSubmit}
+        onCancelAction={cancelEdit}
       />
 
       <ConfirmDialog

@@ -22,24 +22,23 @@ export function MarkAsDoneButton({ task }: MarkAsDoneButtonProps) {
       ...task,
       quantityDone: task.quantityTarget,
       columnId: doneColumn?.id,
+      classifiedDate: new Date(),
       updatedAt: new Date(),
     });
   }, [doneColumnPromise, task, updateTask]);
 
-  if (task.quantityDone + 1 !== task.quantityTarget) {
-    return null;
-  }
-
   return (
     <TaskActionButton
       icon={<CheckIcon />}
+      task={task}
       tooltip="Mark as done"
       onAction={markAsDone}
-      soundName="done"
+      successSound="done"
       confirmTitle="Confirm completion"
       confirmContent={`Are you sure you want to mark <strong>${task.title}</strong> as done?`}
       successMessage={`${task.title} was marked as done`}
       errorMessage={`Failed to mark ${task.title} as done`}
+      feedbackKey="mark-task-as-done"
     />
   );
 }

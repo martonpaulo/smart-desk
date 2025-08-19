@@ -12,6 +12,7 @@ export interface EntityState<E extends { id: string; updatedAt: Date; isSynced?:
   add(data: Partial<E>): Promise<string>;
   update(data: Partial<E> & { id: string }): Promise<void>;
   softDelete?(id: string): Promise<void>;
+  restore?(id: string): Promise<void>;
   hardDelete?(id: string): Promise<void>;
   syncPending(): Promise<void>;
   syncFromServer(): Promise<void>;
@@ -22,6 +23,7 @@ interface Config<E extends { id: string; updatedAt: Date; isSynced?: boolean }> 
   fetchAll(client: SupabaseClient): Promise<E[]>;
   upsert(client: SupabaseClient, item: E): Promise<E>;
   softDelete?(client: SupabaseClient, id: string): Promise<void>;
+  restore?(client: SupabaseClient, id: string): Promise<void>;
   hardDelete?(client: SupabaseClient, id: string): Promise<void>;
   buildAddEntity(data: Partial<E>, id: string): E;
   buildUpdateEntity(old: E, data: Partial<E>): E;
@@ -66,6 +68,21 @@ export function createZustandEntityStore<
               } catch {
                 // optionally requeue or log
                 console.error(`Failed to soft delete item with id ${id}`);
+              }
+            }
+          : undefined;
+
+        const restoreFn = cfg.restore
+          ? async (id: string): Promise<void> => {
+              set(state => ({
+                items: state.items.filter(item => item.id !== id),
+                pending: state.pending.filter(item => item.id !== id),
+              }));
+              try {
+                await cfg.restore!(getSupabaseClient(), id);
+              } catch {
+                // optionally requeue or log
+                console.error(`Failed to restore item with id ${id}`);
               }
             }
           : undefined;
@@ -125,6 +142,7 @@ export function createZustandEntityStore<
           syncPending,
           syncFromServer,
           ...(softDeleteFn && { softDelete: softDeleteFn }),
+          ...(restoreFn && { restore: restoreFn }),
           ...(hardDeleteFn && { hardDelete: hardDeleteFn }),
         };
       },

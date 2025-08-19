@@ -17,13 +17,9 @@ export function SendToInboxButton({ task }: SendToInboxButtonProps) {
   const sendToInbox = useCallback(async () => {
     const tomorrow = startOfDay(addDays(new Date(), 1));
 
-    let newPlannedDate: Date;
-
-    if (!task.plannedDate || isBefore(task.plannedDate, tomorrow)) {
-      newPlannedDate = tomorrow;
-    } else {
-      newPlannedDate = task.plannedDate;
-    }
+    // Decide plannedDate for the next inbox
+    const newPlannedDate =
+      !task.plannedDate || isBefore(task.plannedDate, tomorrow) ? tomorrow : task.plannedDate;
 
     await updateTask({
       ...task,
@@ -37,13 +33,15 @@ export function SendToInboxButton({ task }: SendToInboxButtonProps) {
   return (
     <TaskActionButton
       icon={<ForwardToInboxIcon />}
+      task={task}
       tooltip="Send to next inbox"
       onAction={sendToInbox}
-      soundName="send"
+      successSound="send"
       confirmTitle="Send task to next inbox"
       confirmContent={`Are you sure you want to send <strong>${task.title}</strong> to the next inbox?`}
       successMessage={`${task.title} was sent to next inbox`}
       errorMessage={`Failed to send ${task.title} to next inbox`}
+      feedbackKey="send-task-to-inbox"
     />
   );
 }

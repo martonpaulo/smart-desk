@@ -15,12 +15,12 @@ import { ColorPicker } from '@/shared/components/ColorPicker';
 interface CalendarFormProps {
   initial?: IcsCalendar;
   mode: 'add' | 'edit';
-  onSubmit: (payload: { title: string; source: string; color: string }) => void;
-  onCancel: () => void;
+  onSubmitAction: (payload: { title: string; source: string; color: string }) => void;
+  onCancelAction: () => void;
 }
 
 const schema = z.object({
-  source: z.string().trim().min(1, 'URL is required').url('Must be a valid URL'),
+  source: z.string().trim().min(1, 'URL is required').pipe(z.url('Must be a valid URL')),
   title: z.string().trim().min(1, 'Title is required'),
   color: z
     .string()
@@ -35,7 +35,7 @@ type FormValues = z.infer<typeof schema>;
  * Zod + RHF with strong typing and clear errors.
  * No memo hooks needed thanks to the React compiler.
  */
-export function CalendarForm({ initial, mode, onSubmit, onCancel }: CalendarFormProps) {
+export function CalendarForm({ initial, mode, onSubmitAction, onCancelAction }: CalendarFormProps) {
   const { enqueueSnackbar } = useSnackbar();
 
   const {
@@ -62,7 +62,7 @@ export function CalendarForm({ initial, mode, onSubmit, onCancel }: CalendarForm
   }, [initial, reset]);
 
   function submit(values: FormValues) {
-    onSubmit(values);
+    onSubmitAction(values);
     // parent shows success toast and sound for add/update
   }
 
@@ -91,7 +91,7 @@ export function CalendarForm({ initial, mode, onSubmit, onCancel }: CalendarForm
               error={Boolean(errors.source)}
               helperText={errors.source?.message}
               fullWidth
-              inputProps={{ inputMode: 'url' }}
+              slotProps={{ input: { inputMode: 'url' } }}
             />
           )}
         />
@@ -131,7 +131,7 @@ export function CalendarForm({ initial, mode, onSubmit, onCancel }: CalendarForm
         <Stack direction="row" justifyContent="flex-end" spacing={2}>
           <Button
             onClick={() => {
-              onCancel();
+              onCancelAction();
             }}
             color="inherit"
             disabled={isSubmitting}

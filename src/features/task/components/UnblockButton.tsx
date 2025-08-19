@@ -17,20 +17,18 @@ export function UnblockButton({ task }: UnblockButtonProps) {
     await updateTask({ ...task, blocked: false, updatedAt: new Date() });
   }, [task, updateTask]);
 
-  if (!task.blocked) {
-    return null;
-  }
-
   return (
     <TaskActionButton
       icon={<UnblockIcon />}
+      task={task}
       tooltip="Unblock"
       onAction={unblockTask}
-      soundName="unblock"
+      successSound="unblock"
       confirmTitle="Unblock task"
       confirmContent={`Are you sure you want to unblock <strong>${task.title}</strong>?`}
       successMessage={`${task.title} was unblocked`}
       errorMessage={`Failed to unblock ${task.title}`}
+      feedbackKey="unblock-task"
     />
   );
 }

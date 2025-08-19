@@ -12,6 +12,7 @@ import { DateAdapterProvider } from '@/legacy/providers/DateAdapterProvider';
 import { LocationProvider } from '@/legacy/providers/LocationProvider';
 import { ReactQueryProvider } from '@/legacy/providers/ReactQueryProvider';
 import { ZoomProvider } from '@/legacy/providers/ZoomProvider';
+import { PromiseFeedbackProvider } from '@/shared/context/PromiseFeedbackContext';
 import { SnackbarWrapperProvider } from '@/shared/providers/SnackbarWrapperProvider';
 import { jetbrainsMono, poppins } from '@/theme/fonts';
 
@@ -32,6 +33,7 @@ const providers = [
   AppThemeProvider,
   NavigationLayout,
   SnackbarWrapperProvider,
+  PromiseFeedbackProvider,
 ];
 
 export default function RootLayout({ children }: RootLayoutProps) {

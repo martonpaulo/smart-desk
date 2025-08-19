@@ -14,7 +14,6 @@ import { EventList } from '@/legacy/components/event/EventList';
 import { HiddenColumnsList } from '@/legacy/components/HiddenColumnsList';
 import { TodoProgress } from '@/legacy/components/Progress';
 import { EventTimeline } from '@/legacy/components/timeline/EventTimeline';
-import { UndoSnackbar } from '@/legacy/components/UndoSnackbar';
 import { useLocation } from '@/legacy/hooks/useLocation';
 import { useWeather } from '@/legacy/hooks/useWeather';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
@@ -115,7 +114,6 @@ export default function BoardPage() {
           key={`${now.toISOString()}-ChangeSnackbar`}
         />
       )} */}
-      <UndoSnackbar />
     </Stack>
   );
 }

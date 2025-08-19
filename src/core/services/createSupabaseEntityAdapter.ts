@@ -112,6 +112,15 @@ export function createSupabaseEntityAdapter<E extends Base>(config: {
     }
   }
 
+  async function restore(id: string): Promise<void> {
+    const client = await ensureClient();
+    const { error } = await client.from(table).update({ trashed: false }).eq('id', id);
+    if (error) {
+      console.error(`restore ${table}`, error);
+      throw new Error(`Could not restore ${table}`);
+    }
+  }
+
   async function hardDelete(id: string): Promise<void> {
     const client = await ensureClient();
     const { error } = await client.from(table).delete().eq('id', id);
@@ -179,5 +188,5 @@ export function createSupabaseEntityAdapter<E extends Base>(config: {
     return result;
   }
 
-  return { fetchAll, upsert, softDelete, hardDelete };
+  return { fetchAll, upsert, softDelete, restore, hardDelete };
 }

@@ -189,6 +189,10 @@ export function TaskModal({
     await updateTask({ id, trashed: true, updatedAt: new Date() });
   };
 
+  const handleRestore = async (id: string) => {
+    await updateTask({ id, trashed: false, updatedAt: new Date() });
+  };
+
   const handleFlagsChange = (_: unknown, newFlags: string[]) => {
     setForm(f => ({
       ...f,
@@ -216,6 +220,7 @@ export function TaskModal({
       onClose={onCloseAction}
       onSave={handleSave}
       deleteAction={handleDelete}
+      restoreAction={handleRestore}
       deleteId={task?.id}
       title={form.title}
       onTitleChange={value => setForm(f => ({ ...f, title: value }))}

@@ -21,18 +21,18 @@ export function RecoverFromTrashButton({ task }: RecoverFromTrashButtonProps) {
     });
   }, [task, updateTask]);
 
-  if (!task.trashed) return null;
-
   return (
     <TaskActionButton
       icon={<RestoreFromTrashIcon />}
+      task={task}
       tooltip="Recover from trash"
       onAction={recoverTask}
-      soundName="recover"
+      successSound="recover"
       confirmTitle="Recover task from trash"
       confirmContent={`<strong>${task.title}</strong> will be recovered from trash.`}
       successMessage={`${task.title} was recovered from trash`}
       errorMessage={`Failed to recover ${task.title}`}
+      feedbackKey="recover-task"
     />
   );
 }
