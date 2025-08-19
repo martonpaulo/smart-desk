@@ -9,13 +9,13 @@ import { SupabaseSyncContext } from '@/core/providers/SupabaseSyncProvider';
 import { useConnectionStore } from '@/core/store/useConnectionStore';
 import { Clock } from '@/legacy/components/Clock';
 import { TodoList } from '@/legacy/components/column/TodoList';
-import { DailyTimeLoadIndicator } from '@/legacy/components/DailyTimeLoadIndicator';
 import { EventList } from '@/legacy/components/event/EventList';
 import { HiddenColumnsList } from '@/legacy/components/HiddenColumnsList';
-import { TodoProgress } from '@/legacy/components/Progress';
 import { EventTimeline } from '@/legacy/components/timeline/EventTimeline';
 import { useLocation } from '@/legacy/hooks/useLocation';
 import { useWeather } from '@/legacy/hooks/useWeather';
+import { ProgressBarIndicator } from '@/shared/components/ProgressBarIndicator';
+import { TimeLoadIndicator } from '@/shared/components/TimeLoadIndicator';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
 export default function BoardPage() {
@@ -78,8 +78,8 @@ export default function BoardPage() {
         <Stack alignItems="flex-start">
           <Stack spacing={2}>
             <Stack direction="row" gap={1} justifyContent="space-between" alignItems="center">
-              <DailyTimeLoadIndicator />
-              <TodoProgress />
+              <TimeLoadIndicator />
+              <ProgressBarIndicator />
             </Stack>
             <EventList key={`${now.toISOString()}-EventList`} />
 

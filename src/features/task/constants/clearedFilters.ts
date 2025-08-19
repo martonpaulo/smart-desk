@@ -10,6 +10,7 @@ export const clearedFilters: TaskFilters = {
   plannedTo: null,
   plannedMode: null,
   classified: null,
+  estimated: null,
   done: null,
   daily: null,
   trashed: null,

@@ -7,6 +7,7 @@ export interface TaskFilters {
   plannedFrom?: Date | null;
   plannedTo?: Date | null;
   plannedMode?: 'include' | 'exclude' | 'only' | null;
+  estimated?: boolean | null;
   classified?: boolean | null;
   done?: boolean | null;
   daily?: boolean | null;

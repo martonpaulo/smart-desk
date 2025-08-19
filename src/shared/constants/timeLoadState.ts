@@ -1,6 +1,6 @@
 import { theme } from '@/theme';
 
-export const timeLoad = {
+export const timeLoadState = {
   stable: {
     label: 'Stable',
     color: theme.palette.success.main,

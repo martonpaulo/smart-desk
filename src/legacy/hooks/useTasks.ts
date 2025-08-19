@@ -72,6 +72,7 @@ export function useTasks(filters: TaskFilters = {}) {
     plannedMode = null,
 
     classified = null,
+    estimated = null,
 
     done = null,
     daily = null,
@@ -115,6 +116,8 @@ export function useTasks(filters: TaskFilters = {}) {
       const matchesTrashed = trashed == null ? true : task.trashed === trashed;
       const matchesTag = tagId ? task.tagId === tagId : true;
 
+      const matchesEstimated = estimated == null ? true : !!task.estimatedTime;
+
       return (
         matchesTitle &&
         matchesImportant &&
@@ -123,6 +126,7 @@ export function useTasks(filters: TaskFilters = {}) {
         matchesPlanned &&
         matchesDone &&
         matchesClassified &&
+        matchesEstimated &&
         matchesDaily &&
         matchesTrashed &&
         matchesTag
@@ -140,6 +144,7 @@ export function useTasks(filters: TaskFilters = {}) {
       done,
       daily,
       classified,
+      estimated,
       trashed,
       tagId,
     ],

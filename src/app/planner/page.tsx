@@ -15,14 +15,14 @@ import { useDragState } from '@/features/eisenhower/hooks/useDragState';
 import { EventConversionModal } from '@/features/event/components/EventConversionModal';
 import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
 import { useBulkTaskSelection } from '@/features/task/hooks/useBulkTaskSelection';
-import { DailyTimeLoadIndicator } from '@/legacy/components/DailyTimeLoadIndicator';
-import { TodoProgress } from '@/legacy/components/Progress';
 import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
 import { useTasks } from '@/legacy/hooks/useTasks';
 import { useBoardStore } from '@/legacy/store/board/store';
 import type { Event } from '@/legacy/types/Event';
 import type { Task } from '@/legacy/types/task';
 import { CountChip } from '@/shared/components/CountChip';
+import { ProgressBarIndicator } from '@/shared/components/ProgressBarIndicator';
+import { TimeLoadIndicator } from '@/shared/components/TimeLoadIndicator';
 
 type PendingDrop = {
   taskId: string;
@@ -190,8 +190,8 @@ export default function DayPlannerPage() {
         setShowEventsAction={setShowEvents}
         rightSlot={
           <Stack direction="row" gap={2} alignItems="center">
-            <DailyTimeLoadIndicator />
-            <TodoProgress />
+            <TimeLoadIndicator />
+            <ProgressBarIndicator />
           </Stack>
         }
       />
