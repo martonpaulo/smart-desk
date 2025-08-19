@@ -68,6 +68,76 @@ export default function SettingsPage() {
       </Paper> */}
 
       <Grid container spacing={2}>
+        {/* Version info */}
+        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack spacing={1.5}>
+              <Typography variant="h3" component="div">
+                Version
+              </Typography>
+
+              <Box
+                role="group"
+                aria-label="Application build details"
+                sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 1 }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Build ID
+                </Typography>
+                <Typography variant="body2">{appVersion}</Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  Build date
+                </Typography>
+                <Typography variant="body2">{formattedBuildDate}</Typography>
+              </Box>
+            </Stack>
+          </Paper>
+        </Grid>
+
+        {/* Zoom controls */}
+        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack spacing={1.5} alignItems="flex-start">
+              <Typography variant="h3" component="div">
+                Interface zoom
+              </Typography>
+
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="body2" color="text.secondary">
+                  Set zoom level
+                </Typography>
+                <ZoomSelector />
+                <ResetZoomButton>Reset</ResetZoomButton>
+              </Stack>
+            </Stack>
+          </Paper>
+        </Grid>
+
+        {/* Daily reset */}
+        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack spacing={1.5} alignItems="flex-start">
+              <Typography variant="h3" component="div">
+                Daily reset
+              </Typography>
+
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="body2" color="text.secondary">
+                  Tasks reset at
+                </Typography>
+                <TextField
+                  type="time"
+                  size="small"
+                  variant="standard"
+                  value={RESET_TIME.toString()}
+                  // If you plan to make it editable later, wire onChange here
+                />
+              </Stack>
+            </Stack>
+          </Paper>
+        </Grid>
+
         {/* Sound settings */}
         <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
           <Paper variant="outlined" sx={{ p: 2 }}>
@@ -126,76 +196,6 @@ export default function SettingsPage() {
                   label={<Typography variant="body2">Event changes</Typography>}
                 />
               </Stack>
-            </Stack>
-          </Paper>
-        </Grid>
-
-        {/* Zoom controls */}
-        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Stack spacing={1.5} alignItems="flex-start">
-              <Typography variant="h3" component="div">
-                Interface zoom
-              </Typography>
-
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography variant="body2" color="text.secondary">
-                  Set zoom level
-                </Typography>
-                <ZoomSelector />
-                <ResetZoomButton>Reset</ResetZoomButton>
-              </Stack>
-            </Stack>
-          </Paper>
-        </Grid>
-
-        {/* Daily reset */}
-        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Stack spacing={1.5} alignItems="flex-start">
-              <Typography variant="h3" component="div">
-                Daily reset
-              </Typography>
-
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography variant="body2" color="text.secondary">
-                  Tasks reset at
-                </Typography>
-                <TextField
-                  type="time"
-                  size="small"
-                  variant="standard"
-                  value={RESET_TIME.toString()}
-                  // If you plan to make it editable later, wire onChange here
-                />
-              </Stack>
-            </Stack>
-          </Paper>
-        </Grid>
-
-        {/* Version info */}
-        <Grid size={{ mobileSm: 12, tabletSm: 6 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Stack spacing={1.5}>
-              <Typography variant="h3" component="div">
-                Version
-              </Typography>
-
-              <Box
-                role="group"
-                aria-label="Application build details"
-                sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 1 }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  Build ID
-                </Typography>
-                <Typography variant="body2">{appVersion}</Typography>
-
-                <Typography variant="body2" color="text.secondary">
-                  Build date
-                </Typography>
-                <Typography variant="body2">{formattedBuildDate}</Typography>
-              </Box>
             </Stack>
           </Paper>
         </Grid>
