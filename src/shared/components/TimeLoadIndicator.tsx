@@ -1,13 +1,12 @@
-import { Box, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import { Stack, Tooltip, Typography } from '@mui/material';
 
 import { useTasks } from '@/legacy/hooks/useTasks';
 import { parseSafeHtml } from '@/legacy/utils/textUtils';
+import { CircleBox } from '@/shared/components/CircleBox';
 import { resolveTimeLoadState } from '@/shared/utils/timeLoadUtils';
 import { formatFullDuration } from '@/shared/utils/timeUtils';
 
 export function TimeLoadIndicator() {
-  const theme = useTheme();
-
   const allTasks = useTasks({
     plannedDate: new Date(),
     trashed: false,
@@ -39,26 +38,20 @@ export function TimeLoadIndicator() {
   const { label, color, tooltip } = resolveTimeLoadState(allTaskMinutes);
 
   return (
-    <Stack direction="column" spacing={0.5}>
-      <Tooltip title={parseSafeHtml(tooltip)}>
-        <Stack direction="row" gap={0.5} alignItems="center" sx={{ cursor: 'help' }}>
-          <Box
-            sx={{
-              width: theme.spacing(1.5),
-              height: theme.spacing(1.5),
-              borderRadius: '50%',
-              bgcolor: color,
-            }}
-          />
-          <Typography variant="body2" color={color} fontWeight="bold">
+    <Tooltip title={parseSafeHtml(tooltip)}>
+      <Stack spacing={1} sx={{ cursor: 'pointer' }}>
+        <Stack direction="row" gap={0.5} alignItems="center" height={16}>
+          <CircleBox color={color} size={1.5} />
+
+          <Typography variant="body2" color={color} fontWeight="bold" lineHeight={1}>
             {label}
           </Typography>
         </Stack>
-      </Tooltip>
 
-      <Typography variant="body2" color={color}>
-        {completedDurationFormatted} / {totalDurationFormatted}
-      </Typography>
-    </Stack>
+        <Typography variant="body2" color={color} lineHeight={1} height={16}>
+          {completedDurationFormatted} / {totalDurationFormatted}
+        </Typography>
+      </Stack>
+    </Tooltip>
   );
 }

@@ -25,28 +25,31 @@ export function ProgressBarIndicator(props: StackProps) {
 
   return (
     <Stack spacing={1} {...props}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2}>
-        <Typography variant="body2" color={color} fontWeight={fontWeight}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} height={16}>
+        <Typography variant="body2" color={color} fontWeight={fontWeight} lineHeight={1}>
           {label}
         </Typography>
-        <Typography variant="h4" color={color}>
+
+        <Typography variant="h4" color={color} lineHeight={1}>
           {parseFloat(completedCount.toFixed(2))} of {totalCount} ({percentage}%)
         </Typography>
       </Stack>
 
-      <LinearProgress
-        variant="determinate"
-        value={percentage}
-        sx={{
-          height: 12,
-          borderRadius: 2,
-          bgcolor: 'rgba(0,0,0,0.05)',
-          '& .MuiLinearProgress-bar': {
-            backgroundColor: color,
-            transition: 'transform 0.4s ease, background-color 0.4s ease',
-          },
-        }}
-      />
+      <Stack height={16} justifyContent="center">
+        <LinearProgress
+          variant="determinate"
+          value={percentage}
+          sx={{
+            height: 12,
+            borderRadius: 2,
+            bgcolor: 'rgba(0,0,0,0.05)',
+            '& .MuiLinearProgress-bar': {
+              backgroundColor: color,
+              transition: 'transform 0.4s ease, background-color 0.4s ease',
+            },
+          }}
+        />
+      </Stack>
     </Stack>
   );
 }
