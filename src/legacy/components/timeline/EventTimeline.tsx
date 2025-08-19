@@ -10,25 +10,21 @@ import {
   generateHourlyIndicators,
   layoutTimelineEvents,
 } from '@/legacy/utils/timelineUtils';
+import { useCurrentTime } from '@/shared/hooks/useCurrentTime';
 
-interface EventTimelineProps {
-  currentTime: Date;
-  pastWindowHours: number;
-  futureWindowHours: number;
-}
+const PAST_WINDOW_HOURS = 3;
+const FUTURE_WINDOW_HOURS = 6;
 
-export function EventTimeline({
-  currentTime,
-  pastWindowHours,
-  futureWindowHours,
-}: EventTimelineProps) {
+export function EventTimeline() {
   const { palette } = useTheme();
 
-  const startTime = new Date(currentTime);
-  startTime.setHours(startTime.getHours() - pastWindowHours);
+  const now = useCurrentTime();
 
-  const endTime = new Date(currentTime);
-  endTime.setHours(endTime.getHours() + futureWindowHours);
+  const startTime = new Date(now);
+  startTime.setHours(startTime.getHours() - PAST_WINDOW_HOURS);
+
+  const endTime = new Date(now);
+  endTime.setHours(endTime.getHours() + FUTURE_WINDOW_HOURS);
 
   const { data: events } = useCombinedEvents(startTime, endTime);
 
@@ -40,6 +36,7 @@ export function EventTimeline({
           border: `1px solid ${theme.palette.divider}`,
           borderRadius: 1,
           p: 2,
+          flexGrow: 1,
         })}
       >
         <Typography align="center" variant="body2">
@@ -48,8 +45,6 @@ export function EventTimeline({
       </Box>
     );
   }
-
-  const now = new Date(currentTime);
 
   const rowGapRem = 0.25;
   const rowHeightRem = 0.75;
@@ -60,8 +55,8 @@ export function EventTimeline({
   const leveledEvents = layoutTimelineEvents(
     filteredEvents,
     now,
-    pastWindowHours,
-    futureWindowHours,
+    PAST_WINDOW_HOURS,
+    FUTURE_WINDOW_HOURS,
   );
 
   // compute container height
@@ -69,8 +64,8 @@ export function EventTimeline({
   const containerHeightRem = (rowGapRem + rowHeightRem) * totalLevels + headerHeightRem;
 
   // time indicators
-  const hourlyMarkers = generateHourlyIndicators(now, pastWindowHours, futureWindowHours);
-  const currentMarkerPos = calculateCurrentTimePercentage(pastWindowHours, futureWindowHours);
+  const hourlyMarkers = generateHourlyIndicators(now, PAST_WINDOW_HOURS, FUTURE_WINDOW_HOURS);
+  const currentMarkerPos = calculateCurrentTimePercentage(PAST_WINDOW_HOURS, FUTURE_WINDOW_HOURS);
 
   return (
     <Box
@@ -79,6 +74,7 @@ export function EventTimeline({
         border: `1px solid ${palette.divider}`,
         overflow: 'hidden',
         borderRadius: 1,
+        flexGrow: 1,
       }}
     >
       <Box

@@ -4,32 +4,34 @@ import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import WbTwilightOutlinedIcon from '@mui/icons-material/WbTwilightOutlined';
 import { Stack, Typography } from '@mui/material';
 
-import { IWeather } from '@/legacy/types/IWeather';
+import { useLocation } from '@/legacy/hooks/useLocation';
+import { useWeather } from '@/legacy/hooks/useWeather';
+import { useCurrentTime } from '@/shared/hooks/useCurrentTime';
 
-interface ClockProps {
-  currentTime: Date;
-  weather: IWeather;
-}
+export function Clock() {
+  const { latitude, longitude } = useLocation();
+  const { data: weather } = useWeather(latitude, longitude);
 
-export function Clock({ currentTime, weather }: ClockProps) {
-  const hour = currentTime.getHours();
-  const minute = currentTime.getMinutes();
+  const now = useCurrentTime();
+
+  const hour = now.getHours();
+  const minute = now.getMinutes();
 
   const hour12 = hour % 12 || 12;
-  const ampm = hour < 12 ? 'am' : 'pm';
+  const meridiem = hour < 12 ? 'am' : 'pm';
 
-  const formattedDate = currentTime.toLocaleDateString([], {
+  const formattedDate = now.toLocaleDateString([], {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
   });
 
-  const { apparentTemperature, relativeHumidity } = weather;
-
   let PhaseIcon = HotelIcon;
   if (hour >= 6 && hour < 12) PhaseIcon = WbTwilightOutlinedIcon;
   else if (hour >= 12 && hour < 18) PhaseIcon = WbSunnyOutlinedIcon;
   else if (hour >= 18) PhaseIcon = NightsStayOutlinedIcon;
+
+  const showWeather = weather?.apparentTemperature && weather?.relativeHumidity;
 
   return (
     <Stack>
@@ -37,7 +39,7 @@ export function Clock({ currentTime, weather }: ClockProps) {
         <Typography variant="h1" mr={0.5}>
           {hour12}:{`${minute}`.padStart(2, '0')}
         </Typography>
-        <Typography variant="h2">{ampm}</Typography>
+        <Typography variant="h2">{meridiem}</Typography>
         <Stack alignSelf="start">
           <PhaseIcon />
         </Stack>
@@ -46,9 +48,11 @@ export function Clock({ currentTime, weather }: ClockProps) {
       <Stack direction="row" justifyContent="space-between" gap={1.5} alignItems="center">
         <Typography variant="subtitle1">{formattedDate}</Typography>
 
-        <Typography variant="caption">
-          {apparentTemperature}/{relativeHumidity}
-        </Typography>
+        {showWeather ? (
+          <Typography variant="caption">
+            {weather.apparentTemperature}/{weather.relativeHumidity}
+          </Typography>
+        ) : null}
       </Stack>
     </Stack>
   );

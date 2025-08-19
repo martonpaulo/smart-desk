@@ -6,6 +6,7 @@ import { ColumnModal } from '@/legacy/components/column/ColumnModal';
 import { TodoColumn } from '@/legacy/components/column/TodoColumn';
 import { AddTaskFloatButton } from '@/legacy/components/task/AddTaskFloatButton';
 import { SyncStatus } from '@/legacy/components/task/SyncedSyncIcon';
+import { TaskCard } from '@/legacy/components/task/TaskCard';
 import { TaskModal } from '@/legacy/components/task/TaskModal';
 import { useTasks } from '@/legacy/hooks/useTasks';
 import { useBoardStore } from '@/legacy/store/board/store';
@@ -34,9 +35,11 @@ const mapSyncStatusFromStore = (status: SyncStatusFromStore): SyncStatus => {
   }
 };
 
+// Treat columns named "Done" as done, case-insensitive and trimmed
+const isDoneColumn = (column: Column): boolean => column.title?.trim().toLowerCase() === 'done';
+
 export function TodoList({ showDate }: TodoListProps) {
   const syncStatusFromStore = useSyncStatusStore(s => s.status);
-
   const syncStatus = mapSyncStatusFromStore(syncStatusFromStore);
 
   const tasks = useTasks({ plannedDate: new Date(), trashed: false, classified: true });
@@ -58,7 +61,7 @@ export function TodoList({ showDate }: TodoListProps) {
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [hoverTaskId, setHoverTaskId] = useState<string | null>(null);
   const [taskDropColumnId, setTaskDropColumnId] = useState<string | null>(null);
-  // **new** column drag state
+  // column drag state
   const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
   const [hoverColumnId, setHoverColumnId] = useState<string | null>(null);
 
@@ -72,7 +75,28 @@ export function TodoList({ showDate }: TodoListProps) {
     if (hiddenColumnIds && hiddenColumnIds.includes(c.id)) return false;
     return true;
   });
+
   const boardIsEmpty = columnsToRender.length === 0;
+
+  // Precompute helpers to avoid repeated lookups
+  const visibleColumnsMap = new Map(columnsToRender.map(c => [c.id, c]));
+  const visibleNonDoneColumns = columnsToRender.filter(c => !isDoneColumn(c));
+  const visibleNonDoneIds = new Set(visibleNonDoneColumns.map(c => c.id));
+
+  // Mobile: flatten all tasks from visible, non-done columns into a single list
+  const mobileTasks: Task[] = tasks
+    .filter(t => t.columnId && visibleNonDoneIds.has(t.columnId))
+    // sort by column.position then by task.position (fallbacks keep order stable)
+    .sort((a, b) => {
+      const colA = a.columnId ? visibleColumnsMap.get(a.columnId) : undefined;
+      const colB = b.columnId ? visibleColumnsMap.get(b.columnId) : undefined;
+      const colPosA = colA?.position ?? 0;
+      const colPosB = colB?.position ?? 0;
+      if (colPosA !== colPosB) return colPosA - colPosB;
+      const posA = (a as unknown as { position?: number }).position ?? 0;
+      const posB = (b as unknown as { position?: number }).position ?? 0;
+      return posA - posB;
+    });
 
   // ── Column modal open/close ─────────────────────────────────────────────
   const openNewColumnModal = () => {
@@ -124,11 +148,10 @@ export function TodoList({ showDate }: TodoListProps) {
     }
   };
 
-  // ── Task handlers (unchanged) ───────────────────────────────────────────
+  // ── Task handlers ──────────────────────────────────────────────────────
   const handleAddTask = async (task: Partial<Task>): Promise<string> => {
     try {
       return await addTask({
-        // Default title that will be overridden if task.title exists
         title: 'New Task',
         ...task,
         updatedAt: new Date(),
@@ -145,9 +168,9 @@ export function TodoList({ showDate }: TodoListProps) {
     setEditingTask(task);
   };
 
-  // ── Task drag & drop ────────────────────────────────────────────────────
+  // ── Task drag & drop (disabled on mobile) ───────────────────────────────
   const handleTaskDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
-    if (isMobile) return; // disable drag on mobile
+    if (isMobile) return;
     e.dataTransfer.effectAllowed = 'move';
     setDraggingTaskId(id);
     setHoverTaskId(null);
@@ -179,7 +202,7 @@ export function TodoList({ showDate }: TodoListProps) {
     }
   };
 
-  // ── Column drag & drop ──────────────────────────────────────────────────
+  // ── Column drag & drop (desktop only) ───────────────────────────────────
   const handleColumnDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     if (isMobile) return;
     e.dataTransfer.effectAllowed = 'move';
@@ -197,17 +220,13 @@ export function TodoList({ showDate }: TodoListProps) {
   const handleColumnDragEnd = () => {
     if (isMobile) return;
     if (draggingColumnId) {
-      // sort visible columns by position
       const sorted = columnsToRender.slice().sort((a, b) => a.position - b.position);
-
       const fromIdx = sorted.findIndex(c => c.id === draggingColumnId);
       const toIdx = hoverColumnId ? sorted.findIndex(c => c.id === hoverColumnId) : fromIdx;
 
       if (fromIdx >= 0 && toIdx >= 0 && fromIdx !== toIdx) {
-        // reorder array
         const moved = sorted.splice(fromIdx, 1)[0];
         sorted.splice(toIdx, 0, moved);
-        // batch update new positions
         sorted.forEach((col, i) => {
           updateColumn({ id: col.id, position: i + 1, updatedAt: new Date() });
         });
@@ -239,7 +258,6 @@ export function TodoList({ showDate }: TodoListProps) {
         draggingTaskId={draggingTaskId}
         hoverTaskId={hoverTaskId}
         taskDropColumnId={taskDropColumnId}
-        // ── new column DnD props ───────────────────────────────────────
         onColumnDragStart={handleColumnDragStart}
         onColumnDragOver={handleColumnDragOver}
         onColumnDragEnd={handleColumnDragEnd}
@@ -252,22 +270,46 @@ export function TodoList({ showDate }: TodoListProps) {
   };
 
   return (
-    <Stack spacing={2}>
-      <Stack
-        direction={isMobile ? 'column-reverse' : 'row'}
-        spacing={2}
-        sx={{ userSelect: 'none', alignItems: 'flex-start' }}
-      >
-        {columnsToRender
-          .slice()
-          .sort((a, b) => a.position - b.position)
-          .map(renderColumn)}
-      </Stack>
+    <>
+      {/* Mobile: show a single consolidated task list excluding "Done" column */}
+      {isMobile ? (
+        <Stack spacing={2} pt={2} sx={{ userSelect: 'none' }}>
+          <Stack gap={2}>
+            {mobileTasks.map(task => {
+              const col = task.columnId ? visibleColumnsMap.get(task.columnId) : undefined;
+              const color = col?.color ?? '#999';
+              return (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  color={color}
+                  hasDefaultWidth={false}
+                  showDate={showDate}
+                  editTask={false}
+                  onFinishEditing={() => undefined}
+                  onTaskDragOver={() => undefined}
+                  onTaskDragStart={() => undefined}
+                />
+              );
+            })}
+          </Stack>
 
-      {boardIsEmpty && (
-        <Button variant="contained" onClick={openNewColumnModal}>
-          Add First Column
-        </Button>
+          {boardIsEmpty && (
+            <Button variant="contained" onClick={openNewColumnModal}>
+              Add First Column
+            </Button>
+          )}
+
+          <AddTaskFloatButton />
+        </Stack>
+      ) : (
+        // Desktop: original columns layout
+        <Stack direction="row" spacing={2} sx={{ userSelect: 'none', alignItems: 'flex-start' }}>
+          {columnsToRender
+            .slice()
+            .sort((a, b) => a.position - b.position)
+            .map(renderColumn)}
+        </Stack>
       )}
 
       <ColumnModal
@@ -278,13 +320,11 @@ export function TodoList({ showDate }: TodoListProps) {
         onClose={closeColumnModal}
       />
 
-      {isMobile && <AddTaskFloatButton />}
-
       <TaskModal
         open={Boolean(editingTask)}
         task={editingTask}
         onCloseAction={() => setEditingTask(null)}
       />
-    </Stack>
+    </>
   );
 }

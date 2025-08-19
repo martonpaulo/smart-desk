@@ -1,9 +1,7 @@
-'use client';
-
 import { KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useState } from 'react';
 
-import EditIcon from '@mui/icons-material/Edit';
-import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import {
@@ -13,16 +11,17 @@ import {
   IconButton,
   MenuItem,
   SpeedDial,
+  SpeedDialAction,
   SpeedDialIcon,
   Stack,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
-  Tooltip,
   useTheme,
 } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 
+import { EventModal } from '@/features/event/components/EventModal';
 import { useTagsStore } from '@/features/tag/store/useTagsStore';
 import { QuantitySelector } from '@/legacy/components/QuantitySelector';
 import { useBoardStore } from '@/legacy/store/board/store';
@@ -33,15 +32,23 @@ import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
 export function AddTaskFloatButton() {
   const theme = useTheme();
   const zIndex = theme.zIndex.modal + 1;
+
+  // Stores
   const { addTask } = useBoardStore(state => state);
   const allTags = useTagsStore(s => s.items);
   const tags = allTags.filter(t => !t.trashed).sort((a, b) => a.name.localeCompare(b.name));
 
-  // modal state
-  const [open, setOpen] = useState(false);
+  // SpeedDial open state
+  const [dialOpen, setDialOpen] = useState(false);
+
+  // Task modal state
+  const [taskOpen, setTaskOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // form state
+  // Event modal state
+  const [eventOpen, setEventOpen] = useState(false);
+
+  // Task form state
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [plannedDate, setPlannedDate] = useState<Date | undefined>(undefined);
@@ -50,13 +57,14 @@ export function AddTaskFloatButton() {
   const [quantityTarget, setQuantityTarget] = useState(1);
   const [tagId, setTagId] = useState<string | undefined>(undefined);
 
-  // flags
+  // Task flags
   const [important, setImportant] = useState(false);
   const [urgent, setUrgent] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [daily, setDaily] = useState(false);
 
-  const resetForm = useCallback(() => {
+  // Reset the task form to defaults
+  const resetTaskForm = () => {
     setTitle('');
     setNotes('');
     setPlannedDate(undefined);
@@ -69,17 +77,32 @@ export function AddTaskFloatButton() {
     setBlocked(false);
     setDaily(false);
     setIsExpanded(false);
-  }, []);
+  };
 
-  const openForm = () => setOpen(true);
-  const closeForm = useCallback(() => {
-    setOpen(false);
-  }, []);
+  // Openers and closers
+  const openTaskForm = () => {
+    setTaskOpen(true);
+    setDialOpen(false);
+  };
 
+  const closeTaskForm = () => {
+    setTaskOpen(false);
+  };
+
+  const openEventModal = () => {
+    setEventOpen(true);
+    setDialOpen(false);
+  };
+
+  const closeEventModal = () => setEventOpen(false);
+
+  // Submit new task with basic validation
   const submitTask = useCallback(() => {
-    if (!title.trim()) return;
+    const safeTitle = title.trim();
+    if (!safeTitle) return;
+
     addTask({
-      title: title.trim(),
+      title: safeTitle,
       notes: notes.trim() || undefined,
       plannedDate: plannedDate ?? undefined,
       estimatedTime,
@@ -92,36 +115,36 @@ export function AddTaskFloatButton() {
       tagId,
       updatedAt: new Date(),
     });
-    closeForm();
-    resetForm();
+
+    closeTaskForm();
+    resetTaskForm();
   }, [
-    title,
-    notes,
-    plannedDate,
-    estimatedTime,
-    quantityTarget,
-    useQuantity,
-    important,
-    urgent,
+    addTask,
     blocked,
     daily,
+    estimatedTime,
+    important,
+    notes,
+    plannedDate,
+    quantityTarget,
     tagId,
-    closeForm,
-    resetForm,
-    addTask,
+    title,
+    urgent,
+    useQuantity,
   ]);
 
-  // keyboard shortcuts
+  // Keyboard shortcuts active only when task panel is open
   useEffect(() => {
-    if (!open) return;
+    if (!taskOpen) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeForm();
+      if (e.key === 'Escape') closeTaskForm();
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') submitTask();
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
-  }, [open, submitTask, closeForm]);
+  }, [taskOpen, submitTask]);
 
+  // Flags logic for ToggleButtonGroup
   const activeFlags = [
     important && 'important',
     urgent && 'urgent',
@@ -138,18 +161,47 @@ export function AddTaskFloatButton() {
 
   return (
     <>
-      <Backdrop open={open} />
-      <Tooltip title="Add new task" placement="left">
-        <SpeedDial
-          ariaLabel="Add Task"
-          sx={{ position: 'fixed', bottom: 80, right: 16 }}
-          icon={<SpeedDialIcon openIcon={<EditIcon />} />}
-          onClick={openForm}
-        />
-      </Tooltip>
+      {/* Floating launcher with two actions */}
 
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <ClickAwayListener onClickAway={closeForm}>
+      <SpeedDial
+        ariaLabel="Create"
+        icon={<SpeedDialIcon />}
+        sx={{ position: 'fixed', bottom: 80, right: 16 }}
+        onOpen={() => setDialOpen(true)}
+        onClose={() => setDialOpen(false)}
+        open={dialOpen}
+      >
+        <SpeedDialAction
+          key="add-task"
+          icon={<AddTaskIcon />}
+          slotProps={{
+            tooltip: {
+              title: 'Add new task',
+              open: false,
+            },
+          }}
+          onClick={openTaskForm}
+        />
+        <SpeedDialAction
+          key="add-event"
+          icon={<EditCalendarIcon />}
+          slotProps={{
+            tooltip: {
+              title: 'Add new event',
+              open: false,
+            },
+          }}
+          onClick={openEventModal}
+        />
+      </SpeedDial>
+
+      {/* Event creation modal lives here too to avoid touching EventList */}
+      <EventModal open={eventOpen} onClose={closeEventModal} />
+
+      {/* Task sheet-style panel reuses your existing UI */}
+      <Backdrop open={taskOpen} />
+      <Collapse in={taskOpen} timeout="auto" unmountOnExit>
+        <ClickAwayListener onClickAway={closeTaskForm}>
           <Stack
             position="fixed"
             bottom={0}
@@ -199,8 +251,9 @@ export function AddTaskFloatButton() {
                           color: 'white',
                           '&:hover': { bgcolor: 'primary.dark' },
                         }}
+                        aria-label="Save task"
                       >
-                        <PlaylistAddIcon />
+                        <AddTaskIcon />
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -250,7 +303,7 @@ export function AddTaskFloatButton() {
 
             {/* Expandable section */}
             {!isExpanded && (
-              <IconButton size="small" onClick={() => setIsExpanded(true)}>
+              <IconButton size="small" onClick={() => setIsExpanded(true)} aria-label="Expand">
                 <UnfoldMoreIcon />
               </IconButton>
             )}
@@ -285,7 +338,7 @@ export function AddTaskFloatButton() {
                 </TextField>
 
                 {/* Quantity */}
-                <Stack direction="row" alignItems="center">
+                <Stack direction="row" alignItems="center" gap={2}>
                   <ToggleButton
                     value="quantity"
                     selected={useQuantity}
@@ -311,7 +364,7 @@ export function AddTaskFloatButton() {
                   onChange={v => setNotes(v)}
                 />
 
-                <IconButton size="small" onClick={() => setIsExpanded(false)}>
+                <IconButton size="small" onClick={() => setIsExpanded(false)} aria-label="Collapse">
                   <UnfoldLessIcon />
                 </IconButton>
               </>

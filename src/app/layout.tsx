@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 
 import { SessionProvider } from 'next-auth/react';
 
+import { MobileMotionController } from '@/core/components/MobileMotionController';
 import { AppThemeProvider } from '@/core/providers/AppThemeProvider';
 import { SupabaseSyncProvider } from '@/core/providers/SupabaseSyncProvider';
 import { InterfaceSoundProvider } from '@/features/sound/providers/InterfaceSoundProvider';
@@ -34,6 +35,7 @@ const providers = [
   NavigationLayout,
   SnackbarWrapperProvider,
   PromiseFeedbackProvider,
+  MobileMotionController,
 ];
 
 export default function RootLayout({ children }: RootLayoutProps) {

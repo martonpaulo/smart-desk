@@ -3,6 +3,8 @@ import { createTheme } from '@mui/material';
 import { customBreakpoints } from '@/theme/custom/breakpoints';
 import { customShapes } from '@/theme/custom/shapes';
 import { typography } from '@/theme/custom/typography';
+import { mobileComponentsOverrides } from '@/theme/mobile/components';
+import { buildMobileGlobalStyles } from '@/theme/mobile/global';
 import { shadows } from '@/theme/shadows';
 
 const baseTheme = createTheme();
@@ -13,6 +15,7 @@ export const theme = createTheme({
     ...baseTheme.shadows,
     ...shadows,
   },
+
   transitions: {
     duration: {
       shortest: 75,
@@ -23,10 +26,18 @@ export const theme = createTheme({
       enteringScreen: 112,
       leavingScreen: 97,
     },
+    easing: {
+      easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+      easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
+      easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
+      sharp: 'cubic-bezier(0.4, 0, 1, 1)',
+    },
   },
+
   breakpoints: {
     values: customBreakpoints,
   },
+
   typography: {
     fontFamily: 'var(--font-poppins)',
     fontSize: 14, // base font size in px
@@ -36,6 +47,7 @@ export const theme = createTheme({
     fontWeightBold: 700,
     ...typography,
   },
+
   components: {
     MuiAccordion: {
       styleOverrides: {
@@ -46,14 +58,9 @@ export const theme = createTheme({
         },
       },
     },
+
     MuiCssBaseline: {
       styleOverrides: {
-        html: {
-          overscrollBehavior: 'none',
-        },
-        body: {
-          overscrollBehavior: 'none',
-        },
         '#__next': {
           height: '100%',
           overflowY: 'auto',
@@ -70,8 +77,19 @@ export const theme = createTheme({
           fontFamily: 'var(--font-code), monospace',
           letterSpacing: '-0.06em',
         },
+
+        ...buildMobileGlobalStyles(),
+
+        // Override any specific properties after spreading mobile styles
+        html: {
+          overscrollBehavior: 'none',
+        },
+        body: {
+          overscrollBehavior: 'none',
+        },
       },
     },
+
     MuiChip: {
       styleOverrides: {
         sizeSmall: {
@@ -80,6 +98,7 @@ export const theme = createTheme({
         },
       },
     },
+
     MuiBottomNavigationAction: {
       styleOverrides: {
         root: {
@@ -94,5 +113,7 @@ export const theme = createTheme({
         },
       },
     },
+
+    ...mobileComponentsOverrides,
   },
 });

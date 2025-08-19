@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Add as AddIcon } from '@mui/icons-material';
 import {
@@ -19,6 +19,7 @@ import { Event as LocalEvent } from '@/features/event/types/Event';
 import { EventListItem } from '@/legacy/components/event/EventListItem';
 import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
 import { mapFromLegacyEvent } from '@/legacy/utils/eventLegacyMapper';
+import { useCurrentTime } from '@/shared/hooks/useCurrentTime';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 import { theme } from '@/theme';
 
@@ -28,10 +29,15 @@ export function EventList() {
 
   const { enqueueSnackbar } = useSnackbar();
 
+  const now = useCurrentTime();
+
   const [editingEvent, setEditingEvent] = useState<LocalEvent | null>(null);
   const [newModalOpen, setNewModalOpen] = useState(false);
 
-  const filteredEvents = events.filter(e => !e.allDay && new Date(e.end) >= new Date());
+  const filteredEvents = useMemo(
+    () => (events ?? []).filter(e => !e.allDay && new Date(e.end) >= now),
+    [events, now],
+  );
 
   const columnColor = alpha(theme.palette.primary.light, 0.2);
   const darkenColor = alpha(theme.palette.primary.light, 0.4);
@@ -49,24 +55,26 @@ export function EventList() {
           borderColor: darkenColor,
         }}
       >
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
-          <Typography variant="h3" color="primary">
-            Event List
-          </Typography>
+        {!isMobile && (
+          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
+            <Typography variant="h3" color="primary">
+              Event List
+            </Typography>
 
-          {filteredEvents && filteredEvents.length > 0 && (
-            <Chip
-              label={filteredEvents?.length}
-              size="small"
-              disabled
-              sx={{
-                '&.Mui-disabled': {
-                  opacity: 1,
-                },
-              }}
-            />
-          )}
-        </Stack>
+            {filteredEvents && filteredEvents.length > 0 && (
+              <Chip
+                label={filteredEvents?.length}
+                size="small"
+                disabled
+                sx={{
+                  '&.Mui-disabled': {
+                    opacity: 1,
+                  },
+                }}
+              />
+            )}
+          </Stack>
+        )}
 
         <List dense disablePadding>
           {filteredEvents.map(ev => (
@@ -83,9 +91,15 @@ export function EventList() {
               color={columnColor}
             />
           ))}
+
+          {isMobile && !filteredEvents.length && (
+            <Typography variant="body2" color="text.secondary">
+              No upcoming events
+            </Typography>
+          )}
         </List>
 
-        <Stack direction="row" alignItems="center" spacing={0}>
+        {!isMobile && (
           <TextField
             fullWidth
             size="small"
@@ -129,7 +143,7 @@ export function EventList() {
               },
             }}
           />
-        </Stack>
+        )}
 
         <EventModal open={newModalOpen} onClose={() => setNewModalOpen(false)} />
         <EventModal

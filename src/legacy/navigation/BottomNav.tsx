@@ -68,10 +68,13 @@ export function BottomNav() {
     });
   }, [router, visible, overflow]);
 
+  const isRouteSelected = (pathname: string, href: string) => {
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   // For controlled BottomNavigation, keep the current path
   const navValue = useMemo(() => {
-    // match by startsWith to handle nested paths
-    const match = [...visible, ...overflow].find(r => pathname.startsWith(r.href));
+    const match = [...visible, ...overflow].find(r => isRouteSelected(pathname, r.href));
     return match?.href ?? pathname;
   }, [pathname, visible, overflow]);
 
