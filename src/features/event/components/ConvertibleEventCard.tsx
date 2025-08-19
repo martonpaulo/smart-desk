@@ -120,7 +120,7 @@ export function ConvertibleEventCard({
               </Tooltip>
             )}
             <Typography
-              variant={'body2'}
+              variant="h6"
               noWrap
               title={title}
               color={disabled ? 'text.disabled' : 'text.primary'}
@@ -130,7 +130,7 @@ export function ConvertibleEventCard({
           </Stack>
 
           <Typography
-            variant="caption"
+            variant="h6"
             color={disabled || !event.calendar ? 'text.disabled' : 'text.secondary'}
           >
             {event.calendar?.name || 'No Calendar'}

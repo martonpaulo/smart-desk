@@ -79,10 +79,9 @@ export function TaskCard({
   );
 
   // tags
-  // Memoize the filtered tags to avoid unnecessary re-renders
   const allTags = useTagsStore(s => s.items);
-  const tags = useMemo(() => allTags.filter(t => !t.trashed), [allTags]);
-  const taskTag = useMemo(() => tags.find(t => t.id === task.tagId), [tags, task.tagId]);
+  const tags = allTags.filter(t => !t.trashed);
+  const taskTag = tags.find(t => t.id === task.tagId);
 
   // local edit state
   const [isEditing, setIsEditing] = useState(editTask);
@@ -188,160 +187,187 @@ export function TaskCard({
     }
   }
 
+  // anchor and hover for tooltip mode only when dense
+  const cardAnchorRef = useRef<HTMLDivElement | null>(null);
+  const [hovering, setHovering] = useState(false);
+
   return (
     <>
-      <TaskContainer
-        color={taskColor}
-        selected={selected}
-        draggable={!isEditing && !isMobile && !selectable}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onClick={toggleSelected}
-        isDragging={isDragging}
-        dense={isMobile}
-        hasDefaultWidth={hasDefaultWidth}
-        sx={dense ? { gap: 0.25, px: 1, py: 1, minHeight: 'auto' } : undefined}
+      {/* Anchor wrapper keeps existing layout and absolute children intact */}
+      <Stack
+        ref={cardAnchorRef}
+        position="relative"
+        onMouseEnter={dense ? () => setHovering(true) : undefined}
+        onMouseLeave={dense ? () => setHovering(false) : undefined}
       >
-        {selectable && (
-          <Checkbox
-            size="small"
-            checked={selected}
-            onClick={e => e.stopPropagation()}
-            onChange={e => onSelectChange?.(task.id, e.target.checked)}
-            sx={{ p: 0 }}
-          />
-        )}
-
-        <PriorityFlag task={task} showEisenhowerIcons={eisenhowerIcons} sx={{ opacity }} />
-
-        {!task.isSynced && (
-          <SyncedSyncIcon status={mappedStatus} fontSize="inherit" color="action" />
-        )}
-
-        <Stack direction="column" flexGrow={1} gap={dense ? 0.25 : 0.5}>
-          {isEditing ? (
-            <TitleBlock
-              mode="edit"
-              dense
-              title={title}
-              inputRef={inputRef as React.RefObject<HTMLInputElement>}
-              onChangeTitle={setTitle}
-              onBlurSave={finishInlineEdit}
-              onCancel={() => {
-                setIsEditing(false);
-                onFinishEditing?.();
-                setTitle(task.title);
-              }}
+        <TaskContainer
+          color={taskColor}
+          selected={selected}
+          draggable={!isEditing && !isMobile && !selectable}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onClick={toggleSelected}
+          isDragging={isDragging}
+          dense={isMobile}
+          hasDefaultWidth={hasDefaultWidth}
+          sx={dense ? { gap: 0.25, px: 1, py: 1, minHeight: 'auto' } : undefined}
+        >
+          {selectable && (
+            <Checkbox
+              size="small"
+              checked={selected}
+              onClick={e => e.stopPropagation()}
+              onChange={e => onSelectChange?.(task.id, e.target.checked)}
+              sx={{ p: 0 }}
             />
-          ) : (
-            <>
-              <Stack direction="row" justifyContent="space-between" gap={dense ? 0.5 : 1}>
-                <Stack direction="row" alignItems="center" flexWrap="wrap">
-                  {task.notes && (
-                    <Tooltip title="Has notes">
-                      <NotesIcon
-                        color={task.trashed || task.blocked ? 'disabled' : 'action'}
-                        sx={{
-                          fontSize: theme.typography.caption.fontSize,
-                          alignSelf: 'center',
-                          mr: dense ? 0.25 : 0.5,
-                        }}
-                      />
-                    </Tooltip>
-                  )}
+          )}
 
-                  <TitleBlock
-                    mode="read"
-                    dense={dense}
-                    title={task.title || 'Untitled Task'}
-                    done={done}
-                    untitled={!task.title}
-                    textVariantSize={isMobile ? 'body1' : 'body2'}
-                    onClickTitle={selectable ? toggleSelected : () => setEditModalOpen(true)}
-                    sx={{
-                      opacity,
-                      fontWeight: task.trashed ? 300 : 400,
-                    }}
-                  />
+          <PriorityFlag task={task} showEisenhowerIcons={eisenhowerIcons} sx={{ opacity }} />
 
-                  {!task.blocked && !task.trashed && task.daily && showDaily && (
-                    <Tooltip title="Repeats daily">
-                      <Typography
-                        component="span"
-                        sx={{
-                          fontSize: dense ? 10 : 16,
-                          lineHeight: 1,
-                          fontWeight: 400,
-                          transform: 'rotate(240deg) translateX(2px)',
-                          color: 'text.secondary',
-                          alignSelf: 'flex-start',
-                          display: 'inline-block',
-                        }}
-                      >
-                        ⟳
-                      </Typography>
-                    </Tooltip>
+          {!task.isSynced && (
+            <SyncedSyncIcon status={mappedStatus} fontSize="inherit" color="action" />
+          )}
+
+          <Stack direction="column" flexGrow={1} gap={dense ? 0.25 : 0.5}>
+            {isEditing ? (
+              <TitleBlock
+                mode="edit"
+                dense
+                title={title}
+                inputRef={inputRef as React.RefObject<HTMLInputElement>}
+                onChangeTitle={setTitle}
+                onBlurSave={finishInlineEdit}
+                onCancel={() => {
+                  setIsEditing(false);
+                  onFinishEditing?.();
+                  setTitle(task.title);
+                }}
+              />
+            ) : (
+              <>
+                <Stack direction="row" justifyContent="space-between" gap={dense ? 0.5 : 1}>
+                  <Stack direction="row" alignItems="center" flexWrap="wrap">
+                    {task.notes && (
+                      <Tooltip title="Has notes">
+                        <NotesIcon
+                          color={task.trashed || task.blocked ? 'disabled' : 'action'}
+                          sx={{
+                            fontSize: theme.typography.caption.fontSize,
+                            alignSelf: 'center',
+                            mr: dense ? 0.25 : 0.5,
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+
+                    <TitleBlock
+                      mode="read"
+                      dense={dense}
+                      title={task.title || 'Untitled Task'}
+                      done={done}
+                      untitled={!task.title}
+                      textVariantSize={isMobile ? 'body1' : 'body2'}
+                      onClickTitle={selectable ? toggleSelected : () => setEditModalOpen(true)}
+                      sx={{
+                        opacity,
+                        fontWeight: task.trashed ? 300 : 400,
+                      }}
+                    />
+
+                    {!task.blocked && !task.trashed && task.daily && showDaily && (
+                      <Tooltip title="Repeats daily">
+                        <Typography
+                          component="span"
+                          sx={{
+                            fontSize: dense ? 10 : 16,
+                            lineHeight: 1,
+                            fontWeight: 400,
+                            transform: 'rotate(240deg) translateX(2px)',
+                            color: 'text.secondary',
+                            alignSelf: 'flex-start',
+                            display: 'inline-block',
+                          }}
+                        >
+                          ⟳
+                        </Typography>
+                      </Tooltip>
+                    )}
+                  </Stack>
+
+                  {isCountTask && (
+                    <Typography
+                      variant={dense ? 'h6' : 'caption'}
+                      color="text.secondary"
+                      sx={{ opacity }}
+                    >
+                      {task.quantityDone}/{task.quantityTarget}
+                    </Typography>
                   )}
                 </Stack>
 
-                {isCountTask && (
-                  <Typography
-                    variant={dense ? 'h6' : 'caption'}
-                    color="text.secondary"
-                    sx={{ opacity }}
-                  >
-                    {task.quantityDone}/{task.quantityTarget}
-                  </Typography>
-                )}
-              </Stack>
+                <MetaRow
+                  opacity={opacity}
+                  dense={dense}
+                  tagComp={
+                    taskTag && showTag ? (
+                      <TagLabel tag={taskTag} size={dense ? 'x-small' : 'small'} />
+                    ) : null
+                  }
+                  durationComp={
+                    showDuration ? (
+                      <Typography
+                        variant={dense ? 'h6' : 'caption'}
+                        color={task.estimatedTime ? 'text.secondary' : 'text.disabled'}
+                      >
+                        {task.estimatedTime
+                          ? formatFullDuration(task.estimatedTime * 60_000)
+                          : 'Unset'}
+                      </Typography>
+                    ) : null
+                  }
+                  separatorComp={
+                    showDuration && showDate ? (
+                      <Typography variant={dense ? 'h6' : 'caption'} color="text.disabled">
+                        |
+                      </Typography>
+                    ) : null
+                  }
+                  dateComp={
+                    showDate ? (
+                      <Typography
+                        variant={dense ? 'h6' : 'caption'}
+                        color={task.plannedDate ? 'text.secondary' : 'text.disabled'}
+                      >
+                        {getDateLabel(task.plannedDate)}
+                      </Typography>
+                    ) : null
+                  }
+                />
+              </>
+            )}
+          </Stack>
 
-              <MetaRow
-                opacity={opacity}
-                dense={dense}
-                tagComp={
-                  taskTag && showTag ? (
-                    <TagLabel tag={taskTag} size={dense ? 'x-small' : 'small'} />
-                  ) : null
-                }
-                durationComp={
-                  showDuration ? (
-                    <Typography
-                      variant={dense ? 'h6' : 'caption'}
-                      color={task.estimatedTime ? 'text.secondary' : 'text.disabled'}
-                    >
-                      {task.estimatedTime
-                        ? formatFullDuration(task.estimatedTime * 60_000)
-                        : 'Unset'}
-                    </Typography>
-                  ) : null
-                }
-                separatorComp={
-                  showDuration && showDate ? (
-                    <Typography variant={dense ? 'h6' : 'caption'} color="text.disabled">
-                      |
-                    </Typography>
-                  ) : null
-                }
-                dateComp={
-                  showDate ? (
-                    <Typography
-                      variant={dense ? 'h6' : 'caption'}
-                      color={task.plannedDate ? 'text.secondary' : 'text.disabled'}
-                    >
-                      {getDateLabel(task.plannedDate)}
-                    </Typography>
-                  ) : null
-                }
-              />
-            </>
+          {/* in-card actions for non-dense still work as before */}
+          {!isEditing && showActions && !dense && (
+            <ActionsBar
+              showOnHover
+              right
+              items={[
+                showSendToInbox ? <SendToInboxButton key="next" task={task} /> : null,
+                showUnblock ? <UnblockButton key="unblock" task={task} /> : null,
+                showIncrement ? <IncrementButton key="inc" task={task} /> : null,
+                showReset ? <ResetButton key="reset" task={task} /> : null,
+                showMarkDone ? <MarkAsDoneButton key="done" task={task} /> : null,
+                showRecover ? <RecoverFromTrashButton key="recover" task={task} /> : null,
+              ].filter(Boolean)}
+            />
           )}
-        </Stack>
+        </TaskContainer>
 
-        {!isEditing && showActions && (
+        {/* tooltip-style actions for dense */}
+        {!isEditing && showActions && dense && (
           <ActionsBar
-            showOnHover
-            right
             items={[
               showSendToInbox ? <SendToInboxButton key="next" task={task} /> : null,
               showUnblock ? <UnblockButton key="unblock" task={task} /> : null,
@@ -350,9 +376,13 @@ export function TaskCard({
               showMarkDone ? <MarkAsDoneButton key="done" task={task} /> : null,
               showRecover ? <RecoverFromTrashButton key="recover" task={task} /> : null,
             ].filter(Boolean)}
+            right
+            asTooltip
+            anchorEl={cardAnchorRef.current}
+            open={hovering}
           />
         )}
-      </TaskContainer>
+      </Stack>
 
       <TaskModal open={isEditModalOpen} task={task} onCloseAction={() => setEditModalOpen(false)} />
     </>
