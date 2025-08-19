@@ -35,14 +35,18 @@ const mapSyncStatusFromStore = (status: SyncStatusFromStore): SyncStatus => {
   }
 };
 
-// Treat columns named "Done" as done, case-insensitive and trimmed
-const isDoneColumn = (column: Column): boolean => column.title?.trim().toLowerCase() === 'done';
-
 export function TodoList({ showDate }: TodoListProps) {
   const syncStatusFromStore = useSyncStatusStore(s => s.status);
   const syncStatus = mapSyncStatusFromStore(syncStatusFromStore);
 
   const tasks = useTasks({ plannedDate: new Date(), trashed: false, classified: true });
+
+  const mobileTasks = useTasks({
+    plannedDate: new Date(),
+    trashed: false,
+    classified: true,
+    done: false,
+  });
 
   // store selectors
   const columns = useBoardStore(s => s.columns);
@@ -70,33 +74,15 @@ export function TodoList({ showDate }: TodoListProps) {
   const hiddenColumnIds = useTodoPrefsStore(state => state.hiddenColumnIds);
   const toggleHiddenColumn = useTodoPrefsStore(state => state.toggleHiddenColumn);
 
-  const columnsToRender = columns.filter(c => {
-    if (c.trashed) return false;
-    if (hiddenColumnIds && hiddenColumnIds.includes(c.id)) return false;
-    return true;
-  });
+  const activeColumns = columns.filter(c => !c.trashed);
+  const visibleColumns = activeColumns.filter(c => !hiddenColumnIds.includes(c.id));
 
-  const boardIsEmpty = columnsToRender.length === 0;
+  const boardIsEmpty = visibleColumns.length === 0;
 
-  // Precompute helpers to avoid repeated lookups
-  const visibleColumnsMap = new Map(columnsToRender.map(c => [c.id, c]));
-  const visibleNonDoneColumns = columnsToRender.filter(c => !isDoneColumn(c));
-  const visibleNonDoneIds = new Set(visibleNonDoneColumns.map(c => c.id));
-
-  // Mobile: flatten all tasks from visible, non-done columns into a single list
-  const mobileTasks: Task[] = tasks
-    .filter(t => t.columnId && visibleNonDoneIds.has(t.columnId))
-    // sort by column.position then by task.position (fallbacks keep order stable)
-    .sort((a, b) => {
-      const colA = a.columnId ? visibleColumnsMap.get(a.columnId) : undefined;
-      const colB = b.columnId ? visibleColumnsMap.get(b.columnId) : undefined;
-      const colPosA = colA?.position ?? 0;
-      const colPosB = colB?.position ?? 0;
-      if (colPosA !== colPosB) return colPosA - colPosB;
-      const posA = (a as unknown as { position?: number }).position ?? 0;
-      const posB = (b as unknown as { position?: number }).position ?? 0;
-      return posA - posB;
-    });
+  const getColumnColor = (columnId: string) => {
+    const col = activeColumns.find(c => c.id === columnId);
+    return col?.color ?? '#999';
+  };
 
   // ── Column modal open/close ─────────────────────────────────────────────
   const openNewColumnModal = () => {
@@ -220,7 +206,7 @@ export function TodoList({ showDate }: TodoListProps) {
   const handleColumnDragEnd = () => {
     if (isMobile) return;
     if (draggingColumnId) {
-      const sorted = columnsToRender.slice().sort((a, b) => a.position - b.position);
+      const sorted = visibleColumns.slice().sort((a, b) => a.position - b.position);
       const fromIdx = sorted.findIndex(c => c.id === draggingColumnId);
       const toIdx = hoverColumnId ? sorted.findIndex(c => c.id === hoverColumnId) : fromIdx;
 
@@ -274,24 +260,20 @@ export function TodoList({ showDate }: TodoListProps) {
       {/* Mobile: show a single consolidated task list excluding "Done" column */}
       {isMobile ? (
         <Stack spacing={2} pt={2} sx={{ userSelect: 'none' }}>
-          <Stack gap={2}>
-            {mobileTasks.map(task => {
-              const col = task.columnId ? visibleColumnsMap.get(task.columnId) : undefined;
-              const color = col?.color ?? '#999';
-              return (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  color={color}
-                  hasDefaultWidth={false}
-                  showDate={showDate}
-                  editTask={false}
-                  onFinishEditing={() => undefined}
-                  onTaskDragOver={() => undefined}
-                  onTaskDragStart={() => undefined}
-                />
-              );
-            })}
+          <Stack gap={1}>
+            {mobileTasks.map(task => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                color={getColumnColor(task.columnId)}
+                hasDefaultWidth={false}
+                showDate={showDate}
+                editTask={false}
+                onFinishEditing={() => undefined}
+                onTaskDragOver={() => undefined}
+                onTaskDragStart={() => undefined}
+              />
+            ))}
           </Stack>
 
           {boardIsEmpty && (
@@ -305,7 +287,7 @@ export function TodoList({ showDate }: TodoListProps) {
       ) : (
         // Desktop: original columns layout
         <Stack direction="row" spacing={2} sx={{ userSelect: 'none', alignItems: 'flex-start' }}>
-          {columnsToRender
+          {visibleColumns
             .slice()
             .sort((a, b) => a.position - b.position)
             .map(renderColumn)}
