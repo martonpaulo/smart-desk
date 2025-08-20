@@ -8,9 +8,10 @@ import { Task } from '@/legacy/types/task';
 
 interface UnblockButtonProps {
   task: Task;
+  dense?: boolean;
 }
 
-export function UnblockButton({ task }: UnblockButtonProps) {
+export function UnblockButton({ task, dense }: UnblockButtonProps) {
   const updateTask = useBoardStore(s => s.updateTask);
 
   const unblockTask = useCallback(async () => {
@@ -21,6 +22,7 @@ export function UnblockButton({ task }: UnblockButtonProps) {
     <TaskActionButton
       icon={<UnblockIcon />}
       task={task}
+      dense={dense}
       tooltip="Unblock"
       onAction={unblockTask}
       successSound="unblock"

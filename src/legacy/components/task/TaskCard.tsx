@@ -229,7 +229,7 @@ export function TaskCard({
             <SyncedSyncIcon status={mappedStatus} fontSize="inherit" color="action" />
           )}
 
-          <Stack direction="column" flexGrow={1} gap={dense ? 0.25 : 0.5}>
+          <Stack direction="column" flexGrow={1} gap={0.5}>
             {isEditing ? (
               <TitleBlock
                 mode="edit"
@@ -246,7 +246,7 @@ export function TaskCard({
               />
             ) : (
               <>
-                <Stack direction="row" justifyContent="space-between" gap={dense ? 0.5 : 1}>
+                <Stack direction="row" justifyContent="space-between" gap={1}>
                   <Stack direction="row" alignItems="center" flexWrap="wrap">
                     {task.notes && (
                       <Tooltip title="Has notes">
@@ -352,7 +352,6 @@ export function TaskCard({
           {!isEditing && showActions && !dense && (
             <ActionsBar
               showOnHover
-              right
               items={[
                 showSendToInbox ? <SendToInboxButton key="next" task={task} /> : null,
                 showUnblock ? <UnblockButton key="unblock" task={task} /> : null,
@@ -369,14 +368,13 @@ export function TaskCard({
         {!isEditing && showActions && dense && (
           <ActionsBar
             items={[
-              showSendToInbox ? <SendToInboxButton key="next" task={task} /> : null,
-              showUnblock ? <UnblockButton key="unblock" task={task} /> : null,
-              showIncrement ? <IncrementButton key="inc" task={task} /> : null,
-              showReset ? <ResetButton key="reset" task={task} /> : null,
-              showMarkDone ? <MarkAsDoneButton key="done" task={task} /> : null,
-              showRecover ? <RecoverFromTrashButton key="recover" task={task} /> : null,
+              showSendToInbox ? <SendToInboxButton key="next" task={task} dense /> : null,
+              showUnblock ? <UnblockButton key="unblock" task={task} dense /> : null,
+              showIncrement ? <IncrementButton key="inc" task={task} dense /> : null,
+              showReset ? <ResetButton key="reset" task={task} dense /> : null,
+              showMarkDone ? <MarkAsDoneButton key="done" task={task} dense /> : null,
+              showRecover ? <RecoverFromTrashButton key="recover" task={task} dense /> : null,
             ].filter(Boolean)}
-            right
             asTooltip
             anchorEl={cardAnchorRef.current}
             open={hovering}

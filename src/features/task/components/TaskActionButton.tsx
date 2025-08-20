@@ -11,6 +11,7 @@ import { usePromiseFeedback } from '@/shared/context/PromiseFeedbackContext';
 interface TaskActionButtonProps extends StackProps {
   icon: ReactNode;
   task: Task;
+  dense?: boolean;
   tooltip: string;
   onAction: () => Promise<void> | void;
   successSound?: InterfaceSound;
@@ -24,6 +25,7 @@ interface TaskActionButtonProps extends StackProps {
 export function TaskActionButton({
   icon,
   task,
+  dense = false,
   tooltip,
   onAction,
   successSound,
@@ -39,7 +41,6 @@ export function TaskActionButton({
   const updateTask = useBoardStore(s => s.updateTask);
 
   const preActionSnapshotRef = useRef<Task | null>(null);
-
   const [openConfirm, setOpenConfirm] = useState(false);
 
   const handleOpenConfirm = () => {
@@ -62,27 +63,26 @@ export function TaskActionButton({
       errorMessage,
       onUndo: undoFromSnapshot,
     });
-
     setOpenConfirm(false);
   };
 
   const loading = isLoading(feedbackKey);
 
+  const button = (
+    <IconButton
+      onClick={handleOpenConfirm}
+      size="small"
+      sx={{ padding: 0.5, borderRadius: theme.shape.borderRadiusSmall }}
+      disabled={loading}
+      aria-label={tooltip}
+    >
+      {icon}
+    </IconButton>
+  );
+
   return (
     <>
-      <Stack {...stackProps}>
-        <Tooltip title={tooltip}>
-          <IconButton
-            onClick={handleOpenConfirm}
-            size="small"
-            sx={{ padding: 0.5, borderRadius: theme.shape.borderRadiusSmall }}
-            disabled={loading}
-            aria-label={tooltip}
-          >
-            {icon}
-          </IconButton>
-        </Tooltip>
-      </Stack>
+      <Stack {...stackProps}>{dense ? button : <Tooltip title={tooltip}>{button}</Tooltip>}</Stack>
 
       <ConfirmDialog
         open={openConfirm}

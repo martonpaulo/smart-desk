@@ -22,7 +22,13 @@ export function MetaRow({
   dense = false,
 }: MetaRowProps) {
   return (
-    <Stack direction="row" alignItems="center" gap={dense ? 0.25 : 0.5} sx={{ opacity }}>
+    <Stack
+      direction="row"
+      alignItems="center"
+      gap={dense ? 0.25 : 0.5}
+      minHeight={16}
+      sx={{ opacity }}
+    >
       {tagComp}
       {durationComp}
       {separatorComp}

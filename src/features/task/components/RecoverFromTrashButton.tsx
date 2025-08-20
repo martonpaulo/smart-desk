@@ -8,9 +8,10 @@ import { Task } from '@/legacy/types/task';
 
 interface RecoverFromTrashButtonProps {
   task: Task;
+  dense?: boolean;
 }
 
-export function RecoverFromTrashButton({ task }: RecoverFromTrashButtonProps) {
+export function RecoverFromTrashButton({ task, dense }: RecoverFromTrashButtonProps) {
   const updateTask = useBoardStore(s => s.updateTask);
 
   const recoverTask = useCallback(async () => {
@@ -25,6 +26,7 @@ export function RecoverFromTrashButton({ task }: RecoverFromTrashButtonProps) {
     <TaskActionButton
       icon={<RestoreFromTrashIcon />}
       task={task}
+      dense={dense}
       tooltip="Recover from trash"
       onAction={recoverTask}
       successSound="recover"

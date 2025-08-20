@@ -9,9 +9,10 @@ import { Task } from '@/legacy/types/task';
 
 interface SendToInboxButtonProps {
   task: Task;
+  dense?: boolean;
 }
 
-export function SendToInboxButton({ task }: SendToInboxButtonProps) {
+export function SendToInboxButton({ task, dense }: SendToInboxButtonProps) {
   const updateTask = useBoardStore(s => s.updateTask);
 
   const sendToInbox = useCallback(async () => {
@@ -34,6 +35,7 @@ export function SendToInboxButton({ task }: SendToInboxButtonProps) {
     <TaskActionButton
       icon={<ForwardToInboxIcon />}
       task={task}
+      dense={dense}
       tooltip="Send to next inbox"
       onAction={sendToInbox}
       successSound="send"

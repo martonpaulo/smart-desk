@@ -9,9 +9,10 @@ import { Task } from '@/legacy/types/task';
 
 interface MarkAsDoneButtonProps {
   task: Task;
+  dense?: boolean;
 }
 
-export function MarkAsDoneButton({ task }: MarkAsDoneButtonProps) {
+export function MarkAsDoneButton({ task, dense }: MarkAsDoneButtonProps) {
   const updateTask = useBoardStore(s => s.updateTask);
   const doneColumnPromise = useDefaultColumns('done');
 
@@ -31,6 +32,7 @@ export function MarkAsDoneButton({ task }: MarkAsDoneButtonProps) {
     <TaskActionButton
       icon={<CheckIcon />}
       task={task}
+      dense={dense}
       tooltip="Mark as done"
       onAction={markAsDone}
       successSound="done"

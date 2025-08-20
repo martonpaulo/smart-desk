@@ -9,9 +9,10 @@ import { Task } from '@/legacy/types/task';
 
 interface ResetButtonProps {
   task: Task;
+  dense?: boolean;
 }
 
-export function ResetButton({ task }: ResetButtonProps) {
+export function ResetButton({ task, dense }: ResetButtonProps) {
   const updateTask = useBoardStore(s => s.updateTask);
   const todoColumnPromise = useDefaultColumns('todo');
 
@@ -30,6 +31,7 @@ export function ResetButton({ task }: ResetButtonProps) {
     <TaskActionButton
       icon={<UndoIcon />}
       task={task}
+      dense={dense}
       tooltip="Reset quantity done"
       onAction={resetTask}
       successSound="reset"

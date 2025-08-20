@@ -8,9 +8,10 @@ import { Task } from '@/legacy/types/task';
 
 interface IncrementButtonProps {
   task: Task;
+  dense?: boolean;
 }
 
-export function IncrementButton({ task }: IncrementButtonProps) {
+export function IncrementButton({ task, dense }: IncrementButtonProps) {
   const updateTask = useBoardStore(s => s.updateTask);
 
   // Freeze the initial quantity for this component instance
@@ -38,6 +39,7 @@ export function IncrementButton({ task }: IncrementButtonProps) {
     <TaskActionButton
       icon={<AddIcon />}
       task={task}
+      dense={dense}
       tooltip="Increment quantity done"
       onAction={incrementQuantityDone}
       successSound="increment"

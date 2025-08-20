@@ -9,7 +9,6 @@ import { alpha, useTheme } from '@mui/material/styles';
 type ActionsBarProps = {
   items: ReactNode[];
   showOnHover?: boolean;
-  right?: boolean;
   asTooltip?: boolean;
   anchorEl?: HTMLElement | null;
   open?: boolean;
@@ -18,7 +17,6 @@ type ActionsBarProps = {
 export function ActionsBar({
   items,
   showOnHover = true,
-  right = true,
   asTooltip = false,
   anchorEl,
   open = false,
@@ -41,17 +39,8 @@ export function ActionsBar({
   // Tooltip-style with Popper, rendered in a portal and positioned like a tooltip
   if (asTooltip && anchorEl) {
     return (
-      <Popper
-        open={open}
-        anchorEl={anchorEl}
-        placement={right ? 'top-end' : 'top-start'}
-        modifiers={[
-          { name: 'offset', options: { offset: [0, 8] } }, // small gap above the card
-          { name: 'preventOverflow', options: { padding: 8 } },
-          { name: 'flip', options: { padding: 8 } },
-        ]}
-      >
-        <Paper elevation={3} sx={{ borderRadius: 1 }}>
+      <Popper open={open} anchorEl={anchorEl} placement="bottom-end">
+        <Paper elevation={2} sx={{ borderRadius: 1 }}>
           <ButtonGroup size="small" sx={groupSx}>
             {items.map((node, idx) => (
               <Stack key={idx} component="span">
@@ -71,8 +60,8 @@ export function ActionsBar({
       className={showOnHover ? 'task-actions' : undefined}
       sx={{
         position: 'absolute',
-        right: right ? 6 : 'auto',
-        left: right ? 'auto' : 6,
+        right: 6,
+        left: 'auto',
         visibility: showOnHover ? 'hidden' : 'visible',
         zIndex: 2,
       }}
