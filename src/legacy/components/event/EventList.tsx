@@ -43,7 +43,6 @@ export function EventList() {
 
   return (
     <Stack
-      width={isMobile ? '100%' : 350}
       borderRadius={1}
       flexGrow={1}
       p={1.5}
