@@ -115,13 +115,13 @@ export const theme = createTheme({
     },
 
     MuiDialogTitle: {
-      defaultProps: {
-        variant: 'h4',
-      },
       styleOverrides: {
-        root: ({ theme }) => ({
-          ...theme.typography.h4,
-        }),
+        root: {
+          fontSize: '1.25rem',
+          fontWeight: 500,
+          lineHeight: 1.6,
+          letterSpacing: '0.0075em',
+        },
       },
     },
 
