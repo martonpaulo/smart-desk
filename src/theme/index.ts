@@ -118,6 +118,11 @@ export const theme = createTheme({
       defaultProps: {
         variant: 'h4',
       },
+      styleOverrides: {
+        root: ({ theme }) => ({
+          ...theme.typography.h4,
+        }),
+      },
     },
 
     ...mobileComponentsOverrides,
