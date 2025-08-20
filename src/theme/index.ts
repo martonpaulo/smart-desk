@@ -114,6 +114,12 @@ export const theme = createTheme({
       },
     },
 
+    MuiDialogTitle: {
+      defaultProps: {
+        variant: 'h4',
+      },
+    },
+
     ...mobileComponentsOverrides,
   },
 });

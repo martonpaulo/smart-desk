@@ -14,8 +14,8 @@ import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 export const routes = {
   primary: [
     { label: 'Board', href: '/', icon: <HomeIcon />, showOnMobile: true },
-    { label: 'Tasks', href: '/tasks', icon: <TaskAltIcon />, showOnMobile: true },
     { label: 'Planner', href: '/planner', icon: <ViewTimelineIcon />, showOnMobile: true },
+    { label: 'Tasks', href: '/tasks', icon: <TaskAltIcon />, showOnMobile: true },
     { label: 'Calendar', href: '/calendar', icon: <CalendarTodayIcon />, showOnMobile: true },
     { label: 'Maps', href: '/maps', icon: <MapIcon />, showOnMobile: false },
     { label: 'Notes', href: '/notes', icon: <NotesIcon />, showOnMobile: true },
