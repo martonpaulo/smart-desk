@@ -30,7 +30,7 @@ export function ProgressBarIndicator(props: StackProps) {
           {label}
         </Typography>
 
-        <Typography variant="h4" color={color} lineHeight={1}>
+        <Typography variant="body2" color={color} lineHeight={1}>
           {parseFloat(completedCount.toFixed(2))} of {totalCount} ({percentage}%)
         </Typography>
       </Stack>
