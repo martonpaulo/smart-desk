@@ -231,7 +231,7 @@ export async function syncFromServerAction(set: Set, get: Get) {
 
     // find tasks that need resetting
     const tasksToReset = mergedTasks.filter(
-      t => t.daily && new Date(t.updatedAt) < RESET_TIME.last,
+      t => t.daily && !t.blocked && !t.trashed && new Date(t.updatedAt) < RESET_TIME.last,
     );
 
     const finalCols = mergedCols;
