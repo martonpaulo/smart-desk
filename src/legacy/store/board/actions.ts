@@ -1,3 +1,4 @@
+import { endOfToday, isBefore } from 'date-fns';
 import type { StoreApi } from 'zustand';
 
 import { defaultColumns } from '@/features/column/config/defaultColumns';
@@ -230,9 +231,14 @@ export async function syncFromServerAction(set: Set, get: Get) {
     });
 
     // find tasks that need resetting
-    const tasksToReset = mergedTasks.filter(
-      t => t.daily && !t.blocked && !t.trashed && new Date(t.updatedAt) < RESET_TIME.last,
-    );
+    const tasksToReset = mergedTasks.filter(t => {
+      const isDaily = t.daily;
+      const isActive = !t.blocked && !t.trashed;
+      const notUpdatedSinceLastReset = isBefore(t.updatedAt, RESET_TIME.last);
+      const notPlannedAfterToday = !t.plannedDate || isBefore(t.plannedDate, endOfToday());
+
+      return isDaily && isActive && notUpdatedSinceLastReset && notPlannedAfterToday;
+    });
 
     const finalCols = mergedCols;
     let finalTasks: Task[];

@@ -27,11 +27,14 @@ export function IncrementButton({ task, dense }: IncrementButtonProps) {
   const newQuantityDone = initialQuantityRef.current + 1;
 
   const incrementQuantityDone = useCallback(async () => {
-    // Use current store value to avoid stale updates
+    const now = new Date();
+
     await updateTask({
       ...task,
       quantityDone: task.quantityDone + 1,
-      updatedAt: new Date(),
+      plannedDate: now,
+      classifiedDate: now,
+      updatedAt: now,
     });
   }, [task, updateTask]);
 

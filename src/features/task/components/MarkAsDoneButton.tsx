@@ -19,12 +19,15 @@ export function MarkAsDoneButton({ task, dense }: MarkAsDoneButtonProps) {
   const markAsDone = useCallback(async () => {
     const doneColumn = await doneColumnPromise;
 
+    const now = new Date();
+
     await updateTask({
       ...task,
       quantityDone: task.quantityTarget,
       columnId: doneColumn?.id,
-      classifiedDate: new Date(),
-      updatedAt: new Date(),
+      plannedDate: now,
+      classifiedDate: now,
+      updatedAt: now,
     });
   }, [doneColumnPromise, task, updateTask]);
 
