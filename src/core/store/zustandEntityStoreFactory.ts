@@ -1,4 +1,3 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -20,11 +19,11 @@ export interface EntityState<E extends { id: string; updatedAt: Date; isSynced?:
 
 interface Config<E extends { id: string; updatedAt: Date; isSynced?: boolean }> {
   key: string;
-  fetchAll(client: SupabaseClient): Promise<E[]>;
-  upsert(client: SupabaseClient, item: E): Promise<E>;
-  softDelete?(client: SupabaseClient, id: string): Promise<void>;
-  restore?(client: SupabaseClient, id: string): Promise<void>;
-  hardDelete?(client: SupabaseClient, id: string): Promise<void>;
+  fetchAll(client: ReturnType<typeof getSupabaseClient>): Promise<E[]>;
+  upsert(client: ReturnType<typeof getSupabaseClient>, item: E): Promise<E>;
+  softDelete?(client: ReturnType<typeof getSupabaseClient>, id: string): Promise<void>;
+  restore?(client: ReturnType<typeof getSupabaseClient>, id: string): Promise<void>;
+  hardDelete?(client: ReturnType<typeof getSupabaseClient>, id: string): Promise<void>;
   buildAddEntity(data: Partial<E>, id: string): E;
   buildUpdateEntity(old: E, data: Partial<E>): E;
 }

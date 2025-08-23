@@ -13,7 +13,7 @@ export default function GalleryPage() {
       title="File Library"
       description="Upload new files or browse and manage your existing Cloudinary media"
     >
-      <FileManager onSelect={handleSelect} />
+      <FileManager onSelectAction={handleSelect} />
     </PageSection>
   );
 }

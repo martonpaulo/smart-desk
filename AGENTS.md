@@ -1,6 +1,6 @@
 # AGENTS
 
-This project uses **TypeScript**, **Next.js (App Router)**, and **MUI (Material UI) v6** for UI components.
+This project uses **TypeScript**, **Next.js (App Router)**, and **MUI (Material UI) v7** for UI components.
 
 ## Workflow Guidelines
 

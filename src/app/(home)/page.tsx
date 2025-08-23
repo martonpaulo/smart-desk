@@ -7,9 +7,7 @@ import { TodoList } from '@/legacy/components/column/TodoList';
 import { EventList } from '@/legacy/components/event/EventList';
 import { HiddenColumnsList } from '@/legacy/components/HiddenColumnsList';
 import { EventTimeline } from '@/legacy/components/timeline/EventTimeline';
-import { ConnectedChip } from '@/shared/components/ConnectedChip';
 import { ProgressBarIndicator } from '@/shared/components/ProgressBarIndicator';
-import SyncButton from '@/shared/components/SyncButton';
 import { TimeLoadIndicator } from '@/shared/components/TimeLoadIndicator';
 import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
 
@@ -43,11 +41,6 @@ export default function BoardPage() {
             <EventList />
 
             {!isMobile && <HiddenColumnsList />}
-
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <ConnectedChip />
-              <SyncButton />
-            </Stack>
           </Stack>
         </Stack>
       </Stack>

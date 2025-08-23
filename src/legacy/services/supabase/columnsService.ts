@@ -1,10 +1,10 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fetchUserId } from '@/core/services/supabaseUserService';
+import { TypedSupabaseClient } from '@/legacy/lib/supabaseClient';
 import { Column } from '@/legacy/types/column';
 import { mapColumnToDB, mapDBToColumn } from '@/legacy/utils/databaseUtils';
 
-export async function fetchColumns(client: SupabaseClient): Promise<Column[]> {
+export async function fetchColumns(client: TypedSupabaseClient): Promise<Column[]> {
   const query = client.from('columns').select('*').order('position', { ascending: true });
 
   const { data, error } = await query;
@@ -18,7 +18,7 @@ export async function fetchColumns(client: SupabaseClient): Promise<Column[]> {
   return mappedRows;
 }
 
-export async function upsertColumn(client: SupabaseClient, payload: Column): Promise<Column> {
+export async function upsertColumn(client: TypedSupabaseClient, payload: Column): Promise<Column> {
   const userId = await fetchUserId(client);
   if (!userId) {
     throw new Error('User not authenticated');
@@ -28,7 +28,7 @@ export async function upsertColumn(client: SupabaseClient, payload: Column): Pro
 
   const { data, error } = await client
     .from('columns')
-    .upsert(row, { onConflict: 'id' })
+    .upsert(row as any, { onConflict: 'id' })
     .select()
     .single();
 
@@ -39,13 +39,4 @@ export async function upsertColumn(client: SupabaseClient, payload: Column): Pro
 
   const mappedRow = mapDBToColumn(data);
   return mappedRow;
-}
-
-export async function trashColumn(client: SupabaseClient, id: string): Promise<void> {
-  const { error } = await client.from('columns').update({ trashed: true }).eq('id', id);
-
-  if (error) {
-    console.error('trashColumn failed', error);
-    throw new Error('Could not delete column');
-  }
 }

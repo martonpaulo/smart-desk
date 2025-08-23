@@ -11,10 +11,10 @@ import { useFiles, useSaveFile, useUploadFile } from '@/features/file/hooks/useF
 import type { File as AppFile } from '@/features/file/types/File';
 
 interface FileManagerProps {
-  onSelect: (url: string) => void;
+  onSelectAction: (url: string) => void;
 }
 
-export function FileManager({ onSelect }: FileManagerProps) {
+export function FileManager({ onSelectAction }: FileManagerProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [selected, setSelected] = useState<AppFile | null>(null);
@@ -54,7 +54,7 @@ export function FileManager({ onSelect }: FileManagerProps) {
     return result.file;
   };
   const handlePageChange = (_: React.ChangeEvent<unknown>, v: number) => setPage(v);
-  const confirmSelection = () => selected && onSelect(selected.url);
+  const confirmSelection = () => selected && onSelectAction(selected.url);
 
   useEffect(() => {
     return () => {
@@ -77,10 +77,10 @@ export function FileManager({ onSelect }: FileManagerProps) {
       <FileGallery
         files={files}
         selected={selected}
-        onSelect={setSelected}
+        onSelectAction={setSelected}
         page={page}
         pageSize={pageSize}
-        onPageChange={handlePageChange}
+        onPageChangeAction={handlePageChange}
         loading={filesQuery.isLoading}
         error={filesQuery.isError}
       />

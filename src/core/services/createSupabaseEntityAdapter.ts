@@ -5,6 +5,7 @@ import type { Base } from '@/core/types/Base';
 import type { DbRecord } from '@/core/types/DbRecord';
 import { camelToSnake, snakeToCamel } from '@/core/utils/caseMapper';
 import { baseMapFromDB, baseMapToDB } from '@/core/utils/entityMapper';
+import { TypedSupabaseClient } from '@/legacy/lib/supabaseClient';
 
 /**
  * Optional provider that returns a SupabaseClient instance.
@@ -54,11 +55,11 @@ export function createSupabaseEntityAdapter<E extends Base>(config: {
       (mod as Record<string, unknown>).supabase,
       (mod as Record<string, unknown>).client,
       (mod as Record<string, unknown>).default,
-      (mod as Record<string, unknown>).getClient
-        ? (mod as Record<string, () => SupabaseClient>).getClient()
+      (mod as unknown as { getClient?: () => SupabaseClient }).getClient
+        ? (mod as unknown as { getClient: () => SupabaseClient }).getClient()
         : undefined,
-      (mod as Record<string, unknown>).getSupabaseClient
-        ? (mod as Record<string, () => SupabaseClient>).getSupabaseClient()
+      (mod as unknown as { getSupabaseClient?: () => SupabaseClient }).getSupabaseClient
+        ? (mod as unknown as { getSupabaseClient: () => SupabaseClient }).getSupabaseClient()
         : undefined,
     ].filter(Boolean) as SupabaseClient[];
 
@@ -86,7 +87,7 @@ export function createSupabaseEntityAdapter<E extends Base>(config: {
 
   async function upsert(entity: E): Promise<E> {
     const client = await ensureClient();
-    const userId = hasUser ? await fetchUserId(client) : null;
+    const userId = hasUser ? await fetchUserId(client as unknown as TypedSupabaseClient) : null;
     if (hasUser && !userId) throw new Error('User not authenticated');
 
     const dbRec = mapToDB(entity, userId ?? '');

@@ -1,24 +1,33 @@
+'use client';
+
 import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
-let client: SupabaseClient | null = null;
+import type { Database } from '@/types/supabase'; // <-- adjust or remove if you don't have this
 
-function initClient(): SupabaseClient {
+// Prefer the exact return type from the helper to avoid generic mismatches
+export type TypedSupabaseClient = ReturnType<typeof createPagesBrowserClient<Database>>;
+
+let client: TypedSupabaseClient | null = null;
+
+function initClient(): TypedSupabaseClient {
   if (!client) {
-    client = createPagesBrowserClient({
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    });
-    console.debug('Supabase client initialized');
+    // Reads NEXT_PUBLIC_SUPABASE_URL and KEY automatically
+    client = createPagesBrowserClient<Database>();
+    if (process.env.NODE_ENV !== 'production') {
+      // One-time log for debugging only in dev
+
+      console.debug('Supabase client initialized');
+    }
   }
-  console.debug('Supabase client initialized');
   return client;
 }
 
-export function getSupabaseClient(): SupabaseClient {
+// Simple singleton getter
+export function getSupabaseClient(): TypedSupabaseClient {
   return initClient();
 }
 
-export function useSupabaseClient(): SupabaseClient {
+// Hook-friendly alias that shares the same singleton
+export function useSupabaseClient(): TypedSupabaseClient {
   return initClient();
 }

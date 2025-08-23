@@ -1,21 +1,15 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-
+import { TypedSupabaseClient } from '@/legacy/lib/supabaseClient';
 import { useUserStore } from '@/legacy/store/userStore';
 
-export async function fetchUserId(client: SupabaseClient): Promise<string | null> {
+export async function fetchUserId(client: TypedSupabaseClient): Promise<string | null> {
   const store = useUserStore.getState();
   if (store.id) return store.id;
 
-  const {
-    data: { user },
-    error,
-  } = await client.auth.getUser();
-
-  if (error || !user?.id) {
-    console.error('fetchUserId failed', error);
+  const { data, error } = await client.auth.getUser();
+  if (error) {
+    console.error('Error fetching user ID:', error);
     return null;
   }
 
-  store.setUserId(user.id);
-  return user.id;
+  return data?.user?.id ?? null;
 }

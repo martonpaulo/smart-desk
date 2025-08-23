@@ -14,38 +14,16 @@ import {
   Paper,
   SwipeableDrawer,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { routes } from '@/legacy/navigation/routes';
+import { navItems } from '@/legacy/navigation/navItems';
 
 export function BottomNav() {
-  const theme = useTheme();
   const pathname = usePathname();
   const router = useRouter();
+  const { main, utility } = navItems;
 
-  // Responsive cap: fewer items on very small screens
-  const isTabletUp = useMediaQuery(theme.breakpoints.up('mobileLg'));
-  const isPhoneMdUp = useMediaQuery(theme.breakpoints.up('mobileSm'));
-  const maxVisible = useMemo(() => {
-    if (isTabletUp) return 6; // roomy
-    if (isPhoneMdUp) return 5; // typical phones
-    return 4; // very small phones
-  }, [isPhoneMdUp, isTabletUp]);
-
-  // Only mobile-approved routes
-  const mobileRoutes = useMemo(
-    () => [...routes.primary, ...routes.secondary].filter(r => r.showOnMobile),
-    [],
-  );
-
-  // Split into visible + overflow
-  const visible = mobileRoutes.slice(0, maxVisible);
-  const overflow = mobileRoutes.slice(maxVisible);
-
-  // Drawer state for overflow
   const [moreOpen, setMoreOpen] = useState(false);
   const toggleMore = (open: boolean) => () => setMoreOpen(open);
 
@@ -57,26 +35,23 @@ export function BottomNav() {
     router.push(newValue);
   };
 
-  // Prefetch all targets
   useEffect(() => {
-    [...visible, ...overflow].forEach(route => {
+    [...main, ...utility].forEach(route => {
       try {
         router.prefetch(route.href);
       } catch {
         // ignore
       }
     });
-  }, [router, visible, overflow]);
+  }, [main, router, utility]);
 
-  const isRouteSelected = (pathname: string, href: string) => {
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
+  const isRouteSelected = (path: string, href: string) =>
+    path === href || path.startsWith(`${href}/`);
 
-  // For controlled BottomNavigation, keep the current path
   const navValue = useMemo(() => {
-    const match = [...visible, ...overflow].find(r => isRouteSelected(pathname, r.href));
+    const match = [...main, ...utility].find(r => isRouteSelected(pathname, r.href));
     return match?.href ?? pathname;
-  }, [pathname, visible, overflow]);
+  }, [pathname, main, utility]);
 
   return (
     <>
@@ -94,13 +69,12 @@ export function BottomNav() {
         <BottomNavigation
           value={navValue}
           onChange={handleChange}
-          // show label only for the selected action to save space
           sx={{
             px: 0.5,
             '& .MuiBottomNavigationAction-root': { minWidth: 0, px: 0.5 },
           }}
         >
-          {visible.map(route => (
+          {main.map(route => (
             <BottomNavigationAction
               key={route.href}
               value={route.href}
@@ -111,20 +85,17 @@ export function BottomNav() {
             />
           ))}
 
-          {overflow.length > 0 && (
-            <BottomNavigationAction
-              key="more"
-              value="__more__"
-              icon={<MoreHorizIcon />}
-              label="More"
-              showLabel
-              aria-label="More"
-            />
-          )}
+          <BottomNavigationAction
+            key="more"
+            value="__more__"
+            icon={<MoreHorizIcon />}
+            label="More"
+            showLabel
+            aria-label="More"
+          />
         </BottomNavigation>
       </Paper>
 
-      {/* Overflow items drawer */}
       <SwipeableDrawer
         anchor="bottom"
         open={moreOpen}
@@ -146,7 +117,7 @@ export function BottomNav() {
         </Typography>
         <Divider />
         <List dense disablePadding>
-          {overflow.map(route => (
+          {utility.map(route => (
             <ListItemButton
               key={route.href}
               onClick={() => {

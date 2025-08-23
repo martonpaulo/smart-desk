@@ -17,10 +17,10 @@ import type { File } from '@/features/file/types/File';
 interface FileGalleryProps {
   files: File[];
   selected: File | null;
-  onSelect: (img: File) => void;
+  onSelectAction: (img: File) => void;
   page: number;
   pageSize: number;
-  onPageChange: (_: React.ChangeEvent<unknown>, value: number) => void;
+  onPageChangeAction: (_: React.ChangeEvent<unknown>, value: number) => void;
   loading: boolean;
   error: boolean;
 }
@@ -28,10 +28,10 @@ interface FileGalleryProps {
 export function FileGallery({
   files,
   selected,
-  onSelect,
+  onSelectAction,
   page,
   pageSize,
-  onPageChange,
+  onPageChangeAction,
   loading,
   error,
 }: FileGalleryProps) {
@@ -45,7 +45,7 @@ export function FileGallery({
       <Stack spacing={1}>
         <Skeleton variant="rectangular" width="100%" height={200} />
         <Stack direction="row" justifyContent="center">
-          <Pagination count={count} page={page} onChange={onPageChange} />
+          <Pagination count={count} page={page} onChange={onPageChangeAction} />
         </Stack>
       </Stack>
     );
@@ -75,7 +75,7 @@ export function FileGallery({
               borderColor: 'primary.main',
             }}
           >
-            <CardActionArea onClick={() => onSelect(f)}>
+            <CardActionArea onClick={() => onSelectAction(f)}>
               <CardMedia
                 component={() => {
                   if (f.resourceType === 'image') {
@@ -108,7 +108,7 @@ export function FileGallery({
         ))}
       </Box>
       <Stack alignItems="center" mt={2}>
-        <Pagination count={count} page={page} onChange={onPageChange} />
+        <Pagination count={count} page={page} onChange={onPageChangeAction} />
       </Stack>
     </Box>
   );

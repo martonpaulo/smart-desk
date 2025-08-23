@@ -1,10 +1,10 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fetchUserId } from '@/core/services/supabaseUserService';
+import { TypedSupabaseClient } from '@/legacy/lib/supabaseClient';
 import { Task } from '@/legacy/types/task';
 import { mapDBToTask, mapTaskToDB } from '@/legacy/utils/databaseUtils';
 
-export async function fetchTasks(client: SupabaseClient): Promise<Task[]> {
+export async function fetchTasks(client: TypedSupabaseClient): Promise<Task[]> {
   const query = client.from('tasks').select('*').order('position', { ascending: true });
 
   const { data, error } = await query;
@@ -18,8 +18,8 @@ export async function fetchTasks(client: SupabaseClient): Promise<Task[]> {
   return mappedTasks;
 }
 
-export async function upsertTask(client: SupabaseClient, payload: Task): Promise<Task> {
-  const userId = await fetchUserId(client);
+export async function upsertTask(client: TypedSupabaseClient, payload: Task): Promise<Task> {
+  const userId = await fetchUserId(client as unknown as TypedSupabaseClient);
   if (!userId) {
     throw new Error('User not authenticated');
   }
@@ -31,7 +31,7 @@ export async function upsertTask(client: SupabaseClient, payload: Task): Promise
 
   const { data, error } = await client
     .from('tasks')
-    .upsert(rowClean, { onConflict: 'id' })
+    .upsert(rowClean as any, { onConflict: 'id' })
     .select()
     .single();
 
@@ -42,13 +42,4 @@ export async function upsertTask(client: SupabaseClient, payload: Task): Promise
 
   const mappedRow = mapDBToTask(data);
   return mappedRow;
-}
-
-export async function trashTask(client: SupabaseClient, id: string): Promise<void> {
-  const { error } = await client.from('tasks').update({ trashed: true }).eq('id', id);
-
-  if (error) {
-    console.error('trashTask failed', error);
-    throw new Error('Could not delete task');
-  }
 }

@@ -3,18 +3,19 @@
 import { createContext, ReactNode, useCallback, useEffect } from 'react';
 
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 import { SyncInterval } from '@/core/constants/SyncInterval';
-import { useConnectionStore } from '@/core/store/useConnectionStore';
+import { useConnectivityStore } from '@/core/store/useConnectivityStore';
 import {
   combineCleanups,
-  isOnline,
   runIdle,
   schedulePeriodicSync,
   syncOnVisibilityChange,
   syncStoresBatch,
 } from '@/core/utils/syncHelpers';
 import { getStoresToSyncForRouteAsync } from '@/core/utils/syncRegistry';
+import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
 
 interface Props {
   children: ReactNode;
@@ -30,95 +31,87 @@ export const SupabaseSyncContext = createContext<SyncContextValue>({
 
 export function SupabaseSyncProvider({ children }: Props) {
   const pathname = usePathname();
-  const setOnline = useConnectionStore(s => s.setOnline);
+  const { status } = useSession(); // 'loading' | 'authenticated' | 'unauthenticated'
+  const online = useOnlineStatus();
 
-  // Resolve stores for the current route and run a full sync pass.
+  const setAuthStatus = useConnectivityStore(s => s.setAuthStatus);
+  const setOnline = useConnectivityStore(s => s.setOnline);
+  const isConnected = useConnectivityStore(s => s.isConnected);
+
+  // Keep store in sync with auth status
+  useEffect(() => {
+    setAuthStatus(status);
+  }, [status, setAuthStatus]);
+
+  // Keep store in sync with navigator online
+  useEffect(() => {
+    setOnline(online);
+  }, [online, setOnline]);
+
+  // Resolve stores to sync for the current route
   const syncActive = useCallback(async () => {
     const stores = await getStoresToSyncForRouteAsync(pathname);
     await syncStoresBatch(stores);
   }, [pathname]);
 
-  // Keep connection flag in sync with navigator state.
+  // First sync after idle when connected
   useEffect(() => {
-    setOnline(isOnline());
-  }, [setOnline]);
-
-  // React to online/offline changes.
-  useEffect(() => {
-    function handleOnline() {
-      setOnline(true);
-      void syncActive();
-    }
-    function handleOffline() {
-      setOnline(false);
-    }
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [setOnline, syncActive]);
-
-  // First sync after idle, not during hydration.
-  useEffect(() => {
-    if (!isOnline()) return;
+    if (!isConnected) return;
     runIdle(() => {
-      void syncActive();
+      if (useConnectivityStore.getState().isConnected) {
+        void syncActive();
+      }
     });
-  }, [syncActive]);
+  }, [isConnected, pathname, syncActive]);
 
-  // Periodic background sync and resume-on-visibility.
+  // Periodic background sync and resume on visibility while connected
   useEffect(() => {
-    let aborted = false;
+    if (!isConnected) return;
 
-    async function setup() {
-      if (!isOnline()) return;
+    let cleanupAll: (() => void) | undefined;
+    let cancelled = false;
 
+    void (async () => {
       const stores = await getStoresToSyncForRouteAsync(pathname);
+      if (cancelled) return;
 
-      // Set periodic sync per store with the configured background interval.
       const periodicCleanups = stores.map(s =>
         schedulePeriodicSync(async () => {
-          if (isOnline()) {
-            await s.syncPending();
-            await s.syncFromServer();
-          }
+          if (!useConnectivityStore.getState().isConnected) return;
+          await s.syncPending();
+          await s.syncFromServer();
         }, SyncInterval.BACKGROUND),
       );
 
-      // Resume sync when tab becomes visible and enough time has passed.
       const cancelVisibility = syncOnVisibilityChange(async () => {
-        if (aborted) return;
-        await syncStoresBatch(stores);
+        if (cancelled) return;
+        if (useConnectivityStore.getState().isConnected) {
+          await syncStoresBatch(stores);
+        }
       }, SyncInterval.VISIBILITY);
 
-      return combineCleanups([...periodicCleanups, cancelVisibility]);
-    }
-
-    let cleanupAll: (() => void) | undefined;
-    void setup().then(c => {
-      cleanupAll = c;
-    });
+      cleanupAll = combineCleanups([...periodicCleanups, cancelVisibility]);
+    })();
 
     return () => {
-      aborted = true;
+      cancelled = true;
       if (cleanupAll) cleanupAll();
     };
-  }, [pathname]);
+  }, [isConnected, pathname]);
 
-  // Try to flush pending changes before unload if online.
+  // Flush before unload if connected
   useEffect(() => {
-    function handleBeforeUnload() {
-      if (isOnline()) void syncActive();
-    }
+    const handleBeforeUnload = () => {
+      if (!useConnectivityStore.getState().isConnected) return;
+      void syncActive();
+    };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [syncActive]);
+  }, [syncActive, pathname]);
 
-  return (
-    <SupabaseSyncContext.Provider value={{ syncNowForActiveFeatures: syncActive }}>
-      {children}
-    </SupabaseSyncContext.Provider>
-  );
+  const value: SyncContextValue = {
+    syncNowForActiveFeatures: syncActive,
+  };
+
+  return <SupabaseSyncContext.Provider value={value}>{children}</SupabaseSyncContext.Provider>;
 }

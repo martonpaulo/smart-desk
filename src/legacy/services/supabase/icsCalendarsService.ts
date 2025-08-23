@@ -1,10 +1,10 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fetchUserId } from '@/core/services/supabaseUserService';
+import { TypedSupabaseClient } from '@/legacy/lib/supabaseClient';
 import { IcsCalendar } from '@/legacy/types/icsCalendar';
 import { mapDBToIcsCalendar, mapIcsCalendarToDB } from '@/legacy/utils/databaseUtils';
 
-export async function fetchIcsCalendars(client: SupabaseClient): Promise<IcsCalendar[]> {
+export async function fetchIcsCalendars(client: TypedSupabaseClient): Promise<IcsCalendar[]> {
   const query = client.from('ics_calendars').select('*');
 
   const { data, error } = await query;
@@ -19,10 +19,10 @@ export async function fetchIcsCalendars(client: SupabaseClient): Promise<IcsCale
 }
 
 export async function upsertIcsCalendar(
-  client: SupabaseClient,
+  client: TypedSupabaseClient,
   payload: IcsCalendar,
 ): Promise<IcsCalendar> {
-  const userId = await fetchUserId(client);
+  const userId = await fetchUserId(client as unknown as TypedSupabaseClient);
   if (!userId) {
     throw new Error('User not authenticated');
   }
@@ -31,7 +31,7 @@ export async function upsertIcsCalendar(
 
   const { data, error } = await client
     .from('ics_calendars')
-    .upsert(row, { onConflict: 'id' })
+    .upsert([row] as any, { onConflict: 'id' })
     .select()
     .single();
 
@@ -44,7 +44,7 @@ export async function upsertIcsCalendar(
   return mappedRow;
 }
 
-export async function deleteIcsCalendar(client: SupabaseClient, id: string): Promise<void> {
+export async function deleteIcsCalendar(client: TypedSupabaseClient, id: string): Promise<void> {
   const { error } = await client.from('ics_calendars').delete().eq('id', id);
 
   if (error) {
