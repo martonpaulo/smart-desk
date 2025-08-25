@@ -77,7 +77,7 @@ export default function ManagePage() {
             >
               <CardActionArea
                 component={Link}
-                href={item.href}
+                href={`/manage${item.href}`}
                 aria-label={`Open ${item.title}`}
                 sx={{ height: '100%' }}
               >
