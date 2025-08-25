@@ -18,14 +18,14 @@ export const SYNC_FEATURES: readonly FeatureDef[] = [
   },
   {
     key: 'events',
-    routes: ['/', '/calendar', '/manage/locations', '/planner'],
+    routes: ['/', '/calendar', '/content/locations', '/planner'],
     exportName: 'useLocalEventsStore',
     interval: SyncInterval.HIGH,
     loader: () => import('@/features/event/store/useLocalEventsStore'),
   },
   {
     key: 'files',
-    routes: ['/manage/files', '/maps'],
+    routes: ['/content/files', '/maps'],
     exportName: 'useFilesStore',
     interval: SyncInterval.HIGH,
     loader: () => import('@/features/file/store/useFilesStore'),
@@ -39,14 +39,14 @@ export const SYNC_FEATURES: readonly FeatureDef[] = [
   },
   {
     key: 'locations',
-    routes: ['/manage/locations'],
+    routes: ['/content/locations'],
     exportName: 'useLocationsStore',
     interval: SyncInterval.LOW,
     loader: () => import('@/features/location/store/useLocationsStore'),
   },
   {
     key: 'tags',
-    routes: ['/', '/manage/tags', '/planner'],
+    routes: ['/', '/content/tags', '/planner'],
     exportName: 'useTagsStore',
     interval: SyncInterval.LOW,
     loader: () => import('@/features/tag/store/useTagsStore'),

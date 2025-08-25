@@ -53,10 +53,10 @@ const MANAGE_ITEMS: ManageItem[] = [
   },
 ];
 
-export default function ManagePage() {
+export default function ContentPage() {
   return (
     <PageSection
-      title="Manage"
+      title="Content"
       description="Navigate to manage your files, calendars, tags, and locations"
     >
       <Grid container spacing={2}>
@@ -77,7 +77,7 @@ export default function ManagePage() {
             >
               <CardActionArea
                 component={Link}
-                href={`/manage${item.href}`}
+                href={`/content${item.href}`}
                 aria-label={`Open ${item.title}`}
                 sx={{ height: '100%' }}
               >
