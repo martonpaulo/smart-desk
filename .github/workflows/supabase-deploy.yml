@@ -1,0 +1,58 @@
+name: Supabase Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Supabase CLI
+        run: npm i -g supabase@latest
+
+      - name: Link project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Apply migrations
+        run: supabase db push
+
+      - name: Deploy all edge functions
+        run: |
+          set -e
+          cd supabase/functions
+          for fn in $(ls -1); do
+            if [ -d "$fn" ]; then
+              echo "Deploying function: $fn"
+              supabase functions deploy "$fn" --project-ref "$SUPABASE_PROJECT_REF"
+            fi
+          done
+
+      - name: Upsert schedule for purge-soft-deleted
+        run: |
+          supabase functions schedule upsert daily-purge \
+            --project-ref "$SUPABASE_PROJECT_REF" \
+            --cron "0 0 * * *" \
+            --endpoint "/purge-soft-deleted" \
+            --method POST \
+            --headers "x-cron-secret:${CRON_SECRET}"

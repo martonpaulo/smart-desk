@@ -42,3 +42,8 @@ next-env.d.ts
 
 /archives
 .vscode
+
+# Supabase CLI
+supabase/.temp
+supabase/.branches
+supabase/.shadow
