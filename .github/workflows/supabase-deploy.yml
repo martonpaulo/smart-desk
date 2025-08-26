@@ -51,12 +51,9 @@ jobs:
       - name: Deploy all edge functions
         run: |
           set -e
-          cd supabase/functions
-          for fn in $(ls -1); do
-            if [ -d "$fn" ]; then
-              echo "Deploying function: $fn"
-              supabase functions deploy "$fn" --project-ref "$SUPABASE_PROJECT_REF"
-            fi
+          for fn in $(find supabase/functions -maxdepth 1 -mindepth 1 -type d -printf "%f\n"); do
+            echo "Deploying function: $fn"
+            supabase functions deploy "$fn" --project-ref "$SUPABASE_PROJECT_REF"
           done
 
       - name: Upsert schedule for purge-soft-deleted
