@@ -37,12 +37,12 @@ jobs:
       - name: Link project
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
 
-      - name: Sync Edge Function secrets
+      - name: Sync project secrets
         run: |
-          supabase functions secrets set \
-            SUPABASE_URL="$SUPABASE_URL" \
-            SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY" \
-            CRON_SECRET="$CRON_SECRET" \
+          supabase secrets set \
+            "SUPABASE_URL=$SUPABASE_URL" \
+            "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" \
+            "CRON_SECRET=$CRON_SECRET" \
             --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Apply migrations
