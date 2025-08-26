@@ -58,9 +58,20 @@ jobs:
 
       - name: Upsert schedule for purge-soft-deleted
         run: |
-          supabase functions schedule upsert daily-purge \
-            --project-ref "$SUPABASE_PROJECT_REF" \
-            --cron "0 0 * * *" \
-            --endpoint "/purge-soft-deleted" \
-            --method POST \
-            --headers "x-cron-secret:${CRON_SECRET}"
+          PROJECT_URL="https://${SUPABASE_PROJECT_REF}.functions.supabase.co"
+          supabase db query <<SQL
+          select cron.schedule(
+            'daily-purge',           -- job name (re-used = update)
+            '0 0 * * *',             -- every day at 00:00
+            $$
+            select net.http_post(
+              url    := '${PROJECT_URL}/purge-soft-deleted',
+              headers:= jsonb_build_object(
+                'Content-Type','application/json',
+                'x-cron-secret','${CRON_SECRET}'
+              ),
+              body   := '{}'::jsonb
+            );
+            $$
+          );
+          SQL
