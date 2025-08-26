@@ -34,10 +34,18 @@ jobs:
           version: latest
 
       - name: Link project
-        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF" --access-token "$SUPABASE_ACCESS_TOKEN"
+
+      - name: Sync Edge Function secrets
+        run: |
+          supabase functions secrets set \
+            SUPABASE_URL="$SUPABASE_URL" \
+            SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY" \
+            CRON_SECRET="$CRON_SECRET" \
+            --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Apply migrations
-        run: supabase db push
+        run: supabase db push --yes
 
       - name: Deploy all edge functions
         run: |
