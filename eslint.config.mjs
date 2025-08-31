@@ -1,74 +1,68 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import importPlugin from 'eslint-plugin-import';
-import simpleImportSort from 'eslint-plugin-simple-import-sort';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import {
+  baseConfig,
+  nextjsConfig,
+  nativeConfig,
+  reactLibraryConfig,
+  supabaseConfig,
+  jsonConfig,
+} from '@smart-desk/eslint-config';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+/**
+ * @type {import('eslint').Linter.Config[]}
+ */
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+const pathsToIgnore = ['**/dist/**', '**/.next/**', 'supabase/.supabase/**', '**/node_modules/**'];
 
-const defineConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+export default [
+  // JSON files
   {
-    plugins: {
-      'simple-import-sort': simpleImportSort,
-      import: importPlugin,
-    },
-    rules: {
-      // Disallow "any"
-      '@typescript-eslint/no-explicit-any': 'error',
-
-      // Disallow unused variables unless prefixed with "_"
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-
-      // Don't require importing React in JSX files
-      'react/react-in-jsx-scope': 'off',
-
-      // Disallow default import of React and relative imports
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: [
-            {
-              name: 'react',
-              importNames: ['default'],
-              message: 'Do not import React explicitly',
-            },
-          ],
-          patterns: ['../*', './*'],
-        },
-      ],
-
-      // Allow JSX only in .tsx files
-      'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
-
-      // Enforce import sorting
-      'simple-import-sort/imports': [
-        'error',
-        {
-          groups: [
-            ['^.+\\.(png|jpg|jpeg|gif|svg|webp)$'],
-            ['^react$', '^react-', '^@react'],
-            ['^@?\\w'],
-            ['^@/'],
-          ],
-        },
-      ],
-      'simple-import-sort/exports': 'error',
-    },
+    ...jsonConfig,
+    files: ['**/*.json'],
+    ignores: pathsToIgnore,
   },
 
+  // Apply base configuration to all relevant files
   {
-    files: ['src/app/components/*.{ts,tsx}'],
+    ...baseConfig,
+    files: [
+      'apps/**/*.{ts,tsx}',
+      'packages/**/*.{ts,tsx}',
+      'tooling/**/*.{ts,tsx,js,mjs}',
+      'supabase/functions/**/*.ts',
+      'scripts/**/*.mjs',
+    ],
+    ignores: pathsToIgnore,
+  },
+
+  // Apply Next.js specific configuration to the web app
+  {
+    ...nextjsConfig,
+    files: ['apps/web/**/*.ts', 'apps/web/**/*.tsx'],
+  },
+
+  // Apply React Native specific configuration to the native app
+  {
+    ...nativeConfig,
+    files: ['apps/native/**/*.ts', 'apps/native/**/*.tsx'],
+  },
+
+  // Apply generic React library configuration to UI packages
+  {
+    ...reactLibraryConfig,
+    files: ['packages/ui-*/**/*.ts', 'packages/ui-*/**/*.tsx'],
+  },
+
+  // Apply Supabase specific configuration to Supabase functions
+  {
+    ...supabaseConfig,
+    files: ['supabase/functions/**/*.ts'],
+  },
+
+  // Specific override: Disallow default exports in web components
+  {
+    files: ['apps/web/src/components/**/*.{ts,tsx}'], // Adjusted path for clarity
     rules: {
-      // Enforce consistent import order in components
       'import/no-default-export': 'error',
     },
   },
 ];
-
-export default defineConfig;

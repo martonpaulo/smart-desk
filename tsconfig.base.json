@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@smart-desk/*": ["./packages/*"],
+      "@tooling/*": ["./tooling/*"]
+    }
+  }
+}

@@ -1,7 +1,5 @@
 /** @type {import("prettier").Config} */
 
-import prettierPluginSql from 'prettier-plugin-sql';
-
 const config = {
   printWidth: 100,
   tabWidth: 2,
@@ -22,7 +20,6 @@ const config = {
   htmlWhitespaceSensitivity: 'css',
   endOfLine: 'lf',
   embeddedLanguageFormatting: 'auto',
-  plugins: [prettierPluginSql],
 };
 
 export default config;

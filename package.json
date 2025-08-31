@@ -1,6 +1,7 @@
 {
   "name": "smart-desk",
   "version": "0.1.0",
+  "private": true,
   "homepage": "https://www.martonpaulo.com/smartdesk",
   "author": {
     "name": "Marton Paulo",
@@ -18,20 +19,19 @@
     "url": "https://github.com/martonpaulo/smart-desk"
   },
   "license": "MIT",
-  "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "open": "sleep 5 && open http://localhost:3000 &",
-    "local": "npm run dev && npm run open",
-    "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
-    "format": "prettier --write \"**/*.{ts,tsx,json}\"",
-    "fix": "prettier --write \"**/*.{ts,tsx,json}\" --log-level silent && eslint 'src/**/*.{ts,tsx}' --fix",
-    "clear": "rm -rf .next node_modules package-lock.json && npm cache clean --force && npm install --verbose && npm run dev",
-    "zip": "node scripts/zip.mjs",
-    "issues": "bash scripts/issues.sh",
-    "ship": "set -x && npm run format:fix && npm run lint:fix && npm run build && git add . && git commit -m \"$npm_config_msg\" && git push"
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:mobile": "turbo run dev --filter=mobile",
+    "build": "turbo run build",
+    "build:web": "turbo run build --filter=web",
+    "build:mobile": "turbo run build --filter=mobile",
+    "start": "turbo run start --filter=web",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "typecheck": "turbo run typecheck",
+    "clear": "rimraf node_modules && npm i && npm run dev:web",
+    "zip": "node scripts/zip.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -87,26 +87,7 @@
     "prettier-plugin-sql": "^0.19.2",
     "typescript": "^5"
   },
-  "bugs": {
-    "url": "https://github.com/martonpaulo/smart-desk/issues"
-  },
   "engines": {
     "node": ">=18"
-  },
-  "overrides": {
-    "react-simple-maps": {
-      "d3-geo": "^3.1.0",
-      "d3-color": "^3.1.0",
-      "d3-selection": "^3.0.0",
-      "d3-zoom": "^3.0.0",
-      "react": "^16.8.0 || 17.x || 18.x || 19.x",
-      "react-dom": "^16.8.0 || 17.x || 18.x || 19.x"
-    },
-    "d3-interpolate": {
-      "d3-color": "^3.1.0"
-    },
-    "d3-transition": {
-      "d3-color": "^3.1.0"
-    }
   }
 }
