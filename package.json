@@ -11,16 +11,11 @@
     "node": ">=18"
   },
   "scripts": {
-    "web:clear": "rm -rf node_modules **/node_modules pnpm-lock.yaml apps/web/.next apps/web/out && pnpm store prune && pnpm install",
-    "dev": "nx run-many -t dev --all --parallel",
+    "clear:web": "rm -rf node_modules **/node_modules pnpm-lock.yaml apps/web/.next apps/web/out && pnpm store prune && pnpm install",
     "dev:web": "nx run web:dev",
-    "build": "nx run-many -t build --all --parallel",
     "build:web": "nx run web:build",
-    "start": "nx run web:start",
-    "lint": "nx run-many -t lint --all",
-    "format": "nx format:write",
-    "format:check": "nx format:check",
-    "typecheck": "nx run-many -t typecheck --all",
+    "start:web": "nx run web:start",
+    "fix:web": "node scripts/fix-web.mjs",
     "graph": "nx graph",
     "zip": "node scripts/zip.mjs"
   },
