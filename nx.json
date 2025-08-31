@@ -1,6 +1,5 @@
 {
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "defaultProject": "web",
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/master/packages/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
       "dependsOn": ["^build"],
@@ -8,11 +7,15 @@
       "cache": true
     },
     "lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/eslint.config.mjs",
+        "{workspaceRoot}/tooling/eslint-config/**/*"
+      ],
       "cache": true
     },
-    "test": {
-      "inputs": ["default", "^production"],
+    "typecheck": {
+      "inputs": ["default", "^default"],
       "cache": true
     }
   },
@@ -21,10 +24,15 @@
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/jest.config.[jt]s",
-      "!{projectRoot}/.eslintrc.json"
+      "!{projectRoot}/tsconfig.spec.json"
     ],
-    "sharedGlobals": ["{workspaceRoot}/babel.config.json", "{workspaceRoot}/prettier.config.mjs"]
+    "sharedGlobals": [
+      "{workspaceRoot}/prettier.config.mjs",
+      "{workspaceRoot}/eslint.config.mjs",
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/pnpm-lock.yaml",
+      "{workspaceRoot}/pnpm-workspace.yaml",
+      "{workspaceRoot}/tsconfig.base.json"
+    ]
   }
 }

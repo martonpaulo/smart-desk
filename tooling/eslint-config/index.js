@@ -2,15 +2,18 @@ import { FlatCompat } from '@eslint/eslintrc';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import globals from 'globals';
+import { builtinModules } from 'module';
 
 // Plugins
 import importPlugin from 'eslint-plugin-import';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import reactPlugin from 'eslint-plugin-react';
 import jsonPlugin from 'eslint-plugin-json';
+import jsonParser from 'jsonc-eslint-parser';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
+import nextPlugin from '@next/eslint-plugin-next';
 
 // Mimic __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -48,7 +51,7 @@ export const baseConfig = {
           // Side effect imports first
           ['^\\u0000'],
           // Node.js built-ins
-          [`^(${require('module').builtinModules.join('|')})(/.*|$)`],
+          [`^(${builtinModules.join('|')})(/.*|$)`],
           // React packages
           ['^react', '^@react', '^next', '^@next'],
           // External packages
@@ -76,6 +79,11 @@ export const reactLibraryConfig = {
     react: reactPlugin,
     'react-hooks': reactHooksPlugin,
   },
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
   rules: {
     ...reactPlugin.configs.recommended.rules,
     ...reactHooksPlugin.configs.recommended.rules,
@@ -85,21 +93,40 @@ export const reactLibraryConfig = {
 };
 
 // Configuration specifically for the Next.js app
+const nextCompat = compat.extends(
+  'next/core-web-vitals',
+  'plugin:@typescript-eslint/recommended'
+);
 export const nextjsConfig = {
-  ...compat.extends('next/core-web-vitals', 'plugin:@typescript-eslint/recommended')[0],
-  ...reactLibraryConfig, // Inherit common React rules
+  ...nextCompat[0],
+  // Merge plugins to avoid overwriting those provided by compat
+  plugins: {
+    ...(nextCompat[0]?.plugins || {}),
+    ...(reactLibraryConfig.plugins || {}),
+    '@next/next': nextPlugin,
+  },
+  // Merge rules from compat and react library
   rules: {
-    ...reactLibraryConfig.rules,
-    // Add any Next.js specific overrides here
+    ...(nextCompat[0]?.rules || {}),
+    ...(reactLibraryConfig.rules || {}),
+  },
+  settings: {
+    ...(nextCompat[0]?.settings || {}),
+    ...(reactLibraryConfig.settings || {}),
   },
 };
 
 // Configuration specifically for the React Native app
+const nativeCompat = compat.extends('plugin:react-native/all');
 export const nativeConfig = {
-  ...compat.extends('plugin:react-native/all')[0],
-  ...reactLibraryConfig, // Inherit common React rules
+  ...nativeCompat[0],
+  plugins: {
+    ...(nativeCompat[0]?.plugins || {}),
+    ...(reactLibraryConfig.plugins || {}),
+  },
   rules: {
-    ...reactLibraryConfig.rules,
+    ...(nativeCompat[0]?.rules || {}),
+    ...(reactLibraryConfig.rules || {}),
     // Add any React Native specific overrides here
     'react-native/no-raw-text': ['error', { skip: ['Button'] }], // Example override
   },
@@ -115,9 +142,7 @@ export const supabaseConfig = {
 
 export const jsonConfig = {
   languageOptions: {
-    globals: {
-      ...globals.json,
-    },
+    parser: jsonParser,
   },
   plugins: {
     json: jsonPlugin,

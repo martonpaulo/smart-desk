@@ -1,0 +1,17 @@
+# Smart Desk Supabase configuration
+# Use relative directories to align with monorepo layout
+
+# Set your project ref here when available
+project_id = ""
+
+[db]
+# Keep schemas minimal; extend as needed (e.g., "storage")
+schemas = ["public"]
+
+[functions]
+# Directory for Edge Functions relative to this file
+directory = "./functions"
+
+[migrations]
+# Directory for SQL migrations relative to this file
+directory = "./migrations"

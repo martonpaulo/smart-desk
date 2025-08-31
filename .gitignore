@@ -1,5 +1,5 @@
 # Dependencies
-/node_modules
+**/node_modules
 .pnpm-debug.log*
 
 # Build & Cache output
@@ -62,3 +62,6 @@ next-env.d.ts
 
 # Archives
 /archives
+
+# Nx cache
+.nx

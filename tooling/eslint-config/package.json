@@ -4,22 +4,36 @@
   "private": true,
   "type": "module",
   "main": "index.js",
-  "dependencies": {
-    "@eslint/eslintrc": "^3.1.0",
-    "@next/eslint-plugin-next": "15.3.3",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "eslint-config-next": "15.3.3",
-    "eslint-formatter-unix": "^8.40.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-json": "^4.0.1",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-react-native": "^4.1.0",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
-    "typescript": "^5.5.4"
+  "exports": {
+    ".": "./index.js"
   },
-  "devDependencies": {
-    "eslint": "^9.8.0"
+  "sideEffects": false,
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": ">=5",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-simple-import-sort": "^12.1.0",
+    "eslint-config-next": ">=15.3.3 <16",
+    "@next/eslint-plugin-next": ">=15.3.3 <16",
+    "eslint-plugin-react-native": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "eslint-config-next": {
+      "optional": true
+    },
+    "@next/eslint-plugin-next": {
+      "optional": true
+    },
+    "eslint-plugin-react-native": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "globals": "^15.11.0",
+    "jsonc-eslint-parser": "^2.4.0"
   }
 }
