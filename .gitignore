@@ -65,3 +65,6 @@ next-env.d.ts
 
 # Nx cache
 .nx
+
+# Turbo
+**/.turbo
