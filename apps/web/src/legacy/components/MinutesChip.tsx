@@ -1,7 +1,6 @@
 import { Chip, ChipProps } from '@mui/material';
-
-import { Event } from '@/legacy/types/Event';
-import { computeEventStatus, getUpcomingEventLabel } from '@/legacy/utils/eventUtils';
+import { Event } from 'src/legacy/types/Event';
+import { computeEventStatus, getUpcomingEventLabel } from 'src/legacy/utils/eventUtils';
 
 interface MinutesChipProps extends ChipProps {
   event: Event;

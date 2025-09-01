@@ -1,16 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-
-import { Box } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { PageSection } from '@/core/components/PageSection';
-import { CalendarView } from '@/features/calendar/types/CalendarView';
-import { CalendarNavigation } from '@/legacy/components/calendar/CalendarNavigation';
-import { CalendarViewContainer } from '@/legacy/components/calendar/CalendarViewContainer';
-import { parseDateFromSlug } from '@/legacy/utils/dateSlug';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { Box } from '@mui/material';
+import { PageSection } from 'src/core/components/PageSection';
+import { CalendarView } from 'src/features/calendar/types/CalendarView';
+import { CalendarNavigation } from 'src/legacy/components/calendar/CalendarNavigation';
+import { CalendarViewContainer } from 'src/legacy/components/calendar/CalendarViewContainer';
+import { parseDateFromSlug } from 'src/legacy/utils/dateSlug';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 export default function CalendarPage() {
   const pathname = usePathname();

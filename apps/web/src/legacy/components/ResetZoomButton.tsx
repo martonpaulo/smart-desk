@@ -1,8 +1,7 @@
 import { ReactNode } from 'react';
 
 import { Button, ButtonProps } from '@mui/material';
-
-import { useUiPrefsStore } from '@/legacy/store/uiPrefsStore';
+import { useUiPrefsStore } from 'src/legacy/store/uiPrefsStore';
 
 interface ResetZoomButtonProps extends ButtonProps {
   onClick?: () => void;

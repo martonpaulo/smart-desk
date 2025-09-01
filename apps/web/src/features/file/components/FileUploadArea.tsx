@@ -1,15 +1,14 @@
 'use client';
 
 import { ChangeEvent, DragEvent } from 'react';
+import Image from 'next/image';
 
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import Image from 'next/image';
-
-import type { File as AppFile } from '@/features/file/types/File';
+import type { File as AppFile } from 'src/features/file/types/File';
 
 interface FileUploadAreaProps {
   file: File | null;

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -17,13 +19,10 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-
-import { useSyncTrigger } from '@/core/hook/useSyncTriggers';
-import { useConnectivityStore } from '@/core/store/useConnectivityStore';
-import { navItems } from '@/legacy/navigation/navItems';
-import { SyncStatusIcon } from '@/shared/components/SyncStatusIcon';
+import { useSyncTrigger } from 'src/core/hook/useSyncTriggers';
+import { useConnectivityStore } from 'src/core/store/useConnectivityStore';
+import { navItems } from 'src/legacy/navigation/navItems';
+import { SyncStatusIcon } from 'src/shared/components/SyncStatusIcon';
 
 export function SideDrawer() {
   // Select the boolean primitive, not a function reference

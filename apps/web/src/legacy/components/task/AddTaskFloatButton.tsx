@@ -20,14 +20,13 @@ import {
   useTheme,
 } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
-
-import { EventModal } from '@/features/event/components/EventModal';
-import { useTagsStore } from '@/features/tag/store/useTagsStore';
-import { QuantitySelector } from '@/legacy/components/QuantitySelector';
-import { useBoardStore } from '@/legacy/store/board/store';
-import { formatDuration, parseDuration } from '@/legacy/utils/timeUtils';
-import { DateInput } from '@/shared/components/DateInput';
-import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
+import { EventModal } from 'src/features/event/components/EventModal';
+import { useTagsStore } from 'src/features/tag/store/useTagsStore';
+import { QuantitySelector } from 'src/legacy/components/QuantitySelector';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import { formatDuration, parseDuration } from 'src/legacy/utils/timeUtils';
+import { DateInput } from 'src/shared/components/DateInput';
+import { MarkdownEditableBox } from 'src/shared/components/MarkdownEditableBox';
 
 export function AddTaskFloatButton() {
   const theme = useTheme();

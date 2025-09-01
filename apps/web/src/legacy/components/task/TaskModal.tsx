@@ -3,16 +3,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Chip, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
-
-import { SelectTag } from '@/features/tag/components/SelectTag';
-import { QuantitySelector } from '@/legacy/components/QuantitySelector';
-import { useBoardStore } from '@/legacy/store/board/store';
-import { Task } from '@/legacy/types/task';
-import { formatDuration, parseDuration } from '@/legacy/utils/timeUtils';
-import { CustomDialog } from '@/shared/components/CustomDialog';
-import { DateInput } from '@/shared/components/DateInput';
-import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { SelectTag } from 'src/features/tag/components/SelectTag';
+import { QuantitySelector } from 'src/legacy/components/QuantitySelector';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import { Task } from 'src/legacy/types/task';
+import { formatDuration, parseDuration } from 'src/legacy/utils/timeUtils';
+import { CustomDialog } from 'src/shared/components/CustomDialog';
+import { DateInput } from 'src/shared/components/DateInput';
+import { MarkdownEditableBox } from 'src/shared/components/MarkdownEditableBox';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 type TaskForm = {
   title: string;

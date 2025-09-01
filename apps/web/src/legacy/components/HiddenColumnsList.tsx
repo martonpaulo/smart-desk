@@ -12,11 +12,10 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-
-import { useTasks } from '@/legacy/hooks/useTasks';
-import { useBoardStore } from '@/legacy/store/board/store';
-import { useTodoPrefsStore } from '@/legacy/store/todoPrefsStore';
-import { CountChip } from '@/shared/components/CountChip';
+import { useTasks } from 'src/legacy/hooks/useTasks';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import { useTodoPrefsStore } from 'src/legacy/store/todoPrefsStore';
+import { CountChip } from 'src/shared/components/CountChip';
 
 export function HiddenColumnsList() {
   const columns = useBoardStore(state => state.columns);

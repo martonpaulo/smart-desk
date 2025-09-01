@@ -1,6 +1,3 @@
-import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
-
 import {
   addColumnAction,
   addTaskAction,
@@ -8,9 +5,11 @@ import {
   syncPendingAction,
   updateColumnAction,
   updateTaskAction,
-} from '@/legacy/store/board/actions';
-import { BoardState } from '@/legacy/store/board/types';
-import { buildStorageKey } from '@/legacy/utils/localStorageUtils';
+} from 'src/legacy/store/board/actions';
+import { BoardState } from 'src/legacy/store/board/types';
+import { buildStorageKey } from 'src/legacy/utils/localStorageUtils';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 export const useBoardStore = create<BoardState>()(
   persist(

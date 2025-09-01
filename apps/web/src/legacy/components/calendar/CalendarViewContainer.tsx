@@ -1,13 +1,12 @@
 'use client';
 
 import { Stack } from '@mui/material';
-
-import { CalendarView } from '@/features/calendar/types/CalendarView';
-import { DayView } from '@/legacy/views/DayView';
-import { MonthView } from '@/legacy/views/MonthView';
-import { ScheduleView } from '@/legacy/views/ScheduleView';
-import { WeekView } from '@/legacy/views/WeekView';
-import { YearView } from '@/legacy/views/YearView';
+import { CalendarView } from 'src/features/calendar/types/CalendarView';
+import { DayView } from 'src/legacy/views/DayView';
+import { MonthView } from 'src/legacy/views/MonthView';
+import { ScheduleView } from 'src/legacy/views/ScheduleView';
+import { WeekView } from 'src/legacy/views/WeekView';
+import { YearView } from 'src/legacy/views/YearView';
 
 export interface CalendarViewProps {
   currentDate: Date;

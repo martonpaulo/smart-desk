@@ -1,5 +1,5 @@
-import { createSyncedEntityStore } from '@/core/store/createSyncedEntityStore';
-import { File } from '@/features/file/types/File';
+import { createSyncedEntityStore } from 'src/core/store/createSyncedEntityStore';
+import { File } from 'src/features/file/types/File';
 
 export const useFilesStore = createSyncedEntityStore<File>({
   table: 'files',

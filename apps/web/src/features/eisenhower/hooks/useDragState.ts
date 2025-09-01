@@ -2,7 +2,7 @@
 
 import { DragEvent, useCallback, useState } from 'react';
 
-import type { Task } from '@/legacy/types/task';
+import type { Task } from 'src/legacy/types/task';
 
 export type DragKind = 'task' | 'event' | null;
 

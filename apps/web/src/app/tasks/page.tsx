@@ -1,35 +1,37 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-
-import { Button, Stack, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
 
-import { PageSection } from '@/core/components/PageSection';
-import { TaskFilterPanel } from '@/features/task/components/TaskFilterPanel';
-import { clearedFilters } from '@/features/task/constants/clearedFilters';
-import { useBulkTaskSelection } from '@/features/task/hooks/useBulkTaskSelection';
-import type { TaskFilters } from '@/features/task/types/TaskFilters';
-import { TaskSelectionToolbar } from '@/legacy/components/TaskSelectionToolbar';
-import { useDefaultColumnObj } from '@/legacy/hooks/useDefaultColumnObj';
-import { useTasks } from '@/legacy/hooks/useTasks';
-import { customColors } from '@/legacy/styles/colors';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { Button, Stack, Typography } from '@mui/material';
+import { PageSection } from 'src/core/components/PageSection';
+import { TaskFilterPanel } from 'src/features/task/components/TaskFilterPanel';
+import { clearedFilters } from 'src/features/task/constants/clearedFilters';
+import { useBulkTaskSelection } from 'src/features/task/hooks/useBulkTaskSelection';
+import type { TaskFilters } from 'src/features/task/types/TaskFilters';
+import { TaskSelectionToolbar } from 'src/legacy/components/TaskSelectionToolbar';
+import { useDefaultColumnObj } from 'src/legacy/hooks/useDefaultColumnObj';
+import { useTasks } from 'src/legacy/hooks/useTasks';
+import { customColors } from 'src/legacy/styles/colors';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 // Lazy loaded to keep initial bundle lean
 const AddTaskFloatButton = dynamic(
-  () => import('@/legacy/components/task/AddTaskFloatButton').then(m => m.AddTaskFloatButton),
+  () => import('src/legacy/components/task/AddTaskFloatButton').then(m => m.AddTaskFloatButton),
   { ssr: false },
 );
 
 const AddTaskInput = dynamic(
-  () => import('@/legacy/components/task/AddTaskInput').then(m => m.AddTaskInput),
+  () => import('src/legacy/components/task/AddTaskInput').then(m => m.AddTaskInput),
   { ssr: false },
 );
 
-const TaskCard = dynamic(() => import('@/legacy/components/task/TaskCard').then(m => m.TaskCard), {
-  ssr: false,
-});
+const TaskCard = dynamic(
+  () => import('src/legacy/components/task/TaskCard').then(m => m.TaskCard),
+  {
+    ssr: false,
+  },
+);
 
 export default function TasksPage() {
   const isMobile = useResponsiveness();

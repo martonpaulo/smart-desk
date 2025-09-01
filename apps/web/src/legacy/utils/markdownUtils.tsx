@@ -1,8 +1,7 @@
 import { ReactElement } from 'react';
 
 import { Box, Checkbox, List, ListItem, ListItemIcon, Stack, Typography } from '@mui/material';
-
-import { parseSafeHtml } from '@/legacy/utils/textUtils';
+import { parseSafeHtml } from 'src/legacy/utils/textUtils';
 
 type ListType = 'ul' | 'ol' | 'checkbox';
 

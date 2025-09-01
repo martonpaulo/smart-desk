@@ -1,15 +1,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-
-import { fetchUserId } from '@/core/services/supabaseUserService';
-import type { Base } from '@/core/types/Base';
-import type { DbRecord } from '@/core/types/DbRecord';
-import { camelToSnake, snakeToCamel } from '@/core/utils/caseMapper';
-import { baseMapFromDB, baseMapToDB } from '@/core/utils/entityMapper';
-import { TypedSupabaseClient } from '@/legacy/lib/supabaseClient';
+import { fetchUserId } from 'src/core/services/supabaseUserService';
+import type { Base } from 'src/core/types/Base';
+import type { DbRecord } from 'src/core/types/DbRecord';
+import { camelToSnake, snakeToCamel } from 'src/core/utils/caseMapper';
+import { baseMapFromDB, baseMapToDB } from 'src/core/utils/entityMapper';
+import { TypedSupabaseClient } from 'src/legacy/lib/supabaseClient';
 
 /**
  * Optional provider that returns a SupabaseClient instance.
- * If not provided, we lazy import from '@/core/services/supabaseClient'.
+ * If not provided, we lazy import from 'src/core/services/supabaseClient'.
  */
 type ClientProvider = () => Promise<SupabaseClient> | SupabaseClient;
 
@@ -37,7 +36,7 @@ export function createSupabaseEntityAdapter<E extends Base>(config: {
    * Resolve a Supabase client lazily.
    * Tries, in order:
    * 1) user-provided clientProvider
-   * 2) dynamic import from '@/core/services/supabaseClient'
+   * 2) dynamic import from 'src/core/services/supabaseClient'
    *    supporting common export names.
    */
   async function ensureClient(): Promise<SupabaseClient> {
@@ -50,7 +49,7 @@ export function createSupabaseEntityAdapter<E extends Base>(config: {
     }
 
     // Dynamic import with tolerant export resolution
-    const mod = await import('@/legacy/lib/supabaseClient');
+    const mod = await import('src/legacy/lib/supabaseClient');
     const candidates = [
       (mod as Record<string, unknown>).supabase,
       (mod as Record<string, unknown>).client,

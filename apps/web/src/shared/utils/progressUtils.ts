@@ -1,4 +1,4 @@
-import { progressState } from '@/shared/constants/progressState';
+import { progressState } from 'src/shared/constants/progressState';
 
 export function resolveProgressState(percent: number) {
   const ranges = Object.values(progressState);

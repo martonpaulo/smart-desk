@@ -1,9 +1,9 @@
-import { Column } from '@/legacy/types/column';
-import { IcsCalendar } from '@/legacy/types/icsCalendar';
-import { RawColumn } from '@/legacy/types/rawColumn';
-import { RawIcsCalendar } from '@/legacy/types/rawIcsCalendar';
-import { RawTask } from '@/legacy/types/rawTask';
-import { Task } from '@/legacy/types/task';
+import { Column } from 'src/legacy/types/column';
+import { IcsCalendar } from 'src/legacy/types/icsCalendar';
+import { RawColumn } from 'src/legacy/types/rawColumn';
+import { RawIcsCalendar } from 'src/legacy/types/rawIcsCalendar';
+import { RawTask } from 'src/legacy/types/rawTask';
+import { Task } from 'src/legacy/types/task';
 
 export function mapDBToColumn(rawColumn: RawColumn): Column {
   return {

@@ -1,4 +1,4 @@
-import { RawBase } from '@/core/types/Base';
+import { RawBase } from 'src/core/types/Base';
 
 export interface RawColumn extends RawBase {
   title: string;

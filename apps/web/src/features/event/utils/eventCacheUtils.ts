@@ -1,8 +1,7 @@
 // Shared helpers for canonical event caching and range filtering
 
 import { addDays } from 'date-fns';
-
-import type { Event } from '@/legacy/types/Event';
+import type { Event } from 'src/legacy/types/Event';
 
 export const EVENT_CACHE_KEYS = {
   google: {

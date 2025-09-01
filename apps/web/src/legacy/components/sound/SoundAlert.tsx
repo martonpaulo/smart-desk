@@ -11,12 +11,11 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-
-import { IntervalSelector } from '@/legacy/components/sound/IntervalSelector';
-import { useSpeech } from '@/legacy/hooks/useSpeech';
-import { useTimeAnnouncement } from '@/legacy/hooks/useTimeAnnouncement';
-import type { Event } from '@/legacy/types/Event';
-import { buildAnnouncement } from '@/legacy/utils/announcementUtils';
+import { IntervalSelector } from 'src/legacy/components/sound/IntervalSelector';
+import { useSpeech } from 'src/legacy/hooks/useSpeech';
+import { useTimeAnnouncement } from 'src/legacy/hooks/useTimeAnnouncement';
+import type { Event } from 'src/legacy/types/Event';
+import { buildAnnouncement } from 'src/legacy/utils/announcementUtils';
 
 interface SoundAlertProps {
   currentTime: Date;

@@ -1,4 +1,4 @@
-import { IWeather } from '@/legacy/types/IWeather';
+import { IWeather } from 'src/legacy/types/IWeather';
 
 interface FetchWeatherParams {
   latitude?: number;

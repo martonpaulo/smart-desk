@@ -2,8 +2,7 @@
 
 import { AccessTime, Event as MaterialEvent } from '@mui/icons-material';
 import { Box, Chip, Typography, useTheme } from '@mui/material';
-
-import { Event } from '@/legacy/types/Event';
+import { Event } from 'src/legacy/types/Event';
 
 interface EventCardProps {
   event: Event;

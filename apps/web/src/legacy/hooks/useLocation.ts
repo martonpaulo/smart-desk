@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { LocationContext } from '@/legacy/context/LocationContext';
+import { LocationContext } from 'src/legacy/context/LocationContext';
 
 export function useLocation() {
   const location = useContext(LocationContext);

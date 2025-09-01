@@ -14,10 +14,9 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material';
-
-import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
-import { usePromiseFeedback } from '@/shared/context/PromiseFeedbackContext';
-import { getErrorMessage } from '@/shared/utils/getErrorMessage';
+import { ConfirmDialog } from 'src/shared/components/ConfirmDialog';
+import { usePromiseFeedback } from 'src/shared/context/PromiseFeedbackContext';
+import { getErrorMessage } from 'src/shared/utils/getErrorMessage';
 
 interface CustomDialogProps {
   item: string;

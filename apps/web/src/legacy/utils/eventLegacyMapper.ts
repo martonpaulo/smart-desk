@@ -1,5 +1,5 @@
-import { Event } from '@/features/event/types/Event';
-import { Event as LegacyEvent } from '@/legacy/types/Event';
+import { Event } from 'src/features/event/types/Event';
+import { Event as LegacyEvent } from 'src/legacy/types/Event';
 
 export function mapToLegacyEvent(event: Event): LegacyEvent {
   return {

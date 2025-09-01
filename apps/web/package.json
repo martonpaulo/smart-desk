@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mui/system": "^7.3.1",
     "@smart-desk/data-access": "workspace:*",
     "@smart-desk/design-system": "workspace:*",
     "@smart-desk/hooks": "workspace:*",
@@ -17,6 +18,7 @@
     "@smart-desk/store": "workspace:*",
     "@smart-desk/types": "workspace:*",
     "@smart-desk/ui-web": "workspace:*",
-    "@smart-desk/utils": "workspace:*"
+    "@smart-desk/utils": "workspace:*",
+    "@supabase/auth-helpers-nextjs": "^0.10.0"
   }
 }

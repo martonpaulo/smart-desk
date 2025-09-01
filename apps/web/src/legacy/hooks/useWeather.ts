@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-
-import { fetchWeather } from '@/legacy/services/weatherService';
+import { fetchWeather } from 'src/legacy/services/weatherService';
 
 export function useWeather(latitude?: number, longitude?: number) {
   return useQuery({

@@ -1,8 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { endOfDay, format, startOfDay } from 'date-fns';
-
-import { useLocationsStore } from '@/features/location/store/useLocationsStore';
-import type { Location } from '@/features/location/types/Location';
+import { useLocationsStore } from 'src/features/location/store/useLocationsStore';
+import type { Location } from 'src/features/location/types/Location';
 
 type UseLocationsByDateResult = {
   locations: Location[];

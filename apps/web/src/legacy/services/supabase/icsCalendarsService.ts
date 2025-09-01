@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { fetchUserId } from '@/core/services/supabaseUserService';
-import { TypedSupabaseClient } from '@/legacy/lib/supabaseClient';
-import { IcsCalendar } from '@/legacy/types/icsCalendar';
-import { mapDBToIcsCalendar, mapIcsCalendarToDB } from '@/legacy/utils/databaseUtils';
+import { fetchUserId } from 'src/core/services/supabaseUserService';
+import { TypedSupabaseClient } from 'src/legacy/lib/supabaseClient';
+import { IcsCalendar } from 'src/legacy/types/icsCalendar';
+import { mapDBToIcsCalendar, mapIcsCalendarToDB } from 'src/legacy/utils/databaseUtils';
 
 export async function fetchIcsCalendars(client: TypedSupabaseClient): Promise<IcsCalendar[]> {
   const query = client.from('ics_calendars').select('*');

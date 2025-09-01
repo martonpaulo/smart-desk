@@ -4,12 +4,11 @@ import { useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
 import { Button, Stack, Typography } from '@mui/material';
-
-import { PageSection } from '@/core/components/PageSection';
-import { LocationCard } from '@/features/location/components/LocationCard';
-import { LocationModal } from '@/features/location/components/LocationModal';
-import { useLocationsStore } from '@/features/location/store/useLocationsStore';
-import { Location } from '@/features/location/types/Location';
+import { PageSection } from 'src/core/components/PageSection';
+import { LocationCard } from 'src/features/location/components/LocationCard';
+import { LocationModal } from 'src/features/location/components/LocationModal';
+import { useLocationsStore } from 'src/features/location/store/useLocationsStore';
+import { Location } from 'src/features/location/types/Location';
 
 export default function LocationsManagerPage() {
   const allLocations = useLocationsStore(s => s.items);

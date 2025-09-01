@@ -1,4 +1,4 @@
-import { Task } from '@/legacy/types/task';
+import { Task } from 'src/legacy/types/task';
 
 export function isTaskEmpty(task: Task): boolean {
   const isTitleEmpty = task.title.trim() === '';

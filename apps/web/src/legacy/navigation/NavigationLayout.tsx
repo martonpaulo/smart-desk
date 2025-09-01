@@ -3,10 +3,9 @@
 import { ReactNode } from 'react';
 
 import { Box, Stack } from '@mui/material';
-
-import { BottomNav } from '@/legacy/navigation/BottomNav';
-import { SideDrawer } from '@/legacy/navigation/SideDrawer';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { BottomNav } from 'src/legacy/navigation/BottomNav';
+import { SideDrawer } from 'src/legacy/navigation/SideDrawer';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 interface NavigationLayoutProps {
   children: ReactNode;

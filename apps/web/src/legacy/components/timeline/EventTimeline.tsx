@@ -1,16 +1,15 @@
 import { Box, Typography, useTheme } from '@mui/material';
-
-import { CurrentIndicator } from '@/legacy/components/timeline/CurrentIndicator';
-import { EventBar } from '@/legacy/components/timeline/EventBar';
-import { TimeIndicator } from '@/legacy/components/timeline/TimeIndicator';
-import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
+import { CurrentIndicator } from 'src/legacy/components/timeline/CurrentIndicator';
+import { EventBar } from 'src/legacy/components/timeline/EventBar';
+import { TimeIndicator } from 'src/legacy/components/timeline/TimeIndicator';
+import { useCombinedEvents } from 'src/legacy/hooks/useCombinedEvents';
 import {
   calculateCurrentTimePercentage,
   formatHourLabel,
   generateHourlyIndicators,
   layoutTimelineEvents,
-} from '@/legacy/utils/timelineUtils';
-import { useCurrentTime } from '@/shared/hooks/useCurrentTime';
+} from 'src/legacy/utils/timelineUtils';
+import { useCurrentTime } from 'src/shared/hooks/useCurrentTime';
 
 const PAST_WINDOW_HOURS = 3;
 const FUTURE_WINDOW_HOURS = 6;

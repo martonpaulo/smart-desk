@@ -6,11 +6,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Stack, TextField } from '@mui/material';
 import { useSnackbar } from 'notistack';
+import { playInterfaceSound } from 'src/features/sound/utils/soundPlayer';
+import { IcsCalendar } from 'src/legacy/types/icsCalendar';
+import { ColorPicker } from 'src/shared/components/ColorPicker';
 import { z } from 'zod';
-
-import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
-import { IcsCalendar } from '@/legacy/types/icsCalendar';
-import { ColorPicker } from '@/shared/components/ColorPicker';
 
 interface CalendarFormProps {
   initial?: IcsCalendar;

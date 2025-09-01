@@ -3,8 +3,7 @@
 import { PropsWithChildren } from 'react';
 
 import { Stack } from '@mui/material';
-
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 /**
  * Simple responsive grid using Stack wrapping

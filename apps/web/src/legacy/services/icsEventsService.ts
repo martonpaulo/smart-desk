@@ -1,8 +1,7 @@
 import { DateTime } from 'luxon';
-
-import type { Event } from '@/legacy/types/Event';
-import type { ICalendar } from '@/legacy/types/ICalendar';
-import { IcsCalendar } from '@/legacy/types/icsCalendar';
+import type { Event } from 'src/legacy/types/Event';
+import type { ICalendar } from 'src/legacy/types/ICalendar';
+import { IcsCalendar } from 'src/legacy/types/icsCalendar';
 
 // Fetch events from all configured ICS calendars
 export async function fetchIcsEvents(

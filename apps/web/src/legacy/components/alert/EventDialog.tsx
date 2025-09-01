@@ -12,12 +12,11 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-
-import { MinutesChip } from '@/legacy/components/MinutesChip';
-import { useAlertSound } from '@/legacy/hooks/useAlertSound';
-import type { Event } from '@/legacy/types/Event';
-import { IAlertType } from '@/legacy/types/IAlertType';
-import { formatEventTimeRange, getAttendeeCountLabel } from '@/legacy/utils/eventUtils';
+import { MinutesChip } from 'src/legacy/components/MinutesChip';
+import { useAlertSound } from 'src/legacy/hooks/useAlertSound';
+import type { Event } from 'src/legacy/types/Event';
+import { IAlertType } from 'src/legacy/types/IAlertType';
+import { formatEventTimeRange, getAttendeeCountLabel } from 'src/legacy/utils/eventUtils';
 
 interface EventDialogProps {
   event: Event | null;

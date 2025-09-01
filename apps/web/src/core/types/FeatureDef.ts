@@ -1,4 +1,4 @@
-import { SyncInterval } from '@/core/constants/SyncInterval';
+import { SyncInterval } from 'src/core/constants/SyncInterval';
 
 export interface FeatureDef {
   key: string;

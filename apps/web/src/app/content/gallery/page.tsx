@@ -1,7 +1,7 @@
 'use client';
 
-import { PageSection } from '@/core/components/PageSection';
-import { FileManager } from '@/features/file/components/FileManager';
+import { PageSection } from 'src/core/components/PageSection';
+import { FileManager } from 'src/features/file/components/FileManager';
 
 export default function GalleryPage() {
   const handleSelect = (url: string) => {

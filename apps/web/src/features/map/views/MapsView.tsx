@@ -4,12 +4,11 @@ import { useState } from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
 import { Button, Stack, Typography } from '@mui/material';
-
-import { PageSection } from '@/core/components/PageSection';
-import { useFilesStore } from '@/features/file/store/useFilesStore';
-import { MapCard } from '@/features/map/components/MapCard';
-import { MapCreateDialog } from '@/features/map/components/MapCreateDialog';
-import { useMapsStore } from '@/features/map/store/useMapsStore';
+import { PageSection } from 'src/core/components/PageSection';
+import { useFilesStore } from 'src/features/file/store/useFilesStore';
+import { MapCard } from 'src/features/map/components/MapCard';
+import { MapCreateDialog } from 'src/features/map/components/MapCreateDialog';
+import { useMapsStore } from 'src/features/map/store/useMapsStore';
 
 export function MapsView() {
   const maps = useMapsStore(s => s.items);

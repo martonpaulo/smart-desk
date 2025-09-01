@@ -2,11 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Checkbox, FormControlLabel, Stack, TextField } from '@mui/material';
 import { DateTime } from 'luxon';
-
-import { useLocalEventsStore } from '@/features/event/store/useLocalEventsStore';
-import { Event } from '@/features/event/types/Event';
-import { CustomDialog } from '@/shared/components/CustomDialog';
-import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
+import { useLocalEventsStore } from 'src/features/event/store/useLocalEventsStore';
+import { Event } from 'src/features/event/types/Event';
+import { CustomDialog } from 'src/shared/components/CustomDialog';
+import { MarkdownEditableBox } from 'src/shared/components/MarkdownEditableBox';
 
 // helper to build a JS Date from separate date and time strings
 function combineDateTime(date: string, time: string): Date {

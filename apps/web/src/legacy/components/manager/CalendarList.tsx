@@ -22,9 +22,8 @@ import {
 } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { useSnackbar } from 'notistack';
-
-import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
-import { IcsCalendar } from '@/legacy/types/icsCalendar';
+import { playInterfaceSound } from 'src/features/sound/utils/soundPlayer';
+import { IcsCalendar } from 'src/legacy/types/icsCalendar';
 
 interface CalendarListProps {
   calendars: IcsCalendar[];

@@ -6,11 +6,10 @@ import AddIcon from '@mui/icons-material/Add';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha, darken, lighten } from '@mui/material/styles';
 import TextField, { TextFieldProps } from '@mui/material/TextField';
-
-import { defaultColumns } from '@/features/column/config/defaultColumns';
-import { useBoardStore } from '@/legacy/store/board/store';
-import { Column } from '@/legacy/types/column';
-import { Task } from '@/legacy/types/task';
+import { defaultColumns } from 'src/features/column/config/defaultColumns';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import { Column } from 'src/legacy/types/column';
+import { Task } from 'src/legacy/types/task';
 
 interface AddTaskInputProps extends TextFieldProps<'outlined'> {
   taskProperties?: Partial<Task>;

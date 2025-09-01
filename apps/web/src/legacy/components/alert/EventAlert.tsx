@@ -1,10 +1,10 @@
-import { EventDialog } from '@/legacy/components/alert/EventDialog';
-import { Event } from '@/legacy/types/Event';
+import { EventDialog } from 'src/legacy/components/alert/EventDialog';
+import { Event } from 'src/legacy/types/Event';
 import {
   calculateMinutesUntilEvent,
   computeEventStatus,
   filterCurrentOrFutureEvents,
-} from '@/legacy/utils/eventUtils';
+} from 'src/legacy/utils/eventUtils';
 
 interface EventAlertProps {
   events: Event[] | null;

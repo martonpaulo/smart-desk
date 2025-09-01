@@ -1,4 +1,4 @@
-import { TaskFilters } from '@/features/task/types/TaskFilters';
+import { TaskFilters } from 'src/features/task/types/TaskFilters';
 
 export const clearedFilters: TaskFilters = {
   title: null,

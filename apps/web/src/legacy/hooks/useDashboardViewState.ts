@@ -1,14 +1,13 @@
 import { useEffect } from 'react';
-
 import { signIn, signOut, useSession } from 'next-auth/react';
 
 import {
   isSupabaseLoggedIn,
   signInWithIdToken as supabaseSignInWithIdToken,
   signOutSupabase,
-} from '@/legacy/hooks/useSupabaseAuth';
-import { DashboardViewState } from '@/legacy/types/DashboardViewState';
-import { displayError } from '@/legacy/utils/errorUtils';
+} from 'src/legacy/hooks/useSupabaseAuth';
+import { DashboardViewState } from 'src/legacy/types/DashboardViewState';
+import { displayError } from 'src/legacy/utils/errorUtils';
 
 export function useDashboardViewState(): DashboardViewState {
   const { data: session, status: authStatus } = useSession();

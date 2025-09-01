@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from 'react';
 
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 type MobileMotionControllerProps = {
   children: ReactNode;

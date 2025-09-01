@@ -2,10 +2,9 @@
 
 import { Grid, Typography } from '@mui/material';
 import { eachDayOfInterval, endOfWeek, getDaysInMonth, startOfMonth, startOfWeek } from 'date-fns';
-
-import { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
-import { MonthDayCard } from '@/legacy/components/calendar/MonthDayCard';
-import { weekDays } from '@/legacy/utils/timeUtils';
+import { CalendarViewProps } from 'src/legacy/components/calendar/CalendarViewContainer';
+import { MonthDayCard } from 'src/legacy/components/calendar/MonthDayCard';
+import { weekDays } from 'src/legacy/utils/timeUtils';
 
 export function MonthView({ currentDate, onNavigateAction }: CalendarViewProps) {
   // Get first day of the calendar grid

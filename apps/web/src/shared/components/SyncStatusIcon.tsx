@@ -5,8 +5,7 @@ import CloudOffIcon from '@mui/icons-material/CloudOff';
 import SyncIcon from '@mui/icons-material/Sync';
 import { SxProps } from '@mui/material';
 import { keyframes } from '@mui/system';
-
-import { useConnectivityStore } from '@/core/store/useConnectivityStore';
+import { useConnectivityStore } from 'src/core/store/useConnectivityStore';
 
 type Props = {
   iconSx?: SxProps;

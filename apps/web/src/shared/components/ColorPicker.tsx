@@ -10,10 +10,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-
-import { customColors } from '@/legacy/styles/colors';
-import { transitions } from '@/legacy/styles/transitions';
-import type { CustomColor } from '@/shared/types/Color';
+import { customColors } from 'src/legacy/styles/colors';
+import { transitions } from 'src/legacy/styles/transitions';
+import type { CustomColor } from 'src/shared/types/Color';
 
 export function ColorPicker(props: TextFieldProps) {
   const {

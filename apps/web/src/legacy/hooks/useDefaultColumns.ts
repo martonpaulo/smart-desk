@@ -1,5 +1,5 @@
-import { defaultColumns } from '@/features/column/config/defaultColumns';
-import { useBoardStore } from '@/legacy/store/board/store';
+import { defaultColumns } from 'src/features/column/config/defaultColumns';
+import { useBoardStore } from 'src/legacy/store/board/store';
 
 type ColumnKey = keyof typeof defaultColumns;
 

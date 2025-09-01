@@ -2,8 +2,8 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 
-import { LocationContext } from '@/legacy/context/LocationContext';
-import { ILocation } from '@/legacy/types/ILocation';
+import { LocationContext } from 'src/legacy/context/LocationContext';
+import { ILocation } from 'src/legacy/types/ILocation';
 
 interface LocationProviderProps {
   children: ReactNode;

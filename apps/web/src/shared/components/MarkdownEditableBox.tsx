@@ -12,9 +12,8 @@ import {
   useTheme,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
-
-import { transitions } from '@/legacy/styles/transitions';
-import { normalizeText, renderMarkdown } from '@/legacy/utils/markdownUtils';
+import { transitions } from 'src/legacy/styles/transitions';
+import { normalizeText, renderMarkdown } from 'src/legacy/utils/markdownUtils';
 
 interface MarkdownEditableBoxProps {
   value: string;

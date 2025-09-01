@@ -1,5 +1,5 @@
-import { Event } from '@/legacy/types/Event';
-import { formattedTime } from '@/legacy/utils/eventUtils';
+import { Event } from 'src/legacy/types/Event';
+import { formattedTime } from 'src/legacy/utils/eventUtils';
 
 // Compare two lists of events and return human-readable change messages
 export function getEventChangeMessages(previousEvents: Event[], currentEvents: Event[]): string[] {

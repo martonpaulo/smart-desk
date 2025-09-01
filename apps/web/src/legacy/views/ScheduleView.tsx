@@ -22,10 +22,9 @@ import {
   isTomorrow,
   startOfDay,
 } from 'date-fns';
-
-import type { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
-import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
-import type { Event } from '@/legacy/types/Event';
+import type { CalendarViewProps } from 'src/legacy/components/calendar/CalendarViewContainer';
+import { useCombinedEvents } from 'src/legacy/hooks/useCombinedEvents';
+import type { Event } from 'src/legacy/types/Event';
 
 export function ScheduleView({ onNavigateAction }: CalendarViewProps) {
   const theme = useTheme();

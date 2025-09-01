@@ -3,10 +3,9 @@ import NightsStayOutlinedIcon from '@mui/icons-material/NightsStayOutlined';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import WbTwilightOutlinedIcon from '@mui/icons-material/WbTwilightOutlined';
 import { Stack, Typography } from '@mui/material';
-
-import { useLocation } from '@/legacy/hooks/useLocation';
-import { useWeather } from '@/legacy/hooks/useWeather';
-import { useCurrentTime } from '@/shared/hooks/useCurrentTime';
+import { useLocation } from 'src/legacy/hooks/useLocation';
+import { useWeather } from 'src/legacy/hooks/useWeather';
+import { useCurrentTime } from 'src/shared/hooks/useCurrentTime';
 
 export function Clock() {
   const { latitude, longitude } = useLocation();

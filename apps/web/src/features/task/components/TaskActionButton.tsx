@@ -1,12 +1,11 @@
 import { ReactNode, useRef, useState } from 'react';
 
 import { IconButton, Stack, StackProps, Tooltip, useTheme } from '@mui/material';
-
-import { InterfaceSound } from '@/features/sound/types/InterfaceSound';
-import { useBoardStore } from '@/legacy/store/board/store';
-import { Task } from '@/legacy/types/task';
-import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
-import { usePromiseFeedback } from '@/shared/context/PromiseFeedbackContext';
+import { InterfaceSound } from 'src/features/sound/types/InterfaceSound';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import { Task } from 'src/legacy/types/task';
+import { ConfirmDialog } from 'src/shared/components/ConfirmDialog';
+import { usePromiseFeedback } from 'src/shared/context/PromiseFeedbackContext';
 
 interface TaskActionButtonProps extends StackProps {
   icon: ReactNode;

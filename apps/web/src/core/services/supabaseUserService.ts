@@ -1,5 +1,5 @@
-import { TypedSupabaseClient } from '@/legacy/lib/supabaseClient';
-import { useUserStore } from '@/legacy/store/userStore';
+import { TypedSupabaseClient } from 'src/legacy/lib/supabaseClient';
+import { useUserStore } from 'src/legacy/store/userStore';
 
 export async function fetchUserId(client: TypedSupabaseClient): Promise<string | null> {
   const store = useUserStore.getState();

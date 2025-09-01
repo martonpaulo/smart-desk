@@ -6,9 +6,8 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { alpha } from '@mui/material/styles';
 import TextField, { TextFieldProps } from '@mui/material/TextField';
-
-import { formatValue, parseValue } from '@/legacy/utils/stringUtils';
-import { theme } from '@/theme';
+import { formatValue, parseValue } from 'src/legacy/utils/stringUtils';
+import { theme } from 'src/theme';
 
 export interface QuantitySelectorProps extends Omit<TextFieldProps, 'value' | 'onChange'> {
   value: number | null;

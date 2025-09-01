@@ -3,8 +3,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import { Button, Stack, Tooltip } from '@mui/material';
-
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 type NotesToolbarProps = {
   onAdd: () => void;

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { fetchUserId } from '@/core/services/supabaseUserService';
-import { TypedSupabaseClient } from '@/legacy/lib/supabaseClient';
-import { Task } from '@/legacy/types/task';
-import { mapDBToTask, mapTaskToDB } from '@/legacy/utils/databaseUtils';
+import { fetchUserId } from 'src/core/services/supabaseUserService';
+import { TypedSupabaseClient } from 'src/legacy/lib/supabaseClient';
+import { Task } from 'src/legacy/types/task';
+import { mapDBToTask, mapTaskToDB } from 'src/legacy/utils/databaseUtils';
 
 export async function fetchTasks(client: TypedSupabaseClient): Promise<Task[]> {
   const query = client.from('tasks').select('*').order('position', { ascending: true });

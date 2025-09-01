@@ -1,11 +1,10 @@
 import { UseQueryResult } from '@tanstack/react-query';
 import { endOfToday, startOfToday } from 'date-fns';
-
-import { useLocalEventsStore } from '@/features/event/store/useLocalEventsStore';
-import { useGoogleEvents } from '@/legacy/hooks/useGoogleEvents';
-import { useIcsEvents } from '@/legacy/hooks/useIcsEvents';
-import { Event } from '@/legacy/types/Event';
-import { mapToLegacyEvent } from '@/legacy/utils/eventLegacyMapper';
+import { useLocalEventsStore } from 'src/features/event/store/useLocalEventsStore';
+import { useGoogleEvents } from 'src/legacy/hooks/useGoogleEvents';
+import { useIcsEvents } from 'src/legacy/hooks/useIcsEvents';
+import { Event } from 'src/legacy/types/Event';
+import { mapToLegacyEvent } from 'src/legacy/utils/eventLegacyMapper';
 
 export function useCombinedEvents(start: Date = startOfToday(), end: Date = endOfToday()) {
   const startTime = start.getTime();

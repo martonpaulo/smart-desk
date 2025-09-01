@@ -1,21 +1,20 @@
 'use client';
 
 import { createContext, ReactNode, useCallback, useEffect } from 'react';
-
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
-import { SyncInterval } from '@/core/constants/SyncInterval';
-import { useConnectivityStore } from '@/core/store/useConnectivityStore';
+import { SyncInterval } from 'src/core/constants/SyncInterval';
+import { useConnectivityStore } from 'src/core/store/useConnectivityStore';
 import {
   combineCleanups,
   runIdle,
   schedulePeriodicSync,
   syncOnVisibilityChange,
   syncStoresBatch,
-} from '@/core/utils/syncHelpers';
-import { getStoresToSyncForRouteAsync } from '@/core/utils/syncRegistry';
-import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus';
+} from 'src/core/utils/syncHelpers';
+import { getStoresToSyncForRouteAsync } from 'src/core/utils/syncRegistry';
+import { useOnlineStatus } from 'src/shared/hooks/useOnlineStatus';
 
 interface Props {
   children: ReactNode;

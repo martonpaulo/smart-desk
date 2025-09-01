@@ -3,11 +3,10 @@
 import { DragEvent } from 'react';
 
 import { Stack, useTheme } from '@mui/material';
-
-import { ConvertibleEventCard } from '@/features/event/components/ConvertibleEventCard';
-import { TaskCard } from '@/legacy/components/task/TaskCard';
-import type { Event } from '@/legacy/types/Event';
-import type { Task } from '@/legacy/types/task';
+import { ConvertibleEventCard } from 'src/features/event/components/ConvertibleEventCard';
+import { TaskCard } from 'src/legacy/components/task/TaskCard';
+import type { Event } from 'src/legacy/types/Event';
+import type { Task } from 'src/legacy/types/task';
 
 type InboxSectionProps = {
   showEvents: boolean;

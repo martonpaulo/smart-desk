@@ -3,14 +3,13 @@
 import { useState } from 'react';
 
 import { useSnackbar } from 'notistack';
-
-import { PageSection } from '@/core/components/PageSection';
-import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
-import { CalendarForm } from '@/legacy/components/manager/CalendarForm';
-import { CalendarList } from '@/legacy/components/manager/CalendarList';
-import { useSettingsStorage } from '@/legacy/store/settings/store';
-import { IcsCalendar } from '@/legacy/types/icsCalendar';
-import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import { PageSection } from 'src/core/components/PageSection';
+import { playInterfaceSound } from 'src/features/sound/utils/soundPlayer';
+import { CalendarForm } from 'src/legacy/components/manager/CalendarForm';
+import { CalendarList } from 'src/legacy/components/manager/CalendarList';
+import { useSettingsStorage } from 'src/legacy/store/settings/store';
+import { IcsCalendar } from 'src/legacy/types/icsCalendar';
+import { ConfirmDialog } from 'src/shared/components/ConfirmDialog';
 
 export default function CalendarManagerPage() {
   const calendars = useSettingsStorage(s => s.icsCalendars);

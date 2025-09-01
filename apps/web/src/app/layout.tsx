@@ -1,23 +1,22 @@
 'use client';
 
-import { ReactNode } from 'react';
+import '@/legacy/lib/dragDropTouch';
 
+import { ReactNode } from 'react';
 import { SessionProvider } from 'next-auth/react';
 
-import { MobileMotionController } from '@/core/components/MobileMotionController';
-import { AppThemeProvider } from '@/core/providers/AppThemeProvider';
-import { SupabaseSyncProvider } from '@/core/providers/SupabaseSyncProvider';
-import { InterfaceSoundProvider } from '@/features/sound/providers/InterfaceSoundProvider';
-import { NavigationLayout } from '@/legacy/navigation/NavigationLayout';
-import { DateAdapterProvider } from '@/legacy/providers/DateAdapterProvider';
-import { LocationProvider } from '@/legacy/providers/LocationProvider';
-import { ReactQueryProvider } from '@/legacy/providers/ReactQueryProvider';
-import { ZoomProvider } from '@/legacy/providers/ZoomProvider';
-import { PromiseFeedbackProvider } from '@/shared/context/PromiseFeedbackContext';
-import { SnackbarWrapperProvider } from '@/shared/providers/SnackbarWrapperProvider';
-import { jetbrainsMono, poppins } from '@/theme/fonts';
-
-import '@/legacy/lib/dragDropTouch';
+import { MobileMotionController } from 'src/core/components/MobileMotionController';
+import { AppThemeProvider } from 'src/core/providers/AppThemeProvider';
+import { SupabaseSyncProvider } from 'src/core/providers/SupabaseSyncProvider';
+import { InterfaceSoundProvider } from 'src/features/sound/providers/InterfaceSoundProvider';
+import { NavigationLayout } from 'src/legacy/navigation/NavigationLayout';
+import { DateAdapterProvider } from 'src/legacy/providers/DateAdapterProvider';
+import { LocationProvider } from 'src/legacy/providers/LocationProvider';
+import { ReactQueryProvider } from 'src/legacy/providers/ReactQueryProvider';
+import { ZoomProvider } from 'src/legacy/providers/ZoomProvider';
+import { PromiseFeedbackProvider } from 'src/shared/context/PromiseFeedbackContext';
+import { SnackbarWrapperProvider } from 'src/shared/providers/SnackbarWrapperProvider';
+import { jetbrainsMono, poppins } from 'src/theme/fonts';
 
 interface RootLayoutProps {
   readonly children: ReactNode;

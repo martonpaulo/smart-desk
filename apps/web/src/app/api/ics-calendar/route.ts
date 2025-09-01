@@ -1,9 +1,9 @@
-import ICAL from 'ical.js';
-import { DateTime } from 'luxon';
 import { NextRequest, NextResponse } from 'next/server';
 
-import type { Event } from '@/legacy/types/Event';
-import type { ICalendar } from '@/legacy/types/ICalendar';
+import ICAL from 'ical.js';
+import { DateTime } from 'luxon';
+import type { Event } from 'src/legacy/types/Event';
+import type { ICalendar } from 'src/legacy/types/ICalendar';
 
 function toDateInZone(time: ICAL.Time | Date, zone: string): Date {
   if (time instanceof Date) {

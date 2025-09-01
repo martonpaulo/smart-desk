@@ -1,5 +1,5 @@
-import { SYNC_FEATURES } from '@/core/config/syncStores';
-import type { FeatureDef } from '@/core/types/FeatureDef';
+import { SYNC_FEATURES } from 'src/core/config/syncStores';
+import type { FeatureDef } from 'src/core/types/FeatureDef';
 
 interface SyncStoreConfig {
   useStore: {

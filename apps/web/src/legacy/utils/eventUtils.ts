@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon';
-
-import type { Event } from '@/legacy/types/Event';
-import { EventStatus } from '@/legacy/types/ITimelineEvent';
+import type { Event } from 'src/legacy/types/Event';
+import { EventStatus } from 'src/legacy/types/ITimelineEvent';
 
 const FULL_DAY_MS = 24 * 60 * 60 * 1000;
 

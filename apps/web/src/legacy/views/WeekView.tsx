@@ -16,11 +16,10 @@ import {
   startOfHour,
   startOfWeek,
 } from 'date-fns';
-
-import type { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
-import { EventCard } from '@/legacy/components/calendar/EventCard';
-import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import type { CalendarViewProps } from 'src/legacy/components/calendar/CalendarViewContainer';
+import { EventCard } from 'src/legacy/components/calendar/EventCard';
+import { useCombinedEvents } from 'src/legacy/hooks/useCombinedEvents';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 const HOURS_IN_DAY = 24;
 const WEEKS_PER_PAGE = 2; // number of extra weeks to fetch per "page" when scrolling

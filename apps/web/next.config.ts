@@ -1,14 +1,12 @@
 import type { NextConfig } from 'next';
 
-import packageJson from '../../package.json';
-
 const isProd = process.env.NODE_ENV === 'production';
 const isVercelProd = process.env.VERCEL_ENV === 'production';
 const enableReactCompiler =
   isProd && isVercelProd && process.env.NEXT_DISABLE_REACT_COMPILER !== '1'; // manual kill-switch
 
 const COMMIT_SHA = (process.env.VERCEL_GIT_COMMIT_SHA ?? '').slice(0, 7);
-const APP_VERSION = COMMIT_SHA || packageJson.version;
+const APP_VERSION = COMMIT_SHA || 'dev';
 const BUILD_DATE = new Date().toISOString();
 
 const nextConfig: NextConfig = {

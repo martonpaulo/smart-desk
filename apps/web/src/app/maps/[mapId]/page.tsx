@@ -1,6 +1,6 @@
 import { use } from 'react';
 
-import { MapEditorView } from '@/features/map/views/MapEditorView';
+import { MapEditorView } from 'src/features/map/views/MapEditorView';
 
 interface MapPageProps {
   params: Promise<{ mapId: string }>;

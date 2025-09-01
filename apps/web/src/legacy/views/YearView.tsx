@@ -1,10 +1,9 @@
 'use client';
 
 import { Box, Paper, Typography, useTheme } from '@mui/material';
-
-import { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
-import { daysOfWeek } from '@/legacy/utils/calendarUtils';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { CalendarViewProps } from 'src/legacy/components/calendar/CalendarViewContainer';
+import { daysOfWeek } from 'src/legacy/utils/calendarUtils';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 export function YearView({ currentDate, onNavigateAction }: CalendarViewProps) {
   const theme = useTheme();

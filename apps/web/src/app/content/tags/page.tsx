@@ -1,6 +1,6 @@
 'use client';
 
-import { TagsManagerView } from '@/features/tag/views/TagsManagerView';
+import { TagsManagerView } from 'src/features/tag/views/TagsManagerView';
 
 export default function NotesPage() {
   return <TagsManagerView />;

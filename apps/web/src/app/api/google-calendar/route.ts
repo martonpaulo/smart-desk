@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 
-import { authOptions } from '@/legacy/lib/auth';
-import { ApiResponse } from '@/legacy/services/api';
-import { mapGoogleEventsToEvents } from '@/legacy/services/event-mapper';
-import { GoogleCalendarAPI, GoogleCalendarError } from '@/legacy/services/google-api';
-import type { Event } from '@/legacy/types/Event';
+import { authOptions } from 'src/legacy/lib/auth';
+import { ApiResponse } from 'src/legacy/services/api';
+import { mapGoogleEventsToEvents } from 'src/legacy/services/event-mapper';
+import { GoogleCalendarAPI, GoogleCalendarError } from 'src/legacy/services/google-api';
+import type { Event } from 'src/legacy/types/Event';
 
 export async function GET(request: NextRequest) {
   console.log('Calendar API route called:', request.url);

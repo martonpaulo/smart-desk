@@ -8,9 +8,8 @@ import {
   Security as ShieldIcon,
 } from '@mui/icons-material';
 import { Stack, StackProps, SvgIconOwnProps, Tooltip } from '@mui/material';
-
-import { Task } from '@/legacy/types/task';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { Task } from 'src/legacy/types/task';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 type PriorityFlagProps = Omit<StackProps, 'children'> & {
   task: Task;

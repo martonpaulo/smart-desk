@@ -1,7 +1,6 @@
 import { Alert, CircularProgress, Stack, Typography } from '@mui/material';
-
-import { IWeather } from '@/legacy/types/IWeather';
-import { formattedTime } from '@/legacy/utils/eventUtils';
+import { IWeather } from 'src/legacy/types/IWeather';
+import { formattedTime } from 'src/legacy/utils/eventUtils';
 
 export interface WeatherProps {
   locationName?: string | null;

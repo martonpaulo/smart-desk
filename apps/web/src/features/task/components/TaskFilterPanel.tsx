@@ -17,13 +17,12 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
-
-import { TagLabel } from '@/features/tag/components/TagLabel';
-import { useTagsStore } from '@/features/tag/store/useTagsStore';
-import { clearedFilters } from '@/features/task/constants/clearedFilters';
-import type { TaskFilters } from '@/features/task/types/TaskFilters';
-import { DateInput } from '@/shared/components/DateInput';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { TagLabel } from 'src/features/tag/components/TagLabel';
+import { useTagsStore } from 'src/features/tag/store/useTagsStore';
+import { clearedFilters } from 'src/features/task/constants/clearedFilters';
+import type { TaskFilters } from 'src/features/task/types/TaskFilters';
+import { DateInput } from 'src/shared/components/DateInput';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 type TaskFilterPanelProps = {
   filters: TaskFilters;

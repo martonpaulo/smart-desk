@@ -1,4 +1,4 @@
-import { getStoredFilters, setStoredFilters } from '@/legacy/utils/localStorageUtils';
+import { getStoredFilters, setStoredFilters } from 'src/legacy/utils/localStorageUtils';
 
 export interface TagPreset {
   name: string;

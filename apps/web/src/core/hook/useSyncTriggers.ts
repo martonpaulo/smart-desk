@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useSnackbar } from 'notistack';
-
-import { useConnectivityStore } from '@/core/store/useConnectivityStore';
+import { useConnectivityStore } from 'src/core/store/useConnectivityStore';
 
 // Public shape kept small for UI
 export type UseSyncTriggerResult = {

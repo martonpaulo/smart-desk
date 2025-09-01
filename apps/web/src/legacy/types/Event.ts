@@ -1,4 +1,4 @@
-import { ICalendar } from '@/legacy/types/ICalendar';
+import { ICalendar } from 'src/legacy/types/ICalendar';
 
 export interface Event {
   id: string;

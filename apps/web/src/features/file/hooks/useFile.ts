@@ -1,7 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
-import { FileListResponse, fileService } from '@/features/file/services/fileService';
-import { File } from '@/features/file/types/File';
+import { FileListResponse, fileService } from 'src/features/file/services/fileService';
+import { File } from 'src/features/file/types/File';
 
 export function useFiles(resourceType: File['resourceType']) {
   return useInfiniteQuery<

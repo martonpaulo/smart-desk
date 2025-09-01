@@ -1,4 +1,4 @@
-import { InterfaceSound } from '@/features/sound/types/InterfaceSound';
+import { InterfaceSound } from 'src/features/sound/types/InterfaceSound';
 
 export interface PromiseFeedback<T> {
   key: string;

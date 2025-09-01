@@ -5,8 +5,7 @@ import { ReactNode } from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { CssBaseline } from '@mui/material';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
-
-import { theme } from '@/theme';
+import { theme } from 'src/theme';
 
 interface AppThemeProviderProps {
   children: ReactNode;

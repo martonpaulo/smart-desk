@@ -1,11 +1,10 @@
 import { useCallback } from 'react';
 
 import { Undo as UndoIcon } from '@mui/icons-material';
-
-import { TaskActionButton } from '@/features/task/components/TaskActionButton';
-import { useDefaultColumns } from '@/legacy/hooks/useDefaultColumns';
-import { useBoardStore } from '@/legacy/store/board/store';
-import { Task } from '@/legacy/types/task';
+import { TaskActionButton } from 'src/features/task/components/TaskActionButton';
+import { useDefaultColumns } from 'src/legacy/hooks/useDefaultColumns';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import { Task } from 'src/legacy/types/task';
 
 interface ResetButtonProps {
   task: Task;

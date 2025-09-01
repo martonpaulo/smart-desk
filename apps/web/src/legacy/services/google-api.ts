@@ -1,11 +1,10 @@
 import axios, { type AxiosError } from 'axios';
-
 import type {
   GoogleCalendar,
   GoogleCalendarEvent,
   GoogleCalendarListResponse,
   GoogleEventsResponse,
-} from '@/legacy/services/api';
+} from 'src/legacy/services/api';
 
 export class GoogleCalendarError extends Error {
   constructor(

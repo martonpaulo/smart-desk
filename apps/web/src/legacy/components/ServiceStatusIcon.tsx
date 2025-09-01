@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 import CheckIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import HelpIcon from '@mui/icons-material/HelpOutline';
-import { useSession } from 'next-auth/react';
-
-import { getSupabaseClient } from '@/legacy/lib/supabaseClient';
+import { getSupabaseClient } from 'src/legacy/lib/supabaseClient';
 
 type Status = 'ok' | 'error' | 'pending';
 type Service = 'google' | 'supabase';

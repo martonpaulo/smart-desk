@@ -1,7 +1,7 @@
 'use client';
 
-import { TaskModal } from '@/legacy/components/task/TaskModal';
-import type { Task } from '@/legacy/types/task';
+import { TaskModal } from 'src/legacy/components/task/TaskModal';
+import type { Task } from 'src/legacy/types/task';
 
 type EventConversionModalProps = {
   open: boolean;

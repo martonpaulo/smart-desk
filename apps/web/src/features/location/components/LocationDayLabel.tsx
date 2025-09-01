@@ -8,8 +8,7 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Avatar, AvatarGroup, Chip, Tooltip, useTheme } from '@mui/material';
-
-import { Location, LocationType } from '@/features/location/types/Location';
+import { Location, LocationType } from 'src/features/location/types/Location';
 
 type LocationDayLabelProps = {
   locations: Location[];

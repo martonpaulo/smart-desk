@@ -6,12 +6,11 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { Button, CircularProgress, Drawer, Stack, TextField, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import type { FeatureCollection } from 'geojson';
-
-import { PageSection } from '@/core/components/PageSection';
-import { useFile } from '@/features/file/hooks/useFile';
-import { useMapsStore } from '@/features/map/store/useMapsStore';
-import type { MapRecord } from '@/features/map/types/MapRecord';
-import { ColorPicker } from '@/shared/components/ColorPicker';
+import { PageSection } from 'src/core/components/PageSection';
+import { useFile } from 'src/features/file/hooks/useFile';
+import { useMapsStore } from 'src/features/map/store/useMapsStore';
+import type { MapRecord } from 'src/features/map/types/MapRecord';
+import { ColorPicker } from 'src/shared/components/ColorPicker';
 
 interface RegionPath {
   id: string;

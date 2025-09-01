@@ -1,19 +1,18 @@
-import type { StoreApi } from 'zustand';
-
-import { getSupabaseClient } from '@/legacy/lib/supabaseClient';
+import { getSupabaseClient } from 'src/legacy/lib/supabaseClient';
 import {
   deleteIcsCalendar,
   fetchIcsCalendars,
   upsertIcsCalendar,
-} from '@/legacy/services/supabase/icsCalendarsService';
+} from 'src/legacy/services/supabase/icsCalendarsService';
 import {
   AddIcsCalendarData,
   DeleteIcsCalendarData,
   SettingsState,
   UpdateIcsCalendarData,
-} from '@/legacy/store/settings/types';
-import { IcsCalendar } from '@/legacy/types/icsCalendar';
-import { mergeById } from '@/legacy/utils/boardHelpers';
+} from 'src/legacy/store/settings/types';
+import { IcsCalendar } from 'src/legacy/types/icsCalendar';
+import { mergeById } from 'src/legacy/utils/boardHelpers';
+import type { StoreApi } from 'zustand';
 
 type Set = StoreApi<SettingsState>['setState'];
 type Get = StoreApi<SettingsState>['getState'];

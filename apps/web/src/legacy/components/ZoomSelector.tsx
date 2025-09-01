@@ -1,5 +1,5 @@
-import { QuantitySelector } from '@/legacy/components/QuantitySelector';
-import { useUiPrefsStore } from '@/legacy/store/uiPrefsStore';
+import { QuantitySelector } from 'src/legacy/components/QuantitySelector';
+import { useUiPrefsStore } from 'src/legacy/store/uiPrefsStore';
 
 export function ZoomSelector() {
   const zoom = useUiPrefsStore(state => state.zoom);

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 
-import { Tag } from '@/features/tag/types/Tag';
-import { customColors } from '@/legacy/styles/colors';
-import { ColorPicker } from '@/shared/components/ColorPicker';
-import { CustomDialog } from '@/shared/components/CustomDialog';
+import { Tag } from 'src/features/tag/types/Tag';
+import { customColors } from 'src/legacy/styles/colors';
+import { ColorPicker } from 'src/shared/components/ColorPicker';
+import { CustomDialog } from 'src/shared/components/CustomDialog';
 
 interface TagModalProps {
   open: boolean;

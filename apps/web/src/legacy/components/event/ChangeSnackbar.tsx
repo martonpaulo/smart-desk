@@ -3,13 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Typography } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
-
-import { useAlertSound } from '@/legacy/hooks/useAlertSound';
-import { useEventChanges } from '@/legacy/hooks/useEventChanges';
-import type { Event } from '@/legacy/types/Event';
-import { IAlertType } from '@/legacy/types/IAlertType';
-import { filterTodayEvents } from '@/legacy/utils/eventUtils';
-import { parseBold } from '@/legacy/utils/textUtils';
+import { useAlertSound } from 'src/legacy/hooks/useAlertSound';
+import { useEventChanges } from 'src/legacy/hooks/useEventChanges';
+import type { Event } from 'src/legacy/types/Event';
+import { IAlertType } from 'src/legacy/types/IAlertType';
+import { filterTodayEvents } from 'src/legacy/utils/eventUtils';
+import { parseBold } from 'src/legacy/utils/textUtils';
 
 interface ChangeSnackbarProps {
   events: Event[];

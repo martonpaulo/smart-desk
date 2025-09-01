@@ -3,12 +3,11 @@ import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { alpha, Box, Chip, IconButton, Stack, Typography } from '@mui/material';
-
-import { AddTaskInput } from '@/legacy/components/task/AddTaskInput';
-import { SyncedSyncIcon, SyncStatus } from '@/legacy/components/task/SyncedSyncIcon';
-import { TaskCard } from '@/legacy/components/task/TaskCard';
-import { Column } from '@/legacy/types/column';
-import { Task } from '@/legacy/types/task';
+import { AddTaskInput } from 'src/legacy/components/task/AddTaskInput';
+import { SyncedSyncIcon, SyncStatus } from 'src/legacy/components/task/SyncedSyncIcon';
+import { TaskCard } from 'src/legacy/components/task/TaskCard';
+import { Column } from 'src/legacy/types/column';
+import { Task } from 'src/legacy/types/task';
 
 interface TodoColumnProps {
   column: Column;
@@ -192,12 +191,6 @@ export function TodoColumn({
       >
         <AddIcon fontSize="inherit" />
       </IconButton>
-
-      <style jsx>{`
-        .todo-column:hover .add-column-btn {
-          visibility: visible;
-        }
-      `}</style>
     </Box>
   );
 }

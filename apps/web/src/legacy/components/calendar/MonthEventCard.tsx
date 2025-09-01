@@ -2,9 +2,8 @@
 
 import { DescriptionOutlined as NotesIcon } from '@mui/icons-material';
 import { Box, Chip, Stack, Typography, useTheme } from '@mui/material';
-
-import { Event } from '@/legacy/types/Event';
-import { isPast, toLocalTimeString } from '@/legacy/utils/timeUtils';
+import { Event } from 'src/legacy/types/Event';
+import { isPast, toLocalTimeString } from 'src/legacy/utils/timeUtils';
 
 interface MonthEventCardProps {
   event: Event;

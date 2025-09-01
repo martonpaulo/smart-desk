@@ -1,4 +1,4 @@
-import { Base } from '@/core/types/Base';
+import { Base } from 'src/core/types/Base';
 
 export interface Tag extends Base {
   name: string;

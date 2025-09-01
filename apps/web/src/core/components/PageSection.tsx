@@ -1,8 +1,7 @@
 import { ReactNode } from 'react';
 
 import { Stack, StackProps, Typography } from '@mui/material';
-
-import { appMetadata } from '@/legacy/config/seo';
+import { appMetadata } from 'src/legacy/config/seo';
 
 export const metadata = appMetadata;
 

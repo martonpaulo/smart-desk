@@ -1,7 +1,6 @@
 import { LinearProgress, Stack, StackProps, Typography } from '@mui/material';
-
-import { useTasks } from '@/legacy/hooks/useTasks';
-import { resolveProgressState } from '@/shared/utils/progressUtils';
+import { useTasks } from 'src/legacy/hooks/useTasks';
+import { resolveProgressState } from 'src/shared/utils/progressUtils';
 
 export function ProgressBarIndicator(props: StackProps) {
   const tasks = useTasks({

@@ -18,8 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import { differenceInCalendarDays, format } from 'date-fns';
-
-import { Location, LocationType } from '@/features/location/types/Location';
+import { Location, LocationType } from 'src/features/location/types/Location';
 
 interface LocationCardProps {
   location: Location;

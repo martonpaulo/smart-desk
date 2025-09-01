@@ -1,4 +1,4 @@
-import { Base, RawBase } from '@/core/types/Base';
+import { Base, RawBase } from 'src/core/types/Base';
 
 // Convert "fooBar" → "foo_bar"
 type SnakeCase<S extends string> = S extends `${infer Head}${infer Tail}`

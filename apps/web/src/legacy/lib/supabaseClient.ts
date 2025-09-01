@@ -1,8 +1,7 @@
 'use client';
 
 import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
-
-import type { Database } from '@/types/supabase'; // <-- adjust or remove if you don't have this
+import type { Database } from 'src/types/supabase';
 
 // Prefer the exact return type from the helper to avoid generic mismatches
 export type TypedSupabaseClient = ReturnType<typeof createPagesBrowserClient<Database>>;

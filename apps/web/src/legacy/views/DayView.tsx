@@ -2,10 +2,9 @@
 
 import { Box, Paper, Typography, useTheme } from '@mui/material';
 import { endOfDay, isSameHour, startOfDay } from 'date-fns';
-
-import { CalendarViewProps } from '@/legacy/components/calendar/CalendarViewContainer';
-import { EventCard } from '@/legacy/components/calendar/EventCard';
-import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
+import { CalendarViewProps } from 'src/legacy/components/calendar/CalendarViewContainer';
+import { EventCard } from 'src/legacy/components/calendar/EventCard';
+import { useCombinedEvents } from 'src/legacy/hooks/useCombinedEvents';
 
 export function DayView({ currentDate }: CalendarViewProps) {
   const theme = useTheme();

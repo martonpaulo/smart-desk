@@ -1,8 +1,7 @@
 'use client';
 
 import { alpha, Chip, useTheme } from '@mui/material';
-
-import { Tag } from '@/features/tag/types/Tag';
+import { Tag } from 'src/features/tag/types/Tag';
 
 type TagLabelProps = {
   tag: Tag;

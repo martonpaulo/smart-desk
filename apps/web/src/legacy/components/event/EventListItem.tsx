@@ -8,15 +8,14 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-
-import { MinutesChip } from '@/legacy/components/MinutesChip';
-import { Event } from '@/legacy/types/Event';
+import { MinutesChip } from 'src/legacy/components/MinutesChip';
+import { Event } from 'src/legacy/types/Event';
 import {
   calculateMinutesUntilEvent,
   computeEventStatus,
   formatEventTimeRange,
-} from '@/legacy/utils/eventUtils';
-import { theme } from '@/theme';
+} from 'src/legacy/utils/eventUtils';
+import { theme } from 'src/theme';
 
 interface EventListItemProps {
   event: Event;

@@ -1,24 +1,23 @@
+// Safari PWA drag-drop fix
+import '@/legacy/lib/dragDropTouch';
+
 import { useState } from 'react';
 
 import { Button, Stack } from '@mui/material';
-
-import { ColumnModal } from '@/legacy/components/column/ColumnModal';
-import { TodoColumn } from '@/legacy/components/column/TodoColumn';
-import { AddTaskFloatButton } from '@/legacy/components/task/AddTaskFloatButton';
-import { SyncStatus } from '@/legacy/components/task/SyncedSyncIcon';
-import { TaskCard } from '@/legacy/components/task/TaskCard';
-import { TaskModal } from '@/legacy/components/task/TaskModal';
-import { useTasks } from '@/legacy/hooks/useTasks';
-import { useBoardStore } from '@/legacy/store/board/store';
-import { SyncStatus as SyncStatusFromStore, useSyncStatusStore } from '@/legacy/store/syncStatus';
-import { useTodoPrefsStore } from '@/legacy/store/todoPrefsStore';
-import { Column } from '@/legacy/types/column';
-import { Task } from '@/legacy/types/task';
-import { getNewColumnPosition } from '@/legacy/utils/boardHelpers';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
-
-// Safari PWA drag-drop fix
-import '@/legacy/lib/dragDropTouch';
+import { ColumnModal } from 'src/legacy/components/column/ColumnModal';
+import { TodoColumn } from 'src/legacy/components/column/TodoColumn';
+import { AddTaskFloatButton } from 'src/legacy/components/task/AddTaskFloatButton';
+import { SyncStatus } from 'src/legacy/components/task/SyncedSyncIcon';
+import { TaskCard } from 'src/legacy/components/task/TaskCard';
+import { TaskModal } from 'src/legacy/components/task/TaskModal';
+import { useTasks } from 'src/legacy/hooks/useTasks';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import { SyncStatus as SyncStatusFromStore, useSyncStatusStore } from 'src/legacy/store/syncStatus';
+import { useTodoPrefsStore } from 'src/legacy/store/todoPrefsStore';
+import { Column } from 'src/legacy/types/column';
+import { Task } from 'src/legacy/types/task';
+import { getNewColumnPosition } from 'src/legacy/utils/boardHelpers';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 interface TodoListProps {
   showDate?: boolean;

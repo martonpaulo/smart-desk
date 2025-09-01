@@ -1,16 +1,15 @@
 import { useEffect } from 'react';
-
-import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   EVENT_CACHE_KEYS,
   filterEventsByRange,
   mergeEventsById,
   pruneByRangeWithBuffer,
-} from '@/features/event/utils/eventCacheUtils';
-import { fetchGoogleEvents } from '@/legacy/services/googleEventsService';
-import type { Event } from '@/legacy/types/Event';
+} from 'src/features/event/utils/eventCacheUtils';
+import { fetchGoogleEvents } from 'src/legacy/services/googleEventsService';
+import type { Event } from 'src/legacy/types/Event';
 
 const FETCH_INTERVAL_MS = 60_000;
 const DERIVED_STALE_TIME_MS = 30_000;

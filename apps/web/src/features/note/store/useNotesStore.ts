@@ -1,6 +1,6 @@
-import { createSyncedEntityStore } from '@/core/store/createSyncedEntityStore';
-import type { Note } from '@/features/note/types/Note';
-import { customColors } from '@/legacy/styles/colors';
+import { createSyncedEntityStore } from 'src/core/store/createSyncedEntityStore';
+import type { Note } from 'src/features/note/types/Note';
+import { customColors } from 'src/legacy/styles/colors';
 
 export const useNotesStore = createSyncedEntityStore<Note>({
   table: 'notes',

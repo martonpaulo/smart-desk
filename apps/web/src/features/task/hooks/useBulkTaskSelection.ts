@@ -1,9 +1,8 @@
 import { useSnackbar } from 'notistack';
-
-import { BulkTaskActions } from '@/features/task/hooks/useBulkTaskEdit';
-import { useTaskSelection } from '@/legacy/hooks/useTaskSelection';
-import { useBoardStore } from '@/legacy/store/board/store';
-import type { Task } from '@/legacy/types/task';
+import { BulkTaskActions } from 'src/features/task/hooks/useBulkTaskEdit';
+import { useTaskSelection } from 'src/legacy/hooks/useTaskSelection';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import type { Task } from 'src/legacy/types/task';
 
 /**
  * Encapsulates selection state and batch‑update handler

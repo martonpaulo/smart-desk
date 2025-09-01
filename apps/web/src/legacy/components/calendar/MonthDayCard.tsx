@@ -1,13 +1,12 @@
 import { Paper, Stack, Typography, useTheme } from '@mui/material';
 import { endOfDay, isSameMonth, isToday, startOfDay } from 'date-fns';
-
-import { CalendarView } from '@/features/calendar/types/CalendarView';
-import { LocationDayLabel } from '@/features/location/components/LocationDayLabel';
-import { useLocationsByDate } from '@/features/location/hooks/useLocationsByDate';
-import { MonthEventCard } from '@/legacy/components/calendar/MonthEventCard';
-import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
-import { isWeekday } from '@/legacy/utils/timeUtils';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { CalendarView } from 'src/features/calendar/types/CalendarView';
+import { LocationDayLabel } from 'src/features/location/components/LocationDayLabel';
+import { useLocationsByDate } from 'src/features/location/hooks/useLocationsByDate';
+import { MonthEventCard } from 'src/legacy/components/calendar/MonthEventCard';
+import { useCombinedEvents } from 'src/legacy/hooks/useCombinedEvents';
+import { isWeekday } from 'src/legacy/utils/timeUtils';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 interface MonthDayCardProps {
   currentDate: Date;

@@ -4,25 +4,24 @@ import { useMemo, useState } from 'react';
 
 import { Paper, Stack, Typography, useTheme } from '@mui/material';
 import { isToday } from 'date-fns';
-
-import { PageSection } from '@/core/components/PageSection';
-import { InboxSection } from '@/features/eisenhower/components/InboxSection';
-import { PendingDropModal } from '@/features/eisenhower/components/PendingDropModal';
-import { PlannerControls } from '@/features/eisenhower/components/PlannerControl';
-import { QuadrantGrid } from '@/features/eisenhower/components/QuadrantGrid';
-import { eisenhowerQuadrants } from '@/features/eisenhower/config/eisenhowerQuadrants';
-import { useDragState } from '@/features/eisenhower/hooks/useDragState';
-import { EventConversionModal } from '@/features/event/components/EventConversionModal';
-import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
-import { useBulkTaskSelection } from '@/features/task/hooks/useBulkTaskSelection';
-import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
-import { useTasks } from '@/legacy/hooks/useTasks';
-import { useBoardStore } from '@/legacy/store/board/store';
-import type { Event } from '@/legacy/types/Event';
-import type { Task } from '@/legacy/types/task';
-import { CountChip } from '@/shared/components/CountChip';
-import { ProgressBarIndicator } from '@/shared/components/ProgressBarIndicator';
-import { TimeLoadIndicator } from '@/shared/components/TimeLoadIndicator';
+import { PageSection } from 'src/core/components/PageSection';
+import { InboxSection } from 'src/features/eisenhower/components/InboxSection';
+import { PendingDropModal } from 'src/features/eisenhower/components/PendingDropModal';
+import { PlannerControls } from 'src/features/eisenhower/components/PlannerControl';
+import { QuadrantGrid } from 'src/features/eisenhower/components/QuadrantGrid';
+import { eisenhowerQuadrants } from 'src/features/eisenhower/config/eisenhowerQuadrants';
+import { useDragState } from 'src/features/eisenhower/hooks/useDragState';
+import { EventConversionModal } from 'src/features/event/components/EventConversionModal';
+import { playInterfaceSound } from 'src/features/sound/utils/soundPlayer';
+import { useBulkTaskSelection } from 'src/features/task/hooks/useBulkTaskSelection';
+import { useCombinedEvents } from 'src/legacy/hooks/useCombinedEvents';
+import { useTasks } from 'src/legacy/hooks/useTasks';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import type { Event } from 'src/legacy/types/Event';
+import type { Task } from 'src/legacy/types/task';
+import { CountChip } from 'src/shared/components/CountChip';
+import { ProgressBarIndicator } from 'src/shared/components/ProgressBarIndicator';
+import { TimeLoadIndicator } from 'src/shared/components/TimeLoadIndicator';
 
 type PendingDrop = {
   taskId: string;

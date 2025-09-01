@@ -4,9 +4,8 @@ import { useState } from 'react';
 
 import { ChevronLeft, ChevronRight, MoreVert } from '@mui/icons-material';
 import { Box, Button, ButtonGroup, IconButton, Menu, MenuItem, Typography } from '@mui/material';
-
-import { CalendarView } from '@/features/calendar/types/CalendarView';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { CalendarView } from 'src/features/calendar/types/CalendarView';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 interface CalendarNavigationProps {
   currentDate: Date;

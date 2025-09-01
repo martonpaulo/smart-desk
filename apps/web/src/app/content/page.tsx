@@ -1,6 +1,7 @@
 'use client';
 
 import { ComponentType } from 'react';
+import Link from 'next/link';
 
 import CollectionsIcon from '@mui/icons-material/Collections';
 import EventIcon from '@mui/icons-material/Event';
@@ -15,9 +16,7 @@ import {
   SvgIconProps,
   Typography,
 } from '@mui/material';
-import Link from 'next/link';
-
-import { PageSection } from '@/core/components/PageSection';
+import { PageSection } from 'src/core/components/PageSection';
 
 type ManageItem = {
   title: string;

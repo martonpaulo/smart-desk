@@ -14,14 +14,13 @@ import {
   ToggleButtonGroup,
   useTheme,
 } from '@mui/material';
-
-import { TagLabel } from '@/features/tag/components/TagLabel';
-import { useTagsStore } from '@/features/tag/store/useTagsStore';
-import type { BulkTaskActions } from '@/features/task/hooks/useBulkTaskEdit';
-import { useBulkTaskEdit } from '@/features/task/hooks/useBulkTaskEdit';
-import { QuantitySelector } from '@/legacy/components/QuantitySelector';
-import { formatDuration, parseDuration } from '@/legacy/utils/timeUtils';
-import { DateInput } from '@/shared/components/DateInput';
+import { TagLabel } from 'src/features/tag/components/TagLabel';
+import { useTagsStore } from 'src/features/tag/store/useTagsStore';
+import type { BulkTaskActions } from 'src/features/task/hooks/useBulkTaskEdit';
+import { useBulkTaskEdit } from 'src/features/task/hooks/useBulkTaskEdit';
+import { QuantitySelector } from 'src/legacy/components/QuantitySelector';
+import { formatDuration, parseDuration } from 'src/legacy/utils/timeUtils';
+import { DateInput } from 'src/shared/components/DateInput';
 
 export interface TaskSelectionToolbarProps {
   totalCount: number;

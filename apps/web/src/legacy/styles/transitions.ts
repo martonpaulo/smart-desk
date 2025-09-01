@@ -1,6 +1,5 @@
 import { CSSObject } from '@emotion/react';
-
-import { theme } from '@/theme';
+import { theme } from 'src/theme';
 
 const scaleValues = {
   small: 1.03,

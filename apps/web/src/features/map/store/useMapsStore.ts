@@ -1,5 +1,5 @@
-import { createSyncedEntityStore } from '@/core/store/createSyncedEntityStore';
-import { MapRecord } from '@/features/map/types/MapRecord';
+import { createSyncedEntityStore } from 'src/core/store/createSyncedEntityStore';
+import { MapRecord } from 'src/features/map/types/MapRecord';
 
 export const useMapsStore = createSyncedEntityStore<MapRecord>({
   table: 'maps',

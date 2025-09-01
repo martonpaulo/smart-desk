@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import {
@@ -15,9 +16,7 @@ import {
   SwipeableDrawer,
   Typography,
 } from '@mui/material';
-import { usePathname, useRouter } from 'next/navigation';
-
-import { navItems } from '@/legacy/navigation/navItems';
+import { navItems } from 'src/legacy/navigation/navItems';
 
 export function BottomNav() {
   const pathname = usePathname();

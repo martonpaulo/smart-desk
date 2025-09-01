@@ -1,6 +1,6 @@
-import type { Event } from '@/legacy/types/Event';
-import { ITimelineEvent } from '@/legacy/types/ITimelineEvent';
-import { computeEventStatus } from '@/legacy/utils/eventUtils';
+import type { Event } from 'src/legacy/types/Event';
+import { ITimelineEvent } from 'src/legacy/types/ITimelineEvent';
+import { computeEventStatus } from 'src/legacy/utils/eventUtils';
 interface Bounds {
   startPercent: number;
   widthPercent: number;

@@ -6,8 +6,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-
-import { parseSafeHtml } from '@/legacy/utils/textUtils';
+import { parseSafeHtml } from 'src/legacy/utils/textUtils';
 
 interface ConfirmDialogProps {
   open: boolean;

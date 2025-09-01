@@ -1,4 +1,4 @@
-import { IcsCalendar } from '@/legacy/types/icsCalendar';
+import { IcsCalendar } from 'src/legacy/types/icsCalendar';
 
 export interface SettingsState {
   icsCalendars: IcsCalendar[];

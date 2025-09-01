@@ -2,9 +2,9 @@
 
 import { createContext, ReactNode, useContext, useMemo } from 'react';
 
-import { useLoadingRegistry } from '@/shared/hooks/useLoadingRegistry';
-import { useRunWithFeedback } from '@/shared/hooks/useRunWithFeedback';
-import { PromiseFeedback } from '@/shared/types/PromiseFeedback';
+import { useLoadingRegistry } from 'src/shared/hooks/useLoadingRegistry';
+import { useRunWithFeedback } from 'src/shared/hooks/useRunWithFeedback';
+import { PromiseFeedback } from 'src/shared/types/PromiseFeedback';
 
 export interface PromiseFeedbackContextValue {
   isLoading: (key: string) => boolean;

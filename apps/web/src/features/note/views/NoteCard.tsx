@@ -5,8 +5,7 @@ import { useMemo } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import { Button, Paper, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-
-import type { Note } from '@/features/note/types/Note';
+import type { Note } from 'src/features/note/types/Note';
 
 /**
  * Compact card with color accent, title, preview, and quick edit.

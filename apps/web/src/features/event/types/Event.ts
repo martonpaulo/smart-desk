@@ -1,4 +1,4 @@
-import { Base } from '@/core/types/Base';
+import { Base } from 'src/core/types/Base';
 
 export interface Event extends Base {
   startTime: Date;

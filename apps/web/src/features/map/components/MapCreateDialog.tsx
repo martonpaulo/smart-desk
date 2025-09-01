@@ -13,12 +13,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-
-import { FileUploadArea } from '@/features/file/components/FileUploadArea';
-import { useSaveFile, useUploadFile } from '@/features/file/hooks/useFile';
-import type { File as AppFile } from '@/features/file/types/File';
-import { useMapsStore } from '@/features/map/store/useMapsStore';
-import type { MapRecord } from '@/features/map/types/MapRecord';
+import { FileUploadArea } from 'src/features/file/components/FileUploadArea';
+import { useSaveFile, useUploadFile } from 'src/features/file/hooks/useFile';
+import type { File as AppFile } from 'src/features/file/types/File';
+import { useMapsStore } from 'src/features/map/store/useMapsStore';
+import type { MapRecord } from 'src/features/map/types/MapRecord';
 
 interface MapCreateDialogProps {
   open: boolean;

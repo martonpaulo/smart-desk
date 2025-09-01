@@ -1,27 +1,26 @@
 import { endOfToday, isBefore } from 'date-fns';
-import type { StoreApi } from 'zustand';
-
-import { defaultColumns } from '@/features/column/config/defaultColumns';
-import { getSupabaseClient } from '@/legacy/lib/supabaseClient';
-import { fetchColumns, upsertColumn } from '@/legacy/services/supabase/columnsService';
-import { fetchTasks, upsertTask } from '@/legacy/services/supabase/tasksService';
+import { defaultColumns } from 'src/features/column/config/defaultColumns';
+import { getSupabaseClient } from 'src/legacy/lib/supabaseClient';
+import { fetchColumns, upsertColumn } from 'src/legacy/services/supabase/columnsService';
+import { fetchTasks, upsertTask } from 'src/legacy/services/supabase/tasksService';
 import {
   AddColumnData,
   AddTaskData,
   BoardState,
   UpdateColumnData,
   UpdateTaskData,
-} from '@/legacy/store/board/types';
-import { Column } from '@/legacy/types/column';
-import { Task } from '@/legacy/types/task';
+} from 'src/legacy/store/board/types';
+import { Column } from 'src/legacy/types/column';
+import { Task } from 'src/legacy/types/task';
 import {
   getLastTaskPositionInColumn,
   getNewColumnPosition,
   mergeById,
-} from '@/legacy/utils/boardHelpers';
-import { RESET_TIME } from '@/legacy/utils/resetTime';
-import { isTaskEmpty } from '@/legacy/utils/taskUtils';
-import { theme } from '@/theme';
+} from 'src/legacy/utils/boardHelpers';
+import { RESET_TIME } from 'src/legacy/utils/resetTime';
+import { isTaskEmpty } from 'src/legacy/utils/taskUtils';
+import { theme } from 'src/theme';
+import type { StoreApi } from 'zustand';
 
 type Set = StoreApi<BoardState>['setState'];
 type Get = StoreApi<BoardState>['getState'];

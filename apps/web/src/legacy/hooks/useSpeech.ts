@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { ISpeechStatus } from '@/legacy/types/ISpeechStatus';
+import { ISpeechStatus } from 'src/legacy/types/ISpeechStatus';
 
 export function useSpeech(text: string) {
   const [speechStatus, setSpeechStatus] = useState(ISpeechStatus.IDLE);

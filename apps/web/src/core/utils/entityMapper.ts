@@ -1,4 +1,4 @@
-import { Base, RawBase } from '@/core/types/Base';
+import { Base, RawBase } from 'src/core/types/Base';
 
 // maps id/user_id/trashed/created_at/updated_at
 export function baseMapToDB<T extends Base>(entity: T, userId: string): RawBase {

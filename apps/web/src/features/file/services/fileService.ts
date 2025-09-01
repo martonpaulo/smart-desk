@@ -1,7 +1,6 @@
 import axios from 'axios';
-
-import { useFilesStore } from '@/features/file/store/useFilesStore';
-import type { File } from '@/features/file/types/File';
+import { useFilesStore } from 'src/features/file/store/useFilesStore';
+import type { File } from 'src/features/file/types/File';
 
 export interface FileListResponse {
   files: File[];

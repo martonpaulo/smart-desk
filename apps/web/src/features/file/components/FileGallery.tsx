@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -10,9 +12,7 @@ import Pagination from '@mui/material/Pagination';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Image from 'next/image';
-
-import type { File } from '@/features/file/types/File';
+import type { File } from 'src/features/file/types/File';
 
 interface FileGalleryProps {
   files: File[];

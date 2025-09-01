@@ -1,10 +1,9 @@
 import { Stack, Tooltip, Typography } from '@mui/material';
-
-import { useTasks } from '@/legacy/hooks/useTasks';
-import { parseSafeHtml } from '@/legacy/utils/textUtils';
-import { CircleBox } from '@/shared/components/CircleBox';
-import { resolveTimeLoadState } from '@/shared/utils/timeLoadUtils';
-import { formatFullDuration } from '@/shared/utils/timeUtils';
+import { useTasks } from 'src/legacy/hooks/useTasks';
+import { parseSafeHtml } from 'src/legacy/utils/textUtils';
+import { CircleBox } from 'src/shared/components/CircleBox';
+import { resolveTimeLoadState } from 'src/shared/utils/timeLoadUtils';
+import { formatFullDuration } from 'src/shared/utils/timeUtils';
 
 export function TimeLoadIndicator() {
   const allTasks = useTasks({

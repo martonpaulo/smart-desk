@@ -12,15 +12,14 @@ import {
   Typography,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
-
-import { EventModal } from '@/features/event/components/EventModal';
-import { Event as LocalEvent } from '@/features/event/types/Event';
-import { EventListItem } from '@/legacy/components/event/EventListItem';
-import { useCombinedEvents } from '@/legacy/hooks/useCombinedEvents';
-import { mapFromLegacyEvent } from '@/legacy/utils/eventLegacyMapper';
-import { useCurrentTime } from '@/shared/hooks/useCurrentTime';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
-import { theme } from '@/theme';
+import { EventModal } from 'src/features/event/components/EventModal';
+import { Event as LocalEvent } from 'src/features/event/types/Event';
+import { EventListItem } from 'src/legacy/components/event/EventListItem';
+import { useCombinedEvents } from 'src/legacy/hooks/useCombinedEvents';
+import { mapFromLegacyEvent } from 'src/legacy/utils/eventLegacyMapper';
+import { useCurrentTime } from 'src/shared/hooks/useCurrentTime';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
+import { theme } from 'src/theme';
 
 export function EventList() {
   const isMobile = useResponsiveness();

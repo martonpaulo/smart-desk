@@ -1,19 +1,18 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import AddIcon from '@mui/icons-material/Add';
 import { Fab, Pagination, Stack, Typography } from '@mui/material';
-import { useRouter, useSearchParams } from 'next/navigation';
-
-import { PageSection } from '@/core/components/PageSection';
-import { NoteModal } from '@/features/note/components/NoteModal';
-import { useNotesStore } from '@/features/note/store/useNotesStore';
-import type { Note } from '@/features/note/types/Note';
-import { NoteCard } from '@/features/note/views/NoteCard';
-import { NotesGrid } from '@/features/note/views/NotesGrid';
-import { NotesToolbar } from '@/features/note/views/NotesToolbar';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { PageSection } from 'src/core/components/PageSection';
+import { NoteModal } from 'src/features/note/components/NoteModal';
+import { useNotesStore } from 'src/features/note/store/useNotesStore';
+import type { Note } from 'src/features/note/types/Note';
+import { NoteCard } from 'src/features/note/views/NoteCard';
+import { NotesGrid } from 'src/features/note/views/NotesGrid';
+import { NotesToolbar } from 'src/features/note/views/NotesToolbar';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 export function NotesView() {
   const router = useRouter();

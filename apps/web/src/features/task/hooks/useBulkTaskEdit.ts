@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { TaskSelectAction } from '@/features/task/types/TaskSelectAction';
+import type { TaskSelectAction } from 'src/features/task/types/TaskSelectAction';
 
 export interface BulkTaskActions {
   important: TaskSelectAction;

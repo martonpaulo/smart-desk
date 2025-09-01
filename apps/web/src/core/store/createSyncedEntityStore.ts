@@ -1,7 +1,7 @@
-import { createSupabaseEntityAdapter } from '@/core/services/createSupabaseEntityAdapter';
-import { createZustandEntityStore } from '@/core/store/zustandEntityStoreFactory';
-import type { Base } from '@/core/types/Base';
-import { isOnline } from '@/core/utils/syncHelpers';
+import { createSupabaseEntityAdapter } from 'src/core/services/createSupabaseEntityAdapter';
+import { createZustandEntityStore } from 'src/core/store/zustandEntityStoreFactory';
+import type { Base } from 'src/core/types/Base';
+import { isOnline } from 'src/core/utils/syncHelpers';
 
 interface SyncedEntityStoreConfig<E extends Base> {
   table: string;

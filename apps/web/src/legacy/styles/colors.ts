@@ -19,8 +19,7 @@ import {
   teal,
   yellow,
 } from '@mui/material/colors';
-
-import { ColorMap } from '@/shared/types/Color';
+import { ColorMap } from 'src/shared/types/Color';
 
 export const customColors: ColorMap = {
   blue: { label: 'Blue', value: blue[500] },

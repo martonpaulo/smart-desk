@@ -1,11 +1,10 @@
 import { useCallback, useMemo } from 'react';
 
 import { endOfDay, isAfter, isBefore, isSameDay, isToday, startOfDay } from 'date-fns';
-
-import { TaskFilters } from '@/features/task/types/TaskFilters';
-import { useBoardStore } from '@/legacy/store/board/store';
-import type { Task } from '@/legacy/types/task';
-import { sortActive } from '@/legacy/utils/taskUtils';
+import { TaskFilters } from 'src/features/task/types/TaskFilters';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import type { Task } from 'src/legacy/types/task';
+import { sortActive } from 'src/legacy/utils/taskUtils';
 
 function matchesPlannedWindow(
   task: Task,

@@ -1,5 +1,5 @@
-import type { ApiResponse } from '@/legacy/services/api';
-import type { Event } from '@/legacy/types/Event';
+import type { ApiResponse } from 'src/legacy/services/api';
+import type { Event } from 'src/legacy/types/Event';
 
 // fetch events from Google calendar endpoint
 export async function fetchGoogleEvents(start?: Date, end?: Date): Promise<Event[]> {

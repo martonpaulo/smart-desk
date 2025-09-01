@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { defaultColumns } from '@/features/column/config/defaultColumns';
-import { useDefaultColumns } from '@/legacy/hooks/useDefaultColumns';
-import { Column } from '@/legacy/types/column';
+import { defaultColumns } from 'src/features/column/config/defaultColumns';
+import { useDefaultColumns } from 'src/legacy/hooks/useDefaultColumns';
+import { Column } from 'src/legacy/types/column';
 
 type ColumnKey = keyof typeof defaultColumns;
 

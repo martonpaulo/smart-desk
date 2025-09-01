@@ -1,6 +1,6 @@
-import type { GoogleCalendar, GoogleCalendarEvent } from '@/legacy/services/api';
-import type { Event } from '@/legacy/types/Event';
-import type { ICalendar } from '@/legacy/types/ICalendar';
+import type { GoogleCalendar, GoogleCalendarEvent } from 'src/legacy/services/api';
+import type { Event } from 'src/legacy/types/Event';
+import type { ICalendar } from 'src/legacy/types/ICalendar';
 
 export function mapGoogleEventToEvent(
   event: GoogleCalendarEvent & { calendarId?: string },

@@ -4,8 +4,7 @@ import CloudOffIcon from '@mui/icons-material/CloudOff';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import SyncIcon from '@mui/icons-material/Sync';
 import { SvgIconProps } from '@mui/material';
-
-import { useAnimationDelay } from '@/legacy/hooks/useAnimationDelay';
+import { useAnimationDelay } from 'src/legacy/hooks/useAnimationDelay';
 
 export type SyncStatus = 'syncing' | 'disconnected' | 'error';
 

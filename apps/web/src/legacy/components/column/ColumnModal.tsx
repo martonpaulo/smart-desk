@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 
-import { customColors } from '@/legacy/styles/colors';
-import { Column } from '@/legacy/types/column';
-import { ColorPicker } from '@/shared/components/ColorPicker';
-import { CustomDialog } from '@/shared/components/CustomDialog';
+import { customColors } from 'src/legacy/styles/colors';
+import { Column } from 'src/legacy/types/column';
+import { ColorPicker } from 'src/shared/components/ColorPicker';
+import { CustomDialog } from 'src/shared/components/CustomDialog';
 
 interface ColumnModalProps {
   open: boolean;

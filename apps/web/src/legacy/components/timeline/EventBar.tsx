@@ -1,6 +1,5 @@
 import { Box, useTheme } from '@mui/material';
-
-import { ITimelineEvent } from '@/legacy/types/ITimelineEvent';
+import { ITimelineEvent } from 'src/legacy/types/ITimelineEvent';
 
 interface EventBarProps {
   event: ITimelineEvent;

@@ -1,5 +1,5 @@
-import { createSyncedEntityStore } from '@/core/store/createSyncedEntityStore';
-import { Event } from '@/features/event/types/Event';
+import { createSyncedEntityStore } from 'src/core/store/createSyncedEntityStore';
+import { Event } from 'src/features/event/types/Event';
 
 export const useLocalEventsStore = createSyncedEntityStore<Event>({
   table: 'events',

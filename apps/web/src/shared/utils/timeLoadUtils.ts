@@ -1,4 +1,4 @@
-import { timeLoadState } from '@/shared/constants/timeLoadState';
+import { timeLoadState } from 'src/shared/constants/timeLoadState';
 
 export function resolveTimeLoadState(totalMinutes: number) {
   const ranges = Object.values(timeLoadState);

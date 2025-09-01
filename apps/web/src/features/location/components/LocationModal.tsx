@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react';
 
 import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import { addDays, isEqual as isEqualDate } from 'date-fns';
-
-import { useLocationsStore } from '@/features/location/store/useLocationsStore';
-import { Location, LocationType } from '@/features/location/types/Location';
-import { CustomDialog } from '@/shared/components/CustomDialog';
-import { DateInput } from '@/shared/components/DateInput';
+import { useLocationsStore } from 'src/features/location/store/useLocationsStore';
+import { Location, LocationType } from 'src/features/location/types/Location';
+import { CustomDialog } from 'src/shared/components/CustomDialog';
+import { DateInput } from 'src/shared/components/DateInput';
 
 function toDate(v?: Date | string | number | null): Date | undefined {
   if (!v) return undefined;

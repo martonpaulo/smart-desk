@@ -2,10 +2,9 @@ import { useCallback } from 'react';
 
 import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
 import { addDays, isBefore, startOfDay } from 'date-fns';
-
-import { TaskActionButton } from '@/features/task/components/TaskActionButton';
-import { useBoardStore } from '@/legacy/store/board/store';
-import { Task } from '@/legacy/types/task';
+import { TaskActionButton } from 'src/features/task/components/TaskActionButton';
+import { useBoardStore } from 'src/legacy/store/board/store';
+import { Task } from 'src/legacy/types/task';
 
 interface SendToInboxButtonProps {
   task: Task;

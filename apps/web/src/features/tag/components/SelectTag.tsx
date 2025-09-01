@@ -1,7 +1,6 @@
 import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
-
-import { useTagsStore } from '@/features/tag/store/useTagsStore';
-import { Tag } from '@/features/tag/types/Tag';
+import { useTagsStore } from 'src/features/tag/store/useTagsStore';
+import { Tag } from 'src/features/tag/types/Tag';
 
 type SelectTagProps = {
   tagId?: string;

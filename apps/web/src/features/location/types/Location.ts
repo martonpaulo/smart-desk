@@ -1,4 +1,4 @@
-import { Base } from '@/core/types/Base';
+import { Base } from 'src/core/types/Base';
 
 export type LocationType = 'city' | 'flight' | 'bus' | 'stay' | 'hidden';
 

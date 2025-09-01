@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { useNotesStore } from '@/features/note/store/useNotesStore';
-import { Note } from '@/features/note/types/Note';
-import { ColorPicker } from '@/shared/components/ColorPicker';
-import { CustomDialog } from '@/shared/components/CustomDialog';
-import { MarkdownEditableBox } from '@/shared/components/MarkdownEditableBox';
+import { useNotesStore } from 'src/features/note/store/useNotesStore';
+import { Note } from 'src/features/note/types/Note';
+import { ColorPicker } from 'src/shared/components/ColorPicker';
+import { CustomDialog } from 'src/shared/components/CustomDialog';
+import { MarkdownEditableBox } from 'src/shared/components/MarkdownEditableBox';
 
 interface NoteModalProps {
   open: boolean;

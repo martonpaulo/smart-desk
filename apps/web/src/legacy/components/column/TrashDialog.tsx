@@ -8,9 +8,8 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
-
-import { Column } from '@/legacy/types/column';
-import { Task } from '@/legacy/types/task';
+import { Column } from 'src/legacy/types/column';
+import { Task } from 'src/legacy/types/task';
 
 interface TrashDialogProps {
   open: boolean;

@@ -1,5 +1,5 @@
-import { createSyncedEntityStore } from '@/core/store/createSyncedEntityStore';
-import type { Location } from '@/features/location/types/Location';
+import { createSyncedEntityStore } from 'src/core/store/createSyncedEntityStore';
+import type { Location } from 'src/features/location/types/Location';
 
 export const useLocationsStore = createSyncedEntityStore<Location>({
   table: 'locations',

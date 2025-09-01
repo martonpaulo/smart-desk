@@ -1,4 +1,4 @@
-import { Base } from '@/core/types/Base';
+import { Base } from 'src/core/types/Base';
 
 export interface IcsCalendar extends Base {
   title: string;

@@ -1,9 +1,8 @@
+import { getSupabaseClient } from 'src/legacy/lib/supabaseClient';
+import { mergeById } from 'src/legacy/utils/boardHelpers';
+import { buildStorageKey } from 'src/legacy/utils/localStorageUtils';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-
-import { getSupabaseClient } from '@/legacy/lib/supabaseClient';
-import { mergeById } from '@/legacy/utils/boardHelpers';
-import { buildStorageKey } from '@/legacy/utils/localStorageUtils';
 
 export interface EntityState<E extends { id: string; updatedAt: Date; isSynced?: boolean }> {
   items: E[];

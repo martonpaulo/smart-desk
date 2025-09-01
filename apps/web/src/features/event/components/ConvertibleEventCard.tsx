@@ -4,11 +4,10 @@ import { DragEvent, useState } from 'react';
 
 import { DescriptionOutlined as NotesIcon } from '@mui/icons-material';
 import { Box, Stack, Tooltip, Typography, useTheme } from '@mui/material';
-
-import { TaskContainer } from '@/legacy/components/task/TaskContainer';
-import { customColors } from '@/legacy/styles/colors';
-import type { Event } from '@/legacy/types/Event';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { TaskContainer } from 'src/legacy/components/task/TaskContainer';
+import { customColors } from 'src/legacy/styles/colors';
+import type { Event } from 'src/legacy/types/Event';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 type ConvertibleEventCardProps = {
   event: Event;

@@ -5,13 +5,12 @@ import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Button, IconButton, Stack, Typography } from '@mui/material';
-
-import { PageSection } from '@/core/components/PageSection';
-import { TagLabel } from '@/features/tag/components/TagLabel';
-import { useTagsStore } from '@/features/tag/store/useTagsStore';
-import { Tag } from '@/features/tag/types/Tag';
-import { TagModal } from '@/legacy/components/TagModal';
-import { useBoardStore } from '@/legacy/store/board/store';
+import { PageSection } from 'src/core/components/PageSection';
+import { TagLabel } from 'src/features/tag/components/TagLabel';
+import { useTagsStore } from 'src/features/tag/store/useTagsStore';
+import { Tag } from 'src/features/tag/types/Tag';
+import { TagModal } from 'src/legacy/components/TagModal';
+import { useBoardStore } from 'src/legacy/store/board/store';
 
 export function TagsManagerView() {
   const allTags = useTagsStore(s => s.items);

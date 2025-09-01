@@ -3,9 +3,8 @@
 import { DragEvent } from 'react';
 
 import { Stack } from '@mui/material';
-
-import { EisenhowerQuadrant } from '@/legacy/components/EisenhowerQuadrant';
-import type { Task } from '@/legacy/types/task';
+import { EisenhowerQuadrant } from 'src/legacy/components/EisenhowerQuadrant';
+import type { Task } from 'src/legacy/types/task';
 
 type QuadrantConfig = {
   title: string;

@@ -16,13 +16,12 @@ import {
   Typography,
 } from '@mui/material';
 import { DateTime } from 'luxon';
-
-import { PageSection } from '@/core/components/PageSection';
-import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
-import { ResetZoomButton } from '@/legacy/components/ResetZoomButton';
-import { ZoomSelector } from '@/legacy/components/ZoomSelector';
-import { useAudioStore } from '@/legacy/store/audioStore';
-import { RESET_TIME } from '@/legacy/utils/resetTime';
+import { PageSection } from 'src/core/components/PageSection';
+import { playInterfaceSound } from 'src/features/sound/utils/soundPlayer';
+import { ResetZoomButton } from 'src/legacy/components/ResetZoomButton';
+import { ZoomSelector } from 'src/legacy/components/ZoomSelector';
+import { useAudioStore } from 'src/legacy/store/audioStore';
+import { RESET_TIME } from 'src/legacy/utils/resetTime';
 
 export default function SettingsPage() {
   const [enabled, setEnabled] = useSoundEnabled();

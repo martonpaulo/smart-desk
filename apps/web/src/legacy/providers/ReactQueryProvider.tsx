@@ -5,9 +5,8 @@ import { ReactNode, useEffect, useState } from 'react';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { QueryClient } from '@tanstack/react-query';
 import { Persister, PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-
-import { buildStorageKey } from '@/legacy/utils/localStorageUtils';
-import { calculateRetryDelay, shouldRetry } from '@/legacy/utils/queryUtils';
+import { buildStorageKey } from 'src/legacy/utils/localStorageUtils';
+import { calculateRetryDelay, shouldRetry } from 'src/legacy/utils/queryUtils';
 
 const dataIsFreshForMs = 1000 * 60 * 1;
 const dataInMemoryExpiresInMs = 1000 * 60 * 5;

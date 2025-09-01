@@ -1,7 +1,8 @@
-import axios from 'axios';
 import type { Account, NextAuthOptions, Session } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import GoogleProvider from 'next-auth/providers/google';
+
+import axios from 'axios';
 
 const REQUIRED_SCOPES = [
   'openid',

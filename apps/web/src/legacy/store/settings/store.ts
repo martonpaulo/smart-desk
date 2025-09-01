@@ -1,15 +1,14 @@
-import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
-
 import {
   addIcsCalendarAction,
   syncFromServerAction,
   syncPendingAction,
   updateIcsCalendarAction,
-} from '@/legacy/store/settings/actions';
-import { deleteIcsCalendarAction } from '@/legacy/store/settings/actions';
-import { SettingsState } from '@/legacy/store/settings/types';
-import { buildStorageKey } from '@/legacy/utils/localStorageUtils';
+} from 'src/legacy/store/settings/actions';
+import { deleteIcsCalendarAction } from 'src/legacy/store/settings/actions';
+import { SettingsState } from 'src/legacy/store/settings/types';
+import { buildStorageKey } from 'src/legacy/utils/localStorageUtils';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 export const useSettingsStorage = create<SettingsState>()(
   persist(

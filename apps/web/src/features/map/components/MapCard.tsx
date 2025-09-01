@@ -1,9 +1,9 @@
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import { Card, CardActionArea, CardContent, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
 
-import type { File } from '@/features/file/types/File';
-import type { MapRecord } from '@/features/map/types/MapRecord';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import { Card, CardActionArea, CardContent, Stack, Typography } from '@mui/material';
+import type { File } from 'src/features/file/types/File';
+import type { MapRecord } from 'src/features/map/types/MapRecord';
 
 interface MapCardProps {
   map: MapRecord;
@@ -16,7 +16,6 @@ export function MapCard({ map, file }: MapCardProps) {
       return <video src={map.fileUrl} style={{ width: '100%' }} />;
     }
     if (file?.resourceType === 'image') {
-      // eslint-disable-next-line @next/next/no-img-element
       return <img src={map.fileUrl} alt={map.name} style={{ width: '100%' }} />;
     }
     return (

@@ -1,5 +1,5 @@
 import { createContext } from 'react';
 
-import { ILocation } from '@/legacy/types/ILocation';
+import { ILocation } from 'src/legacy/types/ILocation';
 
 export const LocationContext = createContext<ILocation | null>(null);

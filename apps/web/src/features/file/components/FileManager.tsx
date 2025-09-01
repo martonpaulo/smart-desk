@@ -4,11 +4,10 @@ import { useEffect, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-
-import { FileGallery } from '@/features/file/components/FileGallery';
-import { FileUploadArea } from '@/features/file/components/FileUploadArea';
-import { useFiles, useSaveFile, useUploadFile } from '@/features/file/hooks/useFile';
-import type { File as AppFile } from '@/features/file/types/File';
+import { FileGallery } from 'src/features/file/components/FileGallery';
+import { FileUploadArea } from 'src/features/file/components/FileUploadArea';
+import { useFiles, useSaveFile, useUploadFile } from 'src/features/file/hooks/useFile';
+import type { File as AppFile } from 'src/features/file/types/File';
 
 interface FileManagerProps {
   onSelectAction: (url: string) => void;

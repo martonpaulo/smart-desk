@@ -1,7 +1,6 @@
+import { buildStorageKey } from 'src/legacy/utils/localStorageUtils';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-
-import { buildStorageKey } from '@/legacy/utils/localStorageUtils';
 
 interface UserState {
   id: string | null;

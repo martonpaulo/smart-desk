@@ -1,4 +1,4 @@
-import { customColors } from '@/legacy/styles/colors';
+import { customColors } from 'src/legacy/styles/colors';
 
 export const eisenhowerQuadrants = [
   {

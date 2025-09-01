@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from 'react';
 
-import { useUiPrefsStore } from '@/legacy/store/uiPrefsStore';
+import { useUiPrefsStore } from 'src/legacy/store/uiPrefsStore';
 
 interface ZoomProviderProps {
   children: ReactNode;

@@ -1,11 +1,10 @@
 import { createTheme } from '@mui/material';
-
-import { customBreakpoints } from '@/theme/custom/breakpoints';
-import { customShapes } from '@/theme/custom/shapes';
-import { typography } from '@/theme/custom/typography';
-import { mobileComponentsOverrides } from '@/theme/mobile/components';
-import { buildMobileGlobalStyles } from '@/theme/mobile/global';
-import { shadows } from '@/theme/shadows';
+import { customBreakpoints } from 'src/theme/custom/breakpoints';
+import { customShapes } from 'src/theme/custom/shapes';
+import { typography } from 'src/theme/custom/typography';
+import { mobileComponentsOverrides } from 'src/theme/mobile/components';
+import { buildMobileGlobalStyles } from 'src/theme/mobile/global';
+import { shadows } from 'src/theme/shadows';
 
 const baseTheme = createTheme();
 

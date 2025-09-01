@@ -1,5 +1,5 @@
-import type { Column } from '@/legacy/types/column';
-import type { Task } from '@/legacy/types/task';
+import type { Column } from 'src/legacy/types/column';
+import type { Task } from 'src/legacy/types/task';
 
 export function getNewColumnPosition(columns: Column[], previousColumnPosition?: number): number {
   if (!columns.length) return 0;

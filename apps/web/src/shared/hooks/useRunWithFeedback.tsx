@@ -3,9 +3,8 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
 import { closeSnackbar, enqueueSnackbar } from 'notistack';
-
-import { playInterfaceSound } from '@/features/sound/utils/soundPlayer';
-import { PromiseFeedback } from '@/shared/types/PromiseFeedback';
+import { playInterfaceSound } from 'src/features/sound/utils/soundPlayer';
+import { PromiseFeedback } from 'src/shared/types/PromiseFeedback';
 
 export function useRunWithFeedback(deps: {
   add: (key?: string) => void;

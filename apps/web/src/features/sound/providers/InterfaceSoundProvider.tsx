@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { SoundProvider } from 'react-sounds';
 
-import { interfaceSounds } from '@/features/sound/constants/interfaceSounds';
+import { interfaceSounds } from 'src/features/sound/constants/interfaceSounds';
 
 interface SoundProviderProps {
   children: ReactNode;

@@ -1,6 +1,5 @@
+import { getStoredFilters, setStoredFilters } from 'src/legacy/utils/localStorageUtils';
 import { create } from 'zustand';
-
-import { getStoredFilters, setStoredFilters } from '@/legacy/utils/localStorageUtils';
 
 interface TodoPrefsState {
   view: 'board' | 'list';

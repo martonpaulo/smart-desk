@@ -1,6 +1,6 @@
-import { fetchUserId } from '@/core/services/supabaseUserService';
-import { getSupabaseClient } from '@/legacy/lib/supabaseClient';
-import { useUserStore } from '@/legacy/store/userStore';
+import { fetchUserId } from 'src/core/services/supabaseUserService';
+import { getSupabaseClient } from 'src/legacy/lib/supabaseClient';
+import { useUserStore } from 'src/legacy/store/userStore';
 
 export async function signInWithGoogle(): Promise<void> {
   const supabase = getSupabaseClient();

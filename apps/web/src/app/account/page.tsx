@@ -15,10 +15,9 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-
-import { PageSection } from '@/core/components/PageSection';
-import { ServiceStatusIcon } from '@/legacy/components/ServiceStatusIcon';
-import { useDashboardViewState } from '@/legacy/hooks/useDashboardViewState';
+import { PageSection } from 'src/core/components/PageSection';
+import { ServiceStatusIcon } from 'src/legacy/components/ServiceStatusIcon';
+import { useDashboardViewState } from 'src/legacy/hooks/useDashboardViewState';
 
 export default function AccountPage() {
   const { severity, message, isLoading, canSignIn, canSignOut, handleSignIn, handleSignOut } =

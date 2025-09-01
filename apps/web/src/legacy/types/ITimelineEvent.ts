@@ -1,4 +1,4 @@
-import type { Event } from '@/legacy/types/Event';
+import type { Event } from 'src/legacy/types/Event';
 
 export type EventStatus = 'past' | 'current' | 'future';
 

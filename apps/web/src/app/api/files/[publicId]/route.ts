@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import cloudinary from '@/core/lib/cloudinary';
-import type { File as AppFile } from '@/features/file/types/File';
+import cloudinary from 'src/core/lib/cloudinary';
+import type { File as AppFile } from 'src/features/file/types/File';
 
 export async function GET(
   request: NextRequest,

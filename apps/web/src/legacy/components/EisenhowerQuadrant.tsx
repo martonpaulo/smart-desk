@@ -17,12 +17,11 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-
-import { TaskCard } from '@/legacy/components/task/TaskCard';
-import { TaskModal } from '@/legacy/components/task/TaskModal';
-import { Task } from '@/legacy/types/task';
-import { CountChip } from '@/shared/components/CountChip';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { TaskCard } from 'src/legacy/components/task/TaskCard';
+import { TaskModal } from 'src/legacy/components/task/TaskModal';
+import { Task } from 'src/legacy/types/task';
+import { CountChip } from 'src/shared/components/CountChip';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 interface EisenhowerQuadrantProps {
   title: string;

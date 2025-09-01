@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
+
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
 import { Button, Stack, Typography } from '@mui/material';
-import Link from 'next/link';
 
 export default function NotFoundPage() {
   return (

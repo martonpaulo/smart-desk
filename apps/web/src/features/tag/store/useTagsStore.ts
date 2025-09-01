@@ -1,5 +1,5 @@
-import { createSyncedEntityStore } from '@/core/store/createSyncedEntityStore';
-import { Tag } from '@/features/tag/types/Tag';
+import { createSyncedEntityStore } from 'src/core/store/createSyncedEntityStore';
+import { Tag } from 'src/features/tag/types/Tag';
 
 export const useTagsStore = createSyncedEntityStore<Tag>({
   table: 'tags',

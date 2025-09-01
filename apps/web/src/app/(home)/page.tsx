@@ -1,15 +1,14 @@
 'use client';
 
 import { Stack } from '@mui/material';
-
-import { Clock } from '@/legacy/components/Clock';
-import { TodoList } from '@/legacy/components/column/TodoList';
-import { EventList } from '@/legacy/components/event/EventList';
-import { HiddenColumnsList } from '@/legacy/components/HiddenColumnsList';
-import { EventTimeline } from '@/legacy/components/timeline/EventTimeline';
-import { ProgressBarIndicator } from '@/shared/components/ProgressBarIndicator';
-import { TimeLoadIndicator } from '@/shared/components/TimeLoadIndicator';
-import { useResponsiveness } from '@/shared/hooks/useResponsiveness';
+import { Clock } from 'src/legacy/components/Clock';
+import { TodoList } from 'src/legacy/components/column/TodoList';
+import { EventList } from 'src/legacy/components/event/EventList';
+import { HiddenColumnsList } from 'src/legacy/components/HiddenColumnsList';
+import { EventTimeline } from 'src/legacy/components/timeline/EventTimeline';
+import { ProgressBarIndicator } from 'src/shared/components/ProgressBarIndicator';
+import { TimeLoadIndicator } from 'src/shared/components/TimeLoadIndicator';
+import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
 
 export default function BoardPage() {
   const isMobile = useResponsiveness();

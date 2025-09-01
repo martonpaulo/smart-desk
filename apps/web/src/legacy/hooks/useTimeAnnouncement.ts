@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 
-import { Event } from '@/legacy/types/Event';
-import { ISpeechStatus } from '@/legacy/types/ISpeechStatus';
-import { isTimeAvailable } from '@/legacy/utils/eventUtils';
+import { Event } from 'src/legacy/types/Event';
+import { ISpeechStatus } from 'src/legacy/types/ISpeechStatus';
+import { isTimeAvailable } from 'src/legacy/utils/eventUtils';
 
 interface UseTimeAnnouncementOptions {
   now: Date;

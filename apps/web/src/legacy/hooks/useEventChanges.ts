@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-import type { Event } from '@/legacy/types/Event';
-import { getEventChangeMessages } from '@/legacy/utils/eventChangeUtils';
+import type { Event } from 'src/legacy/types/Event';
+import { getEventChangeMessages } from 'src/legacy/utils/eventChangeUtils';
 
 export function useEventChanges(events: Event[]): string[] {
   const previousEventsRef = useRef<Event[]>(events);

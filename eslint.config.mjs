@@ -6,19 +6,19 @@ import {
   supabaseConfig,
   jsonConfig,
 } from '@smart-desk/eslint-config';
+import gitignore from 'eslint-config-flat-gitignore';
 
 /**
  * @type {import('eslint').Linter.Config[]}
  */
 
-const pathsToIgnore = ['**/dist/**', '**/.next/**', 'supabase/.supabase/**', '**/node_modules/**'];
-
 export default [
+  gitignore(),
+
   // JSON files
   {
     ...jsonConfig,
     files: ['**/*.json'],
-    ignores: pathsToIgnore,
   },
 
   // Apply base configuration to all relevant files
@@ -31,7 +31,6 @@ export default [
       'supabase/functions/**/*.ts',
       'scripts/**/*.mjs',
     ],
-    ignores: pathsToIgnore,
   },
 
   // Apply Next.js specific configuration to the web app
