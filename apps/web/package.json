@@ -10,6 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "next": "15.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "@mui/system": "^7.3.1",
     "@smart-desk/data-access": "workspace:*",
     "@smart-desk/design-system": "workspace:*",

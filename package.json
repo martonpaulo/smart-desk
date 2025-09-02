@@ -13,6 +13,7 @@
   "scripts": {
     "clear:web": "rm -rf node_modules **/node_modules pnpm-lock.yaml apps/web/.next apps/web/out && pnpm store prune && pnpm install",
     "fix:web": "node scripts/fix-web.mjs",
+    "dev:web": "nx run web:dev",
     "graph": "nx graph",
     "zip": "node scripts/zip.mjs"
   },

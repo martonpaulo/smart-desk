@@ -1,5 +1,5 @@
 // Safari PWA drag-drop fix
-import '@/legacy/lib/dragDropTouch';
+import 'src/legacy/lib/dragDropTouch';
 
 import { useState } from 'react';
 

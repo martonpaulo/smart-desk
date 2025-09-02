@@ -1,6 +1,6 @@
 'use client';
 
-import '@/legacy/lib/dragDropTouch';
+import 'src/legacy/lib/dragDropTouch';
 
 import { ReactNode } from 'react';
 import { SessionProvider } from 'next-auth/react';
