@@ -101,7 +101,7 @@ smart-desk/
 
 #### Development Tools
 - **Package Manager**: pnpm
-- **Monorepo Management**: Nx
+- **Monorepo Management**: Nx with proper build caching
 - **TypeScript**: Strict mode enabled
 - **Linting**: ESLint with custom configuration
 - **Formatting**: Prettier
@@ -324,6 +324,7 @@ The `vercel.json` file configures the following settings:
 - All workspace packages are properly transpiled for production using Nx
 - The build process runs from the monorepo root using `npx nx run web:build` (Nx command)
 - The `vercel.json` configuration handles the monorepo structure automatically
+- Nx build caching is properly configured with output directories for optimal performance
 - No manual Vercel configuration is needed - everything is handled automatically!
 
 ### Mobile Application (Expo)
@@ -358,6 +359,34 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Expo Team** for the React Native development platform
 - **Supabase Team** for the backend-as-a-service platform
 - **Open Source Community** for the various libraries and tools used
+
+## 🔧 Troubleshooting
+
+### Vercel Deployment Issues
+
+#### Missing routes-manifest.json Error
+If you encounter the error `The file "/vercel/path0/apps/web/.next/routes-manifest.json" couldn't be found` when deploying to Vercel, this is typically caused by Nx not properly caching the build outputs.
+
+**Solution**: The project is already configured with proper Nx output caching in `nx.json`:
+```json
+{
+  "targetDefaults": {
+    "build": {
+      "outputs": [
+        "{projectRoot}/.next",
+        "{projectRoot}/.next/static",
+        "{projectRoot}/.next/server",
+        "{projectRoot}/.next/cache"
+      ]
+    }
+  }
+}
+```
+
+This ensures that Vercel can find all necessary build artifacts during deployment.
+
+#### No Output Directory Error
+If you see "No Output Directory" errors, verify that your `vercel.json` configuration matches the project structure and that Nx is properly configured with output directories.
 
 ## 📞 Support
 
