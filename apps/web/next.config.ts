@@ -12,7 +12,7 @@ const BUILD_DATE = new Date().toISOString();
 
 const nextConfig: NextConfig = {
   // Smaller runtime image for Docker and serverless
-  output: 'standalone',
+  // output: 'standalone', // Disabled for Vercel deployment
 
   transpilePackages: [
     '@smart-desk/data-access',
