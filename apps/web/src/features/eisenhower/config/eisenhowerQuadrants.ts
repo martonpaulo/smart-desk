@@ -1,0 +1,71 @@
+import { customColors } from 'src/legacy/styles/colors';
+
+export const eisenhowerQuadrants = [
+  {
+    title: 'Important & Urgent',
+    color: customColors.red.value,
+    important: true,
+    urgent: true,
+    action: 'Do it now',
+    questions: [
+      'Is there a deadline today or very soon?',
+      'Will ignoring this have serious consequences?',
+      'Do you feel pressure and know it truly matters?',
+      'Is this blocking progress or creating stress?',
+      'Is this a crisis, emergency, or critical issue?',
+    ],
+    examples: ['tasks with critical deadline', 'project launch', 'medical emergency'],
+  },
+  {
+    title: 'Important',
+    color: customColors.blue.value,
+    important: true,
+    urgent: false,
+    action: 'Plan it',
+    questions: [
+      'Will this help your goals, health, or personal growth?',
+      "Is there no deadline, but you'll regret delaying it?",
+      'Is it quiet work that feels valuable in the long run?',
+      'Do you often say, “I should really do this”?',
+      'Do you need to make time for it (not wait)?',
+    ],
+    examples: [
+      'high-impact work',
+      'personal growth',
+      'self-care',
+      'studying',
+      'exercise',
+      'relationship building',
+    ],
+  },
+  {
+    title: 'Urgent',
+    color: customColors.orange.value,
+    important: false,
+    urgent: true,
+    action: 'Minimize or Delegate it',
+    questions: [
+      'Does it feel urgent only because someone else wants it?',
+      'Are you being interrupted, breaking your focus?',
+      'Does this task fail to move you closer to your goals?',
+      'Could someone else do this instead of you?',
+      'Do you often finish it and ask, “Why did I even do that?”',
+    ],
+    examples: ['emails', 'meetings', 'bugs', 'phone calls', 'last-minute tasks'],
+  },
+  {
+    title: 'Not Important & Not Urgent',
+    color: customColors.grey.value,
+    important: false,
+    urgent: false,
+    action: 'Eliminate it',
+    questions: [
+      'Is this just a distraction or time filler?',
+      'Are you doing this to avoid something else?',
+      'Would anyone notice if this never got done?',
+      'Do you feel tired or guilty afterward?',
+      'Does this help with nothing — just noise?',
+    ],
+    examples: ['scrolling', 'gossip', 'busywork', 'random notifications'],
+  },
+];

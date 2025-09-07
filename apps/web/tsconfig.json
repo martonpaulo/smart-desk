@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Next.js App",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Next.js app specific
+    "baseUrl": ".",
+
+    // App doesn't emit
+    "noEmit": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "incremental": true,
+
+    // Development performance optimizations
+    "skipLibCheck": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "disableSourceOfProjectReferenceRedirect": true,
+
+    // Types and plugin for Next
+    "types": ["node", "react", "react-dom", "next"],
+    "plugins": [{ "name": "next" }]
+  },
+  "include": [
+    "next-env.d.ts",
+    "next.config.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", ".next", "out"]
+}

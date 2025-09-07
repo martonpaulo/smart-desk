@@ -1,254 +1,256 @@
 # Smart Desk
 
-A comprehensive productivity dashboard and task management application built with Next.js, featuring an advanced calendar system, task management, weather integration, and real-time synchronization capabilities.
+A comprehensive cross-platform productivity application built with a modern monorepo architecture. Smart Desk provides task management, calendar integration, note-taking, and location services across web and mobile platforms.
+
+## 🎯 About This Project
+
+Smart Desk was born out of personal necessity. As a developer, I found that existing productivity tools weren't meeting my specific requirements and workflow needs. Rather than settling for suboptimal solutions, I decided to create my own comprehensive productivity application that would perfectly align with my personal demands and preferences.
+
+This project represents a unique learning journey where I'm combining my existing knowledge with the power of Artificial Intelligence to build something truly tailored to my needs. I'm primarily leveraging:
+
+- **MCPs (Model Context Protocols)**: For enhanced AI integration and context management
+- **OpenAI Codex**: For intelligent code generation and assistance
+- **Cursor IDE**: As my primary development environment with AI-powered features
+
+The goal is not just to build a productivity tool, but to learn and master these cutting-edge AI development tools while creating something genuinely useful. This project serves as both a practical solution and a hands-on learning experience in modern AI-assisted development.
 
 ## 🌟 Features
 
-### 📅 Advanced Calendar System
+### 📱 Cross-Platform Support
+- **Web Application**: Next.js with Material-UI v7 *(Desktop-optimized, not mobile-optimized)*
+- **iOS Application**: React Native with Expo and React Native Paper *(Recommended for mobile users)*
+- **Shared Codebase**: Common packages and utilities across platforms
 
+> **⚠️ Important**: The web application is **not optimized for mobile devices**. For the best mobile experience, please use the dedicated iOS application available on the App Store.
+
+### 📅 Advanced Calendar System
 - **Multiple Views**: Day, Week, Month, Year, and Schedule views
 - **Smart Navigation**: URL-based routing with date-specific paths
 - **Event Management**: Integration with Google Calendar and ICS feeds
-- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **Real-time Updates**: Live event synchronization and notifications
 
 ### ✅ Task Management
-
 - **Kanban Board**: Drag-and-drop task organization
 - **Eisenhower Matrix**: Priority-based task categorization
 - **Custom Columns**: Configurable workflow stages
 - **Task Progress**: Visual progress tracking and analytics
-- **Undo/Redo**: Comprehensive action history
 
-### 🌤️ Weather Integration
+### 📝 Note-Taking & Organization
+- **Rich Text Editor**: Advanced note creation and editing
+- **Tag System**: Flexible categorization and filtering
+- **File Management**: Upload and organize documents and media
+- **Search & Discovery**: Powerful search across all content
 
-- **Location-based Weather**: Automatic location detection
-- **Detailed Forecasts**: Current conditions and extended forecasts
-- **Weather Alerts**: Severe weather notifications
+### 🗺️ Location & Maps
+- **Interactive Maps**: Location-based features and visualization
+- **Weather Integration**: Location-based weather information
+- **Smart Notifications**: Context-aware alerts and reminders
 
 ### 🔊 Smart Notifications
-
 - **Event Alerts**: Customizable event reminders
-- **Time Announcements**: Periodic time notifications
 - **Sound Management**: Configurable alert sounds and volumes
+- **Cross-Platform Sync**: Notifications work across all devices
 
-### 🎨 Modern UI/UX
+## 🏗️ Architecture
 
-- **Material UI**: Consistent design system
-- **Dark/Light Themes**: Automatic theme switching
-- **Responsive Layout**: Mobile-first design approach
-- **Accessibility**: WCAG compliant interface
+### Monorepo Structure
+
+This project uses a modern monorepo architecture with the following structure:
+
+```
+smart-desk/
+├── apps/
+│   ├── web/                    # Next.js web application
+│   └── native/                 # React Native iOS application
+├── packages/
+│   ├── data-access/           # Data layer and API clients
+│   ├── design-system/         # Shared design tokens and components
+│   ├── hooks/                 # Shared React hooks
+│   ├── icons/                 # Icon library
+│   ├── store/                 # State management (Zustand)
+│   ├── types/                 # TypeScript type definitions
+│   ├── ui-native/             # React Native UI components
+│   ├── ui-web/                # Web UI components
+│   └── utils/                 # Shared utilities
+├── supabase/                  # Database schema and functions
+└── scripts/                   # Build and deployment scripts
+```
+
+### Technology Stack
+
+#### Web Application
+- **Framework**: Next.js 15 with App Router
+- **UI Library**: Material-UI (MUI) v7
+- **State Management**: Zustand
+- **Data Fetching**: TanStack Query v5
+- **Styling**: Emotion (CSS-in-JS)
+- **Authentication**: NextAuth.js
+- **Target Platform**: Desktop browsers only (not mobile-optimized)
+
+#### Mobile Application
+- **Framework**: React Native with Expo
+- **UI Library**: React Native Paper
+- **State Management**: Zustand
+- **Styling**: Styled Components
+
+#### Backend & Infrastructure
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **File Storage**: Cloudinary
+- **Real-time**: Supabase Realtime
+
+#### Development Tools
+- **Package Manager**: pnpm
+- **Monorepo Management**: Nx
+- **TypeScript**: Strict mode enabled
+- **Linting**: ESLint with custom configuration
+- **Formatting**: Prettier
+- **Code Quality**: Pre-commit hooks
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
-- Supabase account (for data synchronization)
-- Google Cloud Console project (for calendar integration)
+- pnpm (recommended package manager)
+- Supabase account
+- iOS development environment (for mobile app)
 
 ### Installation
 
 1. **Clone the repository**
-
    ```bash
    git clone https://github.com/your-username/smart-desk.git
    cd smart-desk
    ```
 
 2. **Install dependencies**
-
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Environment Setup**
 
-   Create a `.env.local` file in the root directory using the provided `.env.example` as a template.
+   Create environment files for each application:
+
+   **Web App** (`apps/web/.env.local`):
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXTAUTH_SECRET=your_nextauth_secret
+   NEXTAUTH_URL=http://localhost:3000
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   ```
+
+   **Mobile App** (`apps/native/.env`):
+   ```env
+   EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
+   EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
 4. **Database Setup**
 
-   Run the SQL scripts in the project root to set up your Supabase database:
-
+   Set up your Supabase database by running the SQL scripts in the `supabase/` directory:
    ```bash
-   create_tasks_table.sql
-   create_columns_table.sql
-   create_ics_calendars_table.sql
-
-   etc.
+   # Run the base table creation scripts
+   # These will be executed in your Supabase dashboard
    ```
 
-   Ensure you have the necessary tables and relationships set up in your Supabase project.
+5. **Start Development Servers**
 
-5. **Start the development server**
-
+   **Web Application:**
    ```bash
-   npm run dev
+   pnpm dev:web
+   # or
+   nx run web:dev
    ```
 
-6. **Open your browser**
+   **Mobile Application:**
+   ```bash
+   cd apps/native
+   npx expo start
+   ```
 
-   Navigate to [http://localhost:3000](http://localhost:3000)
+## 📦 Available Scripts
 
-## 🏗️ Architecture
+### Root Level Scripts
+- `pnpm dev:web` - Start web development server
+- `pnpm build:web` - Build web application for production
+- `pnpm graph` - Visualize project dependency graph
+- `pnpm fix:web` - Fix common web application issues
+- `pnpm clear:web` - Clean all dependencies and build artifacts
 
-### Technology Stack
-
-- **Framework**: Next.js 15 with App Router
-- **UI Library**: Material-UI (MUI) v5
-- **State Management**: Zustand
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: NextAuth.js
-- **Styling**: Emotion (CSS-in-JS)
-- **Date Handling**: Native JavaScript Date API
-- **HTTP Client**: React Query (TanStack Query)
-
-### Project Structure
-
-```
-smart-desk/
-├── app/ # Next.js App Router pages
-│ ├── calendar/[[...date]]/ # Dynamic calendar routes
-│ ├── tasks/ # Task management page
-│ ├── ...
-│ └── api/ # API routes
-├── components/ # Reusable UI components
-│ ├── calendar/ # Calendar-specific components
-│ │ ├── views/ # Calendar view components
-│ └── ...
-├── hooks/ # Custom React hooks
-│ ├── useEvents.ts
-│ ├── useTasks.ts
-│ ├── useWeather.ts
-│ └── ...
-├── providers/ # Context providers
-│ ├── AppThemeProvider.tsx
-│ ├── LocationProvider.tsx
-│ └── ...
-├── services/ # External service integrations
-│ ├── supabase/ # Supabase service layer
-│ ├── googleEventsService.ts
-│ └── weatherService.ts
-├── store/ # Zustand state stores
-│ ├── board/ # Task board state
-│ ├── settings/ # Application settings
-│ └── ...
-├── styles/ # Theme and styling
-├── types/ # TypeScript type definitions
-├── utils/ # Utility functions
-└── ...
-```
-
-## 🗓️ Calendar Routes
-
-The calendar system supports comprehensive URL-based navigation:
-
-### Route Structure
-
-- `/calendar` - Default view (current month)
-- `/calendar/2025` - Year view for 2025
-- `/calendar/2025/08` - Month view for August 2025
-- `/calendar/2025/08/21` - Day view for August 21, 2025
-- `/calendar/2025/08/21/week` - Week view containing August 21, 2025
-- `/calendar/schedule` - Schedule list view
-
-### Calendar Views
-
-#### Day View
-
-- Hourly timeline (24-hour format)
-- All-day events section
-- Current time indicator
-- Event details on hover/click
-
-#### Week View
-
-- 7-day grid layout
-- Responsive mobile/desktop layouts
-- All-day events row
-- Time slot grid with events
-
-#### Month View
-
-- Traditional calendar grid
-- Event indicators
-- Today highlighting
-- Click navigation to day view
-
-#### Year View
-
-- 12-month overview
-- Mini calendar for each month
-- Current month highlighting
-- Click navigation to month view
-
-#### Schedule View
-
-- List-based event display
-- Filtering options (today, week, month, upcoming)
-- Event grouping by date
-- Detailed event information
+### Web Application Scripts
+- `pnpm dev` - Start Next.js development server
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm lint` - Run ESLint
+- `pnpm format` - Format code with Prettier
+- `pnpm typecheck` - Run TypeScript type checking
 
 ## 🎨 Design System
 
-### Material UI Integration
-
-The application uses Material-UI with a custom theme that includes:
-
-- **Typography**: Poppins font family with custom weight scales
+### Web (Material-UI v7)
+- **Typography**: Custom font scales and weights
 - **Color Palette**: Carefully selected primary, secondary, and accent colors
-- **Breakpoints**: Custom responsive breakpoints for optimal mobile experience
-- **Shadows**: Custom shadow system for depth and hierarchy
-- **Transitions**: Smooth animations with consistent timing
+- **Components**: Consistent component library across the application
+- **Responsive Design**: Desktop-first approach (not optimized for mobile)
+- **Target Platform**: Desktop browsers only - use mobile app for mobile devices
 
-### Responsive Design
-
-- **Mobile-first approach**: Optimized for touch interfaces
-- **Adaptive layouts**: Components adjust based on screen size
-- **Touch-friendly**: Appropriate touch targets and gestures
-- **Performance optimized**: Efficient rendering on mobile devices
+### Mobile (React Native Paper)
+- **Material Design**: Following Google's Material Design guidelines
+- **Theming**: Custom theme configuration for brand consistency
+- **Accessibility**: Built-in accessibility features and screen reader support
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
-| Variable                        | Description                | Required |
-| ------------------------------- | -------------------------- | -------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL       | Yes      |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key     | Yes      |
-| `GOOGLE_CLIENT_ID`              | Google OAuth client ID     | Optional |
-| `GOOGLE_CLIENT_SECRET`          | Google OAuth client secret | Optional |
-| `NEXTAUTH_SECRET`               | NextAuth.js secret key     | Yes      |
-| `NEXTAUTH_URL`                  | Application base URL       | Yes      |
+| Variable | Description | Required | Platform |
+|----------|-------------|----------|----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes | Web |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Yes | Web |
+| `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL | Yes | Mobile |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | Yes | Mobile |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID | Optional | Web |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | Optional | Web |
+| `NEXTAUTH_SECRET` | NextAuth.js secret key | Yes | Web |
+| `NEXTAUTH_URL` | Application base URL | Yes | Web |
 
-### Customization
+### Database Schema
 
-#### Theme Customization
+The application uses Supabase with the following main tables:
+- `tasks` - Task management
+- `events` - Calendar events
+- `notes` - Note-taking
+- `files` - File storage
+- `locations` - Location data
+- `maps` - Map configurations
+- `tags` - Tagging system
+- `columns` - Kanban board columns
 
-Edit `styles/theme.ts` to customize the Material-UI theme:
+## 🏛️ Code Standards
 
-```typescript
-export const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#your-primary-color',
-    },
-    // ... other theme options
-  },
-});
-```
+### TypeScript Guidelines
+- **Strict Mode**: Always use strict TypeScript configuration
+- **Named Exports**: Use named exports exclusively (no default exports)
+- **Absolute Imports**: Use `src/*` alias instead of relative paths
+- **Type Safety**: Avoid `any` types; always provide proper typing
 
-#### Adding New Calendar Views
+### React Guidelines
+- **Function Components**: Use function syntax for components
+- **Hooks**: Prefer custom hooks for reusable logic
+- **State Management**: Use Zustand for global state, local state for component-specific data
+- **Performance**: Implement proper memoization and optimization
 
-1. Create a new view component in `components/calendar/views/`
-2. Add the view type to the `CalendarView` union type
-3. Update the `CalendarViewContainer` to handle the new view
-4. Add navigation logic in `CalendarNavigation`
+### Code Quality
+- **ESLint**: Follow project ESLint configuration
+- **Prettier**: Use Prettier for consistent code formatting
+- **Conventional Commits**: Follow conventional commit message format
+- **Testing**: Write tests for critical functionality
 
 ## 🤝 Contributing
-
-We welcome contributions to Smart Desk! Please follow these guidelines:
 
 ### Development Workflow
 
@@ -258,75 +260,79 @@ We welcome contributions to Smart Desk! Please follow these guidelines:
    git checkout -b feature/your-feature-name
    ```
 3. **Make your changes**
-4. **Write tests** (if applicable)
+4. **Run quality checks**
+   ```bash
+   pnpm lint
+   pnpm typecheck
+   ```
 5. **Commit your changes**
    ```bash
    git commit -m "feat: add your feature description"
    ```
-6. **Push to your fork**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-7. **Create a Pull Request**
-
-### Coding Standards
-
-- **TypeScript**: Use strict TypeScript with proper type definitions
-- **ESLint**: Follow the project's ESLint configuration
-- **Prettier**: Use Prettier for code formatting
-- **Commit Messages**: Follow conventional commit format
-- **Component Structure**: Use functional components with hooks
-- **File Naming**: Use kebab-case for files, PascalCase for components
+6. **Push and create a Pull Request**
 
 ### Code Review Process
 
-1. All PRs require at least one review
-2. Ensure all tests pass
-3. Maintain test coverage above 80%
-4. Update documentation for new features
-5. Follow accessibility guidelines (WCAG 2.1)
+- All PRs require at least one review
+- Ensure all linting and type checking passes
+- Update documentation for new features
+- Follow accessibility guidelines (WCAG 2.1)
+- Test on both web and mobile platforms
 
 ## 📦 Deployment
 
-### Vercel (Recommended)
+### Web Application (Vercel)
 
-1. **Connect your repository** to Vercel
-2. **Configure environment variables** in the Vercel dashboard
-3. **Deploy** - Vercel will automatically build and deploy your application
+#### Vercel Configuration
+Since this is a monorepo project, you'll need to configure Vercel with the following settings:
 
-### Manual Deployment
+| Setting | Value | Description |
+|---------|-------|-------------|
+| **Framework Preset** | `Next.js` | Next.js framework |
+| **Build Command** | `cd apps/web && pnpm build` | Build command for the web app |
+| **Output Directory** | `apps/web/.next` | Next.js build output directory |
+| **Install Command** | `pnpm install` | Install all dependencies |
+| **Development Command** | `cd apps/web && pnpm dev` | Development server command |
+| **Root Directory** | `apps/web` | Root directory for the web app |
+| **Node.js Version** | `20.x` | Node.js version (compatible with >=18 requirement) |
 
-```bash
+#### Deployment Steps
+1. **Connect Repository**: Connect your GitHub repository to Vercel
+2. **Configure Settings**: Use the settings above in Vercel's project settings
+3. **Environment Variables**: Set up the following environment variables in Vercel:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXTAUTH_SECRET`
+   - `NEXTAUTH_URL`
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+4. **Deploy**: Vercel will automatically deploy on push to your main branch
 
-# Build the application
+#### Important Notes
+- The web application uses `output: 'standalone'` in Next.js config for optimal Vercel deployment
+- All workspace packages are properly transpiled for production
+- The build process uses Nx for efficient dependency management
 
-npm run build
-
-# Start the production server
-
-npm run start
-```
+### Mobile Application (Expo)
+1. Build for iOS using Expo Application Services (EAS)
+2. Submit to App Store through Expo dashboard
+3. Configure app store metadata and screenshots
 
 ## 🔮 Future Enhancements
 
 ### Planned Features
-
 - **🔄 Offline Support**: PWA capabilities with offline task management
 - **🤖 AI Integration**: Smart task suggestions and calendar optimization
 - **📊 Advanced Analytics**: Detailed productivity insights and reports
 - **🔗 Third-party Integrations**: Slack, Microsoft Teams, Notion integration
-- **📱 Mobile App**: React Native mobile application
 - **🎯 Goal Tracking**: Long-term goal setting and progress tracking
 - **👥 Team Collaboration**: Shared workspaces and team features
-- **🔐 Enhanced Security**: Two-factor authentication and encryption
 
 ### Technical Improvements
-
 - **Performance**: Bundle optimization and lazy loading
 - **Accessibility**: Enhanced screen reader support
 - **Internationalization**: Multi-language support
-- **Testing**: Comprehensive test coverage
-- **Documentation**: Interactive API documentation
+- **Testing**: Comprehensive test coverage with Jest and React Testing Library
 
 ## 📄 License
 
@@ -336,6 +342,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Material-UI Team** for the excellent component library
 - **Next.js Team** for the powerful React framework
+- **Expo Team** for the React Native development platform
 - **Supabase Team** for the backend-as-a-service platform
 - **Open Source Community** for the various libraries and tools used
 
@@ -347,4 +354,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Smart Desk** - Transforming productivity, one task at a time. 🚀
+**Smart Desk** - Transforming productivity across all your devices. 🚀

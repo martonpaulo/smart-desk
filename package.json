@@ -1,112 +1,43 @@
 {
   "name": "smart-desk",
-  "version": "0.1.0",
-  "homepage": "https://www.martonpaulo.com/smartdesk",
-  "author": {
-    "name": "Marton Paulo",
-    "email": "info@martonpaulo.com",
-    "url": "https://www.martonpaulo.com"
-  },
-  "description": "Dashboard for managing events, tasks and smart widgets",
-  "keywords": [
-    "calendar",
-    "tasks",
-    "dashboard"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/martonpaulo/smart-desk"
-  },
-  "license": "MIT",
+  "version": "0.0.1",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "open": "sleep 5 && open http://localhost:3000 &",
-    "local": "npm run dev && npm run open",
-    "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
-    "format": "prettier --write \"**/*.{ts,tsx,json}\"",
-    "fix": "prettier --write \"**/*.{ts,tsx,json}\" --log-level silent && eslint 'src/**/*.{ts,tsx}' --fix",
-    "clear": "rm -rf .next node_modules package-lock.json && npm cache clean --force && npm install --verbose && npm run dev",
-    "zip": "node scripts/zip.mjs",
-    "issues": "bash scripts/issues.sh",
-    "ship": "set -x && npm run format:fix && npm run lint:fix && npm run build && git add . && git commit -m \"$npm_config_msg\" && git push"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@hookform/resolvers": "^5.2.1",
-    "@mui/icons-material": "^7.1.1",
-    "@mui/material": "^7.1.1",
-    "@mui/material-nextjs": "^7.1.1",
-    "@mui/x-date-pickers": "^8.9.0",
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
-    "@supabase/supabase-js": "^2.50.3",
-    "@tanstack/query-async-storage-persister": "^5.83.1",
-    "@tanstack/query-sync-storage-persister": "^5.80.7",
-    "@tanstack/react-query": "^5.80.7",
-    "@tanstack/react-query-persist-client": "^5.80.7",
-    "axios": "^1.10.0",
-    "babel-plugin-react-compiler": "^19.1.0-rc.2",
-    "cloudinary": "^2.7.0",
-    "date-fns": "^4.1.0",
-    "dompurify": "^3.2.6",
-    "howler": "^2.2.4",
-    "html-react-parser": "^5.2.6",
-    "ical.js": "^2.1.0",
-    "luxon": "^3.6.1",
-    "next": "15.3.3",
-    "next-auth": "^4.24.11",
-    "next-cloudinary": "^6.16.0",
-    "node-ical": "^0.20.1",
-    "notistack": "^3.0.2",
-    "openmeteo": "^1.2.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-hook-form": "^7.61.1",
-    "react-sounds": "^1.0.25",
-    "react-text-to-speech": "^2.1.0",
-    "zod": "^4.0.14",
-    "zustand": "^5.0.5"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@types/geojson": "^7946.0.16",
-    "@types/luxon": "^3.6.2",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.3",
-    "eslint-formatter-unix": "^8.40.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
-    "prettier": "^3.5.3",
-    "prettier-plugin-sql": "^0.19.2",
-    "typescript": "^5"
-  },
-  "bugs": {
-    "url": "https://github.com/martonpaulo/smart-desk/issues"
-  },
+  "packageManager": "pnpm@10.15.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "engines": {
     "node": ">=18"
   },
-  "overrides": {
-    "react-simple-maps": {
-      "d3-geo": "^3.1.0",
-      "d3-color": "^3.1.0",
-      "d3-selection": "^3.0.0",
-      "d3-zoom": "^3.0.0",
-      "react": "^16.8.0 || 17.x || 18.x || 19.x",
-      "react-dom": "^16.8.0 || 17.x || 18.x || 19.x"
-    },
-    "d3-interpolate": {
-      "d3-color": "^3.1.0"
-    },
-    "d3-transition": {
-      "d3-color": "^3.1.0"
-    }
+  "scripts": {
+    "clear:web": "rm -rf node_modules **/node_modules pnpm-lock.yaml apps/web/.next apps/web/out && pnpm store prune && pnpm install",
+    "fix:web": "node scripts/fix-web.mjs",
+    "build:web": "nx run web:build",
+    "dev:web": "nx run web:dev",
+    "graph": "nx graph",
+    "zip": "node scripts/zip.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@next/eslint-plugin-next": "15.3.3",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
+    "eslint": "^9.34.0",
+    "eslint-config-flat-gitignore": "^2.1.0",
+    "eslint-config-next": "15.3.3",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-json": "^4.0.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-native": "^4.1.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "globals": "^15.11.0",
+    "globby": "^14.1.0",
+    "jsonc-eslint-parser": "^2.4.0",
+    "nx": "19.8.14",
+    "prettier": "^3.5.3",
+    "typescript": "^5"
   }
 }
