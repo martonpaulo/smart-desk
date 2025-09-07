@@ -57,6 +57,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/webpack": "^5.28.5"
+    "@types/webpack": "^5.28.5",
+    "babel-plugin-react-compiler": "^0.0.0-experimental-592c1c9"
   }
 }
