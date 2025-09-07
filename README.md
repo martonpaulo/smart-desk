@@ -283,35 +283,48 @@ The application uses Supabase with the following main tables:
 
 ### Web Application (Vercel)
 
-#### Vercel Configuration
-Since this is a monorepo project, you'll need to configure Vercel with the following settings:
+#### Automatic Configuration
+This project includes a `vercel.json` configuration file that automatically configures Vercel for the monorepo setup. No manual configuration is required!
+
+#### Vercel Configuration Details
+The `vercel.json` file configures the following settings:
 
 | Setting | Value | Description |
 |---------|-------|-------------|
 | **Framework Preset** | `Next.js` | Next.js framework |
-| **Build Command** | `cd apps/web && pnpm build` | Build command for the web app |
+| **Build Command** | `pnpm build:web` | Uses Nx to build the web app from monorepo root |
 | **Output Directory** | `apps/web/.next` | Next.js build output directory |
-| **Install Command** | `pnpm install` | Install all dependencies |
-| **Development Command** | `cd apps/web && pnpm dev` | Development server command |
-| **Root Directory** | `apps/web` | Root directory for the web app |
-| **Node.js Version** | `20.x` | Node.js version (compatible with >=18 requirement) |
+| **Install Command** | `pnpm install` | Installs all workspace dependencies |
+| **Root Directory** | `.` | Uses monorepo root directory |
 
 #### Deployment Steps
 1. **Connect Repository**: Connect your GitHub repository to Vercel
-2. **Configure Settings**: Use the settings above in Vercel's project settings
+2. **Automatic Detection**: Vercel will automatically detect the `vercel.json` configuration
 3. **Environment Variables**: Set up the following environment variables in Vercel:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXTAUTH_SECRET`
-   - `NEXTAUTH_URL`
-   - `GOOGLE_CLIENT_ID`
-   - `GOOGLE_CLIENT_SECRET`
+
+   **Required Environment Variables:**
+   - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+   - `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
+   - `GOOGLE_CLIENT_ID` - Google OAuth client ID
+   - `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
+   - `CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name
+   - `CLOUDINARY_API_KEY` - Cloudinary API key
+   - `CLOUDINARY_API_SECRET` - Cloudinary API secret
+
+   **Optional Environment Variables:**
+   - `NEXT_PUBLIC_APP_URL` - Application base URL (defaults to 'https://www.martonpaulo.com')
+   - `NEXT_PUBLIC_STORAGE_PREFIX` - Storage namespace prefix (defaults to empty string)
+   - `NEXT_PUBLIC_STORAGE_VERSION` - Storage version (defaults to 'v1')
+
 4. **Deploy**: Vercel will automatically deploy on push to your main branch
 
 #### Important Notes
 - The web application uses `output: 'standalone'` in Next.js config for optimal Vercel deployment
 - All workspace packages are properly transpiled for production
 - The build process uses Nx for efficient dependency management
+- The `.vercelignore` file excludes unnecessary files from deployment
+- No manual Vercel configuration is needed - everything is handled automatically!
 
 ### Mobile Application (Expo)
 1. Build for iOS using Expo Application Services (EAS)
