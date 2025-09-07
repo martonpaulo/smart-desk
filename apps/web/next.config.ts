@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import type { Configuration } from 'webpack';
 
 const isProd = process.env.NODE_ENV === 'production';
 const isVercelProd = process.env.VERCEL_ENV === 'production';
@@ -34,11 +35,49 @@ const nextConfig: NextConfig = {
     ],
     // Only use React Compiler in production
     reactCompiler: enableReactCompiler,
+    // Reduce memory usage in development
+    memoryBasedWorkersCount: true,
+  },
+
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
   },
 
   // Security + size
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
+
+  // Development optimizations
+  ...(process.env.NODE_ENV === 'development' && {
+    // Reduce bundle analysis overhead
+    webpack: (config: Configuration, { dev }: { dev: boolean }) => {
+      if (dev) {
+        // Optimize for development speed
+        config.optimization = {
+          ...config.optimization,
+          removeAvailableModules: false,
+          removeEmptyChunks: false,
+          splitChunks: false,
+        };
+
+        // Reduce memory usage
+        config.cache = {
+          type: 'memory',
+          maxGenerations: 1,
+        };
+
+        // Faster source maps in development
+        config.devtool = 'eval-cheap-module-source-map';
+      }
+      return config;
+    },
+  }),
 
   images: {
     formats: ['image/avif', 'image/webp'],

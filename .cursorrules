@@ -1,51 +1,9 @@
-# Smart Desk — Agent Guidelines
-
-A comprehensive guide for AI agents working on the Smart Desk monorepo project.
+# Smart Desk Development Rules
 
 ## 🏗️ Project Overview
+Smart Desk is a cross-platform productivity application built with a modern monorepo architecture using TypeScript, Next.js (web), and React Native with Expo (iOS).
 
-Smart Desk is a cross-platform productivity application built with a modern monorepo architecture using TypeScript, Next.js (web), and React Native with Expo (iOS). The project follows a feature-oriented structure with strict linting, formatting, and type safety.
-
-> **⚠️ Platform Optimization**: The web application is **not optimized for mobile devices** and is designed for desktop browsers only. Users should be directed to use the dedicated iOS mobile application for the best mobile experience.
-
-### Architecture
-- **Monorepo**: pnpm workspaces with Nx for build orchestration
-- **Web App**: Next.js 15 with App Router, Material-UI v7, TypeScript
-- **Mobile App**: React Native with Expo, React Native Paper, TypeScript
-- **Backend**: Supabase (PostgreSQL, Auth, Realtime, Storage)
-- **State Management**: Zustand with custom synced entity stores
-- **Data Fetching**: TanStack Query v5
-- **File Storage**: Cloudinary integration
-
-## 📁 Project Structure
-
-```
-smart-desk/
-├── apps/
-│   ├── web/                    # Next.js web application
-│   │   └── src/
-│   │       ├── app/            # Next.js App Router pages
-│   │       ├── core/           # Core utilities, providers, stores
-│   │       ├── features/       # Feature-oriented modules
-│   │       ├── legacy/         # Legacy components (migration in progress)
-│   │       ├── shared/         # Shared components and utilities
-│   │       └── theme/          # MUI theme configuration
-│   └── native/                 # React Native iOS application
-├── packages/                   # Shared packages
-│   ├── data-access/           # Data layer and API clients
-│   ├── design-system/         # Shared design tokens
-│   ├── hooks/                 # Shared React hooks
-│   ├── icons/                 # Icon library
-│   ├── store/                 # State management utilities
-│   ├── types/                 # TypeScript type definitions
-│   ├── ui-native/             # React Native UI components
-│   ├── ui-web/                # Web UI components
-│   └── utils/                 # Shared utilities
-├── supabase/                  # Database schema and functions
-└── scripts/                   # Build and deployment scripts
-```
-
-## 🎯 Core Principles
+## 📋 Core Principles
 
 ### TypeScript Standards
 - **Strict Mode**: Always use strict TypeScript configuration
@@ -160,17 +118,6 @@ pnpm format
 # Build for production
 pnpm build:web
 ```
-
-### Configuration Changes Testing
-**⚠️ CRITICAL**: When modifying any configuration files (ESLint, TypeScript, package.json, etc.), you MUST:
-
-1. **Install dependencies**: `pnpm install`
-2. **Run linting**: `cd apps/web && pnpm lint`
-3. **Test build**: `cd apps/web && pnpm build`
-4. **Test development server**: `pnpm dev:web` (verify it starts and responds)
-5. **Verify no errors**: Check that all commands complete successfully
-
-This ensures configuration changes don't break the project and maintains system reliability.
 
 ### Code Quality Checks
 - **ESLint**: Must pass all linting rules

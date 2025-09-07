@@ -6,18 +6,16 @@
     // Next.js app specific
     "baseUrl": ".",
 
-    // Next 15 friendly targets
-    "target": "ES2022",
-    "module": "ESNext",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "jsx": "preserve",
-    "moduleResolution": "bundler",
-
-    // App doesn’t emit
+    // App doesn't emit
     "noEmit": true,
     "allowJs": true,
     "resolveJsonModule": true,
     "incremental": true,
+
+    // Development performance optimizations
+    "skipLibCheck": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "disableSourceOfProjectReferenceRedirect": true,
 
     // Types and plugin for Next
     "types": ["node", "react", "react-dom", "next"],

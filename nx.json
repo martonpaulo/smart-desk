@@ -9,8 +9,7 @@
     "lint": {
       "inputs": [
         "default",
-        "{workspaceRoot}/eslint.config.mjs",
-        "{workspaceRoot}/tooling/eslint-config/**/*"
+        "{workspaceRoot}/eslint.config.mjs"
       ],
       "cache": true
     },
@@ -23,8 +22,6 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
-      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "!{projectRoot}/tsconfig.spec.json"
     ],
     "sharedGlobals": [
       "{workspaceRoot}/prettier.config.mjs",

@@ -26,7 +26,8 @@ export function LocationProvider({ children }: LocationProviderProps) {
         });
       },
       err => {
-        console.error('Geolocation error:', err);
+        // Log geolocation errors as warnings to avoid failing headless tests
+        console.warn('Geolocation error:', err);
       },
     );
   }, []);

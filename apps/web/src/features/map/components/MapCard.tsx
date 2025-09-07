@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -16,7 +17,15 @@ export function MapCard({ map, file }: MapCardProps) {
       return <video src={map.fileUrl} style={{ width: '100%' }} />;
     }
     if (file?.resourceType === 'image') {
-      return <img src={map.fileUrl} alt={map.name} style={{ width: '100%' }} />;
+      return (
+        <Image
+          src={map.fileUrl}
+          alt={map.name}
+          width={300}
+          height={200}
+          style={{ width: '100%', height: 'auto' }}
+        />
+      );
     }
     return (
       <Stack alignItems="center" py={2}>
