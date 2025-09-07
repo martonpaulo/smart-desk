@@ -172,6 +172,16 @@ pnpm build:web
 
 This ensures configuration changes don't break the project and maintains system reliability.
 
+### Documentation Updates
+**⚠️ CRITICAL**: When making any changes that are documented in README.md or should be documented because they are important, you MUST:
+
+1. **Update README.md**: Always update the README.md file to reflect the changes
+2. **Include relevant details**: Add configuration changes, new features, deployment updates, environment variables, etc.
+3. **Keep documentation current**: Ensure all instructions and examples remain accurate
+4. **Verify completeness**: Check that all necessary information is documented
+
+This ensures the project documentation stays current and helps other developers understand the changes.
+
 ### Code Quality Checks
 - **ESLint**: Must pass all linting rules
 - **Prettier**: Code must be properly formatted
