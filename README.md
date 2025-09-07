@@ -295,7 +295,6 @@ The `vercel.json` file configures the following settings:
 | **Build Command** | `pnpm build:web` | Uses Nx to build the web app from monorepo root |
 | **Output Directory** | `apps/web/.next` | Next.js build output directory |
 | **Install Command** | `pnpm install` | Installs all workspace dependencies |
-| **Root Directory** | `.` | Uses monorepo root directory |
 
 #### Deployment Steps
 1. **Connect Repository**: Connect your GitHub repository to Vercel
