@@ -292,7 +292,7 @@ The `vercel.json` file configures the following settings:
 | Setting | Value | Description |
 |---------|-------|-------------|
 | **Framework Preset** | `Next.js` | Next.js framework |
-| **Build Command** | `pnpm build:web` | Uses Nx to build the web app from monorepo root |
+| **Build Command** | `cd apps/web && pnpm build` | Builds the web app from the apps/web directory |
 | **Output Directory** | `apps/web/.next` | Next.js build output directory |
 | **Install Command** | `pnpm install` | Installs all workspace dependencies |
 
@@ -321,7 +321,7 @@ The `vercel.json` file configures the following settings:
 #### Important Notes
 - The web application uses `output: 'standalone'` in Next.js config for optimal Vercel deployment
 - All workspace packages are properly transpiled for production
-- The build process uses Nx for efficient dependency management
+- The build process runs from the `apps/web` directory to ensure proper Next.js context
 - The `.vercelignore` file excludes unnecessary files from deployment
 - No manual Vercel configuration is needed - everything is handled automatically!
 
