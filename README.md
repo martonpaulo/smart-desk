@@ -11,9 +11,10 @@ Smart Desk is a personal productivity tool built with modern web technologies. I
 - **📱 Cross-Platform**: Web (Next.js) and iOS (React Native) applications
 - **📅 Calendar**: Google Calendar integration with multiple view modes
 - **✅ Tasks**: Kanban board and Eisenhower Matrix for task management
+- **📊 Export**: CSV export functionality for task data
 - **📝 Notes**: Rich text editor with tagging and file management
 - **🗺️ Maps**: Location services with weather integration
-- **🔄 Sync**: Real-time synchronization across devices
+- **🔄 Sync**: Real-time synchronization across devices with automatic reconnection
 
 > **⚠️ Note**: The web app is desktop-optimized. Use the iOS app for mobile.
 
@@ -62,6 +63,57 @@ Smart Desk is a personal productivity tool built with modern web technologies. I
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime)
 - **Storage**: Cloudinary
 - **Tools**: TypeScript, ESLint, Prettier, pnpm, Nx
+
+## 📊 Data Export
+
+Smart Desk includes comprehensive CSV export functionality for task data:
+
+### Export Features
+- **One-Click Export**: Export button located in the side drawer
+- **Complete Data**: Includes all task fields (title, notes, status, dates, etc.)
+- **Filtered Export**: Excludes trashed tasks by default for clean data
+- **Formatted Dates**: Human-readable date and time formatting
+- **CSV Compliance**: Proper escaping of special characters and quotes
+
+### Export Data Fields
+The CSV export includes the following task information:
+- Basic Info: Title, Notes, Position
+- Status Flags: Important, Urgent, Blocked, Daily, Trashed
+- Progress: Quantity Done, Quantity Target
+- Time Management: Estimated Time, Planned Date, Classified Date
+- Metadata: Created At, Updated At, Column ID, Tag ID, Event ID
+
+### Usage
+1. Click the "Export Tasks" button below the hidden columns section on the main dashboard
+2. The CSV file will automatically download with a timestamped filename
+3. Open the file in Excel, Google Sheets, or any CSV-compatible application
+4. Receive real-time notifications about the export status
+
+## 🔄 Automatic Sync & Reconnection
+
+Smart Desk includes intelligent sync capabilities that ensure your data is always up-to-date:
+
+### Offline-First Design
+- **Local Storage**: All changes are saved locally first, even when offline
+- **Pending Changes**: System tracks all unsynced changes while offline
+- **Automatic Detection**: Pending changes are automatically detected and queued
+
+### Reconnection Behavior
+- **Auto-Sync**: When connection is restored, pending changes are automatically synced
+- **Smart Notifications**: Real-time feedback about sync status and pending changes
+- **Conflict Resolution**: Server changes are merged with local changes intelligently
+
+### Sync Features
+- **Background Sync**: Periodic synchronization in the background
+- **Visibility Sync**: Sync when app becomes visible again
+- **Manual Sync**: Manual sync button for immediate synchronization
+- **Error Handling**: Graceful error handling with retry mechanisms
+
+### User Experience
+- **Visual Indicators**: Clear status indicators show sync state
+- **Progress Notifications**: Real-time notifications about sync progress
+- **Offline Support**: Full functionality even when disconnected
+- **Seamless Recovery**: Automatic recovery when connection is restored
 
 ## 📁 Project Structure
 

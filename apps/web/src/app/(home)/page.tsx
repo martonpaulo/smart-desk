@@ -6,6 +6,7 @@ import { TodoList } from 'src/legacy/components/column/TodoList';
 import { EventList } from 'src/legacy/components/event/EventList';
 import { HiddenColumnsList } from 'src/legacy/components/HiddenColumnsList';
 import { EventTimeline } from 'src/legacy/components/timeline/EventTimeline';
+import { ExportTasksButton } from 'src/features/task/components/ExportTasksButton';
 import { ProgressBarIndicator } from 'src/shared/components/ProgressBarIndicator';
 import { TimeLoadIndicator } from 'src/shared/components/TimeLoadIndicator';
 import { useResponsiveness } from 'src/shared/hooks/useResponsiveness';
@@ -39,7 +40,12 @@ export default function BoardPage() {
 
             <EventList />
 
-            {!isMobile && <HiddenColumnsList />}
+            {!isMobile && (
+              <Stack spacing={2}>
+                <HiddenColumnsList />
+                <ExportTasksButton />
+              </Stack>
+            )}
           </Stack>
         </Stack>
       </Stack>
