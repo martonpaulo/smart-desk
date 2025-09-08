@@ -12,7 +12,7 @@ Smart Desk is a personal productivity tool built with modern web technologies. I
 - **📅 Calendar**: Google Calendar integration with multiple view modes
 - **✅ Tasks**: Kanban board and Eisenhower Matrix for task management
 - **📊 Export**: CSV export functionality for task data
-- **📝 Notes**: Rich text editor with tagging and file management
+- **📝 Notes**: Rich text editor with tagging, file management, and full-view mode
 - **🗺️ Maps**: Location services with weather integration
 - **🔄 Sync**: Real-time synchronization across devices with automatic reconnection
 
@@ -63,6 +63,35 @@ Smart Desk is a personal productivity tool built with modern web technologies. I
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime)
 - **Storage**: Cloudinary
 - **Tools**: TypeScript, ESLint, Prettier, pnpm, Nx
+
+## 📝 Notes Full View
+
+Smart Desk includes a powerful full-view mode for notes with comprehensive inline editing capabilities:
+
+### Full View Features
+- **Dedicated Routes**: Each note has its own URL at `/notes/[id]`
+- **Inline Editing**: Edit title, color, and content directly without modals or navigation
+- **Real-time Preview**: Live markdown preview while editing content
+- **Color Management**: Visual color picker with live preview
+- **Date Tracking**: Clear display of both creation and last modified dates
+- **Rich Markdown Support**: Full markdown rendering with proper formatting
+- **Auto-save**: Changes are automatically saved to the database
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+
+### Usage
+1. **From Notes Page**: Click the "Open" button on any note card
+2. **Direct Access**: Navigate directly to `/notes/[note-id]` in your browser
+3. **Edit Mode**: Click the edit icon to enable inline editing
+4. **Save Changes**: Use the save button to persist changes (only enabled when changes are made)
+5. **Cancel Changes**: Use the cancel button to discard unsaved changes
+
+### Features
+- **Markdown Rendering**: Full support for headers, lists, links, and formatting
+- **Color Coding**: Visual color indicators for note organization with live preview
+- **Metadata Display**: Clear creation and update timestamps with visual separation
+- **Navigation**: Easy back navigation and breadcrumb support
+- **Accessibility**: WCAG 2.1 compliant with proper keyboard navigation
+- **Live Preview**: Real-time markdown preview while editing content
 
 ## 📊 Data Export
 

@@ -59,6 +59,7 @@ smart-desk/
 - **Colocation**: Keep related files together (components, hooks, stores, types)
 - **Separation of Concerns**: Clear boundaries between UI, business logic, and data
 - **Composability**: Small, reusable functions and components
+- **File Length**: Prefer files to be 300 lines or less for better maintainability and readability
 
 ### State Management
 - **Zustand**: Preferred solution for global state management
@@ -273,6 +274,7 @@ export function FeatureComponent() {
 - ❌ Not running linting before commits
 - ❌ Inconsistent naming conventions
 - ❌ Large, monolithic components
+- ❌ Files exceeding 300 lines (prefer breaking into smaller files)
 - ❌ Missing error handling
 
 ## 🔍 Code Review Checklist
@@ -283,6 +285,7 @@ export function FeatureComponent() {
 - [ ] Prettier formatting applied
 - [ ] All imports properly sorted
 - [ ] No `any` types used
+- [ ] Files are 300 lines or less (prefer smaller files)
 - [ ] Proper error handling implemented
 - [ ] Loading states handled
 - [ ] Accessibility considerations addressed

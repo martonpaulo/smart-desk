@@ -70,8 +70,12 @@ export function NotesView() {
     }
   };
 
+  const handleOpenInNewTab = (note: Note) => {
+    window.open(`/notes/${note.id}`, '_blank');
+  };
+
   return (
-    <PageSection title="Notes" description="Capture your thoughts, on any device">
+    <PageSection title="Notes" description="Write, organize, and remember">
       {/* Desktop toolbar */}
       <NotesToolbar onAdd={() => openModal()} />
 
@@ -90,7 +94,12 @@ export function NotesView() {
       {/* Grid of notes */}
       <NotesGrid>
         {paged.map(note => (
-          <NoteCard key={note.id} note={note} onEdit={() => openModal(note)} />
+          <NoteCard
+            key={note.id}
+            note={note}
+            onEdit={() => openModal(note)}
+            onOpenInNewTab={() => handleOpenInNewTab(note)}
+          />
         ))}
       </NotesGrid>
 

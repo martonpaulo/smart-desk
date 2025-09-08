@@ -3,9 +3,11 @@
 import { useMemo } from 'react';
 
 import EditIcon from '@mui/icons-material/Edit';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Button, Paper, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import type { Note } from 'src/features/note/types/Note';
+import { getDateLabel } from 'src/legacy/utils/timeUtils';
 
 /**
  * Compact card with color accent, title, preview, and quick edit.
@@ -14,9 +16,10 @@ import type { Note } from 'src/features/note/types/Note';
 type NoteCardProps = {
   note: Note;
   onEdit: () => void;
+  onOpenInNewTab?: () => void;
 };
 
-export function NoteCard({ note, onEdit }: NoteCardProps) {
+export function NoteCard({ note, onEdit, onOpenInNewTab }: NoteCardProps) {
   const accent = note.color || '#999';
   const surface = alpha(accent, 0.1);
 
@@ -24,30 +27,25 @@ export function NoteCard({ note, onEdit }: NoteCardProps) {
     const raw = String(note.content ?? '')
       .replace(/\r\n/g, '\n')
       .trim();
-    // Take first ~120 chars while avoiding cutting mid-word
-    const short = raw.length > 140 ? raw.slice(0, 140) + '…' : raw;
     // Convert very simple markdown headers to plain text hint
-    return short.replace(/^#{1,6}\s*/gm, '');
+    const cleaned = raw.replace(/^#{1,6}\s*/gm, '');
+    // Take first ~120 chars while avoiding cutting mid-word
+    const short = cleaned.length > 140 ? cleaned.slice(0, 140) + '…' : cleaned;
+    return short;
   }, [note.content]);
 
   return (
     <Paper
       variant="outlined"
       sx={{
-        borderLeft: `4px solid ${accent}`,
         backgroundColor: surface,
-        p: 1.25,
+        p: 1.5,
         height: '100%',
         display: 'flex',
       }}
     >
-      <Stack gap={1} flexGrow={1} minWidth={0}>
-        <Typography
-          variant="subtitle2"
-          noWrap
-          title={note.title}
-          sx={{ fontWeight: 600, lineHeight: 1.2 }}
-        >
+      <Stack gap={1.5} flexGrow={1} minWidth={0}>
+        <Typography variant="h3" noWrap title={note.title}>
           {note.title || 'Untitled'}
         </Typography>
 
@@ -59,6 +57,7 @@ export function NoteCard({ note, onEdit }: NoteCardProps) {
             WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
+            whiteSpace: 'pre-wrap',
           }}
         >
           {preview || 'No content'}
@@ -66,11 +65,18 @@ export function NoteCard({ note, onEdit }: NoteCardProps) {
 
         <Stack direction="row" justifyContent="space-between" alignItems="center" mt="auto">
           <Typography variant="caption" color="text.disabled">
-            {new Date(note.updatedAt ?? note.createdAt).toLocaleDateString()}
+            {getDateLabel(note.updatedAt ?? note.createdAt)}
           </Typography>
-          <Button size="small" startIcon={<EditIcon />} onClick={onEdit}>
-            Edit
-          </Button>
+          <Stack direction="row" gap={0.5}>
+            {onOpenInNewTab && (
+              <Button size="small" startIcon={<OpenInNewIcon />} onClick={onOpenInNewTab}>
+                Open
+              </Button>
+            )}
+            <Button size="small" startIcon={<EditIcon />} onClick={onEdit}>
+              Edit
+            </Button>
+          </Stack>
         </Stack>
       </Stack>
     </Paper>
