@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 import { SyncInterval } from 'src/core/constants/SyncInterval';
+import { useSupabaseSessionMonitor } from 'src/core/hooks/useSupabaseSessionMonitor';
+import { useSyncTrigger } from 'src/core/hooks/useSyncTriggers';
 import { useConnectivityStore } from 'src/core/store/useConnectivityStore';
 import {
   combineCleanups,
@@ -33,8 +35,15 @@ export function SupabaseSyncProvider({ children }: Props) {
   const { status } = useSession(); // 'loading' | 'authenticated' | 'unauthenticated'
   const online = useOnlineStatus();
 
+  // Monitor Supabase session status
+  useSupabaseSessionMonitor();
+
+  // Monitor connectivity changes and show snackbars
+  useSyncTrigger();
+
   const setAuthStatus = useConnectivityStore(s => s.setAuthStatus);
   const setOnline = useConnectivityStore(s => s.setOnline);
+  const setConnectionError = useConnectivityStore(s => s.setConnectionError);
   const isConnected = useConnectivityStore(s => s.isConnected);
 
   // Keep store in sync with auth status
@@ -47,11 +56,16 @@ export function SupabaseSyncProvider({ children }: Props) {
     setOnline(online);
   }, [online, setOnline]);
 
-  // Resolve stores to sync for the current route
+  // Resolve stores to sync for the current route with error handling
   const syncActive = useCallback(async () => {
-    const stores = await getStoresToSyncForRouteAsync(pathname);
-    await syncStoresBatch(stores);
-  }, [pathname]);
+    try {
+      const stores = await getStoresToSyncForRouteAsync(pathname);
+      await syncStoresBatch(stores);
+    } catch (error) {
+      console.error('Sync failed:', error);
+      setConnectionError('server_error');
+    }
+  }, [pathname, setConnectionError]);
 
   // First sync after idle when connected
   useEffect(() => {
@@ -77,15 +91,25 @@ export function SupabaseSyncProvider({ children }: Props) {
       const periodicCleanups = stores.map(s =>
         schedulePeriodicSync(async () => {
           if (!useConnectivityStore.getState().isConnected) return;
-          await s.syncPending();
-          await s.syncFromServer();
+          try {
+            await s.syncPending();
+            await s.syncFromServer();
+          } catch (error) {
+            console.error('Periodic sync failed:', error);
+            setConnectionError('server_error');
+          }
         }, SyncInterval.BACKGROUND),
       );
 
       const cancelVisibility = syncOnVisibilityChange(async () => {
         if (cancelled) return;
         if (useConnectivityStore.getState().isConnected) {
-          await syncStoresBatch(stores);
+          try {
+            await syncStoresBatch(stores);
+          } catch (error) {
+            console.error('Visibility sync failed:', error);
+            setConnectionError('server_error');
+          }
         }
       }, SyncInterval.VISIBILITY);
 
@@ -96,7 +120,7 @@ export function SupabaseSyncProvider({ children }: Props) {
       cancelled = true;
       if (cleanupAll) cleanupAll();
     };
-  }, [isConnected, pathname]);
+  }, [isConnected, pathname, setConnectionError]);
 
   // Flush before unload if connected
   useEffect(() => {

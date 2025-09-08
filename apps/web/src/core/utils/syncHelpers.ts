@@ -48,13 +48,26 @@ type StoreSync = {
 
 // Run the standard two-step sync sequence for a single store.
 async function runStoreSync(store: StoreSync): Promise<void> {
-  await store.syncPending();
-  await store.syncFromServer();
+  try {
+    await store.syncPending();
+    await store.syncFromServer();
+  } catch (error) {
+    // Re-throw with context for better error handling
+    console.error('Store sync failed:', error);
+    throw new Error(`Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 // Run the standard sync sequence for a list of stores.
 export async function syncStoresBatch(stores: StoreSync[]): Promise<void> {
-  await Promise.all(stores.map(s => runStoreSync(s)));
+  if (stores.length === 0) return;
+
+  try {
+    await Promise.all(stores.map(s => runStoreSync(s)));
+  } catch (error) {
+    console.error('Batch sync failed:', error);
+    throw error; // Re-throw to be handled by caller
+  }
 }
 
 // Compose multiple cleanup callbacks into one.

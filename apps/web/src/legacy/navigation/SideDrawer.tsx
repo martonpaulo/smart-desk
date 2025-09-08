@@ -19,15 +19,12 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { useSyncTrigger } from 'src/core/hook/useSyncTriggers';
+import { useSyncTrigger } from 'src/core/hooks/useSyncTriggers';
 import { useConnectivityStore } from 'src/core/store/useConnectivityStore';
 import { navItems } from 'src/legacy/navigation/navItems';
 import { SyncStatusIcon } from 'src/shared/components/SyncStatusIcon';
 
 export function SideDrawer() {
-  // Select the boolean primitive, not a function reference
-  const canSync = useConnectivityStore(s => s.canSync);
-
   const theme = useTheme();
 
   const pathname = usePathname() || '/';
@@ -73,7 +70,8 @@ export function SideDrawer() {
   };
 
   const [triggerKey, setTriggerKey] = useState(0);
-  const { label: syncLabel } = useSyncTrigger({ triggerKey });
+  const { label: syncLabel, canSync: syncCanSync } = useSyncTrigger({ triggerKey });
+  const uiColor = useConnectivityStore(s => s.uiColor);
 
   return (
     <Drawer
@@ -197,8 +195,9 @@ export function SideDrawer() {
             width={`calc(100% - ${theme.spacing(2)})`}
           >
             <Button
-              variant="outlined"
-              disabled={!canSync}
+              variant={uiColor === 'error' ? 'contained' : 'outlined'}
+              color={uiColor}
+              disabled={!syncCanSync}
               fullWidth
               onClick={() => setTriggerKey(k => k + 1)}
               startIcon={<SyncStatusIcon />}
@@ -209,6 +208,32 @@ export function SideDrawer() {
                 minWidth: 0,
                 padding: 0,
                 paddingLeft: `calc(${ITEM_PX} - ${theme.spacing(0.5)})`,
+                // Enhanced styling for error states
+                ...(uiColor === 'error' && {
+                  boxShadow: `0 0 0 1px ${theme.palette.error.main}`,
+                  '&:hover': {
+                    boxShadow: `0 0 0 2px ${theme.palette.error.main}`,
+                    backgroundColor: theme.palette.error.dark,
+                  },
+                  '&:focus': {
+                    boxShadow: `0 0 0 2px ${theme.palette.error.main}`,
+                  },
+                }),
+                // Subtle animation for error states to draw attention
+                ...(uiColor === 'error' && {
+                  animation: 'pulse 2s infinite',
+                  '@keyframes pulse': {
+                    '0%': {
+                      boxShadow: `0 0 0 0 ${theme.palette.error.main}40`,
+                    },
+                    '70%': {
+                      boxShadow: `0 0 0 4px ${theme.palette.error.main}00`,
+                    },
+                    '100%': {
+                      boxShadow: `0 0 0 0 ${theme.palette.error.main}00`,
+                    },
+                  },
+                }),
                 '& .MuiButton-startIcon': {
                   m: 0,
                   mr: collapsed ? 0 : `calc(${ITEM_GAP} - ${theme.spacing(0.75)})`,
