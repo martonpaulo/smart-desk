@@ -2,10 +2,5 @@
   "buildCommand": "npx nx run web:build",
   "outputDirectory": ".next",
   "installCommand": "cd ../.. && pnpm install",
-  "framework": "nextjs",
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  "framework": "nextjs"
 }
