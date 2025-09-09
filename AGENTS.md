@@ -173,6 +173,18 @@ pnpm build:web
 
 This ensures configuration changes don't break the project and maintains system reliability.
 
+### File Cleanup After Optimization
+**⚠️ CRITICAL**: When finishing optimization work that creates new improved versions of components, you MUST:
+
+1. **Replace old components**: Move optimized components to replace the original ones
+2. **Rename components**: Remove "Optimized" prefixes and use original names (e.g., OptimizedEventList → EventList)
+3. **Update imports**: Update all import statements to use the new component locations
+4. **Remove old files**: Delete the old unused files to keep the codebase clean
+5. **Move supporting files**: Move skeleton components and utilities to appropriate locations
+6. **Test build**: Ensure the build still works after cleanup
+
+This maintains clean code organization and consistent naming conventions throughout the project.
+
 ### Documentation Updates
 **⚠️ CRITICAL**: When making any changes that are documented in README.md or should be documented because they are important, you MUST:
 
