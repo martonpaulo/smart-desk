@@ -1,4 +1,4 @@
-import { Fragment, ReactElement } from 'react';
+import React, { Fragment, ReactElement } from 'react';
 
 import DOMPurify from 'dompurify';
 import parse from 'html-react-parser';

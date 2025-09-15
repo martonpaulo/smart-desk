@@ -2,7 +2,7 @@
 
 import 'src/legacy/lib/dragDropTouch';
 
-import { ReactNode } from 'react';
+import React from 'react';
 import { SessionProvider } from 'next-auth/react';
 
 import { MobileMotionController } from 'src/core/components/MobileMotionController';
@@ -19,7 +19,7 @@ import { SnackbarWrapperProvider } from 'src/shared/providers/SnackbarWrapperPro
 import { jetbrainsMono, poppins } from 'src/theme/fonts';
 
 interface RootLayoutProps {
-  readonly children: ReactNode;
+  readonly children: React.ReactNode;
 }
 
 const providers = [
@@ -47,9 +47,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
 
       <body suppressHydrationWarning className={`${poppins.variable} ${jetbrainsMono.variable}`}>
-        {providers.reduceRight((acc, Provider) => {
-          return <Provider>{acc}</Provider>;
-        }, children)}
+        {providers.reduceRight(
+          (acc: React.ReactNode, Provider: React.ComponentType<{ children: React.ReactNode }>) => {
+            return <Provider>{acc}</Provider>;
+          },
+          children,
+        )}
       </body>
     </html>
   );

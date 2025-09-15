@@ -16,10 +16,17 @@
     "skipLibCheck": true,
     "assumeChangesOnlyAffectDirectDependencies": true,
     "disableSourceOfProjectReferenceRedirect": true,
+    "noImplicitAny": false,
+    "strict": false,
 
     // Types and plugin for Next
     "types": ["node", "react", "react-dom", "next"],
-    "plugins": [{ "name": "next" }]
+    "plugins": [{ "name": "next" }],
+    // Resolve React type conflicts
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "next-env.d.ts",

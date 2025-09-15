@@ -16,13 +16,7 @@ const nextCompat = compat.extends('next/core-web-vitals');
 const config = [
   // Global ignores
   {
-    ignores: [
-      '.next/**',
-      'out/**',
-      'node_modules/**',
-      'dist/**',
-      'build/**',
-    ],
+    ignores: ['.next/**', 'out/**', 'node_modules/**', 'dist/**', 'build/**'],
   },
   ...nextCompat,
   {
@@ -46,6 +40,19 @@ const config = [
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
+      // Disallow relative imports (except same-folder imports)
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../*'],
+              message:
+                'Relative imports are not allowed. Use absolute imports with src/* alias instead.',
+            },
+          ],
+        },
       ],
     },
     settings: {

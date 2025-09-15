@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { QueryClient } from '@tanstack/react-query';
@@ -14,7 +14,7 @@ const dataInLocalStorageExpiresInMs = 1000 * 60 * 10;
 const maxRetryAttempts = 3;
 const maxRetryDelayMs = 1000 * 30;
 
-export function ReactQueryProvider({ children }: { children: ReactNode }) {
+export function ReactQueryProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
       new QueryClient({

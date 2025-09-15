@@ -1,4 +1,4 @@
-import { type DragEvent, type ElementType, useState } from 'react';
+import React, { type DragEvent, useState } from 'react';
 
 import {
   Add as AddIcon,
@@ -67,7 +67,7 @@ export function EisenhowerQuadrant({
   const tasksCount = tasks.length;
 
   // Pick icon and tone using theme palette only
-  let Icon: ElementType = AlertIcon;
+  let Icon: React.ComponentType<{ color?: string; fontSize?: string }> = AlertIcon;
   let iconColor: 'action' | 'error' | 'info' | 'warning' = 'action';
   let showIcon = true;
   let iconSize: 'small' | 'medium' | 'large' = isMobile ? 'small' : 'medium';

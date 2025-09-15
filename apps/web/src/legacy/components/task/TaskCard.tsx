@@ -234,7 +234,7 @@ export function TaskCard({
                 mode="edit"
                 dense
                 title={title}
-                inputRef={inputRef as React.RefObject<HTMLInputElement>}
+                inputRef={inputRef}
                 onChangeTitle={setTitle}
                 onBlurSave={finishInlineEdit}
                 onCancel={() => {

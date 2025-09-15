@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, ReactNode, useCallback, useEffect } from 'react';
+import React, { createContext, useCallback, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
@@ -19,7 +19,7 @@ import { getStoresToSyncForRouteAsync } from 'src/core/utils/syncRegistry';
 import { useOnlineStatus } from 'src/shared/hooks/useOnlineStatus';
 
 interface Props {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 interface SyncContextValue {

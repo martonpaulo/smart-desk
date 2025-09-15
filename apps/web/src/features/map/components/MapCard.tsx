@@ -39,7 +39,7 @@ export function MapCard({ map, file }: MapCardProps) {
 
   return (
     <Card variant="outlined" sx={{ width: 300 }}>
-      <CardActionArea component={Link} href={`/maps/${map.id}`} sx={{ height: '100%' }}>
+      <CardActionArea component={Link as React.ElementType} href={`/maps/${map.id}`} sx={{ height: '100%' }}>
         {renderPreview()}
         <CardContent>
           <Stack gap={1}>

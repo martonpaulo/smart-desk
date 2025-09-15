@@ -24,7 +24,7 @@ export default function NotFoundPage() {
         Oops! This page doesn&apos;t exist
       </Typography>
 
-      <Button component={Link} href="/" variant="contained">
+      <Button component={Link as React.ElementType} href="/" variant="contained">
         Go back home
       </Button>
     </Stack>

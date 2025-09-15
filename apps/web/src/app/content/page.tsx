@@ -1,28 +1,19 @@
 'use client';
 
-import { ComponentType } from 'react';
 import Link from 'next/link';
 
 import CollectionsIcon from '@mui/icons-material/Collections';
 import EventIcon from '@mui/icons-material/Event';
 import LabelIcon from '@mui/icons-material/Label';
 import PlaceIcon from '@mui/icons-material/Place';
-import {
-  Card,
-  CardActionArea,
-  CardContent,
-  Grid,
-  Stack,
-  SvgIconProps,
-  Typography,
-} from '@mui/material';
+import { Card, CardActionArea, CardContent, Grid, Stack, SvgIcon, Typography } from '@mui/material';
 import { PageSection } from 'src/core/components/PageSection';
 
 type ManageItem = {
   title: string;
   description: string;
   href: string;
-  Icon: ComponentType<SvgIconProps>;
+  Icon: typeof SvgIcon;
 };
 
 const MANAGE_ITEMS: ManageItem[] = [
@@ -75,7 +66,7 @@ export default function ContentPage() {
               })}
             >
               <CardActionArea
-                component={Link}
+                component={Link as React.ElementType}
                 href={`/content${item.href}`}
                 aria-label={`Open ${item.title}`}
                 sx={{ height: '100%' }}

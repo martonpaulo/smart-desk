@@ -54,7 +54,7 @@ export function PlannerControls({
         </ToggleButtonGroup>
       </Stack>
 
-      {rightSlot}
+      {rightSlot as React.ReactNode}
     </Stack>
   );
 }

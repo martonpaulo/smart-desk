@@ -1,12 +1,12 @@
 'use client';
 
-import { ReactNode } from 'react';
+import React from 'react';
 
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 interface DateAdapterProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export function DateAdapterProvider({ children }: DateAdapterProviderProps) {

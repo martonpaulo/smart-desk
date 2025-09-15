@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, ReactNode, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 import { useLoadingRegistry } from 'src/shared/hooks/useLoadingRegistry';
 import { useRunWithFeedback } from 'src/shared/hooks/useRunWithFeedback';
@@ -12,7 +12,7 @@ export interface PromiseFeedbackContextValue {
 }
 
 export interface PromiseFeedbackProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 const PromiseFeedbackContext = createContext<PromiseFeedbackContextValue | null>(null);

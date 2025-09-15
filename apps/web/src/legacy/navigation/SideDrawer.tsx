@@ -162,7 +162,7 @@ export function SideDrawer() {
             return (
               <ListItemButton
                 key={href}
-                component={Link}
+                component={Link as React.ElementType}
                 href={href}
                 selected={selected}
                 sx={itemButtonStyles}
@@ -252,7 +252,7 @@ export function SideDrawer() {
             return (
               <ListItemButton
                 key={href}
-                component={Link}
+                component={Link as React.ElementType}
                 href={href}
                 selected={selected}
                 sx={itemButtonStyles}

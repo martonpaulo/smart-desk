@@ -5,6 +5,8 @@
 # Build & Cache output
 /dist
 /build
+**/dist/
+**/build/
 *.tsbuildinfo
 
 # Logs
@@ -30,6 +32,19 @@ next-env.d.ts
 /apps/native/ios/build/
 /apps/native/ios/Pods/
 /apps/native/ios/.xcode.env.local
+
+# Expo
+.expo/
+**/.expo/
+**/dist/
+**/build/
+
+# React Native / Expo specific
+# Note: metro.config.js, babel.config.js, app.json, env.example, and assets/ should be tracked
+# Only ignore build outputs and generated files
+
+# Generated files that should be ignored
+# Only ignore specific generated files, not all config files
 
 # React Native (Android)
 /apps/native/android/build/

@@ -1,12 +1,12 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { LocationContext } from 'src/legacy/context/LocationContext';
 import { ILocation } from 'src/legacy/types/ILocation';
 
 interface LocationProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export function LocationProvider({ children }: LocationProviderProps) {

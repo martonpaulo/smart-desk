@@ -53,6 +53,7 @@ smart-desk/
 - **Named Exports Only**: Use named exports exclusively (no default exports)
 - **Absolute Imports**: Use `src/*` alias instead of relative paths like `../`
 - **Type Safety**: Leverage TypeScript's type system for better code quality
+- **No Relative Exports**: Never use relative exports (e.g., `export * from './Component'`), always use absolute imports
 
 ### Code Organization
 - **Feature-Oriented**: Organize code by features, not by file types
@@ -83,12 +84,17 @@ const ComponentName = ({ prop1, prop2 }: ComponentProps) => {
 
 // ❌ DON'T: Use default exports
 export default function ComponentName() {}
+
+// ❌ DON'T: Import React (React 19 doesn't require it)
+import React from 'react';
+
+// ✅ DO: Direct imports without React
+import { useState, useEffect } from 'react';
 ```
 
 ### Import Organization
 ```typescript
 // ✅ DO: Follow the configured import order
-import React from 'react';
 import { NextRequest } from 'next/server';
 import { Button } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
@@ -138,6 +144,9 @@ interface EntityStore<T extends Base> {
 - **Styled Components**: Use styled-components for custom styling
 - **Platform-Specific**: Consider iOS-specific patterns and behaviors
 - **Primary Mobile Experience**: This is the recommended platform for mobile users
+- **Component Structure**: Create separate folders for components with `index.tsx` and `styles.ts`
+- **No StyleSheet**: Use ONLY React Native Paper and styled-components, never use React Native StyleSheet
+- **Style Separation**: Keep styles in separate `styles.ts` files, not inline with component code
 
 ## 🔧 Development Workflow
 
@@ -262,6 +271,41 @@ export function FeatureComponent() {
 }
 ```
 
+### React Native Component Structure
+```typescript
+// ✅ DO: Create component folder structure
+// components/Button/
+//   ├── index.tsx
+//   └── styles.ts
+
+// components/Button/index.tsx
+import { TouchableOpacity, Text } from 'react-native';
+import { Button as PaperButton } from 'react-native-paper';
+import styled from 'styled-components/native';
+import { ButtonProps } from './types';
+
+const StyledButton = styled(TouchableOpacity)`
+  // styled-components styles here
+`;
+
+export function Button({ title, onPress, ...props }: ButtonProps) {
+  return (
+    <StyledButton onPress={onPress} {...props}>
+      <Text>{title}</Text>
+    </StyledButton>
+  );
+}
+
+// ❌ DON'T: Mix styles with component code
+import { StyleSheet } from 'react-native';
+
+const styles = StyleSheet.create({
+  button: {
+    // styles here
+  },
+});
+```
+
 ## 🚫 Common Pitfalls to Avoid
 
 ### TypeScript Issues
@@ -288,6 +332,10 @@ export function FeatureComponent() {
 - ❌ Large, monolithic components
 - ❌ Files exceeding 300 lines (prefer breaking into smaller files)
 - ❌ Missing error handling
+- ❌ Using relative exports instead of absolute imports
+- ❌ Importing React when not needed (React 19)
+- ❌ Keeping unused components in codebase
+- ❌ Mixing styles with component code in React Native
 
 ## 🔍 Code Review Checklist
 

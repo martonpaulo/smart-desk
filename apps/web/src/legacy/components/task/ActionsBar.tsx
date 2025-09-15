@@ -1,13 +1,13 @@
 'use client';
 
-import { ReactNode } from 'react';
+import React from 'react';
 
 import { ButtonGroup, Paper, Stack } from '@mui/material';
 import Popper from '@mui/material/Popper';
 import { alpha, useTheme } from '@mui/material/styles';
 
 type ActionsBarProps = {
-  items: ReactNode[];
+  items: React.ReactNode[];
   showOnHover?: boolean;
   asTooltip?: boolean;
   anchorEl?: HTMLElement | null;

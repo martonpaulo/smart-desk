@@ -61,7 +61,11 @@ export function CalendarForm({ initial, mode, onSubmitAction, onCancelAction }: 
   }, [initial, reset]);
 
   function submit(values: FormValues) {
-    onSubmitAction(values);
+    onSubmitAction({
+      title: values.title,
+      source: values.source,
+      color: values.color,
+    });
     // parent shows success toast and sound for add/update
   }
 
