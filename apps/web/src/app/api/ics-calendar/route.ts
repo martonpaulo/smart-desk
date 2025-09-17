@@ -44,11 +44,23 @@ function extractEvents(
     const baseTitle = ev.summary || '';
     const baseCount = comp.getAllProperties('attendee').length;
 
+    // Skip events that start with "Canceled"
+    if (baseTitle.startsWith('Canceled')) {
+      continue;
+    }
+
     if (ev.isRecurring()) {
       const iter = ev.iterator();
       let nextTime;
       while ((nextTime = iter.next())) {
         const { startDate, endDate, item } = ev.getOccurrenceDetails(nextTime);
+        const occurrenceTitle = item.summary || baseTitle;
+
+        // Skip occurrences that start with "Canceled"
+        if (occurrenceTitle.startsWith('Canceled')) {
+          continue;
+        }
+
         const s = toDateInZone(startDate, zone);
         let e = toDateInZone(endDate, zone);
         if (startDate.isDate && endDate.isDate) {
@@ -63,7 +75,7 @@ function extractEvents(
           id: `${uid}_${s.toISOString()}`,
           start: s,
           end: e,
-          title: item.summary || baseTitle,
+          title: occurrenceTitle,
           attendeeCount: item.component.getAllProperties('attendee').length,
           description: item.description,
           calendar: calendarMeta,
