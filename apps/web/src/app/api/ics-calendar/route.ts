@@ -5,39 +5,14 @@ import { DateTime } from 'luxon';
 import type { Event } from 'src/legacy/types/Event';
 import type { ICalendar } from 'src/legacy/types/ICalendar';
 
-function icalTimeToUTC(time: ICAL.Time | Date): Date {
+function icalTimeToDate(time: ICAL.Time | Date): Date {
   if (time instanceof Date) {
     return time;
   }
 
-  // For all-day events or floating times (no timezone), treat as UTC
-  if (time.isDate || !time.zone || time.zone.tzid === 'floating') {
-    return DateTime.fromObject(
-      {
-        year: time.year,
-        month: time.month,
-        day: time.day,
-        hour: time.hour || 0,
-        minute: time.minute || 0,
-        second: time.second || 0,
-      },
-      { zone: 'UTC' },
-    ).toJSDate();
-  }
-
-  // For timed events with timezone info, use the ICS event's timezone
-  const eventTimezone = time.zone.tzid;
-  return DateTime.fromObject(
-    {
-      year: time.year,
-      month: time.month,
-      day: time.day,
-      hour: time.hour,
-      minute: time.minute,
-      second: time.second,
-    },
-    { zone: eventTimezone },
-  ).toJSDate();
+  // Use ICAL.Time's built-in conversion which properly handles timezones
+  // This respects the timezone information in the ICS file
+  return time.toJSDate();
 }
 
 function extractEvents(
@@ -72,8 +47,8 @@ function extractEvents(
           continue;
         }
 
-        const s = icalTimeToUTC(startDate);
-        let e = icalTimeToUTC(endDate);
+        const s = icalTimeToDate(startDate);
+        let e = icalTimeToDate(endDate);
         if (startDate.isDate && endDate.isDate) {
           e = new Date(e);
           e.setDate(e.getDate() - 1);
@@ -94,8 +69,8 @@ function extractEvents(
         });
       }
     } else {
-      const s = icalTimeToUTC(ev.startDate);
-      let e = icalTimeToUTC(ev.endDate);
+      const s = icalTimeToDate(ev.startDate);
+      let e = icalTimeToDate(ev.endDate);
       if (ev.startDate.isDate && ev.endDate.isDate) {
         e = new Date(e);
         e.setDate(e.getDate() - 1);
