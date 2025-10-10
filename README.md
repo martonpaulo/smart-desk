@@ -11,7 +11,7 @@ Smart Desk is a personal productivity tool built with modern web technologies. I
 - **📱 Cross-Platform**: Web (Next.js) and iOS (React Native) applications (iOS only)
 - **🔐 Authentication**: Secure login/logout with Supabase Auth
 - **✅ Tasks**: Create, edit, delete, and manage tasks with priority flags
-- **📅 Calendar**: Google Calendar integration with multiple view modes
+- **📅 Calendar**: Google Calendar and ICS calendar integration with multiple view modes and automatic timezone conversion
 - **📊 Export**: CSV export functionality for task data
 - **📝 Notes**: Rich text editor with tagging, file management, and full-view mode
 - **🗺️ Maps**: Location services with weather integration
@@ -84,6 +84,15 @@ Smart Desk is a personal productivity tool built with modern web technologies. I
 - **Backend**: Supabase (PostgreSQL, Auth, Realtime)
 - **Storage**: Cloudinary
 - **Tools**: TypeScript, ESLint, Prettier, pnpm, Nx
+
+### Calendar & Timezone Handling
+
+The web application supports both Google Calendar and ICS calendar integration. For ICS calendars:
+
+- **Timezone Conversion**: ICS events are parsed in their **original timezone** (as specified in the ICS file), converted to UTC internally, and then automatically displayed in the **user's local browser timezone**
+- **No Manual Timezone Selection**: The UI automatically displays all events in your local timezone without requiring any configuration
+- **Proper Handling**: Respects all-day events, floating times, and timed events with specific timezones from ICS feeds
+- **Implementation**: The API route (`/api/ics-calendar`) uses `ical.js` and `luxon` for accurate timezone conversions
 
 ## 📁 Project Structure
 

@@ -11,16 +11,13 @@ export async function fetchIcsEvents(
 ): Promise<Event[]> {
   if (calendars.length === 0) return [];
 
-  const clientZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-
-  const now = DateTime.now().setZone(clientZone);
+  const now = DateTime.now();
   const startIso = (
     start ? DateTime.fromJSDate(start) : now.minus({ days: 1 }).startOf('day')
   ).toISO()!;
   const endIso = (end ? DateTime.fromJSDate(end) : now.plus({ days: 1 }).endOf('day')).toISO()!;
 
   const base = new URL('/api/ics-calendar', window.location.origin);
-  base.searchParams.set('timezone', clientZone);
   base.searchParams.set('startDate', startIso);
   base.searchParams.set('endDate', endIso);
 

@@ -5,16 +5,28 @@ import { DateTime } from 'luxon';
 import type { Event } from 'src/legacy/types/Event';
 import type { ICalendar } from 'src/legacy/types/ICalendar';
 
-function toDateInZone(time: ICAL.Time | Date, zone: string): Date {
+function icalTimeToUTC(time: ICAL.Time | Date): Date {
   if (time instanceof Date) {
-    return DateTime.fromJSDate(time).setZone(zone).toJSDate();
+    return time;
   }
-  if (time.isDate && (!time.zone || time.zone.tzid === 'floating')) {
-    return DateTime.fromObject({ year: time.year, month: time.month, day: time.day }, { zone })
-      .startOf('day')
-      .toJSDate();
+
+  // For all-day events or floating times (no timezone), treat as UTC
+  if (time.isDate || !time.zone || time.zone.tzid === 'floating') {
+    return DateTime.fromObject(
+      {
+        year: time.year,
+        month: time.month,
+        day: time.day,
+        hour: time.hour || 0,
+        minute: time.minute || 0,
+        second: time.second || 0,
+      },
+      { zone: 'UTC' },
+    ).toJSDate();
   }
-  // Fix: Convert ICAL.Time directly to DateTime without going through JS Date first
+
+  // For timed events with timezone info, use the ICS event's timezone
+  const eventTimezone = time.zone.tzid;
   return DateTime.fromObject(
     {
       year: time.year,
@@ -24,13 +36,12 @@ function toDateInZone(time: ICAL.Time | Date, zone: string): Date {
       minute: time.minute,
       second: time.second,
     },
-    { zone },
+    { zone: eventTimezone },
   ).toJSDate();
 }
 
 function extractEvents(
   root: ICAL.Component,
-  zone: string,
   start: Date,
   end: Date,
   calendarMeta: ICalendar,
@@ -61,8 +72,8 @@ function extractEvents(
           continue;
         }
 
-        const s = toDateInZone(startDate, zone);
-        let e = toDateInZone(endDate, zone);
+        const s = icalTimeToUTC(startDate);
+        let e = icalTimeToUTC(endDate);
         if (startDate.isDate && endDate.isDate) {
           e = new Date(e);
           e.setDate(e.getDate() - 1);
@@ -83,8 +94,8 @@ function extractEvents(
         });
       }
     } else {
-      const s = toDateInZone(ev.startDate, zone);
-      let e = toDateInZone(ev.endDate, zone);
+      const s = icalTimeToUTC(ev.startDate);
+      let e = icalTimeToUTC(ev.endDate);
       if (ev.startDate.isDate && ev.endDate.isDate) {
         e = new Date(e);
         e.setDate(e.getDate() - 1);
@@ -114,7 +125,6 @@ export async function GET(req: NextRequest) {
   const calId = params.get('id');
   const calName = params.get('name');
   const calColorParam = params.get('color') ?? '#0078D4';
-  const zone = params.get('timezone') || 'UTC';
   const sIso = params.get('startDate');
   const eIso = params.get('endDate');
 
@@ -125,8 +135,8 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const start = DateTime.fromISO(sIso, { zone }).toJSDate();
-  const end = DateTime.fromISO(eIso, { zone }).toJSDate();
+  const start = DateTime.fromISO(sIso).toJSDate();
+  const end = DateTime.fromISO(eIso).toJSDate();
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     return NextResponse.json({ error: 'invalid date format' }, { status: 400 });
   }
@@ -150,6 +160,6 @@ export async function GET(req: NextRequest) {
     name: calName,
     color: calendarColor,
   };
-  const events = extractEvents(root, zone, start, end, calendarMeta);
+  const events = extractEvents(root, start, end, calendarMeta);
   return NextResponse.json(events);
 }
