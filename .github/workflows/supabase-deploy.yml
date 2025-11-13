@@ -35,7 +35,7 @@ jobs:
           version: latest
 
       - name: Link project
-        run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+        run: supabase link --project-ref $PROJECT_REF --password $SUPABASE_DB_PASSWORD
 
       - name: Sync project secrets
         run: |
