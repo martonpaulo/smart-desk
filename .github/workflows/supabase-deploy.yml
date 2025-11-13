@@ -21,8 +21,10 @@ jobs:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
 
     steps:
-      - name: Checkout
+      - name: Checkout (full history)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -45,9 +47,13 @@ jobs:
             "CRON_SECRET=$CRON_SECRET" \
             --project-ref "$PROJECT_REF"
 
-      - name: Apply migrations
+      - name: Sync remote migrations then apply
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          # feed automatic "y" answers to any confirmation prompts
+          # pull remote migration history to local workspace (ok if it fails)
+          supabase db pull --linked --password "$SUPABASE_DB_PASSWORD" || true
+          # try to apply migrations non-interactively
           yes | supabase db push --linked --password "$SUPABASE_DB_PASSWORD"
 
       - name: Deploy all edge functions
@@ -63,8 +69,8 @@ jobs:
           PROJECT_URL="https://${PROJECT_REF}.functions.supabase.co"
           supabase db query <<SQL
           select cron.schedule(
-            'daily-purge',           -- job name (re-used = update)
-            '0 0 * * *',             -- every day at 00:00
+            'daily-purge',
+            '0 0 * * *',
             $$
             select net.http_post(
               url    := '${PROJECT_URL}/purge-soft-deleted',
