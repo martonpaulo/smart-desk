@@ -1,6 +1,0 @@
-{
-  "buildCommand": "npx nx run web:build",
-  "outputDirectory": ".next",
-  "installCommand": "cd ../.. && pnpm install",
-  "framework": "nextjs"
-}

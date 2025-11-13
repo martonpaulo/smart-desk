@@ -1,11 +1,10 @@
 # Dependencies
 node_modules
-**/node_modules
 
 # Build outputs
-apps/web/.next
-apps/web/out
-apps/web/dist
+.next
+out
+dist
 
 # Development files
 .env.local
@@ -97,11 +96,6 @@ temp/
 
 # OS generated files
 Thumbs.db
-
-# Mobile app files (not needed for web deployment)
-apps/native/
-ios/
-android/
 
 # Supabase files
 supabase/

@@ -1,10 +1,9 @@
 # Dependencies
-**/node_modules
-.pnpm-debug.log*
+node_modules/
 
 # Build & Cache output
-/dist
-/build
+dist
+build
 **/dist/
 **/build/
 *.tsbuildinfo
@@ -24,45 +23,15 @@ ehthumbs.db
 Thumbs.db
 
 # Next.js
-/apps/web/.next/
-/apps/web/out/
+.next/
+out/
 next-env.d.ts
 
-# React Native (iOS)
-/apps/native/ios/build/
-/apps/native/ios/Pods/
-/apps/native/ios/.xcode.env.local
-
-# Expo
-.expo/
-**/.expo/
-**/dist/
-**/build/
-
-# React Native / Expo specific
-# Note: metro.config.js, babel.config.js, app.json, env.example, and assets/ should be tracked
-# Only ignore build outputs and generated files
-
-# Generated files that should be ignored
-# Only ignore specific generated files, not all config files
-
-# React Native (Android)
-/apps/native/android/build/
-/apps/native/android/app/build/
-/apps/native/android/.gradle/
-/apps/native/android/app/src/main/assets/index.android.bundle
-# Keystore files (IMPORTANT for security)
-*.keystore
-*.jks
-
-# Storybook
-/storybook-static
-
 # Supabase
-/supabase/.supabase/
-/supabase/.temp
-/supabase/.branches
-/supabase/.shadow
+supabase/.supabase/
+supabase/.temp
+supabase/.branches
+supabase/.shadow
 
 # Vercel
 .vercel
@@ -74,12 +43,3 @@ next-env.d.ts
 
 # VSCode
 .vscode/
-
-# Archives
-/archives
-
-# Nx cache
-.nx
-
-# Turbo
-**/.turbo

@@ -1,8 +1,0 @@
-packages:
-  - apps/*
-  - packages/*
-
-ignoredBuiltDependencies:
-  - nx
-  - sharp
-  - unrs-resolver

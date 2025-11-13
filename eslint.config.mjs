@@ -1,116 +1,76 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import gitignore from 'eslint-config-flat-gitignore';
 import globals from 'globals';
 import { builtinModules } from 'module';
-import gitignore from 'eslint-config-flat-gitignore';
+
+// Parsers
+import typescriptParser from '@typescript-eslint/parser';
+import jsonParser from 'jsonc-eslint-parser';
 
 // Plugins
-import importPlugin from 'eslint-plugin-import';
-import simpleImportSort from 'eslint-plugin-simple-import-sort';
-import reactPlugin from 'eslint-plugin-react';
-import jsonPlugin from 'eslint-plugin-json';
-import jsonParser from 'jsonc-eslint-parser';
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import typescriptParser from '@typescript-eslint/parser';
-import nextPlugin from '@next/eslint-plugin-next';
+import pluginNext from '@next/eslint-plugin-next';
+import pluginReact from 'eslint-plugin-react';
+import pluginReactHooks from 'eslint-plugin-react-hooks';
+import pluginTypescript from '@typescript-eslint/eslint-plugin';
+import pluginImportSort from 'eslint-plugin-simple-import-sort';
+import pluginJson from 'eslint-plugin-json';
 
-// Mimic __dirname for ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Common ignores
+const IGNORES = ['.next/**', 'out/**', 'node_modules/**', 'dist/**', 'build/**'];
 
-const compat = new FlatCompat({ baseDirectory: __dirname });
+// Import sort groups
+const IMPORT_SORT_GROUPS = [
+  ['^\\u0000'],
+  [`^(${builtinModules.join('|')})(/.*|$)`],
+  ['^@?\\w'],
+  ['^src/'],
+  ['^\\.'],
+  ['^.+\\.s?css$'],
+  ['^.+\\.(png|jpg|jpeg|gif|svg|webp)$'],
+];
 
-// Base configuration for all TypeScript projects
-const baseConfig = {
+// Base parser options shared across configs
+const BASE_PARSER_OPTIONS = {
+  ecmaFeatures: { jsx: true },
+  project: true,
+};
+
+// Base TypeScript config used for source and supabase code
+const baseTsConfig = {
   languageOptions: {
     parser: typescriptParser,
-    parserOptions: {
-      ecmaFeatures: { jsx: true },
-      project: true,
-    },
+    parserOptions: BASE_PARSER_OPTIONS,
   },
-  plugins: {
-    '@typescript-eslint': typescriptEslint,
-    'simple-import-sort': simpleImportSort,
-    import: importPlugin,
-  },
+  // Do NOT include plugin module objects here (they cause circular refs when ESLint validates)
   rules: {
-    // Disallow "any"
     '@typescript-eslint/no-explicit-any': 'error',
-    // Disallow unused variables unless prefixed with "_"
     '@typescript-eslint/no-unused-vars': [
       'error',
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
     ],
-    // Enforce import sorting
     'simple-import-sort/imports': [
       'error',
       {
-        groups: [
-          // Side effect imports first
-          ['^\\u0000'],
-          // Node.js built-ins
-          [`^(${builtinModules.join('|')})(/.*|$)`],
-          // React packages
-          ['^react', '^@react', '^next', '^@next'],
-          // External packages
-          ['^@?\\w'],
-          // Internal monorepo packages
-          ['^@smart-desk(/.*|$)'],
-          // Absolute imports and other internal paths
-          ['^@/'],
-          // Relative imports
-          ['^\\.'],
-          // Style imports
-          ['^.+\\.s?css$'],
-          // Image imports
-          ['^.+\\.(png|jpg|jpeg|gif|svg|webp)$'],
-        ],
+        groups: IMPORT_SORT_GROUPS,
       },
     ],
     'simple-import-sort/exports': 'error',
   },
 };
 
-// Configuration for React-based libraries (e.g., ui-web, ui-native)
+// React specific config — avoid embedding plugin module objects
 const reactLibraryConfig = {
-  plugins: {
-    react: reactPlugin,
-    'react-hooks': reactHooksPlugin,
-  },
   settings: {
     react: {
       version: 'detect',
     },
   },
   rules: {
-    ...reactPlugin.configs.recommended.rules,
-    ...reactHooksPlugin.configs.recommended.rules,
     'react/react-in-jsx-scope': 'off',
     'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
   },
 };
 
-// Note: Next.js specific configuration is handled by apps/web/eslint.config.mjs
-
-// Configuration specifically for the React Native app
-const nativeCompat = compat.extends('plugin:react-native/all');
-const nativeConfig = {
-  ...nativeCompat[0],
-  plugins: {
-    ...(nativeCompat[0]?.plugins || {}),
-    ...(reactLibraryConfig.plugins || {}),
-  },
-  rules: {
-    ...(nativeCompat[0]?.rules || {}),
-    ...(reactLibraryConfig.rules || {}),
-    // Add any React Native specific overrides here
-    'react-native/no-raw-text': ['error', { skip: ['Button'] }], // Example override
-  },
-};
-
+// Supabase globals config (Deno etc)
 const supabaseConfig = {
   languageOptions: {
     globals: {
@@ -119,12 +79,10 @@ const supabaseConfig = {
   },
 };
 
+// JSON files config
 const jsonConfig = {
   languageOptions: {
     parser: jsonParser,
-  },
-  plugins: {
-    json: jsonPlugin,
   },
   rules: {
     'json/*': 'error',
@@ -132,56 +90,81 @@ const jsonConfig = {
 };
 
 /**
- * @type {import('eslint').Linter.Config[]}
+ * Final flattened config
+/**
+ * Final flattened config
+ * Order matters: gitignore, global ignores, Next extends, then per-file rules
  */
-export default [
+const config = [
   gitignore(),
   {
-    ignores: [
-      '**/.next/**',
-      '**/out/**',
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**',
-    ],
+    ignores: IGNORES,
   },
 
-  // JSON files
+  // Register plugins globally
+  {
+    plugins: {
+      '@next/next': pluginNext,
+      react: pluginReact,
+      'react-hooks': pluginReactHooks,
+      '@typescript-eslint': pluginTypescript,
+      'simple-import-sort': pluginImportSort,
+      json: pluginJson,
+    },
+  },
   {
     ...jsonConfig,
     files: ['**/*.json'],
   },
 
-  // Apply base configuration to all relevant files
+  // Base TypeScript rules applied to project source and supabase
   {
-    ...baseConfig,
-    files: [
-      'apps/**/*.{ts,tsx}',
-      'packages/**/*.{ts,tsx}',
-      'supabase/functions/**/*.ts',
-      'scripts/**/*.mjs',
-    ],
+    ...baseTsConfig,
+    files: ['src/**/*.{ts,tsx}', 'supabase/**/*.{ts,tsx}'],
   },
 
-  // Note: Next.js app uses its own eslint.config.mjs file
-
-  // Apply React Native specific configuration to the native app
+  // Add Next and project-specific TypeScript overrides and settings
   {
-    ...nativeConfig,
-    files: ['apps/native/**/*.ts', 'apps/native/**/*.tsx'],
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: BASE_PARSER_OPTIONS,
+    },
+    rules: {
+      '@next/next/no-html-link-for-pages': 'off',
+      '@next/next/no-img-element': 'error',
+      // keep the project's restricted-imports rule
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../*'],
+              message:
+                'Relative imports are not allowed. Use absolute imports with src/* alias instead.',
+            },
+          ],
+        },
+      ],
+    },
+    settings: {
+      next: {
+        rootDir: '.',
+      },
+    },
   },
 
-  // Apply generic React library configuration to UI packages
-  {
-    ...reactLibraryConfig,
-    files: ['packages/ui-*/**/*.ts', 'packages/ui-*/**/*.tsx'],
-  },
-
-  // Apply Supabase specific configuration to Supabase functions
+  // Supabase functions may need Deno globals
   {
     ...supabaseConfig,
-    files: ['supabase/functions/**/*.ts'],
+    files: ['supabase/**/*.ts'],
   },
 
-  // Note: Web app specific rules are handled by apps/web/eslint.config.mjs
+  // React specific rules for UI files
+  {
+    ...reactLibraryConfig,
+    files: ['src/**/*.{tsx,ts}'],
+  },
 ];
+
+export default config;

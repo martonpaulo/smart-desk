@@ -4,46 +4,13 @@ A comprehensive guide for AI agents working on the Smart Desk monorepo project.
 
 ## 🏗️ Project Overview
 
-Smart Desk is a cross-platform productivity application built with a modern monorepo architecture using TypeScript, Next.js (web), and React Native with Expo (iOS). The project follows a feature-oriented structure with strict linting, formatting, and type safety.
-
-> **⚠️ Platform Optimization**: The web application is **not optimized for mobile devices** and is designed for desktop browsers only. Users should be directed to use the dedicated iOS mobile application for the best mobile experience.
+Smart Desk is a productivity application built with a modern architecture using TypeScript and Next.js. The project follows a feature-oriented structure with strict linting, formatting, and type safety.
 
 ### Architecture
-- **Monorepo**: pnpm workspaces with Nx for build orchestration
-- **Web App**: Next.js 15 with App Router, Material-UI v7, TypeScript
-- **Mobile App**: React Native with Expo, React Native Paper, TypeScript
-- **Backend**: Supabase (PostgreSQL, Auth, Realtime, Storage)
+- **App**: Next.js 15 with App Router, Material-UI v7, TypeScript
 - **State Management**: Zustand with custom synced entity stores
 - **Data Fetching**: TanStack Query v5
 - **File Storage**: Cloudinary integration
-
-## 📁 Project Structure
-
-```
-smart-desk/
-├── apps/
-│   ├── web/                    # Next.js web application
-│   │   └── src/
-│   │       ├── app/            # Next.js App Router pages
-│   │       ├── core/           # Core utilities, providers, stores
-│   │       ├── features/       # Feature-oriented modules
-│   │       ├── legacy/         # Legacy components (migration in progress)
-│   │       ├── shared/         # Shared components and utilities
-│   │       └── theme/          # MUI theme configuration
-│   └── native/                 # React Native iOS application
-├── packages/                   # Shared packages
-│   ├── data-access/           # Data layer and API clients
-│   ├── design-system/         # Shared design tokens
-│   ├── hooks/                 # Shared React hooks
-│   ├── icons/                 # Icon library
-│   ├── store/                 # State management utilities
-│   ├── types/                 # TypeScript type definitions
-│   ├── ui-native/             # React Native UI components
-│   ├── ui-web/                # Web UI components
-│   └── utils/                 # Shared utilities
-├── supabase/                  # Database schema and functions
-└── scripts/                   # Build and deployment scripts
-```
 
 ## 🎯 Core Principles
 
@@ -128,59 +95,14 @@ interface EntityStore<T extends Base> {
 }
 ```
 
-## 🎨 UI/UX Guidelines
+### 🎨 UI/UX Guidelines (Material-UI v7)
 
-### Web (Material-UI v7)
 - **Components**: Use MUI components exclusively for consistency
 - **Theming**: Leverage theme tokens, never hardcode colors or sizes
 - **Responsive Design**: Desktop-first approach (not mobile-optimized)
 - **Target Platform**: Desktop browsers only - direct mobile users to native app
 - **Accessibility**: Follow WCAG 2.1 guidelines
 - **Deprecated Props**: Use `inputProps` instead of `InputProps`
-
-### Mobile (React Native Paper)
-- **Material Design**: Follow Google's Material Design guidelines
-- **Theming**: Use custom theme configuration for brand consistency
-- **Styled Components**: Use styled-components for custom styling
-- **Platform-Specific**: Consider iOS-specific patterns and behaviors
-- **Primary Mobile Experience**: This is the recommended platform for mobile users
-- **Component Structure**: Create separate folders for components with `index.tsx` and `styles.ts`
-- **No StyleSheet**: Use ONLY React Native Paper and styled-components, never use React Native StyleSheet
-- **Style Separation**: Keep styles in separate `styles.ts` files, not inline with component code
-
-## 🔧 Development Workflow
-
-### Required Commands
-```bash
-# Install dependencies
-pnpm install
-
-# Start web development server
-pnpm dev:web
-
-# Run linting
-pnpm lint
-
-# Run type checking
-pnpm typecheck
-
-# Format code
-pnpm format
-
-# Build for production
-pnpm build:web
-```
-
-### Configuration Changes Testing
-**⚠️ CRITICAL**: When modifying any configuration files (ESLint, TypeScript, package.json, etc.), you MUST:
-
-1. **Install dependencies**: `pnpm install`
-2. **Run linting**: `cd apps/web && pnpm lint`
-3. **Test build**: `cd apps/web && pnpm build`
-4. **Test development server**: `pnpm dev:web` (verify it starts and responds)
-5. **Verify no errors**: Check that all commands complete successfully
-
-This ensures configuration changes don't break the project and maintains system reliability.
 
 ### File Cleanup After Optimization
 **⚠️ CRITICAL**: When finishing optimization work that creates new improved versions of components, you MUST:
@@ -204,13 +126,13 @@ This maintains clean code organization and consistent naming conventions through
 
 This ensures the project documentation stays current and helps other developers understand the changes.
 
-### Code Quality Checks
+## Code Quality Checks
 - **ESLint**: Must pass all linting rules
 - **Prettier**: Code must be properly formatted
 - **TypeScript**: No type errors allowed
 - **Import Sorting**: Imports must follow the configured order
 
-### Commit Standards
+## Commit Standards
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```bash
 feat: add user authentication system
@@ -220,18 +142,6 @@ refactor: simplify task filtering logic
 ```
 
 ## 🏛️ Feature Development
-
-### Feature Structure
-Each feature should follow this structure:
-```
-features/feature-name/
-├── components/     # UI components
-├── hooks/         # Custom React hooks
-├── store/         # Zustand store
-├── types/         # TypeScript types
-├── utils/         # Utility functions
-└── views/         # Page-level components
-```
 
 ### Store Pattern
 ```typescript
@@ -269,41 +179,6 @@ export function FeatureComponent() {
 
   return <FeatureContent data={data} />;
 }
-```
-
-### React Native Component Structure
-```typescript
-// ✅ DO: Create component folder structure
-// components/Button/
-//   ├── index.tsx
-//   └── styles.ts
-
-// components/Button/index.tsx
-import { TouchableOpacity, Text } from 'react-native';
-import { Button as PaperButton } from 'react-native-paper';
-import styled from 'styled-components/native';
-import { ButtonProps } from './types';
-
-const StyledButton = styled(TouchableOpacity)`
-  // styled-components styles here
-`;
-
-export function Button({ title, onPress, ...props }: ButtonProps) {
-  return (
-    <StyledButton onPress={onPress} {...props}>
-      <Text>{title}</Text>
-    </StyledButton>
-  );
-}
-
-// ❌ DON'T: Mix styles with component code
-import { StyleSheet } from 'react-native';
-
-const styles = StyleSheet.create({
-  button: {
-    // styles here
-  },
-});
 ```
 
 ## 🚫 Common Pitfalls to Avoid
@@ -368,18 +243,10 @@ const styles = StyleSheet.create({
 - **Supabase**: Backend services
 - **Cloudinary**: File storage
 
-### Mobile Application
-- **React Native**: Mobile framework
-- **Expo**: Development platform
-- **React Native Paper**: Material Design components
-- **Styled Components**: CSS-in-JS styling
-
 ### Development Tools
 - **TypeScript**: Type safety
 - **ESLint**: Code linting
 - **Prettier**: Code formatting
-- **Nx**: Monorepo management
-- **pnpm**: Package management
 
 ## 🎯 Best Practices
 
