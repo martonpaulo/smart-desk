@@ -1,21 +1,15 @@
-# Smart Desk Supabase configuration
-# Use relative directories to align with monorepo layout
+# supabase/config.toml — minimal, valid for CLI v2+
+project_id = "dckaobffdeqsyzzdiwpq"
 
-# Set your project ref here when available
-project_id = ""
+[db.migrations]
+enabled = true
+# relative to the supabase/ directory
+schema_paths = ["./migrations"]
 
-[db]
-schemas = ["public"]
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
 
-[migrations]
-# Directory for SQL migrations relative to this file
-directory = "./migrations"
-
-# Optional: per-function settings go here (one table per function)
-# [functions.purge-soft-deleted]
+# function-specific config must be under functions.<name>
+# [functions.my-fn]
 # verify_jwt = false
-# import_map = './functions/purge-soft-deleted/import_map.json'
-
-[edge_runtime]
-# configure edge runtime policy if needed
-# policy = "oneshot"
