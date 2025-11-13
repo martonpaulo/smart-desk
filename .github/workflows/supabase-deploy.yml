@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SUPABASE_PROJECT_REF: ${{ secrets.NEXT_PUBLIC_SUPABASE_PROJECT_REF }}
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: ${{ secrets.NEXT_PUBLIC_SUPABASE_PROJECT_REF }}
       SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
-      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -35,7 +35,7 @@ jobs:
           version: latest
 
       - name: Link project
-        run: supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+        run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
 
       - name: Sync project secrets
         run: |
@@ -43,7 +43,7 @@ jobs:
             "SUPABASE_URL=$SUPABASE_URL" \
             "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" \
             "CRON_SECRET=$CRON_SECRET" \
-            --project-ref "$SUPABASE_PROJECT_REF"
+            --project-ref "$PROJECT_REF"
 
       - name: Apply migrations
         run: supabase db push --yes
@@ -53,12 +53,12 @@ jobs:
           set -e
           for fn in $(find supabase/functions -maxdepth 1 -mindepth 1 -type d -printf "%f\n"); do
             echo "Deploying function: $fn"
-            supabase functions deploy "$fn" --project-ref "$SUPABASE_PROJECT_REF"
+            supabase functions deploy "$fn" --project-ref "$PROJECT_REF"
           done
 
       - name: Upsert schedule for purge-soft-deleted
         run: |
-          PROJECT_URL="https://${SUPABASE_PROJECT_REF}.functions.supabase.co"
+          PROJECT_URL="https://${PROJECT_REF}.functions.supabase.co"
           supabase db query <<SQL
           select cron.schedule(
             'daily-purge',           -- job name (re-used = update)
