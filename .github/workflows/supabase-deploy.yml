@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      PROJECT_REF: ${{ vars.NEXT_PUBLIC_SUPABASE_PROJECT_REF }}
+      SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      PROJECT_REF: ${{ secrets.NEXT_PUBLIC_SUPABASE_PROJECT_REF }}
-      SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
 
@@ -35,7 +35,7 @@ jobs:
           version: latest
 
       - name: Link project
-        run: supabase link --project-ref $PROJECT_REF --password $SUPABASE_DB_PASSWORD
+        run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
 
       - name: Sync project secrets
         run: |
