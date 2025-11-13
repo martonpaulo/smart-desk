@@ -5,13 +5,17 @@
 project_id = ""
 
 [db]
-# Keep schemas minimal; extend as needed (e.g., "storage")
 schemas = ["public"]
-
-[functions]
-# Directory for Edge Functions relative to this file
-directory = "./functions"
 
 [migrations]
 # Directory for SQL migrations relative to this file
 directory = "./migrations"
+
+# Optional: per-function settings go here (one table per function)
+# [functions.purge-soft-deleted]
+# verify_jwt = false
+# import_map = './functions/purge-soft-deleted/import_map.json'
+
+[edge_runtime]
+# configure edge runtime policy if needed
+# policy = "oneshot"
