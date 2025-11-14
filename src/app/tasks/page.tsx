@@ -110,11 +110,11 @@ export default function TasksPage() {
               color={customColors.blue.value}
               // Inline edit for just-created task
               editTask={editingTaskId === task.id}
-              onFinishEditing={() => setEditingTaskId(null)}
+              onFinishEditingAction={() => setEditingTaskId(null)}
               // Bulk selection
               selectable={isSelecting}
               selected={selectedIds.has(task.id)}
-              onSelectChange={selectTask}
+              onSelectChangeAction={selectTask}
             />
           ))}
         </Stack>

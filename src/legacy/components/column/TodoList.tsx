@@ -268,9 +268,9 @@ export function TodoList({ showDate }: TodoListProps) {
                 hasDefaultWidth={false}
                 showDate={showDate}
                 editTask={false}
-                onFinishEditing={() => undefined}
-                onTaskDragOver={() => undefined}
-                onTaskDragStart={() => undefined}
+                onFinishEditingAction={() => undefined}
+                onTaskDragOverAction={() => undefined}
+                onTaskDragStartAction={() => undefined}
               />
             ))}
           </Stack>

@@ -153,9 +153,9 @@ export function TodoColumn({
               showDate={showDate}
               color={column.color}
               editTask={creatingId === task.id}
-              onFinishEditing={() => setCreatingId(null)}
-              onTaskDragOver={(id, e) => onDragOverTask(e, id)}
-              onTaskDragStart={(id, e) => onDragStart(e, id)}
+              onFinishEditingAction={() => setCreatingId(null)}
+              onTaskDragOverAction={(id, e) => onDragOverTask(e, id)}
+              onTaskDragStartAction={(id, e) => onDragStart(e, id)}
             />
           ))}
 

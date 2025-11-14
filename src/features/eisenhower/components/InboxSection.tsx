@@ -64,10 +64,10 @@ export function InboxSection({
           showActions={!isSelecting}
           selectable={isSelecting}
           selected={selectedIds.has(task.id)}
-          onSelectChange={onSelectChangeAction}
-          onTaskDragStart={(_id, e) => onTaskDragStartAction(task, e)}
-          onTaskDragOver={(_id, e) => onTaskDragOverAction(e)}
-          onTaskDragEnd={onTaskDragEndAction}
+          onSelectChangeAction={onSelectChangeAction}
+          onTaskDragStartAction={(_id, e) => onTaskDragStartAction(task, e)}
+          onTaskDragOverAction={(_id, e) => onTaskDragOverAction(e)}
+          onTaskDragEndAction={onTaskDragEndAction}
         />
       ))}
     </Stack>
