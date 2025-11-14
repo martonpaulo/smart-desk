@@ -51,9 +51,11 @@ jobs:
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          # pull remote migration history to local workspace (ok if it fails)
-          supabase db pull --linked --password "$SUPABASE_DB_PASSWORD" || true
-          # try to apply migrations non-interactively
+          # fetch remote-only migrations into workspace (non-interactive)
+          yes | supabase migration fetch --linked || true
+          # list to confirm
+          supabase migration list --output pretty || true
+          # try to push migrations (non-interactive)
           yes | supabase db push --linked --password "$SUPABASE_DB_PASSWORD"
 
       - name: Deploy all edge functions
