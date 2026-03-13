@@ -7,7 +7,7 @@
 # client removes them from the local database automatically.
 
 bucket_definitions:
-  user_events:
+  user_items:
     # Resolve the current user from the JWT 'sub' claim.
     parameters: select request.jwt() ->> 'sub' as user_id
 
@@ -26,5 +26,17 @@ bucket_definitions:
         updated_at,
         deleted_at
         from public.calendar_events
+        where user_id = bucket.user_id
+        and deleted_at is null
+      - select
+        id,
+        user_id,
+        title,
+        description,
+        tags,
+        planned_date,
+        updated_at,
+        deleted_at
+        from public.tasks
         where user_id = bucket.user_id
         and deleted_at is null

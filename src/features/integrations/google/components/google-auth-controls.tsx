@@ -33,7 +33,7 @@ const AUTH_STATUS_CONNECTED_MESSAGE =
 const AUTH_STATUS_DISCONNECTED_MESSAGE =
   'Google Calendar is not connected. Connect it to sync events into your local calendar.';
 const SUCCESS_CONNECTED_QUERY_VALUE = 'google_connected';
-const CALENDAR_DAY_EVENTS_QUERY_KEY = ['calendar-events-day'];
+const CALENDAR_DAY_ITEMS_QUERY_KEY = ['calendar-items-day'];
 
 interface GoogleStartResponse {
   url: string;
@@ -211,7 +211,7 @@ export function GoogleAuthControls() {
         }
 
         if (!isCancelled) {
-          await queryClient.invalidateQueries({ queryKey: CALENDAR_DAY_EVENTS_QUERY_KEY });
+          await queryClient.invalidateQueries({ queryKey: CALENDAR_DAY_ITEMS_QUERY_KEY });
         }
       } catch {
         // Ignore transient background sync errors to avoid user-facing spam.

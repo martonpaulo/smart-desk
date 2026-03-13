@@ -23,4 +23,13 @@ export const appSchema = new Schema({
     updated_at: column.text,
     deleted_at: column.text,
   }),
+  tasks: new Table({
+    user_id: column.text,
+    title: column.text,
+    description: column.text,
+    tags: column.text,
+    planned_date: column.text,
+    updated_at: column.text,
+    deleted_at: column.text,
+  }),
 });

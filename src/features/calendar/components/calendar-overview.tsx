@@ -4,8 +4,9 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 
-import { DayEventsOverview } from '@/features/calendar/components/day-events-overview';
+import { DayItemsOverview } from '@/features/calendar/components/day-items-overview';
 import { GoogleAuthControls } from '@/features/integrations/google/components/google-auth-controls';
+import { TasksOverview } from '@/features/tasks/components/tasks-overview';
 
 const SUCCESS_MESSAGES: Record<string, string> = {
   google_connected: 'Google Calendar connected successfully. Initial sync started.',
@@ -63,7 +64,10 @@ export function CalendarOverview() {
           </div>
         </header>
 
-        <DayEventsOverview />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <DayItemsOverview />
+          <TasksOverview />
+        </div>
       </section>
     </main>
   );

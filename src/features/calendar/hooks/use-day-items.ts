@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 
-import { getDayEvents } from '@/features/calendar/logic/get-day-events';
+import { getDayItems } from '@/features/calendar/logic/get-day-items';
 
-const DAY_EVENTS_REFRESH_INTERVAL_MS = 10_000;
+const DAY_ITEMS_REFRESH_INTERVAL_MS = 10_000;
 
-function getDayBoundaries(date: Date): { dayStartIso: string; dayEndIso: string } {
+function getDayWindowBoundaries(date: Date): { dayStartIso: string; dayEndIso: string } {
   const dayStart = new Date(date);
   dayStart.setHours(0, 0, 0, 0);
 
@@ -18,24 +18,24 @@ function getDayBoundaries(date: Date): { dayStartIso: string; dayEndIso: string 
   };
 }
 
-export function useDayEvents() {
+export function useDayItems() {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setNow(new Date());
-    }, DAY_EVENTS_REFRESH_INTERVAL_MS);
+    }, DAY_ITEMS_REFRESH_INTERVAL_MS);
 
     return () => {
       window.clearInterval(intervalId);
     };
   }, []);
 
-  const boundaries = useMemo(() => getDayBoundaries(now), [now]);
+  const boundaries = useMemo(() => getDayWindowBoundaries(now), [now]);
 
   return useQuery({
-    queryKey: ['calendar-events-day', boundaries.dayStartIso],
-    queryFn: () => getDayEvents(boundaries),
-    refetchInterval: DAY_EVENTS_REFRESH_INTERVAL_MS,
+    queryKey: ['calendar-items-day', boundaries.dayStartIso],
+    queryFn: () => getDayItems(boundaries),
+    refetchInterval: DAY_ITEMS_REFRESH_INTERVAL_MS,
   });
 }
