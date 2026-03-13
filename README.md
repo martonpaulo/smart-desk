@@ -38,6 +38,15 @@ pnpm install
 pnpm dev
 ```
 
+## PowerSync Auth Modes
+
+Configure the client token source with `NEXT_PUBLIC_POWERSYNC_AUTH_MODE`:
+
+- `supabase`: uses the current Supabase session `access_token`
+- `development-token`: uses `NEXT_PUBLIC_POWERSYNC_TOKEN` for all sync requests
+
+Use `supabase` only when Supabase Auth is enabled in your PowerSync instance.
+
 ## Testing Status
 
 Testing is intentionally deferred in this phase.
