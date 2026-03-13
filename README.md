@@ -26,6 +26,16 @@ Rules enforced in this repository:
 - TanStack Query
 - PowerSync
 
+## Platform Services
+
+This project uses:
+
+- GitHub (source control and collaboration)
+- Supabase (database and auth)
+- Vercel (deployment and hosting)
+- PowerSync (local-first sync layer)
+- Google Console (Google OAuth and Calendar integration setup)
+
 ## Workspace Structure
 
 Project structure evolves frequently.

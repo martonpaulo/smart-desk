@@ -281,6 +281,11 @@ migrations/
 
 Use Conventional Commits.
 
+Commit size rule:
+
+- do not create large commits
+- split large modifications into multiple focused commits by concern (for example: schema, backend logic, UI, docs)
+
 Examples:
 
 ```
