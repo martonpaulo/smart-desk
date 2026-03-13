@@ -1,10 +1,15 @@
 'use client';
 
 import type { Session } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import {
+  GOOGLE_LIVE_SYNC_INTERVAL_MS,
+  GOOGLE_SYNC_ME_ENDPOINT,
+} from '@/features/integrations/google/constants';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 const GOOGLE_PROVIDER = 'google' as const;
@@ -22,6 +27,7 @@ const SIGNING_OUT_BUTTON_LABEL = 'Signing out...';
 const SIGN_OUT_BUTTON_LABEL = 'Sign out';
 const AUTH_ERROR_PREFIX = 'Action failed:';
 const SUCCESS_CONNECTED_QUERY_VALUE = 'google_connected';
+const CALENDAR_DAY_EVENTS_QUERY_KEY = ['calendar-events-day'];
 
 interface GoogleStartResponse {
   url: string;
@@ -33,6 +39,7 @@ interface GoogleStatusResponse {
 
 export function GoogleAuthControls() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
 
   const [session, setSession] = useState<Session | null>(null);
@@ -120,6 +127,57 @@ export function GoogleAuthControls() {
       isCancelled = true;
     };
   }, [session, successCode]);
+
+  useEffect(() => {
+    if (!session || !isGoogleConnected) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const syncUserCalendar = async (): Promise<void> => {
+      if (document.visibilityState === 'hidden') {
+        return;
+      }
+
+      try {
+        const response = await fetch(GOOGLE_SYNC_ME_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            [AUTHORIZATION_HEADER]: `${BEARER_PREFIX}${session.access_token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`status ${response.status}`);
+        }
+
+        if (!isCancelled) {
+          await queryClient.invalidateQueries({ queryKey: CALENDAR_DAY_EVENTS_QUERY_KEY });
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        console.warn('Google background sync failed', message);
+      }
+    };
+
+    void syncUserCalendar();
+    const intervalId = window.setInterval(() => {
+      void syncUserCalendar();
+    }, GOOGLE_LIVE_SYNC_INTERVAL_MS);
+    const visibilityHandler = (): void => {
+      if (document.visibilityState === 'visible') {
+        void syncUserCalendar();
+      }
+    };
+    document.addEventListener('visibilitychange', visibilityHandler);
+
+    return () => {
+      isCancelled = true;
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', visibilityHandler);
+    };
+  }, [isGoogleConnected, queryClient, session]);
 
   async function handleSignIn(): Promise<void> {
     setErrorMessage(null);
@@ -244,7 +302,9 @@ export function GoogleAuthControls() {
         </Button>
       </div>
       {shouldShowConnectedState ? (
-        <p className="text-xs text-muted-foreground">Google Calendar already connected.</p>
+        <p className="text-xs text-muted-foreground">
+          Google Calendar connected. Updates sync automatically every few seconds.
+        </p>
       ) : null}
       {errorMessage ? <p className="text-xs text-destructive">{errorMessage}</p> : null}
     </div>

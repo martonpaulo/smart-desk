@@ -17,6 +17,7 @@ bucket_definitions:
         user_id,
         google_event_id,
         calendar_id,
+        calendar_color,
         title,
         starts_at,
         ends_at,

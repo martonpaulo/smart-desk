@@ -26,6 +26,9 @@ const URL_PARAM_SINGLE_EVENTS = 'singleEvents';
 const URL_PARAM_TIME_MIN = 'timeMin';
 const URL_PARAM_TIME_MAX = 'timeMax';
 const URL_PARAM_PAGE_TOKEN = 'pageToken';
+const DEFAULT_CALENDAR_COLOR = '#9aa0a6';
+const ISO_DATE_SUFFIX = 'T12:00:00.000Z';
+const MISSING_EVENTS_UPDATE_CHUNK_SIZE = 500;
 
 interface GoogleEventDateTime {
   dateTime?: string;
@@ -48,6 +51,7 @@ interface EventsListResponse {
 
 interface GoogleCalendarListItem {
   id: string;
+  backgroundColor?: string;
 }
 
 interface CalendarListResponse {
@@ -59,6 +63,7 @@ interface SyncedCalendarEventRow {
   user_id: string;
   google_event_id: string;
   calendar_id: string;
+  calendar_color: string;
   title: string;
   starts_at: string;
   ends_at: string;
@@ -70,7 +75,13 @@ interface SyncedCalendarEventRow {
 
 interface CalendarEventsBatch {
   calendarId: string;
+  calendarColor: string;
   items: GoogleEvent[];
+}
+
+interface AccessibleCalendar {
+  id: string;
+  color: string;
 }
 
 async function withRetry<T>(fn: () => Promise<T>, maxAttempts = MAX_RETRY_ATTEMPTS): Promise<T> {
@@ -106,8 +117,8 @@ function buildTimeWindow(): { min: string; max: string } {
   return { min, max };
 }
 
-async function listAccessibleCalendarIds(accessToken: string): Promise<string[]> {
-  const calendarIds: string[] = [];
+async function listAccessibleCalendars(accessToken: string): Promise<AccessibleCalendar[]> {
+  const calendars: AccessibleCalendar[] = [];
   let nextPageToken: string | undefined;
 
   do {
@@ -119,13 +130,31 @@ async function listAccessibleCalendarIds(accessToken: string): Promise<string[]>
 
     const response = await fetchJson<CalendarListResponse>(url, accessToken);
     for (const calendar of response.items ?? []) {
-      calendarIds.push(calendar.id);
+      calendars.push({
+        id: calendar.id,
+        color: calendar.backgroundColor ?? DEFAULT_CALENDAR_COLOR,
+      });
     }
 
     nextPageToken = response.nextPageToken;
   } while (nextPageToken);
 
-  return Array.from(new Set(calendarIds));
+  const uniqueById = new Map<string, AccessibleCalendar>();
+  for (const calendar of calendars) {
+    if (!uniqueById.has(calendar.id)) {
+      uniqueById.set(calendar.id, calendar);
+    }
+  }
+
+  return Array.from(uniqueById.values());
+}
+
+function toAllDayIso(date: string | undefined): string {
+  if (!date) {
+    return '';
+  }
+
+  return `${date}${ISO_DATE_SUFFIX}`;
 }
 
 async function fetchAllCalendarEvents(
@@ -160,6 +189,7 @@ async function fetchAllCalendarEvents(
 function mapGoogleEventToRow(
   userId: string,
   calendarId: string,
+  calendarColor: string,
   event: GoogleEvent,
 ): SyncedCalendarEventRow {
   const allDay = !event.start.dateTime;
@@ -167,14 +197,67 @@ function mapGoogleEventToRow(
     user_id: userId,
     google_event_id: `${calendarId}:${event.id}`,
     calendar_id: calendarId,
+    calendar_color: calendarColor,
     title: event.summary ?? '',
-    starts_at: event.start.dateTime ?? event.start.date ?? '',
-    ends_at: event.end.dateTime ?? event.end.date ?? '',
+    starts_at: allDay ? toAllDayIso(event.start.date) : (event.start.dateTime ?? ''),
+    ends_at: allDay ? toAllDayIso(event.end.date) : (event.end.dateTime ?? ''),
     all_day: allDay,
     status: event.status,
     updated_at: event.updated,
     deleted_at: event.status === EVENT_STATUS_CANCELLED ? new Date().toISOString() : null,
   };
+}
+
+async function markMissingEventsAsDeleted(
+  userId: string,
+  batches: CalendarEventsBatch[],
+): Promise<void> {
+  if (batches.length === 0) {
+    return;
+  }
+
+  const supabase = createAdminClient();
+  const calendarIds = batches.map(batch => batch.calendarId);
+  const fetchedEventIds = new Set(
+    batches.flatMap(batch => batch.items.map(item => `${batch.calendarId}:${item.id}`)),
+  );
+
+  const { data: existingRows, error: existingRowsError } = await supabase
+    .from(TABLE_CALENDAR_EVENTS)
+    .select('google_event_id')
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .in('calendar_id', calendarIds);
+
+  if (existingRowsError) {
+    throw new Error(`Failed to read existing events: ${existingRowsError.message}`);
+  }
+
+  const missingGoogleEventIds = (existingRows ?? [])
+    .map((row: { google_event_id: string }) => row.google_event_id)
+    .filter(googleEventId => !fetchedEventIds.has(googleEventId));
+
+  if (missingGoogleEventIds.length === 0) {
+    return;
+  }
+
+  const nowIso = new Date().toISOString();
+  for (let index = 0; index < missingGoogleEventIds.length; index += MISSING_EVENTS_UPDATE_CHUNK_SIZE) {
+    const chunk = missingGoogleEventIds.slice(index, index + MISSING_EVENTS_UPDATE_CHUNK_SIZE);
+    const { error: deleteError } = await supabase
+      .from(TABLE_CALENDAR_EVENTS)
+      .update({
+        deleted_at: nowIso,
+        status: EVENT_STATUS_CANCELLED,
+        updated_at: nowIso,
+      })
+      .eq('user_id', userId)
+      .in('google_event_id', chunk);
+
+    if (deleteError) {
+      throw new Error(`Failed to soft-delete missing events: ${deleteError.message}`);
+    }
+  }
 }
 
 export async function syncGoogleCalendar(userId: string): Promise<void> {
@@ -193,18 +276,19 @@ export async function syncGoogleCalendar(userId: string): Promise<void> {
   const refreshToken = decrypt(connection.refresh_token_encrypted as string);
   const { accessToken } = await withRetry(() => refreshAccessToken(refreshToken));
 
-  const calendarIds = await withRetry(() => listAccessibleCalendarIds(accessToken));
+  const calendars = await withRetry(() => listAccessibleCalendars(accessToken));
   console.info(`${GOOGLE_SYNC_LOG_PREFIX} syncing accessible calendars`, {
     userId,
-    calendarsCount: calendarIds.length,
-    calendarIds,
+    calendarsCount: calendars.length,
+    calendarIds: calendars.map(calendar => calendar.id),
   });
 
   const responses: CalendarEventsBatch[] = [];
 
-  for (const calendarId of calendarIds) {
+  for (const calendar of calendars) {
+    const calendarId = calendar.id;
     const items = await withRetry(() => fetchAllCalendarEvents(accessToken, calendarId));
-    responses.push({ calendarId, items });
+    responses.push({ calendarId, calendarColor: calendar.color, items });
     console.info(`${GOOGLE_SYNC_LOG_PREFIX} calendar events fetched`, {
       userId,
       calendarId,
@@ -215,9 +299,17 @@ export async function syncGoogleCalendar(userId: string): Promise<void> {
   const events = responses.flatMap(response =>
     response.items.map(event => ({ calendarId: response.calendarId, event })),
   );
+  const calendarColorById = new Map(
+    responses.map(response => [response.calendarId, response.calendarColor]),
+  );
   if (events.length > 0) {
     const rows = events.map(({ calendarId, event }) =>
-      mapGoogleEventToRow(userId, calendarId, event),
+      mapGoogleEventToRow(
+        userId,
+        calendarId,
+        calendarColorById.get(calendarId) ?? DEFAULT_CALENDAR_COLOR,
+        event,
+      ),
     );
     const { error: upsertError } = await supabase
       .from(TABLE_CALENDAR_EVENTS)
@@ -227,4 +319,6 @@ export async function syncGoogleCalendar(userId: string): Promise<void> {
       throw new Error(`Event upsert failed: ${upsertError.message}`);
     }
   }
+
+  await markMissingEventsAsDeleted(userId, responses);
 }

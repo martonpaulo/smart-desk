@@ -7,10 +7,9 @@ import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+import { getAuthenticatedUser } from '@/features/integrations/google/server/authenticated-user';
 import { createAdminClient } from '@/lib/supabase-server';
 
-const AUTHORIZATION_HEADER = 'authorization';
-const BEARER_PREFIX = 'Bearer ';
 const UNAUTHORIZED_ERROR = 'Unauthorized';
 const HTTP_UNAUTHORIZED = 401;
 const OAUTH_NONCE_COOKIE = 'oauth_nonce';
@@ -21,30 +20,6 @@ const GOOGLE_RESPONSE_TYPE = 'code';
 const GOOGLE_ACCESS_TYPE = 'offline';
 const GOOGLE_PROMPT = 'consent';
 const GOOGLE_CONNECTIONS_TABLE = 'google_connections';
-
-function getBearerToken(request: NextRequest): string | null {
-  const authHeader = request.headers.get(AUTHORIZATION_HEADER);
-  return authHeader?.startsWith(BEARER_PREFIX) ? authHeader.slice(BEARER_PREFIX.length) : null;
-}
-
-async function getAuthenticatedUser(request: NextRequest): Promise<{ id: string } | null> {
-  const token = getBearerToken(request);
-  if (!token) {
-    return null;
-  }
-
-  const supabase = createAdminClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser(token);
-
-  if (error || !user) {
-    return null;
-  }
-
-  return { id: user.id };
-}
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const user = await getAuthenticatedUser(request);

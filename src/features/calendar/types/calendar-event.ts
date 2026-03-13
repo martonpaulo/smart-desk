@@ -5,5 +5,6 @@ export interface CalendarEvent {
   endsAt: string;
   allDay: boolean;
   calendarId: string | null;
+  calendarColor: string | null;
   source: string | null;
 }

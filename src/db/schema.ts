@@ -14,6 +14,7 @@ export const appSchema = new Schema({
     user_id: column.text,
     google_event_id: column.text,
     calendar_id: column.text,
+    calendar_color: column.text,
     title: column.text,
     starts_at: column.text,
     ends_at: column.text,

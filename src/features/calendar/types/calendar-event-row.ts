@@ -7,6 +7,7 @@ export interface CalendarEventRow {
   endsAt: string;
   allDay: number | boolean;
   calendarId: string | null;
+  calendarColor: string | null;
   source: string | null;
 }
 
@@ -18,6 +19,7 @@ export function mapCalendarEventRow(row: CalendarEventRow): CalendarEvent {
     endsAt: row.endsAt,
     allDay: Boolean(row.allDay),
     calendarId: row.calendarId,
+    calendarColor: row.calendarColor,
     source: row.source,
   };
 }

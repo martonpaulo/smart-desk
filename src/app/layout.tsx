@@ -2,6 +2,7 @@ import './globals.css';
 
 import type { ReactNode } from 'react';
 
+import { Toaster } from '@/components/ui/sonner';
 import { PowerSyncProvider } from '@/providers/powersync-provider';
 import { QueryProvider } from '@/providers/query-provider';
 
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <QueryProvider>
           <PowerSyncProvider />
           {children}
+          <Toaster />
         </QueryProvider>
       </body>
     </html>

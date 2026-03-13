@@ -1,0 +1,41 @@
+name: Deploy PowerSync Sync Rules
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - powersync/powersync.yaml
+
+jobs:
+  deploy-sync-rules:
+    name: Deploy Sync Rules to PowerSync Cloud
+    runs-on: ubuntu-latest
+
+    # These environment variables are read by the PowerSync CLI.
+    # INSTANCE_ID and PROJECT_ID are required when the workflow does not use a linked cli.yaml.
+    # ORG_ID is optional and only needed if the token can access multiple organizations.
+    env:
+      PS_ADMIN_TOKEN: ${{ secrets.PS_ADMIN_TOKEN }}
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      INSTANCE_ID: ${{ secrets.INSTANCE_ID }}
+      ORG_ID: ${{ secrets.ORG_ID }}
+
+    steps:
+      # Check out the repository so the workflow can read powersync/powersync.yaml.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install Node.js so we can run the PowerSync CLI with npx.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Deploy only sync config using the YAML file from this repo.
+      # The CLI command follows the official `powersync deploy sync-config` workflow.
+      - name: Deploy PowerSync Sync Rules
+        run: >-
+          npx --yes powersync@latest deploy sync-config
+          --directory powersync
+          --sync-config-file-path powersync/powersync.yaml

@@ -28,6 +28,7 @@ function getDayEventsQuery(): string {
       ends_at AS "endsAt",
       all_day AS "allDay",
       calendar_id AS "calendarId",
+      calendar_color AS "calendarColor",
       '${STREAM_EVENTS_SOURCE}' AS source
     FROM ${STREAM_EVENTS_TABLE}
     WHERE starts_at < ? AND ends_at > ? AND deleted_at IS NULL

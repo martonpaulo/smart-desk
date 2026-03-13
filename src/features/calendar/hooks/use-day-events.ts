@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { getDayEvents } from '@/features/calendar/logic/get-day-events';
 
-const NOW_TICK_MS = 60_000;
+const DAY_EVENTS_REFRESH_INTERVAL_MS = 10_000;
 
 function getDayBoundaries(date: Date): { dayStartIso: string; dayEndIso: string } {
   const dayStart = new Date(date);
@@ -24,7 +24,7 @@ export function useDayEvents() {
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setNow(new Date());
-    }, NOW_TICK_MS);
+    }, DAY_EVENTS_REFRESH_INTERVAL_MS);
 
     return () => {
       window.clearInterval(intervalId);
@@ -36,6 +36,6 @@ export function useDayEvents() {
   return useQuery({
     queryKey: ['calendar-events-day', boundaries.dayStartIso],
     queryFn: () => getDayEvents(boundaries),
-    refetchInterval: NOW_TICK_MS,
+    refetchInterval: DAY_EVENTS_REFRESH_INTERVAL_MS,
   });
 }
