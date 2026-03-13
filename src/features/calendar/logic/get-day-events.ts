@@ -10,29 +10,107 @@ interface DayRange {
   dayEndIso: string;
 }
 
+interface SqliteTableRow {
+  name: string;
+}
+
 const CALENDAR_UI_LOG_PREFIX = '[calendar-ui]';
 const EVENTS_QUERY_TIMEOUT_MS = 5000;
+const SQLITE_TABLE_TYPE = 'table';
+const STREAM_EVENTS_TABLE = 'calendar_events';
+const LEGACY_EVENTS_TABLE = 'events';
+const STREAM_EVENTS_SOURCE = 'google';
+type EventsTableName = typeof STREAM_EVENTS_TABLE | typeof LEGACY_EVENTS_TABLE;
+
+let cachedEventsTableName: EventsTableName | null = null;
 
 function getTimeoutError(): Error {
   return new Error(`events query timeout after ${EVENTS_QUERY_TIMEOUT_MS}ms`);
 }
 
-async function getDayEventRows(range: DayRange): Promise<CalendarEventRow[]> {
-  const query = db.getAll<CalendarEventRow>(
+function getDayEventsQuery(tableName: EventsTableName): string {
+  if (tableName === STREAM_EVENTS_TABLE) {
+    return `
+      SELECT
+        id,
+        title,
+        starts_at AS "startsAt",
+        ends_at AS "endsAt",
+        all_day AS "allDay",
+        calendar_id AS "calendarId",
+        '${STREAM_EVENTS_SOURCE}' AS source
+      FROM ${STREAM_EVENTS_TABLE}
+      WHERE starts_at < ? AND ends_at > ? AND deleted_at IS NULL
+      ORDER BY starts_at ASC
+    `;
+  }
+
+  return `
+    SELECT id, title, "startsAt", "endsAt", "allDay", "calendarId", source
+    FROM ${LEGACY_EVENTS_TABLE}
+    WHERE "startsAt" < ? AND "endsAt" > ?
+    ORDER BY "startsAt" ASC
+  `;
+}
+
+async function resolveEventsTableName(): Promise<EventsTableName> {
+  if (cachedEventsTableName) {
+    return cachedEventsTableName;
+  }
+
+  const rows = await db.getAll<SqliteTableRow>(
     `
-      SELECT id, title, "startsAt", "endsAt", "allDay", "calendarId", source
-      FROM events
-      WHERE "startsAt" < ? AND "endsAt" > ?
-      ORDER BY "startsAt" ASC
+      SELECT name
+      FROM sqlite_master
+      WHERE type = ?
+        AND name IN (?, ?)
+      ORDER BY
+        CASE
+          WHEN name = ? THEN 0
+          WHEN name = ? THEN 1
+          ELSE 2
+        END
+      LIMIT 1
     `,
+    [
+      SQLITE_TABLE_TYPE,
+      STREAM_EVENTS_TABLE,
+      LEGACY_EVENTS_TABLE,
+      STREAM_EVENTS_TABLE,
+      LEGACY_EVENTS_TABLE,
+    ],
+  );
+
+  const tableName = rows[0]?.name as EventsTableName | undefined;
+  if (!tableName) {
+    throw new Error('No supported events table found in local SQLite schema');
+  }
+
+  cachedEventsTableName = tableName;
+  return tableName;
+}
+
+async function getDayEventRows(range: DayRange): Promise<{ rows: CalendarEventRow[]; tableName: EventsTableName }> {
+  const tableName = await resolveEventsTableName();
+
+  const query = db.getAll<CalendarEventRow>(
+    getDayEventsQuery(tableName),
     [range.dayEndIso, range.dayStartIso],
   );
 
-  const timeout = new Promise<CalendarEventRow[]>((_, reject) => {
-    window.setTimeout(() => reject(getTimeoutError()), EVENTS_QUERY_TIMEOUT_MS);
+  let timeoutId: number | null = null;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(getTimeoutError()), EVENTS_QUERY_TIMEOUT_MS);
   });
 
-  return Promise.race([query, timeout]);
+  try {
+    const rows = await Promise.race([query, timeout]);
+    return { rows, tableName };
+  } finally {
+    if (timeoutId !== null) {
+      window.clearTimeout(timeoutId);
+    }
+  }
 }
 
 export async function getDayEvents(range: DayRange): Promise<CalendarEvent[]> {
@@ -44,11 +122,11 @@ export async function getDayEvents(range: DayRange): Promise<CalendarEvent[]> {
       connecting: db.connecting,
     });
 
-    const rows = await getDayEventRows(range);
+    const { rows, tableName } = await getDayEventRows(range);
 
     console.info(`${CALENDAR_UI_LOG_PREFIX} day events loaded`, {
       count: rows.length,
-      table: 'events',
+      table: tableName,
     });
 
     return rows.map(mapCalendarEventRow);
