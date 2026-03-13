@@ -2,10 +2,8 @@
 
 import { useSearchParams } from 'next/navigation';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DayEventsOverview } from '@/features/calendar/components/day-events-overview';
 import { GoogleAuthControls } from '@/features/integrations/google/components/google-auth-controls';
-import { useTasks } from '@/features/tasks/hooks/use-tasks';
 
 const SUCCESS_MESSAGES: Record<string, string> = {
   google_connected: 'Google Calendar connected successfully. Initial sync started.',
@@ -22,8 +20,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   callback_failed: 'Unexpected callback error. Please try again.',
 };
 
-export function TasksOverview() {
-  const { data: tasks = [] } = useTasks();
+export function CalendarOverview() {
   const searchParams = useSearchParams();
 
   const successCode = searchParams.get('success');
@@ -38,7 +35,7 @@ export function TasksOverview() {
           <div className="space-y-1">
             <h1 className="text-3xl font-semibold tracking-tight">Smart Desk</h1>
             <p className="text-muted-foreground">
-              Tasks read from the local database layer. Remote sync is handled in the background.
+              Calendar events are read from local SQLite. Remote sync is handled in the background.
             </p>
           </div>
           <GoogleAuthControls />
@@ -55,27 +52,6 @@ export function TasksOverview() {
             {errorMessage}
           </div>
         ) : null}
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Tasks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {tasks.length === 0 ? (
-              <p className="text-muted-foreground">
-                No tasks yet. Local task schema wiring is next.
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {tasks.map(task => (
-                  <li key={task.id} className="rounded-md border p-3">
-                    {task.title}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
 
         <DayEventsOverview />
       </section>
