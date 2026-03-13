@@ -32,4 +32,9 @@ export const appSchema = new Schema({
     updated_at: column.text,
     deleted_at: column.text,
   }),
+  preferences: new Table({
+    user_id: column.text,
+    language: column.text,
+    updated_at: column.text,
+  }),
 });

@@ -2,6 +2,7 @@
 
 import { PencilLineIcon, Trash2Icon } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { DATE_LOCALE_BY_LANGUAGE, toSupportedLanguage } from '@/features/i18n/constants/languages';
 import { TaskForm } from '@/features/tasks/components/task-form';
 import { useAuthUserId } from '@/features/tasks/hooks/use-auth-user-id';
 import {
@@ -28,18 +30,6 @@ import {
   parseTaskTagsInput,
 } from '@/features/tasks/logic/task-tags';
 import type { Task } from '@/features/tasks/types/task';
-
-const DEFAULT_TASK_TITLE = 'New Task';
-const TASK_CREATED_MESSAGE = 'Task created.';
-const TASK_UPDATED_MESSAGE = 'Task updated.';
-const TASK_DELETED_MESSAGE = 'Task deleted.';
-const TASK_CREATE_ERROR_MESSAGE = 'Could not create task. Try again.';
-const TASK_UPDATE_ERROR_MESSAGE = 'Could not update task. Try again.';
-const TASK_DELETE_ERROR_MESSAGE = 'Could not delete task. Try again.';
-const TASK_EMPTY_STATE_MESSAGE =
-  'No tasks yet. Create one and it will also appear as an all-day event.';
-const TASK_SIGN_IN_HINT = 'Sign in to create and sync tasks.';
-const DATE_FORMAT_LOCALE = 'en-US';
 
 function getCreateDefaultValues(): TaskFormValues {
   return {
@@ -59,8 +49,8 @@ function mapTaskToFormValues(task: Task): TaskFormValues {
   };
 }
 
-function formatPlannedDateLabel(plannedDate: string): string {
-  return new Intl.DateTimeFormat(DATE_FORMAT_LOCALE, {
+function formatPlannedDateLabel(plannedDate: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -68,8 +58,11 @@ function formatPlannedDateLabel(plannedDate: string): string {
 }
 
 export function TasksOverview() {
+  const { t, i18n } = useTranslation();
   const { userId, isLoading: isAuthLoading } = useAuthUserId();
   const { data: tasks = [], isLoading: isTasksLoading } = useTasks();
+  const selectedLanguage = toSupportedLanguage(i18n.resolvedLanguage);
+  const dateLocale = DATE_LOCALE_BY_LANGUAGE[selectedLanguage];
 
   const createTaskMutation = useCreateTask(userId);
   const updateTaskMutation = useUpdateTask(userId);
@@ -90,10 +83,10 @@ export function TasksOverview() {
         tags: parseTaskTagsInput(values.tagsInput),
         plannedDate: values.plannedDate,
       });
-      toast.success(TASK_CREATED_MESSAGE);
+      toast.success(t('tasks.toasts.created'));
       setCreateFormKey(previousKey => previousKey + 1);
     } catch {
-      toast.error(TASK_CREATE_ERROR_MESSAGE);
+      toast.error(t('tasks.toasts.createError'));
     }
   };
 
@@ -110,29 +103,27 @@ export function TasksOverview() {
         tags: parseTaskTagsInput(values.tagsInput),
         plannedDate: values.plannedDate,
       });
-      toast.success(TASK_UPDATED_MESSAGE);
+      toast.success(t('tasks.toasts.updated'));
       setEditingTask(null);
     } catch {
-      toast.error(TASK_UPDATE_ERROR_MESSAGE);
+      toast.error(t('tasks.toasts.updateError'));
     }
   };
 
   const handleDeleteTask = async (taskId: string): Promise<void> => {
     try {
       await deleteTaskMutation.mutateAsync(taskId);
-      toast.success(TASK_DELETED_MESSAGE);
+      toast.success(t('tasks.toasts.deleted'));
     } catch {
-      toast.error(TASK_DELETE_ERROR_MESSAGE);
+      toast.error(t('tasks.toasts.deleteError'));
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tasks</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Create tasks with a planned date. They are shown as all-day items on that day.
-        </p>
+        <CardTitle>{t('tasks.title')}</CardTitle>
+        <p className="text-sm text-muted-foreground">{t('tasks.subtitle')}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <TaskForm
@@ -141,17 +132,19 @@ export function TasksOverview() {
           disabled={!canManageTasks}
           idPrefix="create-task"
           isSubmitting={createTaskMutation.isPending}
-          submitLabel="Add task"
+          submitLabel={t('tasks.form.addTask')}
           onSubmit={handleCreateTask}
         />
 
-        {!canManageTasks ? <p className="text-sm text-muted-foreground">{TASK_SIGN_IN_HINT}</p> : null}
+        {!canManageTasks ? (
+          <p className="text-sm text-muted-foreground">{t('tasks.signInHint')}</p>
+        ) : null}
 
-        {isTasksLoading ? <p className="text-sm text-muted-foreground">Loading tasks...</p> : null}
+        {isTasksLoading ? <p className="text-sm text-muted-foreground">{t('tasks.loading')}</p> : null}
 
         {!isTasksLoading && tasks.length === 0 ? (
           <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-            {TASK_EMPTY_STATE_MESSAGE}
+            {t('tasks.emptyState')}
           </p>
         ) : null}
 
@@ -161,7 +154,7 @@ export function TasksOverview() {
               <li key={task.id} className="rounded-md border p-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-1">
-                    <p className="font-medium">{task.title || DEFAULT_TASK_TITLE}</p>
+                    <p className="font-medium">{task.title || t('tasks.defaultTaskTitle')}</p>
                     <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                       {task.tags?.map(tagValue => (
                         <span
@@ -171,7 +164,7 @@ export function TasksOverview() {
                           {tagValue}
                         </span>
                       ))}
-                      <span>{formatPlannedDateLabel(task.plannedDate)}</span>
+                      <span>{formatPlannedDateLabel(task.plannedDate, dateLocale)}</span>
                     </div>
                     {task.description ? (
                       <p className="text-sm text-muted-foreground">{task.description}</p>
@@ -179,7 +172,7 @@ export function TasksOverview() {
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      aria-label="Edit task"
+                      aria-label={t('tasks.actions.edit')}
                       disabled={!canManageTasks || updateTaskMutation.isPending}
                       size="sm"
                       variant="outline"
@@ -188,10 +181,10 @@ export function TasksOverview() {
                       }}
                     >
                       <PencilLineIcon />
-                      Edit
+                      {t('tasks.actions.edit')}
                     </Button>
                     <Button
-                      aria-label="Delete task"
+                      aria-label={t('tasks.actions.delete')}
                       disabled={!canManageTasks || deleteTaskMutation.isPending}
                       size="sm"
                       variant="destructive"
@@ -200,7 +193,7 @@ export function TasksOverview() {
                       }}
                     >
                       <Trash2Icon />
-                      Delete
+                      {t('tasks.actions.delete')}
                     </Button>
                   </div>
                 </div>
@@ -220,10 +213,8 @@ export function TasksOverview() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit task</DialogTitle>
-            <DialogDescription>
-              Update the title, optional notes, optional tags, and planned date.
-            </DialogDescription>
+            <DialogTitle>{t('tasks.editDialog.title')}</DialogTitle>
+            <DialogDescription>{t('tasks.editDialog.description')}</DialogDescription>
           </DialogHeader>
 
           {editingTask ? (
@@ -232,7 +223,7 @@ export function TasksOverview() {
               defaultValues={mapTaskToFormValues(editingTask)}
               idPrefix="edit-task"
               isSubmitting={updateTaskMutation.isPending}
-              submitLabel="Save changes"
+              submitLabel={t('tasks.editDialog.saveChanges')}
               onCancel={() => {
                 setEditingTask(null);
               }}

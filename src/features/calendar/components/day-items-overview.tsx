@@ -1,25 +1,18 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDayItems } from '@/features/calendar/hooks/use-day-items';
 import type { DayItem } from '@/features/calendar/types/day-item';
+import { DATE_LOCALE_BY_LANGUAGE, toSupportedLanguage } from '@/features/i18n/constants/languages';
 import { cn } from '@/lib/utils';
 
-const DEFAULT_FORMAT_LOCALE = 'en-US';
 const DEFAULT_CALENDAR_COLOR = '#9aa0a6';
-const ITEM_LABEL_FALLBACK = 'Untitled item';
-const TOAST_ITEM_ADDED_PREFIX = 'Added:';
-const TOAST_ITEM_UPDATED_PREFIX = 'Updated:';
-const TOAST_ITEM_REMOVED_PREFIX = 'Removed:';
 const SKELETON_ROWS_COUNT = 2;
 const LOCAL_PLANNED_SOURCE = 'task';
-const SECTION_ALL_DAY_TITLE = 'All-day';
-const SECTION_SCHEDULED_TITLE = 'Scheduled';
-const EMPTY_ALL_DAY_LABEL = 'No all-day items for today.';
-const EMPTY_SCHEDULED_LABEL = 'No timed items for today.';
 
 interface ItemSectionProps {
   title: string;
@@ -42,18 +35,18 @@ function getItemSignature(item: DayItem): string {
 }
 
 function getItemLabel(item: DayItem): string {
-  return item.title.trim() || ITEM_LABEL_FALLBACK;
+  return item.title.trim();
 }
 
-function formatTimeLabel(isoDate: string): string {
-  return new Date(isoDate).toLocaleTimeString([], {
+function formatTimeLabel(isoDate: string, locale: string): string {
+  return new Date(isoDate).toLocaleTimeString(locale, {
     hour: '2-digit',
     minute: '2-digit',
   });
 }
 
-function formatTodayLabel(date: Date): string {
-  return new Intl.DateTimeFormat(DEFAULT_FORMAT_LOCALE, {
+function formatTodayLabel(date: Date, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
     weekday: 'long',
     month: 'short',
     day: 'numeric',
@@ -61,6 +54,10 @@ function formatTodayLabel(date: Date): string {
 }
 
 function ItemSection({ title, emptyLabel, items }: ItemSectionProps) {
+  const { t, i18n } = useTranslation();
+  const selectedLanguage = toSupportedLanguage(i18n.resolvedLanguage);
+  const dateLocale = DATE_LOCALE_BY_LANGUAGE[selectedLanguage];
+
   return (
     <section className="space-y-2 rounded-lg border p-3">
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
@@ -79,12 +76,12 @@ function ItemSection({ title, emptyLabel, items }: ItemSectionProps) {
                   style={{ backgroundColor: item.calendarColor ?? DEFAULT_CALENDAR_COLOR }}
                 />
                 <div className="space-y-1">
-                  <p className="font-medium">{getItemLabel(item)}</p>
+                  <p className="font-medium">{getItemLabel(item) || t('calendar.untitledItem')}</p>
                   {item.allDay ? (
-                    <p className="text-sm text-muted-foreground">All day</p>
+                    <p className="text-sm text-muted-foreground">{t('calendar.allDayLabel')}</p>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      {formatTimeLabel(item.startsAt)} - {formatTimeLabel(item.endsAt)}
+                      {formatTimeLabel(item.startsAt, dateLocale)} - {formatTimeLabel(item.endsAt, dateLocale)}
                     </p>
                   )}
                   {item.source === LOCAL_PLANNED_SOURCE && item.tags ? (
@@ -113,9 +110,12 @@ function ItemSection({ title, emptyLabel, items }: ItemSectionProps) {
 }
 
 export function DayItemsOverview() {
-  const todayLabel = formatTodayLabel(new Date());
+  const { t, i18n } = useTranslation();
   const { data: items = [], isLoading, isFetched } = useDayItems();
   const previousItemsRef = useRef<Map<string, { signature: string; label: string }> | null>(null);
+  const selectedLanguage = toSupportedLanguage(i18n.resolvedLanguage);
+  const dateLocale = DATE_LOCALE_BY_LANGUAGE[selectedLanguage];
+  const todayLabel = formatTodayLabel(new Date(), dateLocale);
 
   const { allDayItems, scheduledItems } = useMemo(() => {
     const groupedItems = {
@@ -152,28 +152,28 @@ export function DayItemsOverview() {
     for (const [itemId, currentItem] of currentItems) {
       const previousItem = previousItems.get(itemId);
       if (!previousItem) {
-        toast.info(`${TOAST_ITEM_ADDED_PREFIX} ${currentItem.label}`);
+        toast.info(t('calendar.toasts.added', { label: currentItem.label }));
         continue;
       }
 
       if (previousItem.signature !== currentItem.signature) {
-        toast.info(`${TOAST_ITEM_UPDATED_PREFIX} ${currentItem.label}`);
+        toast.info(t('calendar.toasts.updated', { label: currentItem.label }));
       }
     }
 
     for (const [itemId, previousItem] of previousItems) {
       if (!currentItems.has(itemId)) {
-        toast.info(`${TOAST_ITEM_REMOVED_PREFIX} ${previousItem.label}`);
+        toast.info(t('calendar.toasts.removed', { label: previousItem.label }));
       }
     }
 
     previousItemsRef.current = currentItems;
-  }, [isFetched, items]);
+  }, [isFetched, items, t]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Today Calendar</CardTitle>
+        <CardTitle>{t('calendar.todayTitle')}</CardTitle>
         <p className="text-sm text-muted-foreground">{todayLabel}</p>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -199,19 +199,17 @@ export function DayItemsOverview() {
         {!isLoading ? (
           <>
             <ItemSection
-              emptyLabel={EMPTY_ALL_DAY_LABEL}
+              emptyLabel={t('calendar.emptyAllDay')}
               items={allDayItems}
-              title={SECTION_ALL_DAY_TITLE}
+              title={t('calendar.sectionAllDay')}
             />
             <ItemSection
-              emptyLabel={EMPTY_SCHEDULED_LABEL}
+              emptyLabel={t('calendar.emptyScheduled')}
               items={scheduledItems}
-              title={SECTION_SCHEDULED_TITLE}
+              title={t('calendar.sectionScheduled')}
             />
             {items.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Connect Google Calendar and sync events to populate this view.
-              </p>
+              <p className="text-sm text-muted-foreground">{t('calendar.emptyStateHint')}</p>
             ) : null}
           </>
         ) : null}

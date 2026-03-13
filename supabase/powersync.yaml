@@ -40,3 +40,10 @@ bucket_definitions:
         from public.tasks
         where user_id = bucket.user_id
         and deleted_at is null
+      - select
+        id,
+        user_id,
+        language,
+        updated_at
+        from public.preferences
+        where user_id = bucket.user_id

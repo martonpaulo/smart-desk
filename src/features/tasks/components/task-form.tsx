@@ -1,13 +1,17 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { taskFormSchema, type TaskFormValues } from '@/features/tasks/logic/task-form-schema';
+import {
+  createTaskFormSchema,
+  type TaskFormValues,
+} from '@/features/tasks/logic/task-form-schema';
 
 interface TaskFormProps {
   idPrefix?: string;
@@ -30,6 +34,9 @@ export function TaskForm({
   onCancel,
   onSubmit,
 }: TaskFormProps) {
+  const { t } = useTranslation();
+  const taskFormSchema = useMemo(() => createTaskFormSchema(t), [t]);
+
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues,
@@ -52,12 +59,12 @@ export function TaskForm({
     >
       <div className="space-y-1">
         <label className="text-sm font-medium" htmlFor={`${idPrefix}-title`}>
-          Title
+          {t('tasks.form.titleLabel')}
         </label>
         <Input
           disabled={disabled || isSubmitting}
           id={`${idPrefix}-title`}
-          placeholder="Write release notes"
+          placeholder={t('tasks.form.titlePlaceholder')}
           {...form.register('title')}
         />
         {form.formState.errors.title ? (
@@ -67,12 +74,12 @@ export function TaskForm({
 
       <div className="space-y-1">
         <label className="text-sm font-medium" htmlFor={`${idPrefix}-description`}>
-          Description (optional)
+          {t('tasks.form.descriptionLabel')}
         </label>
         <Textarea
           disabled={disabled || isSubmitting}
           id={`${idPrefix}-description`}
-          placeholder="Add context or checklist details"
+          placeholder={t('tasks.form.descriptionPlaceholder')}
           {...form.register('description')}
         />
         {form.formState.errors.description ? (
@@ -83,12 +90,12 @@ export function TaskForm({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1">
           <label className="text-sm font-medium" htmlFor={`${idPrefix}-tags`}>
-            Tags (optional)
+            {t('tasks.form.tagsLabel')}
           </label>
           <Input
             disabled={disabled || isSubmitting}
             id={`${idPrefix}-tags`}
-            placeholder="work, urgent"
+            placeholder={t('tasks.form.tagsPlaceholder')}
             {...form.register('tagsInput')}
           />
           {form.formState.errors.tagsInput ? (
@@ -98,7 +105,7 @@ export function TaskForm({
 
         <div className="space-y-1">
           <label className="text-sm font-medium" htmlFor={`${idPrefix}-planned-date`}>
-            Planned date
+            {t('tasks.form.plannedDateLabel')}
           </label>
           <Input
             disabled={disabled || isSubmitting}
@@ -123,7 +130,7 @@ export function TaskForm({
             variant="outline"
             onClick={onCancel}
           >
-            Cancel
+            {t('tasks.editDialog.cancel')}
           </Button>
         ) : null}
       </div>
