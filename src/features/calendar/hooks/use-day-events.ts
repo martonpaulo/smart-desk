@@ -47,9 +47,8 @@ export function useDayEvents() {
   const boundaries = useMemo(() => getDayBoundaries(now), [now]);
 
   return useQuery({
-    queryKey: ['calendar-events-day', boundaries.dayStartIso],
+    queryKey: ['calendar-events-day', boundaries.dayStartIso, isDbConnected],
     queryFn: () => getDayEvents(boundaries),
-    enabled: isDbConnected,
     refetchInterval: NOW_TICK_MS,
   });
 }
