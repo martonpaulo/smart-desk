@@ -59,19 +59,7 @@ async function getDayEventRows(range: DayRange): Promise<CalendarEventRow[]> {
 
 export async function getDayEvents(range: DayRange): Promise<CalendarEvent[]> {
   try {
-    console.info(`${CALENDAR_UI_LOG_PREFIX} requesting day events`, {
-      dayStartIso: range.dayStartIso,
-      dayEndIso: range.dayEndIso,
-      connected: db.connected,
-      connecting: db.connecting,
-    });
-
     const rows = await getDayEventRows(range);
-
-    console.info(`${CALENDAR_UI_LOG_PREFIX} day events loaded`, {
-      count: rows.length,
-      table: STREAM_EVENTS_TABLE,
-    });
 
     return rows.map(mapCalendarEventRow);
   } catch (error) {

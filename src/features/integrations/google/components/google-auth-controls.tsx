@@ -3,7 +3,8 @@
 import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -27,16 +28,10 @@ const SIGNING_OUT_BUTTON_LABEL = 'Signing out...';
 const SIGN_OUT_BUTTON_LABEL = 'Sign out';
 const AUTH_ERROR_PREFIX = 'Action failed:';
 const AUTH_STATUS_SIGNED_OUT_MESSAGE = 'You are signed out. Sign in to connect Google Calendar.';
-const AUTH_STATUS_CHECKING_MESSAGE = 'Checking Google connection status...';
 const AUTH_STATUS_CONNECTED_MESSAGE =
   'Google Calendar connected. Updates sync automatically every few seconds.';
 const AUTH_STATUS_DISCONNECTED_MESSAGE =
   'Google Calendar is not connected. Connect it to sync events into your local calendar.';
-const ALERT_BASE_CLASS_NAME = 'w-full rounded-md border px-3 py-2 text-xs';
-const ALERT_INFO_CLASS_NAME = 'border-border bg-muted text-muted-foreground';
-const ALERT_SUCCESS_CLASS_NAME = 'border-green-500/40 bg-green-500/10 text-green-300';
-const ALERT_WARNING_CLASS_NAME = 'border-amber-500/40 bg-amber-500/10 text-amber-300';
-const ALERT_ERROR_CLASS_NAME = 'border-destructive/40 bg-destructive/10 text-destructive';
 const SUCCESS_CONNECTED_QUERY_VALUE = 'google_connected';
 const CALENDAR_DAY_EVENTS_QUERY_KEY = ['calendar-events-day'];
 
@@ -46,6 +41,14 @@ interface GoogleStartResponse {
 
 interface GoogleStatusResponse {
   connected: boolean;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'Unknown error';
 }
 
 export function GoogleAuthControls() {
@@ -59,7 +62,11 @@ export function GoogleAuthControls() {
   const [isGoogleConnected, setIsGoogleConnected] = useState<boolean | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const previousSessionRef = useRef<Session | null>(null);
+  const hasHydratedConnectionStatusRef = useRef(false);
+  const previousGoogleConnectedRef = useRef<boolean | null>(null);
+
   const successCode = searchParams.get('success');
 
   useEffect(() => {
@@ -123,9 +130,8 @@ export function GoogleAuthControls() {
         }
       })
       .catch(error => {
-        const message = error instanceof Error ? error.message : 'Unknown error';
         if (!isCancelled) {
-          setErrorMessage(`${AUTH_ERROR_PREFIX} ${message}`);
+          toast.error(`${AUTH_ERROR_PREFIX} ${getErrorMessage(error)}`);
         }
       })
       .finally(() => {
@@ -138,6 +144,47 @@ export function GoogleAuthControls() {
       isCancelled = true;
     };
   }, [session, successCode]);
+
+  useEffect(() => {
+    if (isAuthLoading) {
+      return;
+    }
+
+    const hadSessionBefore = previousSessionRef.current !== null;
+
+    if (!session) {
+      if (hadSessionBefore) {
+        toast.info(AUTH_STATUS_SIGNED_OUT_MESSAGE);
+      }
+
+      hasHydratedConnectionStatusRef.current = false;
+      previousGoogleConnectedRef.current = null;
+      previousSessionRef.current = null;
+      return;
+    }
+
+    previousSessionRef.current = session;
+
+    if (isStatusLoading || isGoogleConnected === null) {
+      return;
+    }
+
+    if (!hasHydratedConnectionStatusRef.current) {
+      hasHydratedConnectionStatusRef.current = true;
+      previousGoogleConnectedRef.current = isGoogleConnected;
+      return;
+    }
+
+    if (previousGoogleConnectedRef.current !== isGoogleConnected) {
+      if (isGoogleConnected) {
+        toast.success(AUTH_STATUS_CONNECTED_MESSAGE);
+      } else {
+        toast.info(AUTH_STATUS_DISCONNECTED_MESSAGE);
+      }
+    }
+
+    previousGoogleConnectedRef.current = isGoogleConnected;
+  }, [isAuthLoading, isGoogleConnected, isStatusLoading, session]);
 
   useEffect(() => {
     if (!session || !isGoogleConnected) {
@@ -166,9 +213,8 @@ export function GoogleAuthControls() {
         if (!isCancelled) {
           await queryClient.invalidateQueries({ queryKey: CALENDAR_DAY_EVENTS_QUERY_KEY });
         }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        console.warn('Google background sync failed', message);
+      } catch {
+        // Ignore transient background sync errors to avoid user-facing spam.
       }
     };
 
@@ -191,8 +237,6 @@ export function GoogleAuthControls() {
   }, [isGoogleConnected, queryClient, session]);
 
   async function handleSignIn(): Promise<void> {
-    setErrorMessage(null);
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: GOOGLE_PROVIDER,
       options: {
@@ -201,7 +245,7 @@ export function GoogleAuthControls() {
     });
 
     if (error) {
-      setErrorMessage(`${AUTH_ERROR_PREFIX} ${error.message}`);
+      toast.error(`${AUTH_ERROR_PREFIX} ${error.message}`);
     }
   }
 
@@ -211,7 +255,6 @@ export function GoogleAuthControls() {
     }
 
     setIsConnecting(true);
-    setErrorMessage(null);
 
     try {
       const response = await fetch(START_GOOGLE_CONNECT_ENDPOINT, {
@@ -228,8 +271,7 @@ export function GoogleAuthControls() {
       const data = (await response.json()) as GoogleStartResponse;
       window.location.assign(data.url);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      setErrorMessage(`${AUTH_ERROR_PREFIX} ${message}`);
+      toast.error(`${AUTH_ERROR_PREFIX} ${getErrorMessage(error)}`);
     } finally {
       setIsConnecting(false);
     }
@@ -237,12 +279,11 @@ export function GoogleAuthControls() {
 
   async function handleSignOut(): Promise<void> {
     setIsSigningOut(true);
-    setErrorMessage(null);
 
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      setErrorMessage(`${AUTH_ERROR_PREFIX} ${error.message}`);
+      toast.error(`${AUTH_ERROR_PREFIX} ${error.message}`);
     }
 
     setIsSigningOut(false);
@@ -268,10 +309,6 @@ export function GoogleAuthControls() {
         >
           {SIGN_IN_BUTTON_LABEL}
         </Button>
-        <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_WARNING_CLASS_NAME}`}>
-          {AUTH_STATUS_SIGNED_OUT_MESSAGE}
-        </p>
-        {errorMessage ? <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_ERROR_CLASS_NAME}`}>{errorMessage}</p> : null}
       </div>
     );
   }
@@ -315,20 +352,6 @@ export function GoogleAuthControls() {
           {isSigningOut ? SIGNING_OUT_BUTTON_LABEL : SIGN_OUT_BUTTON_LABEL}
         </Button>
       </div>
-      {shouldShowConnectionLoading ? (
-        <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_INFO_CLASS_NAME}`}>{AUTH_STATUS_CHECKING_MESSAGE}</p>
-      ) : null}
-      {shouldShowConnectedState ? (
-        <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_SUCCESS_CLASS_NAME}`}>
-          {AUTH_STATUS_CONNECTED_MESSAGE}
-        </p>
-      ) : null}
-      {shouldShowConnectButton ? (
-        <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_WARNING_CLASS_NAME}`}>
-          {AUTH_STATUS_DISCONNECTED_MESSAGE}
-        </p>
-      ) : null}
-      {errorMessage ? <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_ERROR_CLASS_NAME}`}>{errorMessage}</p> : null}
     </div>
   );
 }

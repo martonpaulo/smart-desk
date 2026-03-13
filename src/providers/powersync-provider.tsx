@@ -91,8 +91,6 @@ export function PowerSyncProvider(): null {
           console.warn(
             `${POWERSYNC_LOG_PREFIX} skipping connect: NEXT_PUBLIC_POWERSYNC_TOKEN is required in development-token mode`,
           );
-        } else {
-          console.info(`${POWERSYNC_LOG_PREFIX} skipping connect: no active Supabase session`);
         }
         if (db.connected || db.connecting) {
           await db.disconnectAndClear();
@@ -141,10 +139,6 @@ export function PowerSyncProvider(): null {
         });
 
         await Promise.race([connectPromise, timeoutPromise]);
-
-        console.info(`${POWERSYNC_LOG_PREFIX} connected`, {
-          authMode: POWERSYNC_AUTH_MODE,
-        });
       } catch (error) {
         console.error(
           `${POWERSYNC_LOG_PREFIX} connect failed. Verify that PowerSync auth mode matches the token source.`,

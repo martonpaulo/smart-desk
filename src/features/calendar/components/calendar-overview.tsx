@@ -1,6 +1,8 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 import { DayEventsOverview } from '@/features/calendar/components/day-events-overview';
 import { GoogleAuthControls } from '@/features/integrations/google/components/google-auth-controls';
@@ -21,12 +23,30 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export function CalendarOverview() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const successCode = searchParams.get('success');
   const errorCode = searchParams.get('error');
   const successMessage = successCode ? SUCCESS_MESSAGES[successCode] : null;
   const errorMessage = errorCode ? ERROR_MESSAGES[errorCode] : null;
+
+  useEffect(() => {
+    if (!successMessage && !errorMessage) {
+      return;
+    }
+
+    if (successMessage) {
+      toast.success(successMessage);
+    }
+
+    if (errorMessage) {
+      toast.error(errorMessage);
+    }
+
+    router.replace(pathname);
+  }, [errorMessage, pathname, router, successMessage]);
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 sm:px-6 sm:py-10">
@@ -42,18 +62,6 @@ export function CalendarOverview() {
             <GoogleAuthControls />
           </div>
         </header>
-
-        {successMessage ? (
-          <div className="rounded-md border border-green-500/40 bg-green-500/10 px-3 py-2 text-sm text-green-300">
-            {successMessage}
-          </div>
-        ) : null}
-
-        {errorMessage ? (
-          <div className="rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-            {errorMessage}
-          </div>
-        ) : null}
 
         <DayEventsOverview />
       </section>

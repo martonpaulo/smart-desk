@@ -17,7 +17,6 @@ const EVENT_STATUS_CANCELLED = 'cancelled';
 const TABLE_GOOGLE_CONNECTIONS = 'google_connections';
 const TABLE_CALENDAR_EVENTS = 'calendar_events';
 const UPSERT_CONFLICT_FIELDS = 'user_id,google_event_id';
-const GOOGLE_SYNC_LOG_PREFIX = '[google-sync]';
 const EVENTS_SINGLE_EVENTS = 'true';
 const CALENDAR_LIST_PAGE_SIZE = '250';
 const EVENTS_PAGE_SIZE = '250';
@@ -277,11 +276,6 @@ export async function syncGoogleCalendar(userId: string): Promise<void> {
   const { accessToken } = await withRetry(() => refreshAccessToken(refreshToken));
 
   const calendars = await withRetry(() => listAccessibleCalendars(accessToken));
-  console.info(`${GOOGLE_SYNC_LOG_PREFIX} syncing accessible calendars`, {
-    userId,
-    calendarsCount: calendars.length,
-    calendarIds: calendars.map(calendar => calendar.id),
-  });
 
   const responses: CalendarEventsBatch[] = [];
 
@@ -289,11 +283,6 @@ export async function syncGoogleCalendar(userId: string): Promise<void> {
     const calendarId = calendar.id;
     const items = await withRetry(() => fetchAllCalendarEvents(accessToken, calendarId));
     responses.push({ calendarId, calendarColor: calendar.color, items });
-    console.info(`${GOOGLE_SYNC_LOG_PREFIX} calendar events fetched`, {
-      userId,
-      calendarId,
-      count: items.length,
-    });
   }
 
   const events = responses.flatMap(response =>
