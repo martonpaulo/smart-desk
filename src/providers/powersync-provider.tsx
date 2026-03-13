@@ -9,18 +9,28 @@ import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 const NEXT_PUBLIC_POWERSYNC_URL = process.env.NEXT_PUBLIC_POWERSYNC_URL;
 const POWERSYNC_LOG_PREFIX = '[powersync]';
 const SLOW_CONNECT_LOG_MS = 20_000;
+const CONNECT_TIMEOUT_MS = 30_000;
+const RECONNECT_INTERVAL_MS = 15_000;
+
+function getConnectTimeoutError(): Error {
+  return new Error(`connect timeout after ${CONNECT_TIMEOUT_MS}ms`);
+}
 
 export function PowerSyncProvider(): null {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   useEffect(() => {
     let isActive = true;
+    let latestSession: Session | null = null;
     let slowConnectLogTimeoutId: number | null = null;
+    let connectTimeoutId: number | null = null;
 
     const connectIfPossible = async (session: Session | null): Promise<void> => {
       if (!isActive) {
         return;
       }
+
+      latestSession = session;
 
       if (!NEXT_PUBLIC_POWERSYNC_URL) {
         console.warn(`${POWERSYNC_LOG_PREFIX} NEXT_PUBLIC_POWERSYNC_URL is not set`);
@@ -46,7 +56,7 @@ export function PowerSyncProvider(): null {
           });
         }, SLOW_CONNECT_LOG_MS);
 
-        await db.connect({
+        const connectPromise = db.connect({
           fetchCredentials: async () => {
             const { data } = await supabase.auth.getSession();
             const accessToken = data.session?.access_token;
@@ -66,6 +76,14 @@ export function PowerSyncProvider(): null {
           },
         });
 
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          connectTimeoutId = window.setTimeout(() => {
+            reject(getConnectTimeoutError());
+          }, CONNECT_TIMEOUT_MS);
+        });
+
+        await Promise.race([connectPromise, timeoutPromise]);
+
         console.info(`${POWERSYNC_LOG_PREFIX} connected`);
       } catch (error) {
         console.error(`${POWERSYNC_LOG_PREFIX} connect failed`, error);
@@ -84,12 +102,19 @@ export function PowerSyncProvider(): null {
           window.clearTimeout(slowConnectLogTimeoutId);
           slowConnectLogTimeoutId = null;
         }
+        if (connectTimeoutId !== null) {
+          window.clearTimeout(connectTimeoutId);
+          connectTimeoutId = null;
+        }
       }
     };
 
     void supabase.auth
       .getSession()
-      .then(({ data }) => connectIfPossible(data.session ?? null))
+      .then(({ data }) => {
+        latestSession = data.session ?? null;
+        return connectIfPossible(latestSession);
+      })
       .catch(() => {
         // Keep UI usable even if sync bootstrap fails.
       });
@@ -97,13 +122,25 @@ export function PowerSyncProvider(): null {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      latestSession = nextSession;
       void connectIfPossible(nextSession).catch(error => {
         console.error(`${POWERSYNC_LOG_PREFIX} auth state connect handler failed`, error);
       });
     });
 
+    const reconnectIntervalId = window.setInterval(() => {
+      if (!latestSession) {
+        return;
+      }
+
+      void connectIfPossible(latestSession).catch(error => {
+        console.error(`${POWERSYNC_LOG_PREFIX} periodic reconnect failed`, error);
+      });
+    }, RECONNECT_INTERVAL_MS);
+
     return () => {
       isActive = false;
+      window.clearInterval(reconnectIntervalId);
       subscription.unsubscribe();
       if (db.connected || db.connecting) {
         void db.disconnect();

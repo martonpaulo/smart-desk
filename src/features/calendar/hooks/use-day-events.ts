@@ -48,7 +48,7 @@ export function useDayEvents() {
 
   return useQuery({
     queryKey: ['calendar-events-day', boundaries.dayStartIso, isDbConnected],
-    queryFn: () => getDayEvents(boundaries),
+    queryFn: () => (isDbConnected ? getDayEvents(boundaries) : Promise.resolve([])),
     refetchInterval: NOW_TICK_MS,
   });
 }
