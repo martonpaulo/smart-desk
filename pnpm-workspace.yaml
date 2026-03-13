@@ -1,4 +1,5 @@
 ignoredBuiltDependencies:
+  - '@journeyapps/wa-sqlite'
   - sharp
   - unrs-resolver
 

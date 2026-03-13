@@ -42,3 +42,9 @@ next-env.d.ts
 
 # vscode
 .vscode/*
+
+# powersync
+./public/powersync/worker/*
+
+# supabase
+./supabase/.temp
