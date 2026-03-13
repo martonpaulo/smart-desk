@@ -235,6 +235,7 @@ Rules:
 
 - Do not hardcode the project tree in `README.md`.
 - If structure documentation is needed, keep it high-level or reference commands that generate the current tree.
+- Always verify implementation approaches against the official, up-to-date documentation of the libraries/frameworks in use.
 
 ---
 

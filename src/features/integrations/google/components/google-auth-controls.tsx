@@ -26,6 +26,17 @@ const SIGN_IN_BUTTON_LABEL = 'Sign in with Google';
 const SIGNING_OUT_BUTTON_LABEL = 'Signing out...';
 const SIGN_OUT_BUTTON_LABEL = 'Sign out';
 const AUTH_ERROR_PREFIX = 'Action failed:';
+const AUTH_STATUS_SIGNED_OUT_MESSAGE = 'You are signed out. Sign in to connect Google Calendar.';
+const AUTH_STATUS_CHECKING_MESSAGE = 'Checking Google connection status...';
+const AUTH_STATUS_CONNECTED_MESSAGE =
+  'Google Calendar connected. Updates sync automatically every few seconds.';
+const AUTH_STATUS_DISCONNECTED_MESSAGE =
+  'Google Calendar is not connected. Connect it to sync events into your local calendar.';
+const ALERT_BASE_CLASS_NAME = 'w-full rounded-md border px-3 py-2 text-xs';
+const ALERT_INFO_CLASS_NAME = 'border-border bg-muted text-muted-foreground';
+const ALERT_SUCCESS_CLASS_NAME = 'border-green-500/40 bg-green-500/10 text-green-300';
+const ALERT_WARNING_CLASS_NAME = 'border-amber-500/40 bg-amber-500/10 text-amber-300';
+const ALERT_ERROR_CLASS_NAME = 'border-destructive/40 bg-destructive/10 text-destructive';
 const SUCCESS_CONNECTED_QUERY_VALUE = 'google_connected';
 const CALENDAR_DAY_EVENTS_QUERY_KEY = ['calendar-events-day'];
 
@@ -248,7 +259,7 @@ export function GoogleAuthControls() {
 
   if (!session) {
     return (
-      <div className="flex flex-col items-end gap-2">
+      <div className="flex w-full flex-col items-end gap-2 sm:w-auto">
         <Button
           size="sm"
           onClick={() => {
@@ -257,7 +268,10 @@ export function GoogleAuthControls() {
         >
           {SIGN_IN_BUTTON_LABEL}
         </Button>
-        {errorMessage ? <p className="text-xs text-destructive">{errorMessage}</p> : null}
+        <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_WARNING_CLASS_NAME}`}>
+          {AUTH_STATUS_SIGNED_OUT_MESSAGE}
+        </p>
+        {errorMessage ? <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_ERROR_CLASS_NAME}`}>{errorMessage}</p> : null}
       </div>
     );
   }
@@ -267,8 +281,8 @@ export function GoogleAuthControls() {
   const shouldShowConnectionLoading = isStatusLoading || isGoogleConnected === null;
 
   return (
-    <div className="flex flex-col items-end gap-2">
-      <div className="flex items-center gap-2">
+    <div className="flex w-full flex-col items-end gap-2 sm:w-auto">
+      <div className="flex w-full flex-wrap items-center justify-end gap-2">
         {shouldShowConnectButton ? (
           <Button
             disabled={isConnecting}
@@ -301,12 +315,20 @@ export function GoogleAuthControls() {
           {isSigningOut ? SIGNING_OUT_BUTTON_LABEL : SIGN_OUT_BUTTON_LABEL}
         </Button>
       </div>
+      {shouldShowConnectionLoading ? (
+        <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_INFO_CLASS_NAME}`}>{AUTH_STATUS_CHECKING_MESSAGE}</p>
+      ) : null}
       {shouldShowConnectedState ? (
-        <p className="text-xs text-muted-foreground">
-          Google Calendar connected. Updates sync automatically every few seconds.
+        <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_SUCCESS_CLASS_NAME}`}>
+          {AUTH_STATUS_CONNECTED_MESSAGE}
         </p>
       ) : null}
-      {errorMessage ? <p className="text-xs text-destructive">{errorMessage}</p> : null}
+      {shouldShowConnectButton ? (
+        <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_WARNING_CLASS_NAME}`}>
+          {AUTH_STATUS_DISCONNECTED_MESSAGE}
+        </p>
+      ) : null}
+      {errorMessage ? <p className={`${ALERT_BASE_CLASS_NAME} ${ALERT_ERROR_CLASS_NAME}`}>{errorMessage}</p> : null}
     </div>
   );
 }
