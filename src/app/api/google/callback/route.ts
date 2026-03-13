@@ -20,7 +20,6 @@ interface GoogleUserInfo {
   id: string;
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
 const OAUTH_NONCE_COOKIE = 'oauth_nonce';
 const CALLBACK_PATH = '/';
 const OAUTH_ERROR_PARAM = 'error';
@@ -45,12 +44,17 @@ const CALLBACK_ERROR = {
   successConnected: 'google_connected',
 } as const;
 
-function buildSettingsRedirect(searchKey: 'error' | 'success', value: string): URL {
-  return new URL(`${CALLBACK_PATH}?${searchKey}=${value}`, APP_URL);
+function buildSettingsRedirect(
+  requestOrigin: string,
+  searchKey: 'error' | 'success',
+  value: string,
+): URL {
+  return new URL(`${CALLBACK_PATH}?${searchKey}=${value}`, requestOrigin);
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const { searchParams } = request.nextUrl;
+  const requestOrigin = request.nextUrl.origin;
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   const oauthError = searchParams.get('error');
@@ -61,7 +65,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   if (oauthError || !code || !state || !savedNonce) {
     return NextResponse.redirect(
-      buildSettingsRedirect(OAUTH_ERROR_PARAM, CALLBACK_ERROR.oauthFailed),
+      buildSettingsRedirect(requestOrigin, OAUTH_ERROR_PARAM, CALLBACK_ERROR.oauthFailed),
     );
   }
 
@@ -77,13 +81,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     nonce = decoded.nonce;
   } catch {
     return NextResponse.redirect(
-      buildSettingsRedirect(OAUTH_ERROR_PARAM, CALLBACK_ERROR.invalidState),
+      buildSettingsRedirect(requestOrigin, OAUTH_ERROR_PARAM, CALLBACK_ERROR.invalidState),
     );
   }
 
   if (nonce !== savedNonce) {
     return NextResponse.redirect(
-      buildSettingsRedirect(OAUTH_ERROR_PARAM, CALLBACK_ERROR.stateMismatch),
+      buildSettingsRedirect(requestOrigin, OAUTH_ERROR_PARAM, CALLBACK_ERROR.stateMismatch),
     );
   }
 
@@ -105,7 +109,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!tokenRes.ok) {
       return NextResponse.redirect(
-        buildSettingsRedirect(OAUTH_ERROR_PARAM, CALLBACK_ERROR.tokenExchangeFailed),
+        buildSettingsRedirect(requestOrigin, OAUTH_ERROR_PARAM, CALLBACK_ERROR.tokenExchangeFailed),
       );
     }
 
@@ -114,7 +118,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Google only sends refresh_token on the first authorisation (prompt=consent ensures this).
     if (!tokens.refresh_token) {
       return NextResponse.redirect(
-        buildSettingsRedirect(OAUTH_ERROR_PARAM, CALLBACK_ERROR.noRefreshToken),
+        buildSettingsRedirect(requestOrigin, OAUTH_ERROR_PARAM, CALLBACK_ERROR.noRefreshToken),
       );
     }
 
@@ -125,7 +129,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!profileRes.ok) {
       return NextResponse.redirect(
-        buildSettingsRedirect(OAUTH_ERROR_PARAM, CALLBACK_ERROR.profileFetchFailed),
+        buildSettingsRedirect(requestOrigin, OAUTH_ERROR_PARAM, CALLBACK_ERROR.profileFetchFailed),
       );
     }
 
@@ -146,7 +150,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (saveError) {
       console.error('[google-callback] failed to save connection', saveError);
       return NextResponse.redirect(
-        buildSettingsRedirect(OAUTH_ERROR_PARAM, CALLBACK_ERROR.connectionSaveFailed),
+        buildSettingsRedirect(requestOrigin, OAUTH_ERROR_PARAM, CALLBACK_ERROR.connectionSaveFailed),
       );
     }
 
@@ -158,11 +162,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       // TODO: replace with Sentry.captureException(error)
     }
 
-    return NextResponse.redirect(buildSettingsRedirect('success', CALLBACK_ERROR.successConnected));
+    return NextResponse.redirect(
+      buildSettingsRedirect(requestOrigin, 'success', CALLBACK_ERROR.successConnected),
+    );
   } catch (error) {
     console.error(CALLBACK_LOG_PREFIX, error);
     return NextResponse.redirect(
-      buildSettingsRedirect(OAUTH_ERROR_PARAM, CALLBACK_ERROR.callbackFailed),
+      buildSettingsRedirect(requestOrigin, OAUTH_ERROR_PARAM, CALLBACK_ERROR.callbackFailed),
     );
   }
 }
