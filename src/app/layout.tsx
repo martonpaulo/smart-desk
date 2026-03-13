@@ -2,6 +2,7 @@ import './globals.css';
 
 import type { ReactNode } from 'react';
 
+import { PowerSyncProvider } from '@/providers/powersync-provider';
 import { QueryProvider } from '@/providers/query-provider';
 
 interface RootLayoutProps {
@@ -10,9 +11,12 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
+    <html className="dark" lang="en">
       <body>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <PowerSyncProvider />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

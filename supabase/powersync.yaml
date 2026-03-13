@@ -1,0 +1,28 @@
+# PowerSync sync rules for Smart Desk.
+# Deploy this file via the PowerSync dashboard or CLI.
+#
+# calendar_events from Postgres is synced into the local "events" table
+# (matching the app schema defined in src/db/schema.ts).
+# Column aliases translate snake_case Postgres names to camelCase local names.
+# Soft-deleted rows (deleted_at IS NOT NULL) are excluded from sync so the
+# client removes them from the local database automatically.
+
+bucket_definitions:
+  user_events:
+    # Resolve the current user from the JWT 'sub' claim.
+    parameters: select request.jwt() ->> 'sub' as user_id
+
+    data:
+      - select
+        id,
+        title,
+        starts_at         as "startsAt",
+        ends_at           as "endsAt",
+        (all_day::int)    as "allDay",
+        calendar_id       as "calendarId",
+        'google'          as "source",
+        updated_at        as "createdAt",
+        updated_at        as "updatedAt"
+        from public.calendar_events
+        where user_id = bucket.user_id
+        and deleted_at is null

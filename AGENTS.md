@@ -206,12 +206,13 @@ Rules:
 
 ## 13 Constants and Design Tokens
 
-Never hardcode colors, sizes, spacing values, or other magic numbers in feature code.
+Never hardcode colors, sizes, spacing values, or other magic numbers/strings in feature code.
 
 Rules:
 
 - use Tailwind design tokens and theme scales for UI values
 - use named constants for domain thresholds, limits, and timing values
+- use named constants for non-trivial string literals (statuses, provider names, header keys, routes, error codes, table names)
 - keep shared constants in dedicated modules close to their feature or in shared utils when cross-feature
 
 ---
@@ -225,7 +226,7 @@ Rules:
 ❌ Writing sync logic manually
 ❌ Mixing UI, business logic, and data concerns in the same module
 ❌ Building oversized, non-reusable components/functions
-❌ Hardcoding colors, sizes, spacing, or magic numbers
+❌ Hardcoding colors, sizes, spacing, magic numbers, or domain magic strings
 ❌ Hardcoding the project tree in `README.md`
 
 ---
