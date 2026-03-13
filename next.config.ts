@@ -10,6 +10,10 @@ const CROSS_ORIGIN_HEADERS = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  images: {
+    disableStaticImages: true,
+  },
+  turbopack: {},
   async headers() {
     return [
       {

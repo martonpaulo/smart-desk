@@ -7,6 +7,7 @@ import { db } from '@/db/powersync';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 const NEXT_PUBLIC_POWERSYNC_URL = process.env.NEXT_PUBLIC_POWERSYNC_URL;
+const NEXT_PUBLIC_POWERSYNC_TOKEN = process.env.NEXT_PUBLIC_POWERSYNC_TOKEN;
 const POWERSYNC_LOG_PREFIX = '[powersync]';
 const SLOW_CONNECT_LOG_MS = 20_000;
 const CONNECT_TIMEOUT_MS = 30_000;
@@ -21,6 +22,7 @@ export function PowerSyncProvider(): null {
 
   useEffect(() => {
     let isActive = true;
+    let isConnectInFlight = false;
     let latestSession: Session | null = null;
     let slowConnectLogTimeoutId: number | null = null;
     let connectTimeoutId: number | null = null;
@@ -37,7 +39,7 @@ export function PowerSyncProvider(): null {
         return;
       }
 
-      if (!session) {
+      if (!session && !NEXT_PUBLIC_POWERSYNC_TOKEN) {
         console.info(`${POWERSYNC_LOG_PREFIX} skipping connect: no active session`);
         if (db.connected || db.connecting) {
           await db.disconnectAndClear();
@@ -45,11 +47,12 @@ export function PowerSyncProvider(): null {
         return;
       }
 
-      if (db.connected || db.connecting) {
+      if (db.connected || db.connecting || isConnectInFlight) {
         return;
       }
 
       try {
+        isConnectInFlight = true;
         slowConnectLogTimeoutId = window.setTimeout(() => {
           console.warn(`${POWERSYNC_LOG_PREFIX} connect is taking longer than expected`, {
             slowAfterMs: SLOW_CONNECT_LOG_MS,
@@ -60,19 +63,20 @@ export function PowerSyncProvider(): null {
           fetchCredentials: async () => {
             const { data } = await supabase.auth.getSession();
             const accessToken = data.session?.access_token;
+            const token = accessToken ?? NEXT_PUBLIC_POWERSYNC_TOKEN;
 
-            if (!accessToken) {
-              console.warn(`${POWERSYNC_LOG_PREFIX} no access token available for credentials`);
+            if (!token) {
+              console.warn(`${POWERSYNC_LOG_PREFIX} no token available for credentials`);
               return null;
             }
 
             return {
               endpoint: NEXT_PUBLIC_POWERSYNC_URL,
-              token: accessToken,
+              token,
             };
           },
           uploadData: async () => {
-            // Read-only sync for now; local uploads are not implemented in this phase.
+            // Read-only sync for now local uploads are not implemented in this phase
           },
         });
 
@@ -106,6 +110,7 @@ export function PowerSyncProvider(): null {
           window.clearTimeout(connectTimeoutId);
           connectTimeoutId = null;
         }
+        isConnectInFlight = false;
       }
     };
 
@@ -116,7 +121,7 @@ export function PowerSyncProvider(): null {
         return connectIfPossible(latestSession);
       })
       .catch(() => {
-        // Keep UI usable even if sync bootstrap fails.
+        // Keep UI usable even if sync bootstrap fails
       });
 
     const {
@@ -129,7 +134,7 @@ export function PowerSyncProvider(): null {
     });
 
     const reconnectIntervalId = window.setInterval(() => {
-      if (!latestSession) {
+      if (!latestSession && !NEXT_PUBLIC_POWERSYNC_TOKEN) {
         return;
       }
 

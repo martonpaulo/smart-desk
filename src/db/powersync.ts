@@ -1,16 +1,20 @@
-import { PowerSyncDatabase } from '@powersync/web';
+import { PowerSyncDatabase, WASQLiteOpenFactory } from '@powersync/web';
 
 import { appSchema } from '@/db/schema';
 
+const databaseFactory = new WASQLiteOpenFactory({
+  dbFilename: 'smart-desk.db',
+  worker: '/@powersync/worker/WASQLiteDB.umd.js',
+});
+
 export const db = new PowerSyncDatabase({
   schema: appSchema,
-  database: {
-    dbFilename: 'smart-desk.db',
+  database: databaseFactory,
+  flags: {
+    disableSSRWarning: true,
   },
-  // Point to pre-built worker assets served from public/powersync/.
-  // Next.js does not auto-bundle WASM workers from node_modules,
-  // so assets are copied to public/ and referenced by URL.
+  // Point to pre-bundled workers copied into public/@powersync/ by powersync-web copy-assets.
   sync: {
-    worker: '/powersync/worker/SharedSyncImplementation.umd.js',
+    worker: '/@powersync/worker/SharedSyncImplementation.umd.js',
   },
 });

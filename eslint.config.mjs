@@ -116,6 +116,8 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Generated PowerSync worker assets copied into public/
+    'public/@powersync/**',
   ]),
 ]);
 
