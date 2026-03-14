@@ -24,6 +24,7 @@ Rules enforced in this repository:
 - Tailwind CSS
 - Radix UI + shadcn/ui
 - TanStack Query
+- React Hook Form + Zod
 - PowerSync
 
 ## Platform Services
@@ -59,11 +60,16 @@ Use `supabase` only when Supabase Auth is enabled in your PowerSync instance.
 
 ## Testing
 
-The project use the following:
+The project uses the following:
 
 - Vitest (unit)
 - Testing Library (component)
 - Playwright (e2e)
+
+## Supported Languages
+
+- English (United States) — `en`
+- Spanish (Spain) — `es`
 
 ## Notes
 
