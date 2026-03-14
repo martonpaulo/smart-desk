@@ -244,8 +244,24 @@ Rules:
 # Documentation
 
 - Do not hardcode the project tree in `README.md`.
+- Do not hardcode the project tree in `AGENTS.md`.
 - If structure documentation is needed, keep it high-level or reference commands that generate the current tree.
 - Always verify implementation approaches against the official, up-to-date documentation of the libraries/frameworks in use.
+
+---
+
+# Localization
+
+For now, product language support is limited to:
+
+- English (United States)
+- Spanish (Spain)
+
+When implementing i18n changes:
+
+- Keep app language keys aligned with current implementation (`en`, `es`).
+- Keep regional locale mapping aligned (`en-US`, `es-ES`).
+- Do not introduce additional languages/locales unless explicitly requested.
 
 ---
 
@@ -268,22 +284,11 @@ Never implement custom sync logic.
 
 # Project Structure
 
-```
-smart-desk
+Project structure changes over time.
 
-apps/
-web/
+Do not maintain a hardcoded folder tree in this file.
 
-packages/
-ui/
-db/
-features/
-utils/
-types/
-
-supabase/
-migrations/
-```
+If a structure reference is needed, use a high-level description or generate the current tree from the workspace.
 
 ---
 

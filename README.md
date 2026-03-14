@@ -65,6 +65,18 @@ The project use the following:
 - Testing Library (component)
 - Playwright (e2e)
 
+## Localization
+
+For now, Smart Desk supports:
+
+- English (United States)
+- Spanish (Spain)
+
+Implementation detail:
+
+- i18n languages: `en`, `es`
+- date/locale mapping: `en-US`, `es-ES`
+
 ## Notes
 
 - Next.js App Router requires `default` exports in route files such as `page.tsx` and `layout.tsx`.
