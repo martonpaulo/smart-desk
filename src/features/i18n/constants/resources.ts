@@ -14,8 +14,7 @@ export const translationResources = {
       auth: {
         actionFailed: 'Action failed: {{message}}',
         signedOut: 'You are signed out. Sign in to connect Google Calendar.',
-        connected:
-          'Google Calendar connected. Updates sync automatically every few seconds.',
+        connected: 'Google Calendar connected. Updates sync automatically every few seconds.',
         disconnected:
           'Google Calendar is not connected. Connect it to sync events into your local calendar.',
       },
@@ -109,43 +108,43 @@ export const translationResources = {
       app: {
         title: 'Smart Desk',
         subtitle:
-          'Los eventos del calendario se leen desde SQLite local. La sincronizacion remota se ejecuta en segundo plano.',
+          'Los eventos del calendario se leen desde SQLite local. La sincronización remota se ejecuta en segundo plano.',
       },
       language: {
         label: 'Idioma',
-        english: 'Ingles',
-        spanish: 'Espanol',
+        english: 'Inglés',
+        spanish: 'Español',
       },
       auth: {
-        actionFailed: 'La accion fallo: {{message}}',
-        signedOut: 'Has cerrado sesion. Inicia sesion para conectar Google Calendar.',
+        actionFailed: 'La acción ha fallado: {{message}}',
+        signedOut: 'Has cerrado sesión. Inicia sesión para conectar Google Calendar.',
         connected:
-          'Google Calendar conectado. Las actualizaciones se sincronizan automaticamente cada pocos segundos.',
+          'Google Calendar está conectado. Las actualizaciones se sincronizan automáticamente cada pocos segundos.',
         disconnected:
-          'Google Calendar no esta conectado. Conectalo para sincronizar eventos en tu calendario local.',
+          'Google Calendar no está conectado. Conéctalo para sincronizar los eventos en tu calendario local.',
       },
       google: {
         connect: 'Conectar y sincronizar Google',
         connecting: 'Conectando...',
         connected: 'Google conectado',
         checking: 'Comprobando Google...',
-        signIn: 'Iniciar sesion con Google',
-        signingOut: 'Cerrando sesion...',
-        signOut: 'Cerrar sesion',
+        signIn: 'Iniciar sesión con Google',
+        signingOut: 'Cerrando sesión...',
+        signOut: 'Cerrar sesión',
         loading: 'Cargando...',
       },
       calendar: {
         todayTitle: 'Calendario de hoy',
-        sectionAllDay: 'Todo el dia',
+        sectionAllDay: 'Todo el día',
         sectionScheduled: 'Programado',
-        allDayLabel: 'Todo el dia',
-        untitledItem: 'Elemento sin titulo',
-        emptyAllDay: 'No hay elementos de todo el dia para hoy.',
-        emptyScheduled: 'No hay elementos con horario para hoy.',
+        allDayLabel: 'Todo el día',
+        untitledItem: 'Elemento sin título',
+        emptyAllDay: 'No hay elementos de todo el día para hoy.',
+        emptyScheduled: 'No hay elementos programados para hoy.',
         emptyStateHint:
-          'Conecta Google Calendar y sincroniza eventos para llenar esta vista.',
+          'Conecta Google Calendar y sincroniza los eventos para rellenar esta vista.',
         toasts: {
-          added: 'Agregado: {{label}}',
+          added: 'Añadido: {{label}}',
           updated: 'Actualizado: {{label}}',
           removed: 'Eliminado: {{label}}',
         },
@@ -153,19 +152,18 @@ export const translationResources = {
       tasks: {
         title: 'Tareas',
         subtitle:
-          'Crea tareas con una fecha planificada. Se muestran como elementos de todo el dia en esa fecha.',
-        signInHint: 'Inicia sesion para crear y sincronizar tareas.',
+          'Crea tareas con una fecha planificada. Se muestran como elementos de todo el día en esa fecha.',
+        signInHint: 'Inicia sesión para crear y sincronizar tareas.',
         loading: 'Cargando tareas...',
-        emptyState:
-          'Aun no hay tareas. Crea una y tambien aparecera como evento de todo el dia.',
+        emptyState: 'Aún no hay tareas. Crea una y también aparecerá como evento de todo el día.',
         defaultTaskTitle: 'Nueva tarea',
         toasts: {
           created: 'Tarea creada.',
           updated: 'Tarea actualizada.',
           deleted: 'Tarea eliminada.',
-          createError: 'No se pudo crear la tarea. Intentalo de nuevo.',
-          updateError: 'No se pudo actualizar la tarea. Intentalo de nuevo.',
-          deleteError: 'No se pudo eliminar la tarea. Intentalo de nuevo.',
+          createError: 'No se pudo crear la tarea. Inténtalo de nuevo.',
+          updateError: 'No se pudo actualizar la tarea. Inténtalo de nuevo.',
+          deleteError: 'No se pudo eliminar la tarea. Inténtalo de nuevo.',
         },
         actions: {
           edit: 'Editar',
@@ -174,24 +172,24 @@ export const translationResources = {
         editDialog: {
           title: 'Editar tarea',
           description:
-            'Actualiza el titulo, notas opcionales, etiquetas opcionales y fecha planificada.',
+            'Actualiza el título, las notas opcionales, las etiquetas opcionales y la fecha planificada.',
           saveChanges: 'Guardar cambios',
           cancel: 'Cancelar',
         },
         form: {
-          titleLabel: 'Titulo',
-          titlePlaceholder: 'Escribe notas de lanzamiento',
-          descriptionLabel: 'Descripcion (opcional)',
-          descriptionPlaceholder: 'Agrega contexto o detalles de la lista',
+          titleLabel: 'Título',
+          titlePlaceholder: 'Escribe las notas de la versión',
+          descriptionLabel: 'Descripción (opcional)',
+          descriptionPlaceholder: 'Añade contexto o detalles de la lista',
           tagsLabel: 'Etiquetas (opcional)',
           tagsPlaceholder: 'trabajo, urgente',
           plannedDateLabel: 'Fecha planificada',
-          addTask: 'Agregar tarea',
+          addTask: 'Añadir tarea',
           validation: {
-            titleRequired: 'El titulo es obligatorio.',
-            titleMax: 'El titulo debe tener como maximo {{max}} caracteres.',
-            descriptionMax: 'La descripcion debe tener como maximo {{max}} caracteres.',
-            tagsMax: 'Las etiquetas deben tener como maximo {{max}} caracteres.',
+            titleRequired: 'El título es obligatorio.',
+            titleMax: 'El título debe tener como máximo {{max}} caracteres.',
+            descriptionMax: 'La descripción debe tener como máximo {{max}} caracteres.',
+            tagsMax: 'Las etiquetas deben tener como máximo {{max}} caracteres.',
             plannedDateFormat: 'La fecha planificada debe tener formato YYYY-MM-DD.',
           },
         },
@@ -199,23 +197,20 @@ export const translationResources = {
       callback: {
         success: {
           google_connected:
-            'Google Calendar conectado correctamente. La sincronizacion inicial ha comenzado.',
+            'Google Calendar conectado correctamente. La sincronización inicial ha comenzado.',
         },
         error: {
-          oauth_failed: 'La autorizacion de Google fue cancelada o fallo.',
-          invalid_state: 'Estado OAuth invalido. Intenta conectar de nuevo.',
-          state_mismatch:
-            'Fallo la validacion de seguridad. Vuelve a conectar Google.',
-          token_exchange_failed: 'No se pudo intercambiar el codigo de autorizacion de Google.',
+          oauth_failed: 'La autorización de Google fue cancelada o falló.',
+          invalid_state: 'Estado de OAuth no válido. Intenta conectar de nuevo.',
+          state_mismatch: 'La validación de seguridad ha fallado. Vuelve a conectar Google.',
+          token_exchange_failed: 'No se pudo intercambiar el código de autorización de Google.',
           profile_fetch_failed: 'No se pudieron obtener los datos de tu perfil de Google.',
-          connection_save_failed:
-            'Google se conecto, pero no se pudo guardar tu conexion.',
+          connection_save_failed: 'Google se conectó, pero no se pudo guardar la conexión.',
           no_refresh_token:
-            'Google no devolvio un refresh token. Intenta de nuevo con consentimiento.',
-          callback_failed: 'Error inesperado en el callback. Intenta de nuevo.',
+            'Google no devolvió un refresh token. Inténtalo de nuevo con consentimiento.',
+          callback_failed: 'Error inesperado en el callback. Inténtalo de nuevo.',
         },
       },
     },
   },
 } as const;
-
