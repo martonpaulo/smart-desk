@@ -39,7 +39,7 @@ function getLanguageLabel(language: SupportedLanguage, t: (key: string) => strin
 export function LanguageSelector() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
-  const { userId } = useAuthUserId();
+  const { userId, isLoading: isAuthLoading } = useAuthUserId();
 
   const languageQuery = useQuery({
     queryKey: [...LANGUAGE_PREFERENCE_QUERY_KEY, userId],
@@ -53,11 +53,11 @@ export function LanguageSelector() {
   });
 
   useEffect(() => {
-    if (!userId) {
-      if (i18n.resolvedLanguage !== DEFAULT_LANGUAGE) {
-        void i18n.changeLanguage(DEFAULT_LANGUAGE);
-      }
+    if (isAuthLoading) {
+      return;
+    }
 
+    if (!userId) {
       return;
     }
 
@@ -68,7 +68,7 @@ export function LanguageSelector() {
     if (languageQuery.data !== i18n.resolvedLanguage) {
       void i18n.changeLanguage(languageQuery.data);
     }
-  }, [i18n, languageQuery.data, userId]);
+  }, [i18n, isAuthLoading, languageQuery.data, userId]);
 
   const updateLanguageMutation = useMutation({
     mutationFn: async (language: SupportedLanguage) => {

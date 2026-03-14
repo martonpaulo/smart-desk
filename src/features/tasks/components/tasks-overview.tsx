@@ -174,24 +174,26 @@ export function TasksOverview() {
                       aria-label={t('tasks.actions.edit')}
                       disabled={!canManageTasks || updateTaskMutation.isPending}
                       size="sm"
+                      type="button"
                       variant="outline"
                       onClick={() => {
                         setEditingTask(task);
                       }}
                     >
-                      <PencilLineIcon />
+                      <PencilLineIcon aria-hidden="true" />
                       {t('tasks.actions.edit')}
                     </Button>
                     <Button
                       aria-label={t('tasks.actions.delete')}
                       disabled={!canManageTasks || deleteTaskMutation.isPending}
                       size="sm"
+                      type="button"
                       variant="destructive"
                       onClick={() => {
                         void handleDeleteTask(task.id);
                       }}
                     >
-                      <Trash2Icon />
+                      <Trash2Icon aria-hidden="true" />
                       {t('tasks.actions.delete')}
                     </Button>
                   </div>

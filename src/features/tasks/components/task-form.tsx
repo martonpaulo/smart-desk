@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -33,6 +33,7 @@ export function TaskForm({
 }: TaskFormProps) {
   const { t } = useTranslation();
   const taskFormSchema = useMemo(() => createTaskFormSchema(t), [t]);
+  const previousDefaultValuesRef = useRef<TaskFormValues | null>(null);
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
@@ -40,7 +41,20 @@ export function TaskForm({
   });
 
   useEffect(() => {
+    const previousDefaultValues = previousDefaultValuesRef.current;
+    const hasDefaultValuesChanged =
+      !previousDefaultValues ||
+      previousDefaultValues.title !== defaultValues.title ||
+      previousDefaultValues.description !== defaultValues.description ||
+      previousDefaultValues.tagsInput !== defaultValues.tagsInput ||
+      previousDefaultValues.plannedDate !== defaultValues.plannedDate;
+
+    if (!hasDefaultValuesChanged) {
+      return;
+    }
+
     form.reset(defaultValues);
+    previousDefaultValuesRef.current = defaultValues;
   }, [defaultValues, form]);
 
   const submitTaskForm = form.handleSubmit(values => {
@@ -49,6 +63,8 @@ export function TaskForm({
 
   return (
     <form
+      noValidate
+      aria-busy={isSubmitting}
       className="space-y-3"
       onSubmit={event => {
         void submitTaskForm(event);
@@ -59,13 +75,17 @@ export function TaskForm({
           {t('tasks.form.titleLabel')}
         </label>
         <Input
+          aria-describedby={form.formState.errors.title ? `${idPrefix}-title-error` : undefined}
+          aria-invalid={Boolean(form.formState.errors.title)}
           disabled={disabled || isSubmitting}
           id={`${idPrefix}-title`}
           placeholder={t('tasks.form.titlePlaceholder')}
           {...form.register('title')}
         />
         {form.formState.errors.title ? (
-          <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+          <p className="text-xs text-destructive" id={`${idPrefix}-title-error`} role="alert">
+            {form.formState.errors.title.message}
+          </p>
         ) : null}
       </div>
 
@@ -74,13 +94,19 @@ export function TaskForm({
           {t('tasks.form.descriptionLabel')}
         </label>
         <Textarea
+          aria-describedby={
+            form.formState.errors.description ? `${idPrefix}-description-error` : undefined
+          }
+          aria-invalid={Boolean(form.formState.errors.description)}
           disabled={disabled || isSubmitting}
           id={`${idPrefix}-description`}
           placeholder={t('tasks.form.descriptionPlaceholder')}
           {...form.register('description')}
         />
         {form.formState.errors.description ? (
-          <p className="text-xs text-destructive">{form.formState.errors.description.message}</p>
+          <p className="text-xs text-destructive" id={`${idPrefix}-description-error`} role="alert">
+            {form.formState.errors.description.message}
+          </p>
         ) : null}
       </div>
 
@@ -90,13 +116,19 @@ export function TaskForm({
             {t('tasks.form.tagsLabel')}
           </label>
           <Input
+            aria-describedby={
+              form.formState.errors.tagsInput ? `${idPrefix}-tags-error` : undefined
+            }
+            aria-invalid={Boolean(form.formState.errors.tagsInput)}
             disabled={disabled || isSubmitting}
             id={`${idPrefix}-tags`}
             placeholder={t('tasks.form.tagsPlaceholder')}
             {...form.register('tagsInput')}
           />
           {form.formState.errors.tagsInput ? (
-            <p className="text-xs text-destructive">{form.formState.errors.tagsInput.message}</p>
+            <p className="text-xs text-destructive" id={`${idPrefix}-tags-error`} role="alert">
+              {form.formState.errors.tagsInput.message}
+            </p>
           ) : null}
         </div>
 
@@ -105,13 +137,23 @@ export function TaskForm({
             {t('tasks.form.plannedDateLabel')}
           </label>
           <Input
+            aria-describedby={
+              form.formState.errors.plannedDate ? `${idPrefix}-planned-date-error` : undefined
+            }
+            aria-invalid={Boolean(form.formState.errors.plannedDate)}
             disabled={disabled || isSubmitting}
             id={`${idPrefix}-planned-date`}
             type="date"
             {...form.register('plannedDate')}
           />
           {form.formState.errors.plannedDate ? (
-            <p className="text-xs text-destructive">{form.formState.errors.plannedDate.message}</p>
+            <p
+              className="text-xs text-destructive"
+              id={`${idPrefix}-planned-date-error`}
+              role="alert"
+            >
+              {form.formState.errors.plannedDate.message}
+            </p>
           ) : null}
         </div>
       </div>
