@@ -7,6 +7,7 @@ import {
 import { PREFERENCES_TABLE } from '@/features/preferences/constants/preferences';
 
 interface LanguagePreferenceRow {
+  id: string;
   language: string;
 }
 
@@ -18,7 +19,7 @@ interface UpsertLanguagePreferencePayload {
 export async function getLanguagePreference(userId: string): Promise<SupportedLanguage> {
   const rows = await db.getAll<LanguagePreferenceRow>(
     `
-      SELECT language
+      SELECT id, language
       FROM ${PREFERENCES_TABLE}
       WHERE user_id = ?
       LIMIT 1
@@ -38,6 +39,32 @@ export async function upsertLanguagePreference(
   payload: UpsertLanguagePreferencePayload,
 ): Promise<void> {
   const nowIso = new Date().toISOString();
+  const rows = await db.getAll<Pick<LanguagePreferenceRow, 'id'>>(
+    `
+      SELECT id
+      FROM ${PREFERENCES_TABLE}
+      WHERE user_id = ?
+      LIMIT 1
+    `,
+    [payload.userId],
+  );
+
+  const [existingPreference] = rows;
+
+  if (existingPreference) {
+    await db.execute(
+      `
+        UPDATE ${PREFERENCES_TABLE}
+        SET
+          language = ?,
+          updated_at = ?
+        WHERE id = ?
+      `,
+      [payload.language, nowIso, existingPreference.id],
+    );
+
+    return;
+  }
 
   await db.execute(
     `
@@ -48,10 +75,6 @@ export async function upsertLanguagePreference(
         updated_at
       )
       VALUES (?, ?, ?, ?)
-      ON CONFLICT(user_id)
-      DO UPDATE SET
-        language = excluded.language,
-        updated_at = excluded.updated_at
     `,
     [crypto.randomUUID(), payload.userId, payload.language, nowIso],
   );

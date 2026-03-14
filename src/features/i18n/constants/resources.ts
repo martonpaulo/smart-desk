@@ -62,6 +62,10 @@ export const translationResources = {
           edit: 'Edit',
           delete: 'Delete',
         },
+        createDialog: {
+          title: 'Add task',
+          description: 'Create a task with optional notes, optional tags, and a planned date.',
+        },
         editDialog: {
           title: 'Edit task',
           description: 'Update the title, optional notes, optional tags, and planned date.',
@@ -168,6 +172,11 @@ export const translationResources = {
         actions: {
           edit: 'Editar',
           delete: 'Eliminar',
+        },
+        createDialog: {
+          title: 'Añadir tarea',
+          description:
+            'Crea una tarea con notas opcionales, etiquetas opcionales y una fecha planificada.',
         },
         editDialog: {
           title: 'Editar tarea',

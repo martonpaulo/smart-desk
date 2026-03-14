@@ -98,19 +98,27 @@ describe('LanguageSelector', () => {
     upsertLanguagePreferenceMock.mockResolvedValue(undefined);
   });
 
-  it('does not force fallback to English while auth is still loading', async () => {
-    const user = userEvent.setup();
+  it('renders a loading skeleton while auth is loading', () => {
     useAuthUserIdMock.mockReturnValue({ userId: null, isLoading: true });
+
+    const { container } = renderLanguageSelector();
+
+    const skeleton = container.querySelector('.animate-pulse');
+
+    expect(skeleton).toBeInTheDocument();
+    expect(screen.queryByLabelText('language-options')).not.toBeInTheDocument();
+  });
+
+  it('does not force fallback to English when auth is resolved and no user is present', async () => {
+    const user = userEvent.setup();
+    useAuthUserIdMock.mockReturnValue({ userId: null, isLoading: false });
 
     renderLanguageSelector();
 
     await user.selectOptions(screen.getByLabelText('language-options'), 'es');
 
-    await waitFor(() => {
-      expect(i18nMock.changeLanguage).toHaveBeenCalledWith('es');
-    });
-
     expect(i18nMock.changeLanguage).toHaveBeenCalledTimes(1);
+    expect(i18nMock.changeLanguage).toHaveBeenCalledWith('es');
   });
 
   it('applies persisted user language preference after loading', async () => {

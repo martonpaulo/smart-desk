@@ -86,6 +86,7 @@ export function LanguageSelector() {
   });
 
   const selectedLanguage = toSupportedLanguage(i18n.resolvedLanguage);
+  const shouldRenderLoadingSkeleton = isAuthLoading || (Boolean(userId) && languageQuery.isLoading);
 
   const handleLanguageChange = async (nextLanguage: string): Promise<void> => {
     const supportedLanguage = toSupportedLanguage(nextLanguage);
@@ -100,6 +101,10 @@ export function LanguageSelector() {
   };
 
   const selectedLanguageLabel = getLanguageLabel(selectedLanguage, t);
+
+  if (shouldRenderLoadingSkeleton) {
+    return <div aria-hidden className="h-7 w-28 animate-pulse rounded-md bg-muted" />;
+  }
 
   return (
     <DropdownMenu>

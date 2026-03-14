@@ -13,6 +13,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { DATE_LOCALE_BY_LANGUAGE, toSupportedLanguage } from '@/features/i18n/constants/languages';
 import { TaskForm } from '@/features/tasks/components/task-form';
@@ -66,6 +67,7 @@ export function TasksOverview() {
   const deleteTaskMutation = useDeleteTask(userId);
 
   const [createFormKey, setCreateFormKey] = useState(0);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const createDefaultValues = getCreateDefaultValues();
@@ -119,20 +121,46 @@ export function TasksOverview() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('tasks.title')}</CardTitle>
-        <p className="text-sm text-muted-foreground">{t('tasks.subtitle')}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <CardTitle>{t('tasks.title')}</CardTitle>
+            <p className="text-sm text-muted-foreground">{t('tasks.subtitle')}</p>
+          </div>
+
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button disabled={!canManageTasks} size="sm" type="button">
+                {t('tasks.form.addTask')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t('tasks.createDialog.title')}</DialogTitle>
+                <DialogDescription>{t('tasks.createDialog.description')}</DialogDescription>
+              </DialogHeader>
+
+              {isCreateDialogOpen ? (
+                <TaskForm
+                  key={createFormKey}
+                  showCancel
+                  defaultValues={createDefaultValues}
+                  idPrefix="create-task"
+                  isSubmitting={createTaskMutation.isPending}
+                  submitLabel={t('tasks.form.addTask')}
+                  onCancel={() => {
+                    setIsCreateDialogOpen(false);
+                  }}
+                  onSubmit={async values => {
+                    await handleCreateTask(values);
+                    setIsCreateDialogOpen(false);
+                  }}
+                />
+              ) : null}
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <TaskForm
-          key={createFormKey}
-          defaultValues={createDefaultValues}
-          disabled={!canManageTasks}
-          idPrefix="create-task"
-          isSubmitting={createTaskMutation.isPending}
-          submitLabel={t('tasks.form.addTask')}
-          onSubmit={handleCreateTask}
-        />
-
         {!canManageTasks ? (
           <p className="text-sm text-muted-foreground">{t('tasks.signInHint')}</p>
         ) : null}
@@ -153,7 +181,22 @@ export function TasksOverview() {
               <li key={task.id} className="rounded-md border p-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-1">
-                    <p className="font-medium">{task.title || t('tasks.defaultTaskTitle')}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{task.title || t('tasks.defaultTaskTitle')}</p>
+                      <Button
+                        aria-label={t('tasks.actions.edit')}
+                        className="h-6 w-6"
+                        disabled={!canManageTasks || updateTaskMutation.isPending}
+                        size="icon-xs"
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          setEditingTask(task);
+                        }}
+                      >
+                        <PencilLineIcon aria-hidden="true" />
+                      </Button>
+                    </div>
                     <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                       {task.tags?.map(tagValue => (
                         <span
@@ -170,19 +213,6 @@ export function TasksOverview() {
                     ) : null}
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      aria-label={t('tasks.actions.edit')}
-                      disabled={!canManageTasks || updateTaskMutation.isPending}
-                      size="sm"
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setEditingTask(task);
-                      }}
-                    >
-                      <PencilLineIcon aria-hidden="true" />
-                      {t('tasks.actions.edit')}
-                    </Button>
                     <Button
                       aria-label={t('tasks.actions.delete')}
                       disabled={!canManageTasks || deleteTaskMutation.isPending}
@@ -220,6 +250,7 @@ export function TasksOverview() {
 
           {editingTask ? (
             <TaskForm
+              key={editingTask.id}
               showCancel
               defaultValues={mapTaskToFormValues(editingTask)}
               idPrefix="edit-task"

@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -33,29 +33,11 @@ export function TaskForm({
 }: TaskFormProps) {
   const { t } = useTranslation();
   const taskFormSchema = useMemo(() => createTaskFormSchema(t), [t]);
-  const previousDefaultValuesRef = useRef<TaskFormValues | null>(null);
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues,
   });
-
-  useEffect(() => {
-    const previousDefaultValues = previousDefaultValuesRef.current;
-    const hasDefaultValuesChanged =
-      !previousDefaultValues ||
-      previousDefaultValues.title !== defaultValues.title ||
-      previousDefaultValues.description !== defaultValues.description ||
-      previousDefaultValues.tagsInput !== defaultValues.tagsInput ||
-      previousDefaultValues.plannedDate !== defaultValues.plannedDate;
-
-    if (!hasDefaultValuesChanged) {
-      return;
-    }
-
-    form.reset(defaultValues);
-    previousDefaultValuesRef.current = defaultValues;
-  }, [defaultValues, form]);
 
   const submitTaskForm = form.handleSubmit(values => {
     void onSubmit(values);

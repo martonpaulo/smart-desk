@@ -31,6 +31,8 @@ const translations: Record<string, string> = {
   'tasks.signInHint': 'Sign in hint',
   'tasks.editDialog.title': 'Edit task',
   'tasks.editDialog.description': 'Edit description',
+  'tasks.createDialog.title': 'Add task',
+  'tasks.createDialog.description': 'Create description',
   'tasks.form.addTask': 'Add task',
   'tasks.editDialog.saveChanges': 'Save changes',
   'tasks.editDialog.cancel': 'Cancel',
@@ -52,6 +54,7 @@ vi.mock('@/components/ui/card', () => ({
 
 vi.mock('@/components/ui/dialog', () => ({
   Dialog: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  DialogTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   DialogContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   DialogHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   DialogTitle: ({ children }: { children: ReactNode }) => <h3>{children}</h3>,
@@ -85,7 +88,7 @@ describe('TasksOverview accessibility', () => {
   it('renders task action buttons as non-submit buttons with decorative icons hidden', () => {
     render(<TasksOverview />);
 
-    const editButton = screen.getByRole('button', { name: 'Edit' });
+    const editButton = screen.getAllByRole('button', { name: 'Edit' })[0];
     const deleteButton = screen.getByRole('button', { name: 'Delete' });
 
     expect(editButton).toHaveAttribute('type', 'button');
