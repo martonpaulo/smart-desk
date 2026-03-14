@@ -14,6 +14,9 @@ jobs:
   verify:
     name: Lint, Format, Typecheck, Test, Build
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: test-publishable-key
 
     steps:
       - name: Checkout repository
