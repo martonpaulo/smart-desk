@@ -4,7 +4,7 @@ export const translationResources = {
       app: {
         title: 'Smart Desk',
         subtitle:
-          'Calendar events are read from local database. Remote sync is handled in the background.',
+          'Calendar events are read from local SQLite. Remote sync is handled in the background.',
       },
       language: {
         label: 'Language',
