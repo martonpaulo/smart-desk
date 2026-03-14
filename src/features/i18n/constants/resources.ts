@@ -72,6 +72,11 @@ export const translationResources = {
           saveChanges: 'Save changes',
           cancel: 'Cancel',
         },
+        deleteDialog: {
+          title: 'Delete task',
+          description: 'Are you sure you want to delete "{{title}}"? This action cannot be undone.',
+          confirm: 'Delete',
+        },
         form: {
           titleLabel: 'Title',
           titlePlaceholder: 'Write release notes',
@@ -184,6 +189,12 @@ export const translationResources = {
             'Actualiza el título, las notas opcionales, las etiquetas opcionales y la fecha planificada.',
           saveChanges: 'Guardar cambios',
           cancel: 'Cancelar',
+        },
+        deleteDialog: {
+          title: 'Eliminar tarea',
+          description:
+            '¿Seguro que quieres eliminar "{{title}}"? Esta acción no se puede deshacer.',
+          confirm: 'Eliminar',
         },
         form: {
           titleLabel: 'Título',

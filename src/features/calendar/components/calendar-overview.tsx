@@ -6,9 +6,17 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { DayItemsOverview } from '@/features/calendar/components/day-items-overview';
+import { DATE_LOCALE_BY_LANGUAGE, toSupportedLanguage } from '@/features/i18n/constants/languages';
 import { GoogleAuthControls } from '@/features/integrations/google/components/google-auth-controls';
 import { LanguageSelector } from '@/features/preferences/components/language-selector';
-import { TasksOverview } from '@/features/tasks/components/tasks-overview';
+
+function formatCurrentDateLabel(date: Date, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  }).format(date);
+}
 
 const SUCCESS_MESSAGE_KEYS: Record<string, string> = {
   google_connected: 'callback.success.google_connected',
@@ -26,10 +34,13 @@ const ERROR_MESSAGE_KEYS: Record<string, string> = {
 };
 
 export function CalendarOverview() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const selectedLanguage = toSupportedLanguage(i18n.resolvedLanguage);
+  const dateLocale = DATE_LOCALE_BY_LANGUAGE[selectedLanguage];
+  const todayLabel = formatCurrentDateLabel(new Date(), dateLocale);
 
   const successCode = searchParams.get('success');
   const errorCode = searchParams.get('error');
@@ -57,8 +68,8 @@ export function CalendarOverview() {
       <section className="mx-auto flex w-full max-w-4xl flex-col gap-4">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
-            <h1 className="text-3xl font-semibold tracking-tight">{t('app.title')}</h1>
-            <p className="text-muted-foreground">{t('app.subtitle')}</p>
+            <h1 className="text-3xl font-semibold tracking-tight">{t('calendar.todayTitle')}</h1>
+            <p className="text-muted-foreground">{todayLabel}</p>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2 self-end sm:self-auto">
             <LanguageSelector />
@@ -66,10 +77,7 @@ export function CalendarOverview() {
           </div>
         </header>
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          <DayItemsOverview />
-          <TasksOverview />
-        </div>
+        <DayItemsOverview />
       </section>
     </main>
   );
