@@ -56,4 +56,3 @@ export async function upsertLanguagePreference(
     [crypto.randomUUID(), payload.userId, payload.language, nowIso],
   );
 }
-

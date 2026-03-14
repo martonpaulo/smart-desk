@@ -241,7 +241,11 @@ async function markMissingEventsAsDeleted(
   }
 
   const nowIso = new Date().toISOString();
-  for (let index = 0; index < missingGoogleEventIds.length; index += MISSING_EVENTS_UPDATE_CHUNK_SIZE) {
+  for (
+    let index = 0;
+    index < missingGoogleEventIds.length;
+    index += MISSING_EVENTS_UPDATE_CHUNK_SIZE
+  ) {
     const chunk = missingGoogleEventIds.slice(index, index + MISSING_EVENTS_UPDATE_CHUNK_SIZE);
     const { error: deleteError } = await supabase
       .from(TABLE_CALENDAR_EVENTS)

@@ -157,6 +157,16 @@ E2E tests: Playwright
 
 Agents must ensure tests pass before completing tasks.
 
+Whenever a new component, page, or functionality is created, corresponding tests must be added in the same change.
+
+Before pushing to any remote, agents must run local CI:
+
+```bash
+pnpm ci:local
+```
+
+This same verification pipeline must also pass in remote CI (GitHub Actions).
+
 ---
 
 ## 9 Code Size

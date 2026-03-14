@@ -67,7 +67,10 @@ function ItemSection({ title, emptyLabel, items }: ItemSectionProps) {
           {items.map(item => (
             <li
               key={item.id}
-              className={cn('rounded-md border p-3', item.source === LOCAL_PLANNED_SOURCE && 'border-dashed')}
+              className={cn(
+                'rounded-md border p-3',
+                item.source === LOCAL_PLANNED_SOURCE && 'border-dashed',
+              )}
             >
               <div className="flex items-start gap-3">
                 <span
@@ -81,7 +84,8 @@ function ItemSection({ title, emptyLabel, items }: ItemSectionProps) {
                     <p className="text-sm text-muted-foreground">{t('calendar.allDayLabel')}</p>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      {formatTimeLabel(item.startsAt, dateLocale)} - {formatTimeLabel(item.endsAt, dateLocale)}
+                      {formatTimeLabel(item.startsAt, dateLocale)} -{' '}
+                      {formatTimeLabel(item.endsAt, dateLocale)}
                     </p>
                   )}
                   {item.source === LOCAL_PLANNED_SOURCE && item.tags ? (
@@ -140,7 +144,10 @@ export function DayItemsOverview() {
     }
 
     const currentItems = new Map(
-      items.map(item => [item.id, { signature: getItemSignature(item), label: getItemLabel(item) }]),
+      items.map(item => [
+        item.id,
+        { signature: getItemSignature(item), label: getItemLabel(item) },
+      ]),
     );
 
     const previousItems = previousItemsRef.current;

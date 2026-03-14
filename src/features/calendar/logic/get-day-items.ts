@@ -1,9 +1,6 @@
 import { db } from '@/db/powersync';
 import type { DayItem } from '@/features/calendar/types/day-item';
-import {
-  type DayItemRow,
-  mapDayItemRow,
-} from '@/features/calendar/types/day-item-row';
+import { type DayItemRow, mapDayItemRow } from '@/features/calendar/types/day-item-row';
 
 interface DayWindow {
   dayStartIso: string;
@@ -57,10 +54,12 @@ function getDayItemsQuery(): string {
 }
 
 async function getDayItemRows(dayWindow: DayWindow): Promise<DayItemRow[]> {
-  const query = db.getAll<DayItemRow>(
-    getDayItemsQuery(),
-    [dayWindow.dayEndIso, dayWindow.dayStartIso, dayWindow.dayStartIso, dayWindow.dayEndIso],
-  );
+  const query = db.getAll<DayItemRow>(getDayItemsQuery(), [
+    dayWindow.dayEndIso,
+    dayWindow.dayStartIso,
+    dayWindow.dayStartIso,
+    dayWindow.dayEndIso,
+  ]);
 
   let timeoutId: number | null = null;
   const timeout = new Promise<never>((_, reject) => {

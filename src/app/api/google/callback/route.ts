@@ -150,7 +150,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (saveError) {
       console.error('[google-callback] failed to save connection', saveError);
       return NextResponse.redirect(
-        buildSettingsRedirect(requestOrigin, OAUTH_ERROR_PARAM, CALLBACK_ERROR.connectionSaveFailed),
+        buildSettingsRedirect(
+          requestOrigin,
+          OAUTH_ERROR_PARAM,
+          CALLBACK_ERROR.connectionSaveFailed,
+        ),
       );
     }
 

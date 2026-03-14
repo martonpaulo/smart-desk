@@ -57,11 +57,9 @@ Configure the client token source with `NEXT_PUBLIC_POWERSYNC_AUTH_MODE`:
 
 Use `supabase` only when Supabase Auth is enabled in your PowerSync instance.
 
-## Testing Status
+## Testing
 
-Testing is intentionally deferred in this phase.
-
-The project will use the following in upcoming iterations:
+The project use the following:
 
 - Vitest (unit)
 - Testing Library (component)

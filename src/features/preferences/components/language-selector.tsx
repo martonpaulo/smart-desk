@@ -118,10 +118,7 @@ export function LanguageSelector() {
           }}
         >
           {SUPPORTED_LANGUAGES.map(language => (
-            <DropdownMenuRadioItem
-              key={language}
-              value={language}
-            >
+            <DropdownMenuRadioItem key={language} value={language}>
               {getLanguageLabel(language, t)}
             </DropdownMenuRadioItem>
           ))}
@@ -130,4 +127,3 @@ export function LanguageSelector() {
     </DropdownMenu>
   );
 }
-

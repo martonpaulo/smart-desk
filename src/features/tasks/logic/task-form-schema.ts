@@ -25,12 +25,13 @@ export function createTaskFormSchema(t: TFunction) {
     tagsInput: z
       .string()
       .trim()
-      .max(TAGS_INPUT_MAX_LENGTH, t('tasks.form.validation.tagsMax', { max: TAGS_INPUT_MAX_LENGTH }))
+      .max(
+        TAGS_INPUT_MAX_LENGTH,
+        t('tasks.form.validation.tagsMax', { max: TAGS_INPUT_MAX_LENGTH }),
+      )
       .optional()
       .or(z.literal('')),
-    plannedDate: z
-      .string()
-      .regex(ISO_DATE_PATTERN, t('tasks.form.validation.plannedDateFormat')),
+    plannedDate: z.string().regex(ISO_DATE_PATTERN, t('tasks.form.validation.plannedDateFormat')),
   });
 }
 

@@ -25,10 +25,7 @@ import {
 } from '@/features/tasks/hooks/use-tasks';
 import { getTodayDateValue } from '@/features/tasks/logic/task-date';
 import type { TaskFormValues } from '@/features/tasks/logic/task-form-schema';
-import {
-  formatTaskTagsInput,
-  parseTaskTagsInput,
-} from '@/features/tasks/logic/task-tags';
+import { formatTaskTagsInput, parseTaskTagsInput } from '@/features/tasks/logic/task-tags';
 import type { Task } from '@/features/tasks/types/task';
 
 function getCreateDefaultValues(): TaskFormValues {
@@ -140,7 +137,9 @@ export function TasksOverview() {
           <p className="text-sm text-muted-foreground">{t('tasks.signInHint')}</p>
         ) : null}
 
-        {isTasksLoading ? <p className="text-sm text-muted-foreground">{t('tasks.loading')}</p> : null}
+        {isTasksLoading ? (
+          <p className="text-sm text-muted-foreground">{t('tasks.loading')}</p>
+        ) : null}
 
         {!isTasksLoading && tasks.length === 0 ? (
           <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
