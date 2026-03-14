@@ -315,3 +315,16 @@ Use:
 
 - Zod validation
 - Supabase Row Level Security
+
+---
+
+# Supported Languages
+
+This project currently supports:
+
+- English (United States) — `en`
+- Spanish (Spain) — `es`
+
+Translation resources live in `src/features/i18n/constants/resources.ts`.
+
+When adding new user-facing strings, add translations for both locales.
